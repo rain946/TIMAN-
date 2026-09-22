@@ -41,3 +41,14 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Firebase Admin private credentials
+timan-3330c-firebase-adminsdk-*.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/

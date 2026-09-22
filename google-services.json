@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "133506571587",
+    "project_id": "timan-3330c",
+    "storage_bucket": "timan-3330c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:133506571587:android:37e5ccfefe802f8252a3f6",
+        "android_client_info": {
+          "package_name": "com.rain09202.Pettag"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCW7D02wsV_ch21Be0fk9yZwyeB6XmrCyk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:133506571587:android:ca6b3950f94a4b5f52a3f6",
+        "android_client_info": {
+          "package_name": "com.rainiersaul.timan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCW7D02wsV_ch21Be0fk9yZwyeB6XmrCyk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
