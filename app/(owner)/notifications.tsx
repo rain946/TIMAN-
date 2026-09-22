@@ -53,9 +53,6 @@ export default function NotificationsScreen() {
   const [deletingAllRead, setDeletingAllRead] =
     useState(false);
 
-  // =====================================================
-  // LOAD NOTIFICATIONS
-  // =====================================================
 
   const loadNotifications =
     useCallback(async () => {
@@ -121,17 +118,12 @@ export default function NotificationsScreen() {
       }
     }, []);
 
-  // =====================================================
+
   // INITIAL LOAD
-  // =====================================================
 
   useEffect(() => {
     loadNotifications();
   }, [loadNotifications]);
-
-  // =====================================================
-  // REFRESH
-  // =====================================================
 
   const handleRefresh =
     useCallback(async () => {
@@ -139,9 +131,6 @@ export default function NotificationsScreen() {
       await loadNotifications();
     }, [loadNotifications]);
 
-  // =====================================================
-  // MARK ONE AS READ
-  // =====================================================
 
   const markAsRead = async (
     notificationId: number
@@ -202,9 +191,7 @@ export default function NotificationsScreen() {
     }
   };
 
-  // =====================================================
-  // MARK ALL AS READ
-  // =====================================================
+
 
   const handleMarkAllRead =
     async () => {
@@ -270,10 +257,6 @@ export default function NotificationsScreen() {
         setMarkingAll(false);
       }
     };
-
-  // =====================================================
-  // DELETE ONE READ NOTIFICATION
-  // =====================================================
 
   const deleteNotification = async (
     notificationId: number
@@ -342,9 +325,7 @@ export default function NotificationsScreen() {
     }
   };
 
-  // =====================================================
   // CONFIRM DELETE ONE
-  // =====================================================
 
   const handleDeleteNotification = (
     notification: NotificationItem
@@ -379,9 +360,6 @@ export default function NotificationsScreen() {
     );
   };
 
-  // =====================================================
-  // DELETE ALL READ NOTIFICATIONS
-  // =====================================================
 
   const deleteAllReadNotifications =
     async () => {
@@ -447,9 +425,6 @@ export default function NotificationsScreen() {
       }
     };
 
-  // =====================================================
-  // CONFIRM DELETE ALL READ
-  // =====================================================
 
   const handleDeleteAllRead = () => {
     const readCount =
@@ -486,9 +461,7 @@ export default function NotificationsScreen() {
     );
   };
 
-  // =====================================================
   // OPEN NOTIFICATION
-  // =====================================================
 
   const handleNotificationPress = async (
     notification: NotificationItem
@@ -505,28 +478,19 @@ export default function NotificationsScreen() {
     });
 
     switch (notification.type) {
-      // ===============================================
-      // CLINIC ACCESS REQUEST
-      // ===============================================
 
       case "clinic_access_request":
         router.push("/clinic-authorization");
         break;
 
-      // ===============================================
       // CLINIC ACCESS RESULT
-      // ===============================================
-
       case "clinic_access_approved":
       case "clinic_access_declined":
       case "clinic_access_revoked":
         router.push("/clinic-dashboard");
         break;
 
-      // ===============================================
       // NEW VETERINARY RECORD
-      // ===============================================
-
       case "vet_record_added":
         if (!notification.pet_id) {
           Alert.alert(
@@ -546,10 +510,7 @@ export default function NotificationsScreen() {
 
         break;
 
-      // ===============================================
       // LOST PET / QR SCAN
-      // ===============================================
-
       case "pet_qr_scanned":
       case "lost_pet_scan":
         if (!notification.pet_id) {
@@ -570,10 +531,8 @@ export default function NotificationsScreen() {
 
         break;
 
-      // ===============================================
-      // HEALTH SCHEDULE
-      // ===============================================
 
+      // HEALTH SCHEDULS
       case "vaccination_reminder":
       case "deworming_reminder":
       case "health_reminder":
@@ -595,10 +554,8 @@ export default function NotificationsScreen() {
 
         break;
 
-      // ===============================================
-      // DEFAULT
-      // ===============================================
 
+      // DEFAULT
       default:
         console.log(
           "TIMAN: No navigation configured for notification type:",
@@ -609,9 +566,6 @@ export default function NotificationsScreen() {
     }
   };
 
-  // =====================================================
-  // FORMAT TIME
-  // =====================================================
 
   const formatNotificationTime = (
     value: string
@@ -665,10 +619,6 @@ export default function NotificationsScreen() {
     return date.toLocaleDateString();
   };
 
-  // =====================================================
-  // ICON
-  // =====================================================
-
   const getNotificationIcon = (
     type: string
   ): keyof typeof Ionicons.glyphMap => {
@@ -702,10 +652,8 @@ export default function NotificationsScreen() {
     }
   };
 
-  // =====================================================
-  // UNREAD COUNT
-  // =====================================================
 
+  // UNREAD COUNT
   const unreadCount =
     notifications.filter(
       (item) => !item.is_read
@@ -716,9 +664,6 @@ export default function NotificationsScreen() {
       (item) => item.is_read
     ).length;
 
-  // =====================================================
-  // LOADING
-  // =====================================================
 
   if (loading) {
     return (
@@ -737,9 +682,6 @@ export default function NotificationsScreen() {
     );
   }
 
-  // =====================================================
-  // SCREEN
-  // =====================================================
 
   return (
     <SafeAreaView

@@ -1,8 +1,8 @@
 USE timan_db;
 
--- =====================================================
+
 -- USERS
--- =====================================================
+
 
 CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- =====================================================
+
 -- PETS
--- =====================================================
+
 
 CREATE TABLE IF NOT EXISTS pets (
     pet_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS pets (
         ON DELETE CASCADE
 );
 
--- =====================================================
+
 -- CLINIC AUTHORIZATIONS
--- =====================================================
+
 
 CREATE TABLE IF NOT EXISTS clinic_authorizations (
     authorization_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -117,10 +117,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 
 
-
--- =====================================================
 -- VETERINARY RECORDS
--- =====================================================
 
 CREATE TABLE IF NOT EXISTS vet_records (
     record_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -153,9 +150,7 @@ CREATE TABLE IF NOT EXISTS vet_records (
         ON DELETE CASCADE
 );
 
--- =====================================================
--- PUSH TOKENS
--- =====================================================
+-- PUSH TOKEN
 
 CREATE TABLE IF NOT EXISTS push_tokens (
     push_token_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -178,9 +173,8 @@ CREATE TABLE IF NOT EXISTS push_tokens (
     )
 );
 
--- =====================================================
+
 -- REMINDER LOGS
--- =====================================================
 
 CREATE TABLE IF NOT EXISTS reminder_logs (
     reminder_log_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -220,9 +214,7 @@ CREATE TABLE IF NOT EXISTS reminder_logs (
     )
 );
 
--- ============================================
 -- LOST PET REPORTS
--- ============================================
 
 CREATE TABLE IF NOT EXISTS lost_pet_reports (
     lost_report_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -255,9 +247,7 @@ CREATE TABLE IF NOT EXISTS lost_pet_reports (
 );
 
 
--- ============================================
 -- QR SCAN HISTORY
--- ============================================
 
 CREATE TABLE IF NOT EXISTS qr_scan_history (
     scan_id INT AUTO_INCREMENT PRIMARY KEY,

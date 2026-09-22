@@ -22,9 +22,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../config/api";
 
-// ========================================
-// TYPES
-// ========================================
 
 type PetStatus = "Safe" | "Missing" | "Found";
 
@@ -43,9 +40,7 @@ type Pet = {
   created_at: string;
 };
 
-// ========================================
-// SCREEN
-// ========================================
+
 
 export default function PetsScreen() {
   const params = useLocalSearchParams<{
@@ -59,15 +54,11 @@ export default function PetsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // ========================================
-  // SERVER URL
-  // ========================================
+
 
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
-  // ========================================
-  // PHOTO URL
-  // ========================================
+
 
   const getPhotoUrl = (photoUrl: string | null) => {
     if (!photoUrl) {
@@ -84,9 +75,7 @@ export default function PetsScreen() {
     return `${SERVER_URL}${photoUrl}`;
   };
 
-  // ========================================
-  // LOAD PETS
-  // ========================================
+
 
   const loadPets = useCallback(
     async (showLoader = true) => {
@@ -164,10 +153,6 @@ export default function PetsScreen() {
     []
   );
 
-  // ========================================
-  // AUTO REFRESH WHEN SCREEN FOCUSES
-  // ========================================
-
   useFocusEffect(
     useCallback(() => {
       loadPets();
@@ -176,18 +161,11 @@ export default function PetsScreen() {
     }, [loadPets])
   );
 
-  // ========================================
-  // PULL TO REFRESH
-  // ========================================
-
   const handleRefresh = () => {
     setRefreshing(true);
     loadPets(false);
   };
 
-  // ========================================
-  // OPEN PET
-  // ========================================
 
   const openPet = (pet: Pet) => {
     router.push({
@@ -198,10 +176,7 @@ export default function PetsScreen() {
     });
   };
 
-  // ========================================
   // OPEN QR
-  // ========================================
-
   const openQR = (pet: Pet) => {
     router.push({
       pathname: "/pet-qr",
@@ -211,10 +186,7 @@ export default function PetsScreen() {
     });
   };
 
-  // ========================================
   // OPEN RECORDS
-  // ========================================
-
   const openRecords = (pet: Pet) => {
     router.push({
       pathname: "/vet-records",
@@ -224,9 +196,6 @@ export default function PetsScreen() {
     });
   };
 
-  // ========================================
-  // OPEN SCHEDULE
-  // ========================================
 
   const openSchedule = (pet: Pet) => {
     router.push({
@@ -237,9 +206,6 @@ export default function PetsScreen() {
     });
   };
 
-  // ========================================
-  // UI
-  // ========================================
 
   return (
     <SafeAreaView style={styles.container}>
@@ -263,8 +229,7 @@ export default function PetsScreen() {
             : "My Pets"}
         </Text>
 
-        <Pressable
-          style={styles.headerButton}
+        <Pressable style={styles.headerButton}
           onPress={() => router.push("/add-pet")}
         >
           <Ionicons
@@ -275,9 +240,6 @@ export default function PetsScreen() {
         </Pressable>
       </View>
 
-      {/* ========================================
-          LOADING
-      ======================================== */}
 
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -301,9 +263,6 @@ export default function PetsScreen() {
             />
           }
         >
-          {/* ========================================
-              TOP SECTION
-          ======================================== */}
 
           <View style={styles.introSection}>
             <Text style={styles.introTitle}>
@@ -319,9 +278,7 @@ export default function PetsScreen() {
             </Text>
           </View>
 
-          {/* ========================================
-              EMPTY STATE
-          ======================================== */}
+
 
           {pets.length === 0 ? (
             <View style={styles.emptyContainer}>
@@ -366,9 +323,7 @@ export default function PetsScreen() {
             </View>
           ) : (
             <>
-              {/* ========================================
-                  PET COUNT
-              ======================================== */}
+
 
               <View style={styles.countRow}>
                 <Text style={styles.countText}>
@@ -382,10 +337,6 @@ export default function PetsScreen() {
                   Pull down to refresh
                 </Text>
               </View>
-
-              {/* ========================================
-                  PET CARDS
-              ======================================== */}
 
               {pets.map((pet) => {
                 const photoUrl =
@@ -426,8 +377,7 @@ export default function PetsScreen() {
                   >
                     {/* MAIN PET AREA */}
 
-                    <Pressable
-                      style={({ pressed }) => [
+                    <Pressable style={({ pressed }) => [
                         styles.petMainArea,
                         pressed &&
                           styles.pressedLight,
@@ -442,27 +392,13 @@ export default function PetsScreen() {
                     >
                       {/* PET PHOTO */}
 
-                      <View
-                        style={
-                          styles.petImageContainer
-                        }
-                      >
+                      <View style={styles.petImageContainer }>
                         {photoUrl ? (
-                          <Image
-                            source={{
-                              uri: photoUrl,
-                            }}
-                            style={
-                              styles.petImage
-                            }
-                            resizeMode="cover"
-                          />
+                          <Image source={{ri: photoUrl,}}
+                            style={styles.petImage }
+                            resizeMode="cover"/>
                         ) : (
-                          <View
-                            style={
-                              styles.petPlaceholder
-                            }
-                          >
+                          <View style={styles.petPlaceholder} >
                             <Ionicons
                               name="paw"
                               size={36}
@@ -474,37 +410,21 @@ export default function PetsScreen() {
 
                       {/* PET INFO */}
 
-                      <View
-                        style={
-                          styles.petInformation
-                        }
-                      >
-                        <View
-                          style={
-                            styles.nameStatusRow
-                          }
-                        >
-                          <Text
-                            style={
-                              styles.petName
-                            }
-                            numberOfLines={1}
-                          >
+                      <View style={styles.petInformation}>
+                        <View style={styles.nameStatusRow}>
+                          <Text style={styles.petName}
+                            numberOfLines={1}>
                             {pet.pet_name}
                           </Text>
 
-                          <View
-                            style={[
-                              styles.statusBadge,
+                          <View style={[styles.statusBadge,
                               {
                                 backgroundColor:
                                   statusBackground,
                               },
                             ]}
                           >
-                            <View
-                              style={[
-                                styles.statusDot,
+                            <View style={[styles.statusDot,
                                 {
                                   backgroundColor:
                                     statusColor,
@@ -512,9 +432,7 @@ export default function PetsScreen() {
                               ]}
                             />
 
-                            <Text
-                              style={[
-                                styles.statusText,
+                            <Text style={[styles.statusText,
                                 {
                                   color:
                                     statusColor,
@@ -526,47 +444,19 @@ export default function PetsScreen() {
                           </View>
                         </View>
 
-                        <Text
-                          style={styles.petBreed}
-                          numberOfLines={1}
-                        >
-                          {pet.breed ||
-                            "Breed not specified"}
-                        </Text>
-
-                        <View
-                          style={
-                            styles.petDetailsRow
-                          }
-                        >
-                          <Text
-                            style={
-                              styles.petDetail
-                            }
-                          >
+                        <View style={styles.petDetailsRow}>
+                          <Text style={styles.petDetail}>
                             {pet.species}
                           </Text>
 
-                          <View
-                            style={
-                              styles.detailDot
-                            }
-                          />
+                          <View style={styles.detailDot} />
 
-                          <Text
-                            style={
-                              styles.petDetail
-                            }
-                          >
+                          <Text style={styles.petDetail}>
                             {pet.sex}
                           </Text>
                         </View>
 
-                        <Text
-                          style={
-                            styles.viewProfileText
-                          }
-                        >
+                        <Text style={styles.viewProfileText}>
                           {isScheduleMode
                             ? "View Health Schedule"
                             : "View Pet Profile"}
@@ -580,15 +470,7 @@ export default function PetsScreen() {
                       />
                     </Pressable>
 
-                    {/* ========================================
-                        QUICK ACTIONS
-                    ======================================== */}
-
-                    <View
-                      style={
-                        styles.quickActions
-                      }
-                    >
+                    <View style={styles.quickActions}>
                       <PetAction
                         icon="qr-code-outline"
                         label="QR Code"
@@ -597,12 +479,7 @@ export default function PetsScreen() {
                         }
                       />
 
-                      <View
-                        style={
-                          styles.actionDivider
-                        }
-                      />
-
+                      <View style={ styles.actionDivider }/>
                       <PetAction
                         icon="medical-outline"
                         label="Records"
@@ -611,11 +488,7 @@ export default function PetsScreen() {
                         }
                       />
 
-                      <View
-                        style={
-                          styles.actionDivider
-                        }
-                      />
+                      <View style={styles.actionDivider}/>
 
                       <PetAction
                         icon="calendar-outline"
@@ -636,9 +509,9 @@ export default function PetsScreen() {
   );
 }
 
-// ========================================
+
 // PET ACTION COMPONENT
-// ========================================
+
 
 function PetAction({
   icon,

@@ -20,9 +20,6 @@ import { useCallback, useState } from "react";
 
 import { API_URL } from "../../config/api";
 
-// =====================================================
-// TYPES
-// =====================================================
 
 type Pet = {
   pet_id: number;
@@ -71,10 +68,6 @@ type HealthOverviewResponse = {
   message?: string;
 };
 
-// =====================================================
-// DEFAULT VALUES
-// =====================================================
-
 const DEFAULT_SUMMARY: HealthSummary = {
   overdue: 0,
   dueSoon: 0,
@@ -82,9 +75,6 @@ const DEFAULT_SUMMARY: HealthSummary = {
   total: 0,
 };
 
-// =====================================================
-// DASHBOARD
-// =====================================================
 
 export default function DashboardScreen() {
   const [ownerName, setOwnerName] =
@@ -103,9 +93,6 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] =
     useState(false);
 
-  // ===================================================
-  // LOAD DASHBOARD
-  // ===================================================
 
   const loadDashboard = useCallback(
     async (showLoading = true) => {
@@ -130,9 +117,7 @@ export default function DashboardScreen() {
           return;
         }
 
-        // =============================================
         // LOAD OWNER NAME
-        // =============================================
 
         if (storedUser) {
           try {
@@ -160,9 +145,8 @@ export default function DashboardScreen() {
           }
         }
 
-        // =============================================
+
         // LOAD PETS + HEALTH OVERVIEW
-        // =============================================
 
         const [
           petsResponse,
@@ -184,9 +168,9 @@ export default function DashboardScreen() {
           ),
         ]);
 
-        // =============================================
+
         // PETS RESPONSE
-        // =============================================
+
 
         const petsData =
           await petsResponse.json();
@@ -211,12 +195,10 @@ export default function DashboardScreen() {
         ) {
           loadedPets = petsData.data;
         }
-
         setPets(loadedPets);
 
-        // =============================================
+
         // HEALTH OVERVIEW RESPONSE
-        // =============================================
 
         const overviewData: HealthOverviewResponse =
           await overviewResponse.json();
@@ -236,8 +218,6 @@ export default function DashboardScreen() {
         const allSchedules =
           overviewData.allSchedules || [];
 
-        // Show nearest / most important reminders first.
-        // Backend already sorts by next_due_date ASC.
         setReminders(
           allSchedules.slice(0, 4)
         );
@@ -261,23 +241,15 @@ export default function DashboardScreen() {
     []
   );
 
-  // ===================================================
-  // RELOAD + ANDROID BACK BUTTON
-  // ===================================================
-
   useFocusEffect(
     useCallback(() => {
-      // Load latest dashboard data when screen gains focus.
+
       loadDashboard(true);
 
       const onBackPress = () => {
-        // Dashboard is the root screen for logged-in owner.
-        // Do not return to Login.
-        // Refresh dashboard instead.
         setRefreshing(true);
         loadDashboard(false);
 
-        // true = prevent Android from going back to Login
         return true;
       };
 
@@ -293,18 +265,12 @@ export default function DashboardScreen() {
     }, [loadDashboard])
   );
 
-  // ===================================================
-  // REFRESH
-  // ===================================================
 
   const handleRefresh = () => {
     setRefreshing(true);
     loadDashboard(false);
   };
 
-  // ===================================================
-  // OPEN PET
-  // ===================================================
 
   const openPet = (petId: number) => {
     router.push({
@@ -315,9 +281,7 @@ export default function DashboardScreen() {
     });
   };
 
-  // ===================================================
-  // OPEN PET SCHEDULE
-  // ===================================================
+
 
   const openSchedule = (
     petId: number
@@ -330,9 +294,8 @@ export default function DashboardScreen() {
     });
   };
 
-  // ===================================================
   // RENDER
-  // ===================================================
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -370,16 +333,13 @@ export default function DashboardScreen() {
               styles.welcomeTextContainer
             }
           >
-            <Text
-              style={styles.welcomeTitle}
-            >
+            <Text style={styles.welcomeTitle} >
               Keep your pets{"\n"}healthy &
               safe.
             </Text>
 
             <Text
-              style={styles.welcomeSubtitle}
-            >
+              style={styles.welcomeSubtitle} >
               Monitor their health records
               and important schedules.
             </Text>
@@ -390,9 +350,7 @@ export default function DashboardScreen() {
           </Text>
         </View>
 
-        {/* ========================================= */}
         {/* HEALTH OVERVIEW */}
-        {/* ========================================= */}
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
@@ -486,9 +444,7 @@ export default function DashboardScreen() {
 
         {!loading && pets.length === 0 ? (
           <View style={styles.emptyCard}>
-            <View
-              style={styles.emptyIcon}
-            >
+            <View style={styles.emptyIcon}>
               <Ionicons
                 name="paw-outline"
                 size={28}
@@ -496,24 +452,17 @@ export default function DashboardScreen() {
               />
             </View>
 
-            <Text
-              style={styles.emptyTitle}
-            >
+            <Text style={styles.emptyTitle}>
               No pets registered
             </Text>
 
-            <Text
-              style={
-                styles.emptyDescription
-              }
-            >
+            <Text style={styles.emptyDescription}>
               Add your first pet to start
               monitoring health records and
               schedules.
             </Text>
 
-            <Pressable
-              style={({ pressed }) => [
+            <Pressable style={({ pressed }) => [
                 styles.addPetButton,
                 pressed && styles.pressed,
               ]}
@@ -527,9 +476,7 @@ export default function DashboardScreen() {
                 color="#FFFFFF"
               />
 
-              <Text
-                style={styles.addPetText}
-              >
+              <Text style={styles.addPetText}>
                 Add Pet
               </Text>
             </Pressable>
@@ -546,9 +493,7 @@ export default function DashboardScreen() {
           ))
         )}
 
-        {/* ========================================= */}
         {/* HEALTH REMINDERS */}
-        {/* ========================================= */}
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
@@ -623,9 +568,7 @@ export default function DashboardScreen() {
   );
 }
 
-// =====================================================
 // OVERVIEW CARD
-// =====================================================
 
 function OverviewCard({
   count,
@@ -655,8 +598,7 @@ function OverviewCard({
       onPress={onPress}
     >
       <View
-        style={[
-          styles.overviewIcon,
+        style={[ styles.overviewIcon,
           type === "overdue" &&
             styles.overdueIcon,
           type === "due" &&
@@ -679,8 +621,7 @@ function OverviewCard({
       </View>
 
       <Text
-        style={[
-          styles.overviewCount,
+        style={[styles.overviewCount,
           type === "overdue" &&
             styles.overdueCount,
           type === "due" &&
@@ -697,9 +638,8 @@ function OverviewCard({
   );
 }
 
-// =====================================================
 // PET CARD
-// =====================================================
+
 
 function PetCard({
   pet,
@@ -725,8 +665,7 @@ function PetCard({
     .join(" • ");
 
   return (
-    <Pressable
-      style={({ pressed }) => [
+    <Pressable style={({ pressed }) => [
         styles.petCard,
         pressed && styles.pressed,
       ]}
@@ -742,9 +681,7 @@ function PetCard({
             resizeMode="cover"
           />
         ) : (
-          <View
-            style={
-              styles.petPlaceholder
+          <View style={styles.petPlaceholder
             }
           >
             <Ionicons
@@ -822,9 +759,8 @@ function PetCard({
   );
 }
 
-// =====================================================
 // REMINDER CARD
-// =====================================================
+
 
 function ReminderCard({
   schedule,
@@ -930,52 +866,8 @@ function ReminderCard({
   );
 }
 
-// =====================================================
-// NAV ITEM
-// =====================================================
-
-// function NavItem({
-//   icon,
-//   label,
-//   active = false,
-//   onPress,
-// }: {
-//   icon: keyof typeof Ionicons.glyphMap;
-//   label: string;
-//   active?: boolean;
-//   onPress: () => void;
-// }) {
-//   return (
-//     <Pressable
-//       style={styles.navItem}
-//       onPress={onPress}
-//     >
-//       <Ionicons
-//         name={icon}
-//         size={23}
-//         color={
-//           active
-//             ? "#176B3A"
-//             : "#89948E"
-//         }
-//       />
-
-//       <Text
-//         style={[
-//           styles.navText,
-//           active &&
-//             styles.activeNavText,
-//         ]}
-//       >
-//         {label}
-//       </Text>
-//     </Pressable>
-//   );
-// }
-
-// =====================================================
 // HELPERS
-// =====================================================
+
 
 function getPetImageSource(
   photoUrl?: string | null
@@ -1120,10 +1012,6 @@ function getServiceIcon(
   return "medical-outline";
 }
 
-// =====================================================
-// STYLES
-// =====================================================
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -1234,10 +1122,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // ===================================================
-  // HEALTH OVERVIEW
-  // ===================================================
-
   overviewRow: {
     flexDirection: "row",
     gap: 9,
@@ -1327,10 +1211,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#7B877F",
   },
-
-  // ===================================================
-  // PETS
-  // ===================================================
 
   petCard: {
     minHeight: 105,
@@ -1438,9 +1318,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // ===================================================
-  // EMPTY PETS
-  // ===================================================
+
 
   emptyCard: {
     backgroundColor: "#FFFFFF",
@@ -1492,10 +1370,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#FFFFFF",
   },
-
-  // ===================================================
-  // REMINDERS
-  // ===================================================
 
   reminderCard: {
     minHeight: 95,
@@ -1627,10 +1501,6 @@ const styles = StyleSheet.create({
     color: "#7B877F",
     marginTop: 3,
   },
-
-  // ===================================================
-  // NAVIGATION
-  // ===================================================
 
   bottomNav: {
     position: "absolute",
