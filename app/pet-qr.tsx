@@ -272,9 +272,9 @@ export default function PetQRScreen() {
     );
   }
 
-  // ===================================================
+
   // PET NOT FOUND
-  // ===================================================
+
 
   if (!pet) {
     return (
@@ -325,7 +325,7 @@ export default function PetQRScreen() {
   */
 
   const PUBLIC_WEB_URL =
-    "https://maintains-multimedia-church-programmes.trycloudflare.com";
+    "https://affiliated-danny-likelihood-joyce.trycloudflare.com";
 
   const publicProfileUrl = pet.qr_code
     ? `${PUBLIC_WEB_URL}/public/pet/${encodeURIComponent(
