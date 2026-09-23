@@ -7,9 +7,9 @@ const {
 
 const router = express.Router();
 
-// =====================================================
-// HELPER: ESCAPE HTML
-// =====================================================
+
+
+
 
 const escapeHtml = (value) => {
   if (value === null || value === undefined) {
@@ -24,10 +24,10 @@ const escapeHtml = (value) => {
     .replaceAll("'", "&#039;");
 };
 
-// =====================================================
-// API: PUBLIC PET DATA
-// GET /api/public/pets/:qrCode
-// =====================================================
+
+
+
+
 
 router.get("/api/public/pets/:qrCode", async (req, res) => {
   try {
@@ -78,10 +78,10 @@ router.get("/api/public/pets/:qrCode", async (req, res) => {
   }
 });
 
-// =====================================================
-// PUBLIC WEB PROFILE
-// GET /public/pet/:qrCode
-// =====================================================
+
+
+
+
 
 router.get("/public/pet/:qrCode", async (req, res) => {
   try {
@@ -813,8 +813,8 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                   );
                 }
 
-                // Prevent automatic reload from creating
-                // another QR scan.
+                
+                
                 if (isReloadAfterScan) {
                   console.log(
                     "TIMAN automatic reload. Duplicate prevented."
@@ -956,7 +956,7 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                   );
                 }
 
-                // Create location request overlay.
+                
                 const overlay =
                   document.createElement("div");
 
@@ -1099,23 +1099,23 @@ router.get("/public/pet/:qrCode", async (req, res) => {
   }
 });
 
-// =====================================================
-// PUBLIC FINDER QR SCAN
-// POST /api/public/pets/:qrCode/scan
-// =====================================================
-//
-// This route is called when a finder opens a pet's
-// permanent QR profile.
-//
-// Behavior:
-// 1. Find pet and owner.
-// 2. If no active lost report exists, create one.
-// 3. Automatically mark the pet as Missing.
-// 4. Record the QR scan.
-// 5. Save location when the finder allows it.
-// 6. Notify the owner.
-// 7. Notify approved clinics.
-// =====================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 router.post(
   "/api/public/pets/:qrCode/scan",
@@ -1130,9 +1130,9 @@ router.post(
         longitude = null,
       } = req.body || {};
 
-      // ========================================
-      // VALIDATE QR
-      // ========================================
+      
+      
+      
 
       if (!qrCode || !qrCode.trim()) {
         return res.status(400).json({
@@ -1141,9 +1141,9 @@ router.post(
         });
       }
 
-      // ========================================
-      // VALIDATE OPTIONAL LOCATION
-      // ========================================
+      
+      
+      
 
       let validLatitude = null;
       let validLongitude = null;
@@ -1175,19 +1175,19 @@ router.post(
         }
       }
 
-      // ========================================
-      // START TRANSACTION
-      // ========================================
+      
+      
+      
 
       connection =
         await db.getConnection();
 
       await connection.beginTransaction();
 
-      // ========================================
-      // FIND PET + OWNER
-      // Lock pet row during scan processing.
-      // ========================================
+      
+      
+      
+      
 
       const [petRows] =
         await connection.query(
@@ -1228,9 +1228,9 @@ router.post(
       const wasAlreadyMissing =
         pet.pet_status === "Missing";
 
-      // ========================================
-      // FIND ACTIVE LOST REPORT
-      // ========================================
+      
+      
+      
 
       const [activeReportRows] =
         await connection.query(
@@ -1256,9 +1256,9 @@ router.post(
 
       let createdAutomaticReport = false;
 
-      // ========================================
-      // CREATE AUTOMATIC REPORT IF NONE EXISTS
-      // ========================================
+      
+      
+      
 
       if (activeReportRows.length === 0) {
         const automaticMessage =
@@ -1303,8 +1303,8 @@ router.post(
         lostReportId =
           activeReportRows[0].lost_report_id;
 
-        // Update last-known location only when
-        // the finder actually shared location.
+        
+        
         if (locationShared) {
           await connection.query(
             `
@@ -1323,9 +1323,9 @@ router.post(
         }
       }
 
-      // ========================================
-      // MARK PET AS MISSING
-      // ========================================
+      
+      
+      
 
       if (!wasAlreadyMissing) {
         await connection.query(
@@ -1338,9 +1338,9 @@ router.post(
         );
       }
 
-      // ========================================
-      // SAVE QR SCAN HISTORY
-      // ========================================
+      
+      
+      
 
       const [scanResult] =
         await connection.query(
@@ -1363,9 +1363,9 @@ router.post(
           ]
         );
 
-      // ========================================
-      // GET OWNER PUSH TOKENS
-      // ========================================
+      
+      
+      
 
       const [ownerTokenRows] =
         await connection.query(
@@ -1379,9 +1379,9 @@ router.post(
           [pet.owner_id]
         );
 
-      // ========================================
-      // GET APPROVED CLINICS
-      // ========================================
+      
+      
+      
 
       const [clinicRows] =
         await connection.query(
@@ -1407,9 +1407,9 @@ router.post(
             clinic.clinic_user_id
         );
 
-      // ========================================
-      // GET CLINIC PUSH TOKENS
-      // ========================================
+      
+      
+      
 
       let clinicTokenRows = [];
 
@@ -1435,24 +1435,15 @@ router.post(
         clinicTokenRows = tokens;
       }
 
-      // ========================================
-      // COMMIT DATABASE CHANGES
-      // ========================================
 
       await connection.commit();
 
       connection.release();
       connection = null;
 
-      // ========================================
-      // SEND NOTIFICATIONS AFTER COMMIT
-      // ========================================
 
       const notificationPromises = [];
 
-      // ========================================
-      // OWNER NOTIFICATION
-      // ========================================
 
       const ownerTitle =
         wasAlreadyMissing
@@ -1494,9 +1485,9 @@ router.post(
         );
       }
 
-      // ========================================
-      // CLINIC NOTIFICATION
-      // ========================================
+      
+      
+      
 
       const clinicTitle =
         `${pet.pet_name}'s QR was scanned`;
@@ -1534,7 +1525,7 @@ router.post(
         );
       }
 
-      // Push failure must NOT undo the scan.
+      
       const notificationResults =
         await Promise.allSettled(
           notificationPromises
@@ -1562,9 +1553,9 @@ router.post(
         }
       );
 
-      // ========================================
-      // RESPONSE
-      // ========================================
+      
+      
+      
 
       return res.status(201).json({
         success: true,

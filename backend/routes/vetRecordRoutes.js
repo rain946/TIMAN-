@@ -9,9 +9,9 @@ const {
 
 const router = express.Router();
 
-// =====================================================
-// HELPER: REQUIRE ROLE
-// =====================================================
+
+
+
 
 const requireRole = (role) => {
   return (req, res, next) => {
@@ -27,9 +27,9 @@ const requireRole = (role) => {
   };
 };
 
-// =====================================================
-// HELPER: CHECK CLINIC AUTHORIZATION
-// =====================================================
+
+
+
 
 const checkClinicAuthorization = async (
   petId,
@@ -55,11 +55,11 @@ const checkClinicAuthorization = async (
   return rows[0].status === "Approved";
 };
 
-// =====================================================
-// CLINIC: ADD VETERINARY RECORD
-//
-// POST /api/vet-records/:petId
-// =====================================================
+
+
+
+
+
 
 router.post(
   "/:petId",
@@ -84,9 +84,9 @@ router.post(
         next_due_date,
       } = req.body;
 
-      // ===============================================
-      // VALIDATE PET ID
-      // ===============================================
+      
+      
+      
 
       if (
         !Number.isInteger(petId) ||
@@ -98,9 +98,9 @@ router.post(
         });
       }
 
-      // ===============================================
-      // REQUIRED FIELDS
-      // ===============================================
+      
+      
+      
 
       if (
         !visit_date ||
@@ -113,9 +113,9 @@ router.post(
         });
       }
 
-      // ===============================================
-      // VALID SERVICE TYPE
-      // ===============================================
+      
+      
+      
 
       const allowedServices = [
         "Checkup",
@@ -138,9 +138,9 @@ router.post(
         });
       }
 
-      // ===============================================
-      // CHECK PET + GET OWNER
-      // ===============================================
+      
+      
+      
 
       const [petRows] =
         await db.query(
@@ -165,9 +165,9 @@ router.post(
 
       const pet = petRows[0];
 
-      // ===============================================
-      // CHECK CLINIC AUTHORIZATION
-      // ===============================================
+      
+      
+      
 
       const authorized =
         await checkClinicAuthorization(
@@ -183,9 +183,9 @@ router.post(
         });
       }
 
-      // ===============================================
-      // GET CLINIC INFORMATION
-      // ===============================================
+      
+      
+      
 
       const [clinicRows] =
         await db.query(
@@ -210,12 +210,12 @@ router.post(
         clinic?.full_name ||
         "Veterinary clinic";
 
-      // ===============================================
-      // INSERT VETERINARY RECORD
-      //
-      // schedule_status automatically becomes Pending
-      // because of the MySQL default.
-      // ===============================================
+      
+      
+      
+      
+      
+      
 
       const [result] =
         await db.query(
@@ -249,9 +249,9 @@ router.post(
       const recordId =
         result.insertId;
 
-      // ===============================================
-      // BUILD OWNER NOTIFICATION
-      // ===============================================
+      
+      
+      
 
       const notificationType =
         "vet_record_added";
@@ -268,9 +268,6 @@ router.post(
           ` A next health schedule was also set.`;
       }
 
-      // ===============================================
-      // SAVE TO TIMAN NOTIFICATION INBOX
-      // ===============================================
 
       try {
         await db.query(
@@ -299,17 +296,12 @@ router.post(
           `TIMAN: Vet record inbox notification saved for owner ${pet.owner_id}.`
         );
       } catch (notificationDbError) {
-        // Do not undo the veterinary record if
-        // inbox notification storage fails.
         console.error(
           "VET RECORD INBOX NOTIFICATION ERROR:",
           notificationDbError
         );
       }
 
-      // ===============================================
-      // GET OWNER'S ACTIVE PUSH TOKENS
-      // ===============================================
 
       try {
         const [pushTokens] =
@@ -328,9 +320,6 @@ router.post(
           `TIMAN: ${pushTokens.length} active push token(s) found for owner ${pet.owner_id}.`
         );
 
-        // =============================================
-        // SEND IMMEDIATE PUSH TO OWNER
-        // =============================================
 
         for (const tokenRow of pushTokens) {
           try {
@@ -382,17 +371,12 @@ router.post(
           }
         }
       } catch (pushTokenError) {
-        // Veterinary record is already saved,
-        // so push failure must not make the request fail.
         console.error(
           "GET OWNER PUSH TOKEN ERROR:",
           pushTokenError
         );
       }
 
-      // ===============================================
-      // SUCCESS
-      // ===============================================
 
       return res.status(201).json({
         success: true,
@@ -415,11 +399,6 @@ router.post(
     }
   }
 );
-// =====================================================
-// CLINIC: GET AUTHORIZED PET RECORDS
-//
-// GET /api/vet-records/clinic/:petId
-// =====================================================
 
 router.get(
   "/clinic/:petId",
@@ -434,9 +413,6 @@ router.get(
       const clinicUserId =
         req.user.userId;
 
-      // ===============================================
-      // VALIDATE PET ID
-      // ===============================================
 
       if (
         !Number.isInteger(petId) ||
@@ -448,9 +424,6 @@ router.get(
         });
       }
 
-      // ===============================================
-      // CHECK AUTHORIZATION
-      // ===============================================
 
       const authorized =
         await checkClinicAuthorization(
@@ -466,9 +439,6 @@ router.get(
         });
       }
 
-      // ===============================================
-      // GET PET
-      // ===============================================
 
       const [petRows] =
         await db.query(
@@ -493,9 +463,6 @@ router.get(
         });
       }
 
-      // ===============================================
-      // GET VETERINARY RECORDS
-      // ===============================================
 
       const [records] =
         await db.query(
@@ -555,11 +522,6 @@ router.get(
   }
 );
 
-// =====================================================
-// OWNER: GET HEALTH OVERVIEW FOR ALL OWNED PETS
-//
-// GET /api/vet-records/owner-health-overview
-// =====================================================
 
 router.get(
   "/owner-health-overview",
@@ -570,9 +532,6 @@ router.get(
       const ownerId =
         req.user.userId;
 
-      // ===============================================
-      // PHILIPPINE CURRENT DATE
-      // ===============================================
 
       const philippineToday = `
         DATE(
@@ -584,12 +543,6 @@ router.get(
         )
       `;
 
-      // ===============================================
-      // GET ACTIVE HEALTH SCHEDULES
-      //
-      // Only Pending schedules appear on dashboard.
-      // Completed / Cancelled are excluded.
-      // ===============================================
 
       const [schedules] =
         await db.query(
@@ -631,18 +584,6 @@ router.get(
           [ownerId]
         );
 
-      // ===============================================
-      // CLASSIFY SCHEDULES
-      //
-      // Overdue:
-      // before today
-      //
-      // Due Soon:
-      // today through next 7 days
-      //
-      // Upcoming:
-      // more than 7 days
-      // ===============================================
 
       const overdue = [];
       const dueSoon = [];
@@ -697,11 +638,6 @@ router.get(
   }
 );
 
-// =====================================================
-// OWNER: GET PET VETERINARY RECORDS
-//
-// GET /api/vet-records/owner/:petId
-// =====================================================
 
 router.get(
   "/owner/:petId",
@@ -716,9 +652,6 @@ router.get(
       const ownerId =
         req.user.userId;
 
-      // ===============================================
-      // VALIDATE PET ID
-      // ===============================================
 
       if (
         !Number.isInteger(petId) ||
@@ -730,9 +663,6 @@ router.get(
         });
       }
 
-      // ===============================================
-      // VERIFY OWNERSHIP
-      // ===============================================
 
       const [petRows] =
         await db.query(
@@ -762,9 +692,6 @@ router.get(
         });
       }
 
-      // ===============================================
-      // GET RECORDS
-      // ===============================================
 
       const [records] =
         await db.query(
@@ -823,11 +750,6 @@ router.get(
   }
 );
 
-// =====================================================
-// CLINIC: COMPLETE PET HEALTH SCHEDULE
-//
-// PATCH /api/vet-records/:recordId/complete
-// =====================================================
 
 router.patch(
   "/:recordId/complete",
@@ -842,9 +764,6 @@ router.patch(
       const clinicUserId =
         req.user.userId;
 
-      // ===============================================
-      // VALIDATE RECORD ID
-      // ===============================================
 
       if (
         !Number.isInteger(recordId) ||
@@ -857,9 +776,6 @@ router.patch(
         });
       }
 
-      // ===============================================
-      // GET HEALTH SCHEDULE
-      // ===============================================
 
       const [recordRows] =
         await db.query(
@@ -900,9 +816,6 @@ router.patch(
       const record =
         recordRows[0];
 
-      // ===============================================
-      // MUST HAVE A SCHEDULE
-      // ===============================================
 
       if (!record.next_due_date) {
         return res.status(400).json({
@@ -912,9 +825,6 @@ router.patch(
         });
       }
 
-      // ===============================================
-      // CHECK CURRENT STATUS
-      // ===============================================
 
       if (
         record.schedule_status ===
@@ -938,9 +848,6 @@ router.patch(
         });
       }
 
-      // ===============================================
-      // CHECK CLINIC AUTHORIZATION
-      // ===============================================
 
       const authorized =
         await checkClinicAuthorization(
@@ -956,11 +863,6 @@ router.patch(
         });
       }
 
-      // ===============================================
-      // MARK AS COMPLETED
-      //
-      // completed_at uses Philippine time.
-      // ===============================================
 
       const [updateResult] =
         await db.query(
@@ -985,7 +887,6 @@ router.patch(
           [recordId]
         );
 
-      // Protect against duplicate requests.
       if (
         updateResult.affectedRows === 0
       ) {

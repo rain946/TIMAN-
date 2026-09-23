@@ -176,7 +176,6 @@ export default function PetsScreen() {
     });
   };
 
-  // OPEN QR
   const openQR = (pet: Pet) => {
     router.push({
       pathname: "/pet-qr",
@@ -186,7 +185,6 @@ export default function PetsScreen() {
     });
   };
 
-  // OPEN RECORDS
   const openRecords = (pet: Pet) => {
     router.push({
       pathname: "/vet-records",
@@ -209,11 +207,13 @@ export default function PetsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* HEADER */}
 
       <View style={styles.header}>
         <Pressable
-          style={styles.headerButton}
+          style={({ pressed }) => [
+            styles.headerButton,
+            pressed && styles.pressedLight,
+          ]}
           onPress={() => router.back()}
         >
           <Ionicons
@@ -229,7 +229,11 @@ export default function PetsScreen() {
             : "My Pets"}
         </Text>
 
-        <Pressable style={styles.headerButton}
+        <Pressable
+          style={({ pressed }) => [
+            styles.headerButton,
+            pressed && styles.pressedLight,
+          ]}
           onPress={() => router.push("/add-pet")}
         >
           <Ionicons
@@ -375,7 +379,6 @@ export default function PetsScreen() {
                     key={pet.pet_id}
                     style={styles.petCard}
                   >
-                    {/* MAIN PET AREA */}
 
                     <Pressable style={({ pressed }) => [
                         styles.petMainArea,
@@ -390,11 +393,10 @@ export default function PetsScreen() {
                         }
                       }}
                     >
-                      {/* PET PHOTO */}
 
                       <View style={styles.petImageContainer }>
                         {photoUrl ? (
-                          <Image source={{ri: photoUrl,}}
+                          <Image source={{uri: photoUrl,}}
                             style={styles.petImage }
                             resizeMode="cover"/>
                         ) : (
@@ -408,12 +410,11 @@ export default function PetsScreen() {
                         )}
                       </View>
 
-                      {/* PET INFO */}
 
                       <View style={styles.petInformation}>
                         <View style={styles.nameStatusRow}>
                           <Text style={styles.petName}
-                            numberOfLines={1}>
+                            numberOfLines={2}>
                             {pet.pet_name}
                           </Text>
 
@@ -445,14 +446,11 @@ export default function PetsScreen() {
                         </View>
 
                         <View style={styles.petDetailsRow}>
-                          <Text style={styles.petDetail}>
-                            {pet.species}
-                          </Text>
-
-                          <View style={styles.detailDot} />
-
-                          <Text style={styles.petDetail}>
-                            {pet.sex}
+                          <Text
+                            style={styles.petDetail}
+                            numberOfLines={1}
+                          >
+                            {pet.species}  •  {pet.sex}
                           </Text>
                         </View>
 
@@ -479,7 +477,6 @@ export default function PetsScreen() {
                         }
                       />
 
-                      <View style={ styles.actionDivider }/>
                       <PetAction
                         icon="medical-outline"
                         label="Records"
@@ -487,8 +484,6 @@ export default function PetsScreen() {
                           openRecords(pet)
                         }
                       />
-
-                      <View style={styles.actionDivider}/>
 
                       <PetAction
                         icon="calendar-outline"
@@ -510,7 +505,6 @@ export default function PetsScreen() {
 }
 
 
-// PET ACTION COMPONENT
 
 
 function PetAction({
@@ -627,9 +621,6 @@ const styles = StyleSheet.create({
     color: "#9AA49E",
   },
 
-  // ========================================
-  // EMPTY
-  // ========================================
 
   emptyContainer: {
     marginTop: 35,
@@ -681,9 +672,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
 
-  // ========================================
-  // PET CARD
-  // ========================================
 
   petCard: {
     backgroundColor: "#FFFFFF",
@@ -729,7 +717,7 @@ const styles = StyleSheet.create({
 
   nameStatusRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 7,
   },
 
@@ -750,19 +738,15 @@ const styles = StyleSheet.create({
     marginTop: 6,
     flexDirection: "row",
     alignItems: "center",
+    minHeight: 20,
   },
 
   petDetail: {
+    flex: 1,
     fontSize: 13,
+    lineHeight: 18,
+    paddingRight: 4,
     color: "#89938D",
-  },
-
-  detailDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    marginHorizontal: 7,
-    backgroundColor: "#A6AFA9",
   },
 
   viewProfileText: {
@@ -773,6 +757,7 @@ const styles = StyleSheet.create({
   },
 
   statusBadge: {
+    flexShrink: 0,
     borderRadius: 20,
     paddingHorizontal: 9,
     paddingVertical: 4,
@@ -792,35 +777,35 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  // ========================================
-  // QUICK ACTIONS
-  // ========================================
 
   quickActions: {
     minHeight: 56,
     borderTopWidth: 1,
     borderTopColor: "#EDF0EE",
     flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
   },
 
   petAction: {
     flex: 1,
+    minHeight: 44,
+    paddingHorizontal: 4,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
+    borderWidth: 1,
+    borderColor: "#CFE0D4",
+    borderRadius: 12,
+    backgroundColor: "#F7FBF8",
   },
 
   petActionText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#526159",
-  },
-
-  actionDivider: {
-    width: 1,
-    marginVertical: 12,
-    backgroundColor: "#EDF0EE",
+    color: "#176B3A",
   },
 
   pressed: {

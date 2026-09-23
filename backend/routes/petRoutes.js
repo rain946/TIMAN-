@@ -9,9 +9,9 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// ========================================
-// PET UPLOAD DIRECTORY
-// ========================================
+
+
+
 
 const uploadDirectory = path.join(
   __dirname,
@@ -26,9 +26,9 @@ if (!fs.existsSync(uploadDirectory)) {
   });
 }
 
-// ========================================
-// MULTER STORAGE
-// ========================================
+
+
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -46,9 +46,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// ========================================
-// FILE FILTER
-// ========================================
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
@@ -69,9 +66,6 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// ========================================
-// MULTER
-// ========================================
 
 const upload = multer({
   storage,
@@ -83,9 +77,6 @@ const upload = multer({
   fileFilter,
 });
 
-// ========================================
-// ADD PET
-// ========================================
 
 router.post(
   "/",
@@ -138,23 +129,14 @@ router.post(
         });
       }
 
-      // ========================================
-      // PERMANENT QR TOKEN
-      // ========================================
 
       const qrCode = crypto.randomUUID();
 
-      // ========================================
-      // PHOTO PATH
-      // ========================================
 
       const photoUrl = req.file
         ? `/uploads/pets/${req.file.filename}`
         : null;
 
-      // ========================================
-      // INSERT PET
-      // ========================================
 
       const [result] = await db.query(
         `INSERT INTO pets
@@ -216,9 +198,6 @@ router.post(
   }
 );
 
-// ========================================
-// GET MY PETS
-// ========================================
 
 router.get(
   "/",
@@ -272,10 +251,6 @@ router.get(
   }
 );
 
-// ========================================
-// UPDATE PET PHOTO
-// IMPORTANT: MUST BE BEFORE /:id
-// ========================================
 
 router.put(
   "/:id/photo",
@@ -381,20 +356,12 @@ router.put(
   }
 );
 
-// ========================================
-// UPDATE PET STATUS
-// OWNER ONLY
-// IMPORTANT: MUST BE BEFORE /:id
-// ========================================
 
 router.patch(
   "/:id/status",
   authMiddleware,
   async (req, res) => {
     try {
-      // ========================================
-      // OWNER ROLE CHECK
-      // ========================================
 
       if (req.user.role !== "owner") {
         return res.status(403).json({
@@ -407,9 +374,6 @@ router.patch(
       const petId = req.params.id;
       const { status } = req.body;
 
-      // ========================================
-      // VALIDATE STATUS
-      // ========================================
 
       const allowedStatuses = [
         "Safe",
@@ -433,9 +397,6 @@ router.patch(
         });
       }
 
-      // ========================================
-      // CHECK PET OWNERSHIP
-      // ========================================
 
       const [pets] = await db.query(
         `SELECT
@@ -462,9 +423,6 @@ router.patch(
 
       const pet = pets[0];
 
-      // ========================================
-      // SAME STATUS
-      // ========================================
 
       if (pet.pet_status === status) {
         return res.json({
@@ -480,9 +438,6 @@ router.patch(
         });
       }
 
-      // ========================================
-      // UPDATE STATUS
-      // ========================================
 
       await db.query(
         `UPDATE pets
@@ -496,9 +451,6 @@ router.patch(
         ]
       );
 
-      // ========================================
-      // RESPONSE MESSAGE
-      // ========================================
 
       let message =
         `${pet.pet_name}'s status has been updated to ${status}.`;
@@ -543,9 +495,6 @@ router.patch(
   }
 );
 
-// ========================================
-// GET ONE PET
-// ========================================
 
 router.get(
   "/:id",
@@ -597,9 +546,6 @@ router.get(
   }
 );
 
-// ========================================
-// DELETE FILE HELPER
-// ========================================
 
 function deleteFile(filePath) {
   try {

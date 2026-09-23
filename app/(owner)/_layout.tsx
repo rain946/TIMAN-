@@ -24,7 +24,6 @@ export default function OwnerTabsLayout() {
         },
       }}
     >
-      {/* HOME */}
       <Tabs.Screen
         name="dashboard"
         options={{
@@ -41,7 +40,6 @@ export default function OwnerTabsLayout() {
         }}
       />
 
-      {/* PETS */}
       <Tabs.Screen
         name="pets"
         options={{
@@ -58,7 +56,6 @@ export default function OwnerTabsLayout() {
         }}
       />
 
-      {/* ALERTS */}
       <Tabs.Screen
         name="notifications"
         options={{
@@ -75,7 +72,6 @@ export default function OwnerTabsLayout() {
         }}
       />
 
-      {/* PROFILE */}
       <Tabs.Screen
         name="profile"
         options={{
@@ -94,10 +90,6 @@ export default function OwnerTabsLayout() {
     </Tabs>
   );
 }
-
-// =====================================================
-// TAB ITEM
-// =====================================================
 
 function TabItem({
   focused,

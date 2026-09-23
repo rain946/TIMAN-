@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,8 +14,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import EditProfileModal from "../../components/EditProfileModal";
-import ChangePasswordModal from "../../components/ChangePasswordModal";
+import EditProfileModal from "../../components/modals/EditProfileModal";
+import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
 
 import { API_URL } from "../../config/api";
 
@@ -34,22 +36,24 @@ export default function ProfileScreen() {
 
   const [loading, setLoading] =
     useState(true);
+  const [profilePhoto, setProfilePhoto] =
+    useState<string | null>(null);
 
-  // Edit Profile modal
+
   const [
     editProfileVisible,
     setEditProfileVisible,
   ] = useState(false);
 
-  // Change Password modal
+
   const [
     changePasswordVisible,
     setChangePasswordVisible,
   ] = useState(false);
 
-  // ===================================================
-  // LOAD PROFILE
-  // ===================================================
+
+
+
 
   const loadProfile = useCallback(async () => {
     try {
@@ -87,6 +91,12 @@ export default function ProfileScreen() {
       }
 
       setProfile(data.user);
+
+      const savedPhoto =
+        await AsyncStorage.getItem(
+          `owner_profile_photo_${data.user.user_id}`
+        );
+      setProfilePhoto(savedPhoto);
     } catch (error) {
       console.error(
         "LOAD PROFILE ERROR:",
@@ -104,9 +114,6 @@ export default function ProfileScreen() {
     }
   }, []);
 
-  // ===================================================
-  // RELOAD WHEN PROFILE GAINS FOCUS
-  // ===================================================
 
   useFocusEffect(
     useCallback(() => {
@@ -114,14 +121,100 @@ export default function ProfileScreen() {
     }, [loadProfile])
   );
 
-  // ===================================================
-  // PROFILE UPDATED
-  // ===================================================
 
   const handleProfileUpdated = (
     updatedProfile: OwnerProfile
   ) => {
     setProfile(updatedProfile);
+  };
+
+  const saveProfilePhoto = async (
+    result: ImagePicker.ImagePickerResult
+  ) => {
+    if (
+      result.canceled ||
+      !result.assets[0]?.uri ||
+      !profile?.user_id
+    ) {
+      return;
+    }
+
+    const uri = result.assets[0].uri;
+    setProfilePhoto(uri);
+    await AsyncStorage.setItem(
+      `owner_profile_photo_${profile.user_id}`,
+      uri
+    );
+  };
+
+  const chooseProfilePhotoFromGallery = async () => {
+    const permission =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow TIMAN to access your photos."
+      );
+      return;
+    }
+
+    const result =
+      await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+    await saveProfilePhoto(result);
+  };
+
+  const takeProfilePhoto = async () => {
+    const permission =
+      await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow TIMAN to use your camera."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    await saveProfilePhoto(result);
+  };
+
+  const chooseProfilePhoto = () => {
+    Alert.alert(
+      "Profile Photo",
+      "Choose where to get your profile photo.",
+      [
+        {
+          text: "Take Photo",
+          onPress: () => {
+            void takeProfilePhoto();
+          },
+        },
+        {
+          text: "Choose from Gallery",
+          onPress: () => {
+            void chooseProfilePhotoFromGallery();
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
   };
 
   const handleLogout = () => {
@@ -182,7 +275,6 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* HEADER */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
           Profile
@@ -193,22 +285,38 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        {/* PROFILE CARD */}
         <View style={styles.profileCard}>
-          <View style={styles.avatar}>
-            <Ionicons
-              name="person"
-              size={42}
-              color="#176B3A"
-            />
-          </View>
+          <Pressable
+            onPress={chooseProfilePhoto}
+            style={({ pressed }) => [
+              styles.avatar,
+              pressed && styles.pressed,
+            ]}
+          >
+            {profilePhoto ? (
+              <Image
+                source={{ uri: profilePhoto }}
+                style={styles.avatarImage}
+              />
+            ) : (
+              <Ionicons
+                name="person"
+                size={42}
+                color="#176B3A"
+              />
+            )}
+
+            <View style={styles.cameraButton}>
+              <Ionicons
+                name="camera"
+                size={15}
+                color="#FFFFFF"
+              />
+            </View>
+          </Pressable>
 
           <Text style={styles.ownerName}>
             {profile?.full_name || "Pet Owner"}
-          </Text>
-
-          <Text style={styles.ownerEmail}>
-           {profile?.email || ""}
           </Text>
 
           <View style={styles.ownerBadge}>
@@ -224,7 +332,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* ACCOUNT INFORMATION */}
         <Text style={styles.sectionTitle}>
           Account Information
         </Text>
@@ -261,13 +368,11 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* ACCOUNT */}
         <Text style={styles.sectionTitle}>
           Account
         </Text>
 
         <View style={styles.menuCard}>
-          {/* EDIT PROFILE */}
           <MenuItem
             icon="create-outline"
             title="Edit Profile"
@@ -279,7 +384,6 @@ export default function ProfileScreen() {
 
           <MenuDivider />
 
-          {/* CHANGE PASSWORD */}
           <MenuItem
             icon="lock-closed-outline"
             title="Change Password"
@@ -290,7 +394,6 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* PRIVACY */}
         <View style={styles.securityCard}>
           <View style={styles.securityIcon}>
             <Ionicons
@@ -314,7 +417,6 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* LOG OUT */}
         <Pressable
           style={({ pressed }) => [
             styles.logoutButton,
@@ -333,7 +435,6 @@ export default function ProfileScreen() {
           </Text>
         </Pressable>
 
-        {/* APP INFORMATION */}
         <View style={styles.appInfo}>
           <View style={styles.appLogo}>
             <Ionicons
@@ -476,14 +577,14 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 19,
+    fontSize: 21,
     fontWeight: "800",
     color: "#1E2D24",
   },
 
   content: {
     paddingHorizontal: 22,
-    paddingBottom: 110,
+    paddingBottom: 24,
   },
 
   profileCard: {
@@ -505,17 +606,31 @@ const styles = StyleSheet.create({
     borderColor: "#CFE4D1",
   },
 
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 41,
+  },
+
+  cameraButton: {
+    position: "absolute",
+    right: -2,
+    bottom: 1,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#176B3A",
+    borderWidth: 2,
+    borderColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   ownerName: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "900",
     color: "#26392D",
     marginTop: 12,
-  },
-
-  ownerEmail: {
-    fontSize: 10,
-    color: "#718077",
-    marginTop: 4,
   },
 
   ownerBadge: {
@@ -530,13 +645,13 @@ const styles = StyleSheet.create({
   },
 
   ownerBadgeText: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: "800",
     color: "#267542",
   },
 
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: "900",
     color: "#1E2D24",
     marginTop: 25,
@@ -572,12 +687,12 @@ const styles = StyleSheet.create({
   },
 
   infoLabel: {
-    fontSize: 8,
+    fontSize: 11,
     color: "#929C96",
   },
 
   infoValue: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: "700",
     color: "#4C5B52",
     marginTop: 3,
@@ -622,13 +737,13 @@ const styles = StyleSheet.create({
   },
 
   menuTitle: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: "800",
     color: "#3A4A40",
   },
 
   menuDescription: {
-    fontSize: 9,
+    fontSize: 12,
     color: "#89948D",
     marginTop: 3,
   },
@@ -662,14 +777,14 @@ const styles = StyleSheet.create({
   },
 
   securityTitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
     color: "#294C34",
   },
 
   securityText: {
-    fontSize: 9,
-    lineHeight: 15,
+    fontSize: 11,
+    lineHeight: 17,
     color: "#66766B",
     marginTop: 3,
   },
@@ -688,7 +803,7 @@ const styles = StyleSheet.create({
   },
 
   logoutText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "800",
     color: "#A14343",
   },
@@ -705,14 +820,14 @@ const styles = StyleSheet.create({
   },
 
   appName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "900",
     letterSpacing: 1,
     color: "#176B3A",
   },
 
   version: {
-    fontSize: 8,
+    fontSize: 10,
     color: "#A0AAA4",
     marginTop: 4,
   },
@@ -726,7 +841,7 @@ const styles = StyleSheet.create({
 
   loadingProfileText: {
     marginTop: 10,
-    fontSize: 12,
+    fontSize: 14,
     color: "#7B877F",
     fontWeight: "600",
   },

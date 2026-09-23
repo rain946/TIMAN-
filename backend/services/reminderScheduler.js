@@ -6,9 +6,9 @@ const {
   sendExpoPushNotification,
 } = require("./pushService");
 
-// =====================================================
-// DETERMINE REMINDER TYPE
-// =====================================================
+
+
+
 
 function getReminderDetails(daysDifference) {
   switch (daysDifference) {
@@ -72,9 +72,9 @@ function getReminderDetails(daysDifference) {
   }
 }
 
-// =====================================================
-// CHECK IF REMINDER ALREADY SENT
-// =====================================================
+
+
+
 
 async function reminderAlreadySent(
   recordId,
@@ -101,9 +101,9 @@ async function reminderAlreadySent(
   return rows.length > 0;
 }
 
-// =====================================================
-// SAVE REMINDER LOG
-// =====================================================
+
+
+
 
 async function saveReminderLog({
   recordId,
@@ -154,9 +154,9 @@ async function saveReminderLog({
   );
 }
 
-// =====================================================
-// SAVE NOTIFICATION TO TIMAN INBOX
-// =====================================================
+
+
+
 
 async function saveInboxNotification({
   userId,
@@ -188,9 +188,9 @@ async function saveInboxNotification({
   );
 }
 
-// =====================================================
-// GET HEALTH SCHEDULES THAT NEED REMINDERS
-// =====================================================
+
+
+
 
 async function getSchedulesForReminder() {
   const [rows] = await db.query(
@@ -247,9 +247,9 @@ async function getSchedulesForReminder() {
   return rows;
 }
 
-// =====================================================
-// GET OWNER PUSH TOKENS
-// =====================================================
+
+
+
 
 async function getOwnerPushTokens(userId) {
   const [rows] = await db.query(
@@ -269,9 +269,9 @@ async function getOwnerPushTokens(userId) {
   return rows;
 }
 
-// =====================================================
-// PROCESS AUTOMATIC REMINDERS
-// =====================================================
+
+
+
 
 async function processHealthReminders() {
   console.log(
@@ -312,9 +312,6 @@ async function processHealthReminders() {
           `TIMAN: Checking ${schedule.pet_name} - ${schedule.service_type} - ${reminder.type}`
         );
 
-        // =================================================
-        // CHECK DUPLICATE REMINDER
-        // =================================================
 
         const alreadySent =
           await reminderAlreadySent(
@@ -331,17 +328,11 @@ async function processHealthReminders() {
           continue;
         }
 
-        // =================================================
-        // BUILD NOTIFICATION MESSAGE
-        // =================================================
 
         const body =
           `${schedule.pet_name} ${reminder.message} ` +
           `Service: ${schedule.service_type}.`;
 
-        // =================================================
-        // GET OWNER PUSH TOKENS
-        // =================================================
 
         const tokens =
           await getOwnerPushTokens(
@@ -353,19 +344,9 @@ async function processHealthReminders() {
             `TIMAN: No active push token for owner ${schedule.owner_id}.`
           );
 
-          /*
-            Do not mark the reminder as sent.
-
-            This allows TIMAN to try again later
-            when the owner has an active device.
-          */
-
           continue;
         }
 
-        // =================================================
-        // SEND ANDROID POPUP PUSH
-        // =================================================
 
         let notificationSent = false;
         let lastTicketId = null;
@@ -421,14 +402,8 @@ async function processHealthReminders() {
           }
         }
 
-        // =================================================
-        // SAVE SUCCESSFUL REMINDER
-        // =================================================
 
         if (notificationSent) {
-          // -----------------------------------------------
-          // SAVE IN TIMAN NOTIFICATION INBOX
-          // -----------------------------------------------
 
           await saveInboxNotification({
             userId:
@@ -451,9 +426,6 @@ async function processHealthReminders() {
             `TIMAN: Inbox notification saved for ${schedule.pet_name}.`
           );
 
-          // -----------------------------------------------
-          // SAVE REMINDER LOG
-          // -----------------------------------------------
 
           await saveReminderLog({
             recordId:
@@ -499,20 +471,11 @@ async function processHealthReminders() {
   );
 }
 
-// =====================================================
-// START SCHEDULER
-// =====================================================
 
 function startReminderScheduler() {
   console.log(
     "TIMAN reminder scheduler started."
   );
-
-  /*
-    Production schedule:
-    Every day at 8:00 AM
-    Asia/Manila time.
-  */
 
   cron.schedule(
     "0 8 * * *",
@@ -524,14 +487,6 @@ function startReminderScheduler() {
         "Asia/Manila",
     }
   );
-
-  /*
-    Also check once whenever
-    the backend starts.
-
-    Useful when Docker/server
-    starts after 8:00 AM.
-  */
 
   setTimeout(() => {
     processHealthReminders();

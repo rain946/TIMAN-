@@ -5,10 +5,10 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// =====================================================
-// REGISTER PUSH TOKEN
-// POST /api/push-tokens/register
-// =====================================================
+
+
+
+
 
 router.post("/register", authMiddleware, async (req, res) => {
   try {
@@ -19,9 +19,9 @@ router.post("/register", authMiddleware, async (req, res) => {
       device_platform,
     } = req.body;
 
-    // -------------------------------------------------
-    // VALIDATION
-    // -------------------------------------------------
+    
+    
+    
 
     if (
       !expo_push_token ||
@@ -35,7 +35,7 @@ router.post("/register", authMiddleware, async (req, res) => {
 
     const token = expo_push_token.trim();
 
-    // Expo tokens normally use one of these formats
+    
     const isValidExpoToken =
       token.startsWith("ExponentPushToken[") ||
       token.startsWith("ExpoPushToken[");
@@ -52,9 +52,9 @@ router.post("/register", authMiddleware, async (req, res) => {
         ? "ios"
         : "android";
 
-    // -------------------------------------------------
-    // INSERT OR UPDATE TOKEN
-    // -------------------------------------------------
+    
+    
+    
 
     await db.query(
       `
@@ -97,10 +97,10 @@ router.post("/register", authMiddleware, async (req, res) => {
   }
 });
 
-// =====================================================
-// GET CURRENT USER PUSH TOKENS
-// GET /api/push-tokens/my-tokens
-// =====================================================
+
+
+
+
 
 router.get("/my-tokens", authMiddleware, async (req, res) => {
   try {
@@ -140,10 +140,10 @@ router.get("/my-tokens", authMiddleware, async (req, res) => {
   }
 });
 
-// =====================================================
-// DISABLE PUSH TOKEN
-// POST /api/push-tokens/unregister
-// =====================================================
+
+
+
+
 
 router.post("/unregister", authMiddleware, async (req, res) => {
   try {

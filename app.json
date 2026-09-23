@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Pettag",
+    "name": "TIMAN",
     "slug": "Pettag",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,6 +20,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
       "predictiveBackGestureEnabled": false,
       "package": "com.rain09202.Pettag",
       "blockedPermissions": [
@@ -51,7 +52,8 @@
           "photosPermission": "Allow TIMAN to access your photos.",
           "savePhotosPermission": "Allow TIMAN to save QR codes to your photos."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

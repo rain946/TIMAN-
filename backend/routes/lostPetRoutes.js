@@ -5,8 +5,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 const router = express.Router();
 
 
-// POST /api/lost-pets/:petId/missing
-// REPORT PET AS MISSING
+
+
 
 
 router.post(
@@ -33,7 +33,7 @@ router.post(
       } = req.body;
 
 
-      // VALIDATION
+      
 
 
       if (!petId || Number.isNaN(petId)) {
@@ -66,7 +66,7 @@ router.post(
       await connection.beginTransaction();
 
 
-      // CHECK PET OWNERSHIP
+      
 
 
       const [pets] = await connection.query(
@@ -99,7 +99,7 @@ router.post(
 
       const pet = pets[0];
 
-      // CHECK EXISTING ACTIVE LOST CASE
+      
 
       const [activeCases] = await connection.query(
         `
@@ -121,7 +121,6 @@ router.post(
         });
       }
 
-      // NORMALIZE LOCATION
 
       const latitude =
         lastSeenLatitude === null ||
@@ -169,7 +168,6 @@ router.post(
         });
       }
 
-      // CREATE LOST PET REPORT
 
       const [insertResult] = await connection.query(
         `
@@ -195,7 +193,6 @@ router.post(
         ]
       );
 
-      // UPDATE PET STATUS
 
       await connection.query(
         `
@@ -252,8 +249,6 @@ router.post(
 );
 
 
-// GET /api/lost-pets/:petId
-// GET ACTIVE LOST PET DETAILS FOR OWNER
 
 
 router.get(
@@ -278,7 +273,6 @@ router.get(
       }
 
 
-      // PET + ACTIVE LOST REPORT
 
 
       const [reports] = await db.query(
@@ -330,7 +324,6 @@ router.get(
 
       const report = reports[0];
 
-      // QR SCAN HISTORY
 
       const [scans] = await db.query(
         `
@@ -437,8 +430,6 @@ router.get(
 );
 
 
-// PATCH /api/lost-pets/:petId/recovered
-// PET IS BACK WITH OWNER
 
 router.patch(
   "/:petId/recovered",
@@ -465,7 +456,6 @@ router.patch(
 
       await connection.beginTransaction();
 
-      // VERIFY OWNERSHIP
       const [pets] = await connection.query(
         `
         SELECT
@@ -494,7 +484,6 @@ router.patch(
 
       const pet = pets[0];
 
-      // FIND ACTIVE LOST CASE
 
       const [reports] = await connection.query(
         `
@@ -522,7 +511,6 @@ router.patch(
         });
       }
 
-      // CLOSE LOST CASE
 
       await connection.query(
         `
@@ -537,7 +525,6 @@ router.patch(
         ]
       );
 
-      // RETURN PET TO SAFE STATUS
 
       await connection.query(
         `

@@ -117,7 +117,7 @@ export default function DashboardScreen() {
           return;
         }
 
-        // LOAD OWNER NAME
+
 
         if (storedUser) {
           try {
@@ -146,7 +146,7 @@ export default function DashboardScreen() {
         }
 
 
-        // LOAD PETS + HEALTH OVERVIEW
+
 
         const [
           petsResponse,
@@ -169,7 +169,6 @@ export default function DashboardScreen() {
         ]);
 
 
-        // PETS RESPONSE
 
 
         const petsData =
@@ -198,7 +197,6 @@ export default function DashboardScreen() {
         setPets(loadedPets);
 
 
-        // HEALTH OVERVIEW RESPONSE
 
         const overviewData: HealthOverviewResponse =
           await overviewResponse.json();
@@ -294,7 +292,6 @@ export default function DashboardScreen() {
     });
   };
 
-  // RENDER
 
 
   return (
@@ -311,7 +308,6 @@ export default function DashboardScreen() {
           />
         }
       >
-        {/* HEADER */}
 
         <View style={styles.header}>
           <View>
@@ -325,7 +321,6 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* WELCOME CARD */}
 
         <View style={styles.welcomeCard}>
           <View
@@ -350,7 +345,6 @@ export default function DashboardScreen() {
           </Text>
         </View>
 
-        {/* HEALTH OVERVIEW */}
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
@@ -384,9 +378,9 @@ export default function DashboardScreen() {
               type="overdue"
               onPress={() =>
                 router.push({
-                  pathname: "/pets",
+                  pathname: "/health-reminders",
                   params: {
-                    mode: "schedule",
+                    filter: "overdue",
                   },
                 })
               }
@@ -399,9 +393,9 @@ export default function DashboardScreen() {
               type="due"
               onPress={() =>
                 router.push({
-                  pathname: "/pets",
+                  pathname: "/health-reminders",
                   params: {
-                    mode: "schedule",
+                    filter: "dueSoon",
                   },
                 })
               }
@@ -414,9 +408,9 @@ export default function DashboardScreen() {
               type="upcoming"
               onPress={() =>
                 router.push({
-                  pathname: "/pets",
+                  pathname: "/health-reminders",
                   params: {
-                    mode: "schedule",
+                    filter: "upcoming",
                   },
                 })
               }
@@ -424,7 +418,6 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        {/* MY PETS */}
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>
@@ -432,6 +425,10 @@ export default function DashboardScreen() {
           </Text>
 
           <Pressable
+            style={({ pressed }) => [
+              styles.seeAllButton,
+              pressed && styles.pressed,
+            ]}
             onPress={() =>
               router.push("/pets")
             }
@@ -493,14 +490,22 @@ export default function DashboardScreen() {
           ))
         )}
 
-        {/* HEALTH REMINDERS */}
 
-        <View style={styles.sectionHeader}>
+        <View
+          style={[
+            styles.sectionHeader,
+            styles.remindersSectionHeader,
+          ]}
+        >
           <Text style={styles.sectionTitle}>
             Health Reminders
           </Text>
 
           <Pressable
+            style={({ pressed }) => [
+              styles.seeAllButton,
+              pressed && styles.pressed,
+            ]}
             onPress={() =>
               router.push("/health-reminders")
             }
@@ -568,7 +573,6 @@ export default function DashboardScreen() {
   );
 }
 
-// OVERVIEW CARD
 
 function OverviewCard({
   count,
@@ -638,7 +642,6 @@ function OverviewCard({
   );
 }
 
-// PET CARD
 
 
 function PetCard({
@@ -759,7 +762,6 @@ function PetCard({
   );
 }
 
-// REMINDER CARD
 
 
 function ReminderCard({
@@ -866,7 +868,6 @@ function ReminderCard({
   );
 }
 
-// HELPERS
 
 
 function getPetImageSource(
@@ -1027,8 +1028,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 15,
-    marginBottom: 22,
+    marginTop: 10,
+    marginBottom: 16,
   },
 
   smallText: {
@@ -1065,10 +1066,10 @@ const styles = StyleSheet.create({
   },
 
   welcomeCard: {
-    minHeight: 155,
+    minHeight: 145,
     borderRadius: 22,
     backgroundColor: "#176B3A",
-    padding: 22,
+    padding: 19,
     overflow: "hidden",
     flexDirection: "row",
     alignItems: "center",
@@ -1103,8 +1104,8 @@ const styles = StyleSheet.create({
   },
 
   sectionHeader: {
-    marginTop: 28,
-    marginBottom: 14,
+    marginTop: 22,
+    marginBottom: 11,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1122,6 +1123,17 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
+  remindersSectionHeader: {
+    marginTop: 8,
+  },
+
+  seeAllButton: {
+    minHeight: 44,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   overviewRow: {
     flexDirection: "row",
     gap: 9,
@@ -1129,7 +1141,7 @@ const styles = StyleSheet.create({
 
   overviewCard: {
     flex: 1,
-    minHeight: 125,
+    minHeight: 116,
     borderRadius: 18,
     paddingVertical: 13,
     paddingHorizontal: 9,

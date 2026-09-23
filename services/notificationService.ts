@@ -7,9 +7,9 @@ import { API_URL } from "../config/api";
 
 const STORAGE_KEY = "timan_health_reminders";
 
-// =====================================================
-// NOTIFICATION HANDLER
-// =====================================================
+
+
+
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -20,9 +20,9 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// =====================================================
-// TYPES
-// =====================================================
+
+
+
 
 type HealthSchedule = {
   recordId: number;
@@ -43,13 +43,13 @@ type StoredReminder = {
   reminderDate: string;
 };
 
-// =====================================================
-// PERMISSION
-// =====================================================
+
+
+
 
 export async function requestNotificationPermission() {
   try {
-    // Android notification channel
+    
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync(
         "pet-health-reminders",
@@ -85,15 +85,15 @@ export async function requestNotificationPermission() {
   }
 }
 
-// =====================================================
-// REGISTER DEVICE FOR SERVER PUSH
-// =====================================================
+
+
+
 
 export async function registerDeviceForPushNotifications() {
   try {
-    // -------------------------------------------------
-    // 1. CHECK NOTIFICATION PERMISSION
-    // -------------------------------------------------
+    
+    
+    
 
     const granted =
       await requestNotificationPermission();
@@ -105,9 +105,9 @@ export async function registerDeviceForPushNotifications() {
       };
     }
 
-    // -------------------------------------------------
-    // 2. GET EAS PROJECT ID
-    // -------------------------------------------------
+    
+    
+    
 
     const projectId =
       Constants.expoConfig?.extra?.eas?.projectId ??
@@ -129,9 +129,9 @@ export async function registerDeviceForPushNotifications() {
       projectId
     );
 
-    // -------------------------------------------------
-    // 3. GET EXPO PUSH TOKEN
-    // -------------------------------------------------
+    
+    
+    
 
     const pushTokenResult =
       await Notifications.getExpoPushTokenAsync({
@@ -153,9 +153,9 @@ export async function registerDeviceForPushNotifications() {
       };
     }
 
-    // -------------------------------------------------
-    // 4. GET LOGGED-IN USER JWT
-    // -------------------------------------------------
+    
+    
+    
 
     const token =
       await AsyncStorage.getItem("token");
@@ -167,9 +167,9 @@ export async function registerDeviceForPushNotifications() {
       };
     }
 
-    // -------------------------------------------------
-    // 5. SEND PUSH TOKEN TO EXPRESS
-    // -------------------------------------------------
+    
+    
+    
 
     const response =
       await fetch(
@@ -244,9 +244,6 @@ export async function registerDeviceForPushNotifications() {
   }
 }
 
-// =====================================================
-// SYNC ONE PET'S LOCAL HEALTH REMINDERS
-// =====================================================
 
 export async function syncPetHealthReminders(
   petId: number,
@@ -266,14 +263,12 @@ export async function syncPetHealthReminders(
     const stored =
       await getStoredReminders();
 
-    // Only reminders belonging to this pet
     const existingForPet =
       stored.filter(
         (item) =>
           item.petId === petId
       );
 
-    // Cancel this pet's old reminders
     for (const reminder of existingForPet) {
       try {
         await Notifications.cancelScheduledNotificationAsync(
@@ -287,7 +282,6 @@ export async function syncPetHealthReminders(
       }
     }
 
-    // Keep reminders belonging to other pets
     const otherPetReminders =
       stored.filter(
         (item) =>
@@ -307,7 +301,6 @@ export async function syncPetHealthReminders(
         continue;
       }
 
-      // 1 day before due date at 9:00 AM
       const reminderDate =
         new Date(
           dueDate.getFullYear(),
@@ -319,7 +312,6 @@ export async function syncPetHealthReminders(
           0
         );
 
-      // Don't schedule reminders in the past
       if (
         reminderDate.getTime() <=
         Date.now()
@@ -421,9 +413,6 @@ export async function syncPetHealthReminders(
   }
 }
 
-// =====================================================
-// GET STORED REMINDERS
-// =====================================================
 
 export async function getStoredReminders(): Promise<
   StoredReminder[]
@@ -454,9 +443,6 @@ export async function getStoredReminders(): Promise<
   }
 }
 
-// =====================================================
-// GET ACTUALLY SCHEDULED HEALTH REMINDERS
-// =====================================================
 
 export async function getScheduledHealthReminders() {
   try {
@@ -478,9 +464,6 @@ export async function getScheduledHealthReminders() {
   }
 }
 
-// =====================================================
-// TEST LOCAL NOTIFICATION
-// =====================================================
 
 export async function sendTestNotification() {
   try {
@@ -519,9 +502,6 @@ export async function sendTestNotification() {
   }
 }
 
-// =====================================================
-// DATE HELPER
-// =====================================================
 
 function parseDatabaseDate(
   value: string

@@ -8,9 +8,9 @@ const {
 
 const router = express.Router();
 
-// =====================================================
-// HELPER: CHECK USER ROLE
-// =====================================================
+
+
+
 
 const requireRole = (role) => {
   return (req, res, next) => {
@@ -26,9 +26,9 @@ const requireRole = (role) => {
   };
 };
 
-// =====================================================
-// HELPER: SEND PUSH TO USER
-// =====================================================
+
+
+
 
 const sendPushToUser = async ({
   userId,
@@ -85,11 +85,6 @@ const sendPushToUser = async ({
   }
 };
 
-// =====================================================
-// CLINIC: REQUEST ACCESS
-//
-// POST /api/authorizations/request/:petId
-// =====================================================
 
 router.post(
   "/request/:petId",
@@ -113,9 +108,6 @@ router.post(
         });
       }
 
-      // ---------------------------------------------
-      // GET PET
-      // ---------------------------------------------
 
       const [petRows] = await db.query(
         `
@@ -139,9 +131,6 @@ router.post(
 
       const pet = petRows[0];
 
-      // ---------------------------------------------
-      // GET CLINIC INFORMATION
-      // ---------------------------------------------
 
       const [clinicRows] = await db.query(
         `
@@ -173,9 +162,6 @@ router.post(
         clinic.full_name ||
         "A veterinary clinic";
 
-      // ---------------------------------------------
-      // CHECK EXISTING AUTHORIZATION
-      // ---------------------------------------------
 
       const [authorizationRows] =
         await db.query(
@@ -268,9 +254,6 @@ router.post(
           insertResult.insertId;
       }
 
-      // ---------------------------------------------
-      // SAVE OWNER NOTIFICATION
-      // ---------------------------------------------
 
       await db.query(
         `
@@ -295,9 +278,6 @@ router.post(
         ]
       );
 
-      // ---------------------------------------------
-      // SEND POPUP PUSH TO OWNER
-      // ---------------------------------------------
 
       await sendPushToUser({
         userId: pet.owner_id,
@@ -321,9 +301,6 @@ router.post(
         },
       });
 
-      // ---------------------------------------------
-      // NOTIFY PET OWNER
-      // ---------------------------------------------
 
       await sendPushToUser({
         userId: pet.owner_id,
@@ -371,11 +348,6 @@ router.post(
   }
 );
 
-// =====================================================
-// CLINIC: SCAN PET QR
-//
-// GET /api/authorizations/scan/:qrCode
-// =====================================================
 
 router.get(
   "/scan/:qrCode",
@@ -397,9 +369,6 @@ router.get(
         });
       }
 
-      // ---------------------------------------------
-      // FIND PET
-      // ---------------------------------------------
 
       const [petRows] = await db.query(
         `
@@ -442,9 +411,6 @@ router.get(
 
       const pet = petRows[0];
 
-      // ---------------------------------------------
-      // CHECK CLINIC AUTHORIZATION
-      // ---------------------------------------------
 
       const [authorizationRows] =
         await db.query(
@@ -544,11 +510,6 @@ router.get(
   }
 );
 
-// =====================================================
-// CLINIC: CHECK PET AUTHORIZATION
-//
-// GET /api/authorizations/check/:petId
-// =====================================================
 
 router.get(
   "/check/:petId",
@@ -664,11 +625,6 @@ router.get(
   }
 );
 
-// =====================================================
-// OWNER: VIEW AUTHORIZATION REQUESTS
-//
-// GET /api/authorizations/owner
-// =====================================================
 
 router.get(
   "/owner",
@@ -737,11 +693,6 @@ router.get(
   }
 );
 
-// =====================================================
-// OWNER: APPROVE REQUEST
-//
-// PATCH /api/authorizations/:authorizationId/approve
-// =====================================================
 
 router.patch(
   "/:authorizationId/approve",
@@ -842,7 +793,6 @@ router.patch(
         [authorizationId]
       );
 
-      // Notify clinic.
       await sendPushToUser({
         userId:
           authorization.clinic_user_id,
@@ -885,11 +835,6 @@ router.patch(
   }
 );
 
-// =====================================================
-// OWNER: DECLINE REQUEST
-//
-// PATCH /api/authorizations/:authorizationId/decline
-// =====================================================
 
 router.patch(
   "/:authorizationId/decline",
@@ -978,7 +923,6 @@ router.patch(
         [authorizationId]
       );
 
-      // Notify clinic.
       await sendPushToUser({
         userId:
           authorization.clinic_user_id,
@@ -1021,11 +965,6 @@ router.patch(
   }
 );
 
-// =====================================================
-// OWNER: REVOKE APPROVED ACCESS
-//
-// PATCH /api/authorizations/:authorizationId/revoke
-// =====================================================
 
 router.patch(
   "/:authorizationId/revoke",
@@ -1114,7 +1053,6 @@ router.patch(
         [authorizationId]
       );
 
-      // Notify clinic.
       await sendPushToUser({
         userId:
           authorization.clinic_user_id,

@@ -119,7 +119,6 @@ export default function NotificationsScreen() {
     }, []);
 
 
-  // INITIAL LOAD
 
   useEffect(() => {
     loadNotifications();
@@ -325,7 +324,6 @@ export default function NotificationsScreen() {
     }
   };
 
-  // CONFIRM DELETE ONE
 
   const handleDeleteNotification = (
     notification: NotificationItem
@@ -461,7 +459,6 @@ export default function NotificationsScreen() {
     );
   };
 
-  // OPEN NOTIFICATION
 
   const handleNotificationPress = async (
     notification: NotificationItem
@@ -483,14 +480,12 @@ export default function NotificationsScreen() {
         router.push("/clinic-authorization");
         break;
 
-      // CLINIC ACCESS RESULT
       case "clinic_access_approved":
       case "clinic_access_declined":
       case "clinic_access_revoked":
         router.push("/clinic-dashboard");
         break;
 
-      // NEW VETERINARY RECORD
       case "vet_record_added":
         if (!notification.pet_id) {
           Alert.alert(
@@ -510,7 +505,6 @@ export default function NotificationsScreen() {
 
         break;
 
-      // LOST PET / QR SCAN
       case "pet_qr_scanned":
       case "lost_pet_scan":
         if (!notification.pet_id) {
@@ -532,7 +526,6 @@ export default function NotificationsScreen() {
         break;
 
 
-      // HEALTH SCHEDULS
       case "vaccination_reminder":
       case "deworming_reminder":
       case "health_reminder":
@@ -555,7 +548,6 @@ export default function NotificationsScreen() {
         break;
 
 
-      // DEFAULT
       default:
         console.log(
           "TIMAN: No navigation configured for notification type:",
@@ -653,7 +645,6 @@ export default function NotificationsScreen() {
   };
 
 
-  // UNREAD COUNT
   const unreadCount =
     notifications.filter(
       (item) => !item.is_read
@@ -687,7 +678,6 @@ export default function NotificationsScreen() {
     <SafeAreaView
       style={styles.container}
     >
-    {/* HEADER */}
 
     <View style={styles.header}>
       <View style={styles.headerContent}>
@@ -718,7 +708,6 @@ export default function NotificationsScreen() {
         }
       >
 
-        {/* SECTION HEADER */}
 
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
@@ -790,7 +779,6 @@ export default function NotificationsScreen() {
           </View>
         </View>
 
-        {/* EMPTY */}
 
         {notifications.length ===
           0 && (
@@ -810,13 +798,12 @@ export default function NotificationsScreen() {
             <Text
               style={styles.emptyTitle}
             >
-              You're all caught up
+              You&apos;re all caught up
             </Text>
 
           </View>
         )}
 
-        {/* NOTIFICATIONS */}
 
         {notifications.map(
           (notification) => (

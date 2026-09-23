@@ -10,10 +10,10 @@ const {
 
 const router = express.Router();
 
-// =====================================================
-// GET MY NOTIFICATIONS
-// GET /api/notifications
-// =====================================================
+
+
+
+
 
 router.get(
   "/",
@@ -79,10 +79,10 @@ router.get(
   }
 );
 
-// =====================================================
-// GET UNREAD NOTIFICATION COUNT
-// GET /api/notifications/unread-count
-// =====================================================
+
+
+
+
 
 router.get(
   "/unread-count",
@@ -124,10 +124,10 @@ router.get(
   }
 );
 
-// =====================================================
-// MARK ALL NOTIFICATIONS AS READ
-// PATCH /api/notifications/read-all
-// =====================================================
+
+
+
+
 
 router.patch(
   "/read-all",
@@ -170,10 +170,10 @@ router.patch(
   }
 );
 
-// =====================================================
-// MARK ONE NOTIFICATION AS READ
-// PATCH /api/notifications/:notificationId/read
-// =====================================================
+
+
+
+
 
 router.patch(
   "/:notificationId/read",
@@ -254,15 +254,15 @@ router.patch(
   }
 );
 
-// =====================================================
-// DELETE ALL READ NOTIFICATIONS
-//
-// IMPORTANT:
-// Keep this route BEFORE /:notificationId so Express
-// does not treat "read" as a notification ID.
-//
-// DELETE /api/notifications/read
-// =====================================================
+
+
+
+
+
+
+
+
+
 
 router.delete(
   "/read",
@@ -308,15 +308,6 @@ router.delete(
   }
 );
 
-// =====================================================
-// DELETE ONE READ NOTIFICATION
-//
-// The notification must:
-// 1. belong to the logged-in user
-// 2. already be marked as read
-//
-// DELETE /api/notifications/:notificationId
-// =====================================================
 
 router.delete(
   "/:notificationId",
@@ -331,9 +322,6 @@ router.delete(
           req.params.notificationId
         );
 
-      // ===============================================
-      // VALIDATE ID
-      // ===============================================
 
       if (
         !Number.isInteger(
@@ -348,9 +336,6 @@ router.delete(
         });
       }
 
-      // ===============================================
-      // FIND NOTIFICATION
-      // ===============================================
 
       const [rows] =
         await db.query(
@@ -377,9 +362,6 @@ router.delete(
         });
       }
 
-      // ===============================================
-      // ONLY READ NOTIFICATIONS CAN BE DELETED
-      // ===============================================
 
       if (!Boolean(rows[0].is_read)) {
         return res.status(400).json({
@@ -389,9 +371,6 @@ router.delete(
         });
       }
 
-      // ===============================================
-      // DELETE
-      // ===============================================
 
       const [result] =
         await db.query(
@@ -441,10 +420,6 @@ router.delete(
   }
 );
 
-// =====================================================
-// TEST SERVER-SIDE PUSH NOTIFICATION
-// POST /api/notifications/test-push
-// =====================================================
 
 router.post(
   "/test-push",

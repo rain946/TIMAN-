@@ -6,10 +6,10 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// =====================================================
-// GET CURRENT USER PROFILE
-// GET /api/profile
-// =====================================================
+
+
+
+
 
 router.get("/", authMiddleware, async (req, res) => {
   try {
@@ -54,10 +54,10 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-// =====================================================
-// UPDATE CURRENT USER PROFILE
-// PUT /api/profile
-// =====================================================
+
+
+
+
 
 router.put("/", authMiddleware, async (req, res) => {
   try {
@@ -81,9 +81,9 @@ router.put("/", authMiddleware, async (req, res) => {
       address || ""
     ).trim();
 
-    // =================================================
-    // VALIDATION
-    // =================================================
+    
+    
+    
 
     if (
       !cleanFullName ||
@@ -121,9 +121,9 @@ router.put("/", authMiddleware, async (req, res) => {
       });
     }
 
-    // =================================================
-    // CHECK USER
-    // =================================================
+    
+    
+    
 
     const [existingUsers] = await db.query(
       `
@@ -142,9 +142,9 @@ router.put("/", authMiddleware, async (req, res) => {
       });
     }
 
-    // =================================================
-    // UPDATE
-    // =================================================
+    
+    
+    
 
     await db.query(
       `
@@ -163,9 +163,9 @@ router.put("/", authMiddleware, async (req, res) => {
       ]
     );
 
-    // =================================================
-    // RETURN UPDATED PROFILE
-    // =================================================
+    
+    
+    
 
     const [updatedRows] = await db.query(
       `
@@ -201,10 +201,10 @@ router.put("/", authMiddleware, async (req, res) => {
   }
 });
 
-// =====================================================
-// CHANGE PASSWORD
-// PUT /api/profile/change-password
-// =====================================================
+
+
+
+
 
 router.put(
   "/change-password",
@@ -219,9 +219,9 @@ router.put(
         confirm_password,
       } = req.body;
 
-      // ===============================================
-      // REQUIRED FIELDS
-      // ===============================================
+      
+      
+      
 
       if (
         !current_password ||
@@ -235,9 +235,9 @@ router.put(
         });
       }
 
-      // ===============================================
-      // NEW PASSWORD VALIDATION
-      // ===============================================
+      
+      
+      
 
       if (new_password.length < 6) {
         return res.status(400).json({
@@ -263,9 +263,9 @@ router.put(
         });
       }
 
-      // ===============================================
-      // GET CURRENT PASSWORD HASH
-      // ===============================================
+      
+      
+      
 
       const [rows] = await db.query(
         `
@@ -288,9 +288,9 @@ router.put(
 
       const user = rows[0];
 
-      // ===============================================
-      // VERIFY CURRENT PASSWORD
-      // ===============================================
+      
+      
+      
 
       const passwordMatches =
         await bcrypt.compare(
@@ -306,16 +306,16 @@ router.put(
         });
       }
 
-      // ===============================================
-      // HASH NEW PASSWORD
-      // ===============================================
+      
+      
+      
 
       const hashedPassword =
         await bcrypt.hash(new_password, 10);
 
-      // ===============================================
-      // UPDATE PASSWORD
-      // ===============================================
+      
+      
+      
 
       await db.query(
         `

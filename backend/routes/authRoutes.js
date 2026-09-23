@@ -6,10 +6,10 @@ const db = require("../config/db");
 
 const router = express.Router();
 
-// ========================================
-// REGISTER
-// POST /api/auth/register
-// ========================================
+
+
+
+
 
 router.post("/register", async (req, res) => {
   try {
@@ -23,7 +23,7 @@ router.post("/register", async (req, res) => {
       clinicName,
     } = req.body;
 
-    // Required fields
+    
     if (
       !fullName ||
       !email ||
@@ -38,7 +38,7 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Valid role
+    
     if (!["owner", "clinic"].includes(role)) {
       return res.status(400).json({
         success: false,
@@ -46,7 +46,7 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Clinic name required
+    
     if (role === "clinic" && !clinicName) {
       return res.status(400).json({
         success: false,
@@ -54,7 +54,7 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Password length
+    
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -66,7 +66,7 @@ router.post("/register", async (req, res) => {
       .trim()
       .toLowerCase();
 
-    // Check existing email
+    
     const [existingUsers] = await db.query(
       "SELECT user_id FROM users WHERE email = ?",
       [normalizedEmail]
@@ -79,13 +79,13 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Hash password
+    
     const hashedPassword = await bcrypt.hash(
       password,
       10
     );
 
-    // Save user
+    
     const [result] = await db.query(
       `INSERT INTO users
       (
@@ -135,10 +135,10 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ========================================
-// LOGIN
-// POST /api/auth/login
-// ========================================
+
+
+
+
 
 router.post("/login", async (req, res) => {
   try {
@@ -155,7 +155,7 @@ router.post("/login", async (req, res) => {
       .trim()
       .toLowerCase();
 
-    // Find account
+    
     const [users] = await db.query(
       "SELECT * FROM users WHERE email = ?",
       [normalizedEmail]
@@ -170,7 +170,7 @@ router.post("/login", async (req, res) => {
 
     const user = users[0];
 
-    // Compare password
+    
     const passwordCorrect =
       await bcrypt.compare(
         password,
@@ -184,7 +184,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // JWT
+    
     const token = jwt.sign(
       {
         userId: user.user_id,

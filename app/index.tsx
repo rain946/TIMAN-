@@ -5,10 +5,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
-      {/* Decorative paw */}
       <Text style={styles.pawTop}>🐾</Text>
 
-      {/* APP NAME */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>TIMAN</Text>
 
@@ -17,7 +15,6 @@ export default function WelcomeScreen() {
         </Text>
       </View>
 
-      {/* PET IMAGE */}
       <View style={styles.imageContainer}>
         <View style={styles.greenShape} />
 
@@ -28,14 +25,12 @@ export default function WelcomeScreen() {
         />
       </View>
 
-      {/* TAGLINE */}
       <View style={styles.tagline}>
         <Text style={styles.taglineText}>
           Same QR. A Safer, Happier Life.
         </Text>
       </View>
 
-      {/* GET STARTED */}
       <Pressable
         style={({ pressed }) => [
           styles.button,
@@ -47,18 +42,22 @@ export default function WelcomeScreen() {
         <Text style={styles.arrow}>→</Text>
       </Pressable>
 
-      {/* LOGIN */}
       <View style={styles.loginContainer}>
         <Text style={styles.loginText}>
           Already have an account?{" "}
         </Text>
 
-        <Pressable onPress={() => router.push("/login")}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.loginAction,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={() => router.push("/login")}
+        >
           <Text style={styles.loginLink}>Log In</Text>
         </Pressable>
       </View>
 
-      {/* BOTTOM DECORATION */}
       <View style={styles.bottomDecoration}>
         <Text style={styles.bottomPaw}>🐾</Text>
         <Text style={styles.bottomHeart}>♡</Text>
@@ -187,6 +186,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     textDecorationLine: "underline",
+  },
+
+  loginAction: {
+    minHeight: 44,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   bottomDecoration: {

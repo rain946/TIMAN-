@@ -1,9 +1,7 @@
 const EXPO_PUSH_URL =
   "https://exp.host/--/api/v2/push/send";
 
-/**
- * Send one push notification through Expo Push Service.
- */
+
 async function sendExpoPushNotification({
   to,
   title,
