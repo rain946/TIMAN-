@@ -27,6 +27,9 @@ const notificationRoutes =
 
 const lostPetRoutes = require("./routes/lostPetRoutes");
 
+const clinicDashboardRoutes =
+  require("./routes/clinicDashboardRoutes");
+
 const {
   startReminderScheduler,
 } = require("./services/reminderScheduler");
@@ -101,6 +104,11 @@ app.use(
 app.use(
   "/api/profile",
   profileRoutes
+);
+
+app.use(
+  "/api/clinic-dashboard",
+  clinicDashboardRoutes
 );
 
 // Public pet profile routes

@@ -26,10 +26,11 @@ export function ClinicTabItem({
     <View style={styles.tabItemContent}>
       <Ionicons
         name={focused ? activeIcon : inactiveIcon}
-        size={25}
+        size={23}
         color={color}
       />
       <Text
+        numberOfLines={1}
         style={[
           styles.tabText,
           focused && styles.activeTabText,
@@ -65,7 +66,6 @@ export function ClinicScanTabButton({
       <View style={styles.scanButtonCircle}>
         <Ionicons name="scan" size={29} color="#FFFFFF" />
       </View>
-      <Text style={styles.scanTabLabel}>Scan</Text>
     </Pressable>
   );
 }
@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     justifyContent: "center",
+    minWidth: 64,
   },
   scanTabButton: {
     alignItems: "center",
@@ -113,19 +114,16 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     width: 60,
   },
-  scanTabLabel: {
-    color: "#176B3A",
-    fontSize: 14,
-    fontWeight: "700",
-    marginTop: 3,
-  },
   tabText: {
     color: "#89948E",
-    fontSize: 14,
-    fontWeight: "700",
+    fontSize: 10,
+    fontWeight: "600",
     marginTop: 4,
+    textAlign: "center",
+    width: 64,
   },
   activeTabText: {
     color: "#176B3A",
+    fontWeight: "800",
   },
 });

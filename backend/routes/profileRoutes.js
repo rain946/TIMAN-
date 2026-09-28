@@ -1,10 +1,59 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const fs = require("fs");
+const multer = require("multer");
+const path = require("path");
 
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+const uploadsRoot = path.join(__dirname, "..", "uploads");
+
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    const folder = req.user.role === "clinic" ? "clinics" : "owners";
+    const uploadDirectory = path.join(uploadsRoot, folder);
+    fs.mkdirSync(uploadDirectory, { recursive: true });
+    callback(null, uploadDirectory);
+  },
+  filename: (req, file, callback) => {
+    const extension = path.extname(file.originalname).toLowerCase() || ".jpg";
+    callback(null, `${Date.now()}-${crypto.randomUUID()}${extension}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, callback) => {
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    callback(
+      allowedTypes.includes(file.mimetype)
+        ? null
+        : new Error("Only JPG, PNG, and WEBP images are allowed."),
+      allowedTypes.includes(file.mimetype)
+    );
+  },
+});
+
+const deleteUploadedPhoto = (photoUrl) => {
+  if (!photoUrl || !photoUrl.startsWith("/uploads/")) return;
+
+  const relativePath = photoUrl.replace(/^\/uploads\//, "");
+  const resolvedPath = path.resolve(uploadsRoot, relativePath);
+  const resolvedRoot = path.resolve(uploadsRoot);
+
+  if (!resolvedPath.startsWith(`${resolvedRoot}${path.sep}`)) return;
+
+  fs.unlink(resolvedPath, (error) => {
+    if (error && error.code !== "ENOENT") {
+      console.error("DELETE PROFILE PHOTO ERROR:", error);
+    }
+  });
+};
 
 
 
@@ -25,6 +74,7 @@ router.get("/", authMiddleware, async (req, res) => {
           address,
           role,
           clinic_name,
+          profile_photo_url,
           created_at
         FROM users
         WHERE user_id = ?
@@ -206,6 +256,7 @@ router.put("/", authMiddleware, async (req, res) => {
           address,
           role,
           clinic_name,
+          profile_photo_url,
           created_at
         FROM users
         WHERE user_id = ?
@@ -229,6 +280,59 @@ router.put("/", authMiddleware, async (req, res) => {
     });
   }
 });
+
+router.put(
+  "/photo",
+  authMiddleware,
+  upload.single("photo"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Please select a profile photo.",
+        });
+      }
+
+      const userId = req.user.userId;
+      const folder = req.user.role === "clinic" ? "clinics" : "owners";
+      const photoUrl = `/uploads/${folder}/${req.file.filename}`;
+
+      const [users] = await db.query(
+        "SELECT profile_photo_url FROM users WHERE user_id = ? LIMIT 1",
+        [userId]
+      );
+
+      if (users.length === 0) {
+        deleteUploadedPhoto(photoUrl);
+        return res.status(404).json({
+          success: false,
+          message: "User profile not found.",
+        });
+      }
+
+      await db.query(
+        "UPDATE users SET profile_photo_url = ? WHERE user_id = ?",
+        [photoUrl, userId]
+      );
+
+      deleteUploadedPhoto(users[0].profile_photo_url);
+
+      return res.json({
+        success: true,
+        message: "Profile photo updated successfully.",
+        profile_photo_url: photoUrl,
+      });
+    } catch (error) {
+      if (req.file) deleteUploadedPhoto(`/uploads/${req.user.role === "clinic" ? "clinics" : "owners"}/${req.file.filename}`);
+      console.error("UPDATE PROFILE PHOTO ERROR:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to update profile photo.",
+      });
+    }
+  }
+);
 
 
 

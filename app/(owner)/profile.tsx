@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import EditProfileModal from "../../components/modals/EditProfileModal";
 import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
 
-import { API_URL } from "../../config/api";
+import { API_URL, getImageUrl } from "../../config/api";
 import { unregisterDevicePushToken } from "../../services/notificationService";
 
 
@@ -29,6 +29,7 @@ type OwnerProfile = {
   address: string;
   role: string;
   clinic_name?: string | null;
+  profile_photo_url?: string | null;
 };
 
 export default function ProfileScreen() {
@@ -93,11 +94,12 @@ export default function ProfileScreen() {
 
       setProfile(data.user);
 
-      const savedPhoto =
-        await AsyncStorage.getItem(
-          `owner_profile_photo_${data.user.user_id}`
-        );
-      setProfilePhoto(savedPhoto);
+      const savedPhoto = await AsyncStorage.getItem(
+        `owner_profile_photo_${data.user.user_id}`
+      );
+      setProfilePhoto(
+        getImageUrl(data.user.profile_photo_url) || savedPhoto
+      );
     } catch (error) {
       console.error(
         "LOAD PROFILE ERROR:",
@@ -140,12 +142,49 @@ export default function ProfileScreen() {
       return;
     }
 
-    const uri = result.assets[0].uri;
-    setProfilePhoto(uri);
-    await AsyncStorage.setItem(
-      `owner_profile_photo_${profile.user_id}`,
-      uri
-    );
+    const asset = result.assets[0];
+    const token = await AsyncStorage.getItem("token");
+
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("photo", {
+        uri: asset.uri,
+        name: asset.fileName || `owner-${profile.user_id}.jpg`,
+        type: asset.mimeType || "image/jpeg",
+      } as any);
+
+      const response = await fetch(`${API_URL}/profile/photo`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Unable to update profile photo.");
+      }
+
+      const photoUrl = getImageUrl(data.profile_photo_url) || asset.uri;
+      setProfilePhoto(photoUrl);
+      await AsyncStorage.setItem(
+        `owner_profile_photo_${profile.user_id}`,
+        photoUrl
+      );
+      setProfile((current) => current ? {
+        ...current,
+        profile_photo_url: data.profile_photo_url,
+      } : current);
+    } catch (error) {
+      Alert.alert(
+        "Upload Failed",
+        error instanceof Error ? error.message : "Unable to update profile photo."
+      );
+    }
   };
 
   const chooseProfilePhotoFromGallery = async () => {

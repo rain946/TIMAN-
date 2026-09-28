@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -16,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import ChangePasswordModal from "../../../components/modals/ChangePasswordModal";
 import EditProfileModal from "../../../components/modals/EditProfileModal";
-import { API_URL } from "../../../config/api";
+import { API_URL, getImageUrl } from "../../../config/api";
 import { unregisterDevicePushToken } from "../../../services/notificationService";
 
 type ClinicProfile = {
@@ -27,6 +29,7 @@ type ClinicProfile = {
   address: string;
   role: string;
   clinic_name?: string | null;
+  profile_photo_url?: string | null;
 };
 
 export default function ClinicProfileScreen() {
@@ -36,6 +39,8 @@ export default function ClinicProfileScreen() {
   const [error, setError] = useState(false);
   const [editProfileVisible, setEditProfileVisible] = useState(false);
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const requestInFlight = useRef(false);
 
   const loadProfile = useCallback(async (showLoading = true) => {
@@ -80,6 +85,7 @@ export default function ClinicProfileScreen() {
       }
 
       setProfile(data.user);
+      setProfilePhoto(getImageUrl(data.user.profile_photo_url));
     } catch (loadError) {
       console.log("CLINIC PROFILE LOAD ERROR:", loadError);
       setError(true);
@@ -99,6 +105,93 @@ export default function ClinicProfileScreen() {
   const handleProfileUpdated = (updatedProfile: ClinicProfile) => {
     setProfile(updatedProfile);
     void loadProfile(false);
+  };
+
+  const uploadProfilePhoto = async (result: ImagePicker.ImagePickerResult) => {
+    if (result.canceled || !result.assets[0]?.uri || !profile?.user_id) return;
+
+    const asset = result.assets[0];
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      const formData = new FormData();
+      formData.append("photo", {
+        uri: asset.uri,
+        name: asset.fileName || `clinic-${profile.user_id}.jpg`,
+        type: asset.mimeType || "image/jpeg",
+      } as any);
+
+      const response = await fetch(`${API_URL}/profile/photo`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Unable to update profile photo.");
+      }
+
+      setProfilePhoto(getImageUrl(data.profile_photo_url));
+      setProfile((current) => current ? {
+        ...current,
+        profile_photo_url: data.profile_photo_url,
+      } : current);
+    } catch (uploadError) {
+      Alert.alert(
+        "Upload Failed",
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Unable to update profile photo."
+      );
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const chooseFromGallery = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission Required", "Please allow TIMAN to access your photos.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    await uploadProfilePhoto(result);
+  };
+
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission Required", "Please allow TIMAN to use your camera.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    await uploadProfilePhoto(result);
+  };
+
+  const chooseProfilePhoto = () => {
+    Alert.alert("Clinic Photo", "Choose where to get your clinic photo.", [
+      { text: "Take Photo", onPress: () => void takePhoto() },
+      { text: "Choose from Gallery", onPress: () => void chooseFromGallery() },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   const handleLogout = () => {
@@ -184,11 +277,31 @@ export default function ClinicProfileScreen() {
           )}
 
           <View style={styles.identityCard}>
-            <View style={styles.clinicIconOuter}>
-              <View style={styles.clinicIconInner}>
-                <Ionicons name="medkit" size={38} color="#FFFFFF" />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change clinic profile photo"
+              disabled={uploadingPhoto}
+              onPress={chooseProfilePhoto}
+              style={({ pressed }) => [
+                styles.clinicIconOuter,
+                pressed && styles.pressed,
+              ]}
+            >
+              {profilePhoto ? (
+                <Image source={{ uri: profilePhoto }} style={styles.profileImage} />
+              ) : (
+                <View style={styles.clinicIconInner}>
+                  <Ionicons name="medkit" size={38} color="#FFFFFF" />
+                </View>
+              )}
+              <View style={styles.cameraButton}>
+                {uploadingPhoto ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Ionicons name="camera" size={15} color="#FFFFFF" />
+                )}
               </View>
-            </View>
+            </Pressable>
             <Text style={styles.clinicName} numberOfLines={2}>
               {profile?.clinic_name || profile?.full_name || "Veterinary Clinic"}
             </Text>
@@ -341,6 +454,8 @@ const styles = StyleSheet.create({
   identityCard: { minHeight: 232, borderRadius: 22, padding: 22, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", alignItems: "center" },
   clinicIconOuter: { width: 92, height: 92, borderRadius: 29, backgroundColor: "#E5F3E8", alignItems: "center", justifyContent: "center" },
   clinicIconInner: { width: 70, height: 70, borderRadius: 23, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  profileImage: { width: 92, height: 92, borderRadius: 29 },
+  cameraButton: { position: "absolute", right: -3, bottom: -2, width: 30, height: 30, borderRadius: 15, backgroundColor: "#176B3A", borderWidth: 2, borderColor: "#FFFFFF", alignItems: "center", justifyContent: "center" },
   clinicName: { maxWidth: 290, marginTop: 14, fontSize: 20, lineHeight: 26, fontWeight: "900", color: "#24352B", textAlign: "center" },
   roleBadge: { minHeight: 29, marginTop: 9, borderRadius: 10, paddingHorizontal: 10, backgroundColor: "#E5F3E8", flexDirection: "row", alignItems: "center", gap: 5 },
   roleBadgeText: { fontSize: 9, fontWeight: "900", color: "#176B3A" },

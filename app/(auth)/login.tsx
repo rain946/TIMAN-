@@ -667,22 +667,22 @@ const styles =
     },
 
     title: {
-      fontSize: 28,
+      fontSize: 30,
       fontWeight: "900",
       color: "#17251D",
     },
 
     subtitle: {
-      fontSize: 13,
+      fontSize: 16,
       color: "#68766E",
-      lineHeight: 20,
+      lineHeight: 23,
       textAlign: "center",
       marginTop: 7,
       paddingHorizontal: 15,
     },
 
     label: {
-      fontSize: 13,
+      fontSize: 16,
       fontWeight: "700",
       color: "#354B3E",
       marginBottom: 7,
@@ -705,7 +705,7 @@ const styles =
     input: {
       flex: 1,
       marginLeft: 11,
-      fontSize: 15,
+      fontSize: 17,
       color: "#17251D",
       paddingVertical: 15,
     },
@@ -728,7 +728,7 @@ const styles =
     },
 
     forgotText: {
-      fontSize: 12,
+      fontSize: 15,
       fontWeight: "700",
       color: "#176B3A",
     },
@@ -745,7 +745,7 @@ const styles =
 
     loginButtonText: {
       color: "#FFFFFF",
-      fontSize: 16,
+      fontSize: 18,
       fontWeight: "800",
     },
 
@@ -775,8 +775,8 @@ const styles =
 
     roleInfoText: {
       flex: 1,
-      fontSize: 9,
-      lineHeight: 15,
+      fontSize: 13,
+      lineHeight: 19,
       color: "#5E7164",
       marginLeft: 8,
     },
@@ -795,7 +795,7 @@ const styles =
     },
 
     dividerText: {
-      fontSize: 10,
+      fontSize: 13,
       color: "#8B958F",
       marginHorizontal: 10,
     },
@@ -815,7 +815,7 @@ const styles =
 
     createButtonText: {
       color: "#176B3A",
-      fontSize: 13,
+      fontSize: 16,
       fontWeight: "800",
     },
 
@@ -845,15 +845,15 @@ const styles =
     },
 
     securityTitle: {
-      fontSize: 10,
+      fontSize: 14,
       fontWeight: "800",
       color: "#294C34",
     },
 
     securityText: {
-      fontSize: 9,
+      fontSize: 13,
       color: "#718077",
-      lineHeight: 14,
+      lineHeight: 19,
       marginTop: 3,
     },
   });

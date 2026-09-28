@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     address VARCHAR(255) NOT NULL,
     role ENUM('owner', 'clinic') NOT NULL,
     clinic_name VARCHAR(150) NULL,
+    profile_photo_url VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

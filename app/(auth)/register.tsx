@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 27,
+    fontSize: 30,
     fontWeight: "800",
     color: "#17251D",
   },
@@ -682,12 +682,12 @@ const styles = StyleSheet.create({
     marginTop: 7,
     textAlign: "center",
     color: "#68766E",
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 23,
   },
 
   label: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#354B3E",
     fontWeight: "600",
     marginBottom: 10,
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
   },
 
   roleText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "700",
     color: "#176B3A",
   },
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     marginLeft: 11,
-    fontSize: 15,
+    fontSize: 17,
     color: "#17251D",
     paddingVertical: 15,
   },
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
 
   signUpText: {
     color: "#FFFFFF",
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: "700",
   },
 
@@ -784,12 +784,12 @@ const styles = StyleSheet.create({
 
   loginText: {
     color: "#68766E",
-    fontSize: 14,
+    fontSize: 16,
   },
 
   loginLink: {
     color: "#176B3A",
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "700",
     textDecorationLine:
       "underline",

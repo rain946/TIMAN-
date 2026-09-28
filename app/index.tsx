@@ -98,8 +98,8 @@ const styles = StyleSheet.create({
   subtitle: {
     marginTop: 5,
     textAlign: "center",
-    fontSize: 18,
-    lineHeight: 25,
+    fontSize: 20,
+    lineHeight: 28,
     color: "#194D33",
     fontWeight: "500",
   },
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
 
   taglineText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
     textAlign: "center",
   },
@@ -178,12 +178,12 @@ const styles = StyleSheet.create({
 
   loginText: {
     color: "#335C46",
-    fontSize: 14,
+    fontSize: 16,
   },
 
   loginLink: {
     color: "#145A32",
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "700",
     textDecorationLine: "underline",
   },
