@@ -13,8 +13,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PublicPetScreen() {
-
-
   const pet = {
     name: "Buddy",
     species: "Dog",
@@ -45,11 +43,11 @@ export default function PublicPetScreen() {
           onPress: () => {
             Alert.alert(
               "Report Sent",
-              `${pet.ownerName} has been notified that ${pet.name} was found.`
+              `${pet.ownerName} has been notified that ${pet.name} was found.`,
             );
           },
         },
-      ]
+      ],
     );
   };
 
@@ -63,23 +61,13 @@ export default function PublicPetScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons
-            name="chevron-back"
-            size={27}
-            color="#173D2A"
-          />
+          <Ionicons name="chevron-back" size={27} color="#173D2A" />
         </Pressable>
 
         <View style={styles.logoRow}>
-          <Ionicons
-            name="paw"
-            size={19}
-            color="#176B3A"
-          />
+          <Ionicons name="paw" size={19} color="#176B3A" />
 
-          <Text style={styles.logo}>
-            TIMAN
-          </Text>
+          <Text style={styles.logo}>TIMAN</Text>
         </View>
 
         <View style={styles.headerButton} />
@@ -90,20 +78,13 @@ export default function PublicPetScreen() {
         contentContainerStyle={styles.content}
       >
         <View style={styles.verifiedCard}>
-          <Ionicons
-            name="checkmark-circle"
-            size={22}
-            color="#267542"
-          />
+          <Ionicons name="checkmark-circle" size={22} color="#267542" />
 
           <View style={styles.verifiedContent}>
-            <Text style={styles.verifiedTitle}>
-              TIMAN Pet Profile
-            </Text>
+            <Text style={styles.verifiedTitle}>TIMAN Pet Profile</Text>
 
             <Text style={styles.verifiedText}>
-              This pet was identified using its
-              registered QR code.
+              This pet was identified using its registered QR code.
             </Text>
           </View>
         </View>
@@ -117,64 +98,40 @@ export default function PublicPetScreen() {
 
           {pet.status === "Missing" && (
             <View style={styles.missingBadge}>
-              <Ionicons
-                name="alert-circle"
-                size={15}
-                color="#FFFFFF"
-              />
+              <Ionicons name="alert-circle" size={15} color="#FFFFFF" />
 
-              <Text style={styles.missingBadgeText}>
-                MISSING
-              </Text>
+              <Text style={styles.missingBadgeText}>MISSING</Text>
             </View>
           )}
         </View>
 
         <View style={styles.petHeader}>
-          <Text style={styles.petName}>
-            {pet.name}
-          </Text>
+          <Text style={styles.petName}>{pet.name}</Text>
 
-          <Text style={styles.petBreed}>
-            {pet.breed}
-          </Text>
+          <Text style={styles.petBreed}>{pet.breed}</Text>
         </View>
 
         {pet.status === "Missing" && (
           <View style={styles.alertCard}>
             <View style={styles.alertIcon}>
-              <Ionicons
-                name="heart"
-                size={24}
-                color="#A14343"
-              />
+              <Ionicons name="heart" size={24} color="#A14343" />
             </View>
 
             <View style={styles.alertContent}>
-              <Text style={styles.alertTitle}>
-                Help Buddy Get Home
-              </Text>
+              <Text style={styles.alertTitle}>Help Buddy Get Home</Text>
 
               <Text style={styles.alertText}>
-                Buddy&apos;s owner has marked this pet as
-                missing. If you found Buddy, please
-                contact the owner or send a found
-                report below.
+                Buddy&apos;s owner has marked this pet as missing. If you found
+                Buddy, please contact the owner or send a found report below.
               </Text>
             </View>
           </View>
         )}
 
-        <Text style={styles.sectionTitle}>
-          About {pet.name}
-        </Text>
+        <Text style={styles.sectionTitle}>About {pet.name}</Text>
 
         <View style={styles.infoCard}>
-          <InfoRow
-            icon="paw-outline"
-            label="Species"
-            value={pet.species}
-          />
+          <InfoRow icon="paw-outline" label="Species" value={pet.species} />
 
           <Divider />
 
@@ -186,11 +143,7 @@ export default function PublicPetScreen() {
 
           <Divider />
 
-          <InfoRow
-            icon="male-outline"
-            label="Sex"
-            value={pet.sex}
-          />
+          <InfoRow icon="male-outline" label="Sex" value={pet.sex} />
 
           <Divider />
 
@@ -201,61 +154,37 @@ export default function PublicPetScreen() {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>
-          Identifying Marks
-        </Text>
+        <Text style={styles.sectionTitle}>Identifying Marks</Text>
 
         <View style={styles.markCard}>
-          <Ionicons
-            name="search-outline"
-            size={22}
-            color="#176B3A"
-          />
+          <Ionicons name="search-outline" size={22} color="#176B3A" />
 
-          <Text style={styles.markText}>
-            {pet.identifyingMarks}
-          </Text>
+          <Text style={styles.markText}>{pet.identifyingMarks}</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>
-          Pet Owner
-        </Text>
+        <Text style={styles.sectionTitle}>Pet Owner</Text>
 
         <View style={styles.ownerCard}>
           <View style={styles.ownerAvatar}>
-            <Ionicons
-              name="person-outline"
-              size={24}
-              color="#176B3A"
-            />
+            <Ionicons name="person-outline" size={24} color="#176B3A" />
           </View>
 
           <View style={styles.ownerInfo}>
-            <Text style={styles.ownerLabel}>
-              Owner
-            </Text>
+            <Text style={styles.ownerLabel}>Owner</Text>
 
-            <Text style={styles.ownerName}>
-              {pet.ownerName}
-            </Text>
+            <Text style={styles.ownerName}>{pet.ownerName}</Text>
 
             <Text style={styles.ownerPrivacy}>
               Limited information shown for privacy
             </Text>
           </View>
 
-          <Ionicons
-            name="shield-checkmark-outline"
-            size={21}
-            color="#176B3A"
-          />
+          <Ionicons name="shield-checkmark-outline" size={21} color="#176B3A" />
         </View>
 
         {pet.status === "Missing" && (
           <>
-            <Text style={styles.sectionTitle}>
-              Found This Pet?
-            </Text>
+            <Text style={styles.sectionTitle}>Found This Pet?</Text>
 
             <Pressable
               style={({ pressed }) => [
@@ -264,15 +193,9 @@ export default function PublicPetScreen() {
               ]}
               onPress={handleContactOwner}
             >
-              <Ionicons
-                name="call-outline"
-                size={21}
-                color="#FFFFFF"
-              />
+              <Ionicons name="call-outline" size={21} color="#FFFFFF" />
 
-              <Text style={styles.contactButtonText}>
-                Contact Owner
-              </Text>
+              <Text style={styles.contactButtonText}>Contact Owner</Text>
             </Pressable>
 
             <Pressable
@@ -282,43 +205,28 @@ export default function PublicPetScreen() {
               ]}
               onPress={handleReportFound}
             >
-              <Ionicons
-                name="location-outline"
-                size={21}
-                color="#176B3A"
-              />
+              <Ionicons name="location-outline" size={21} color="#176B3A" />
 
-              <Text style={styles.foundButtonText}>
-                Report Pet Found
-              </Text>
+              <Text style={styles.foundButtonText}>Report Pet Found</Text>
             </Pressable>
           </>
         )}
 
         <View style={styles.privacyCard}>
-          <Ionicons
-            name="lock-closed-outline"
-            size={20}
-            color="#176B3A"
-          />
+          <Ionicons name="lock-closed-outline" size={20} color="#176B3A" />
 
           <View style={styles.privacyContent}>
-            <Text style={styles.privacyTitle}>
-              Privacy Protected
-            </Text>
+            <Text style={styles.privacyTitle}>Privacy Protected</Text>
 
             <Text style={styles.privacyText}>
-              Only limited pet and owner information
-              is displayed publicly. Veterinary and
-              private account information is not
-              available on this page.
+              Only limited pet and owner information is displayed publicly.
+              Veterinary and private account information is not available on
+              this page.
             </Text>
           </View>
         </View>
 
-        <Text style={styles.footer}>
-          Powered by TIMAN
-        </Text>
+        <Text style={styles.footer}>Powered by TIMAN</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -336,20 +244,12 @@ function InfoRow({
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoIcon}>
-        <Ionicons
-          name={icon}
-          size={18}
-          color="#176B3A"
-        />
+        <Ionicons name={icon} size={18} color="#176B3A" />
       </View>
 
-      <Text style={styles.infoLabel}>
-        {label}
-      </Text>
+      <Text style={styles.infoLabel}>{label}</Text>
 
-      <Text style={styles.infoValue}>
-        {value}
-      </Text>
+      <Text style={styles.infoValue}>{value}</Text>
     </View>
   );
 }

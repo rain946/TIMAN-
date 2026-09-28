@@ -20,7 +20,6 @@ import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
 import { API_URL, getImageUrl } from "../../config/api";
 import { unregisterDevicePushToken } from "../../services/notificationService";
 
-
 type OwnerProfile = {
   user_id: number;
   full_name: string;
@@ -33,112 +32,70 @@ type OwnerProfile = {
 };
 
 export default function ProfileScreen() {
-  const [profile, setProfile] =
-    useState<OwnerProfile | null>(null);
+  const [profile, setProfile] = useState<OwnerProfile | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
-  const [profilePhoto, setProfilePhoto] =
-    useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
 
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
 
-  const [
-    editProfileVisible,
-    setEditProfileVisible,
-  ] = useState(false);
-
-
-  const [
-    changePasswordVisible,
-    setChangePasswordVisible,
-  ] = useState(false);
-
-
-
-
+  const [changePasswordVisible, setChangePasswordVisible] = useState(false);
 
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
 
-      const token =
-        await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/profile`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(
-          data.message ||
-            "Unable to load profile."
-        );
+        throw new Error(data.message || "Unable to load profile.");
       }
 
       setProfile(data.user);
 
       const savedPhoto = await AsyncStorage.getItem(
-        `owner_profile_photo_${data.user.user_id}`
+        `owner_profile_photo_${data.user.user_id}`,
       );
-      setProfilePhoto(
-        getImageUrl(data.user.profile_photo_url) || savedPhoto
-      );
+      setProfilePhoto(getImageUrl(data.user.profile_photo_url) || savedPhoto);
     } catch (error) {
-      console.error(
-        "LOAD PROFILE ERROR:",
-        error
-      );
+      console.error("LOAD PROFILE ERROR:", error);
 
       Alert.alert(
         "Profile Error",
-        error instanceof Error
-          ? error.message
-          : "Unable to load profile."
+        error instanceof Error ? error.message : "Unable to load profile.",
       );
     } finally {
       setLoading(false);
     }
   }, []);
 
-
   useFocusEffect(
     useCallback(() => {
       loadProfile();
-    }, [loadProfile])
+    }, [loadProfile]),
   );
 
-
-  const handleProfileUpdated = (
-    updatedProfile: OwnerProfile
-  ) => {
+  const handleProfileUpdated = (updatedProfile: OwnerProfile) => {
     setProfile(updatedProfile);
   };
 
-  const saveProfilePhoto = async (
-    result: ImagePicker.ImagePickerResult
-  ) => {
-    if (
-      result.canceled ||
-      !result.assets[0]?.uri ||
-      !profile?.user_id
-    ) {
+  const saveProfilePhoto = async (result: ImagePicker.ImagePickerResult) => {
+    if (result.canceled || !result.assets[0]?.uri || !profile?.user_id) {
       return;
     }
 
@@ -173,51 +130,54 @@ export default function ProfileScreen() {
       setProfilePhoto(photoUrl);
       await AsyncStorage.setItem(
         `owner_profile_photo_${profile.user_id}`,
-        photoUrl
+        photoUrl,
       );
-      setProfile((current) => current ? {
-        ...current,
-        profile_photo_url: data.profile_photo_url,
-      } : current);
+      setProfile((current) =>
+        current
+          ? {
+              ...current,
+              profile_photo_url: data.profile_photo_url,
+            }
+          : current,
+      );
     } catch (error) {
       Alert.alert(
         "Upload Failed",
-        error instanceof Error ? error.message : "Unable to update profile photo."
+        error instanceof Error
+          ? error.message
+          : "Unable to update profile photo.",
       );
     }
   };
 
   const chooseProfilePhotoFromGallery = async () => {
-    const permission =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
       Alert.alert(
         "Permission Required",
-        "Please allow TIMAN to access your photos."
+        "Please allow TIMAN to access your photos.",
       );
       return;
     }
 
-    const result =
-      await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
 
     await saveProfilePhoto(result);
   };
 
   const takeProfilePhoto = async () => {
-    const permission =
-      await ImagePicker.requestCameraPermissionsAsync();
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permission.granted) {
       Alert.alert(
         "Permission Required",
-        "Please allow TIMAN to use your camera."
+        "Please allow TIMAN to use your camera.",
       );
       return;
     }
@@ -233,95 +193,75 @@ export default function ProfileScreen() {
   };
 
   const chooseProfilePhoto = () => {
-    Alert.alert(
-      "Profile Photo",
-      "Choose where to get your profile photo.",
-      [
-        {
-          text: "Take Photo",
-          onPress: () => {
-            void takeProfilePhoto();
-          },
+    Alert.alert("Profile Photo", "Choose where to get your profile photo.", [
+      {
+        text: "Take Photo",
+        onPress: () => {
+          void takeProfilePhoto();
         },
-        {
-          text: "Choose from Gallery",
-          onPress: () => {
-            void chooseProfilePhotoFromGallery();
-          },
+      },
+      {
+        text: "Choose from Gallery",
+        onPress: () => {
+          void chooseProfilePhotoFromGallery();
         },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ]
-    );
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      "Log Out",
-      "Are you sure you want to log out of TIMAN?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
+    Alert.alert("Log Out", "Are you sure you want to log out of TIMAN?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await unregisterDevicePushToken();
+
+            await AsyncStorage.multiRemove([
+              "token",
+              "user",
+              "timan_expo_push_token",
+            ]);
+
+            router.replace("/login");
+          } catch (error) {
+            console.error("LOGOUT ERROR:", error);
+
+            Alert.alert(
+              "Log Out Failed",
+              "Unable to log out. Please try again.",
+            );
+          }
         },
-        {
-          text: "Log Out",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await unregisterDevicePushToken();
-
-              await AsyncStorage.multiRemove([
-                "token",
-                "user",
-                "timan_expo_push_token",
-              ]);
-
-              router.replace("/login");
-            } catch (error) {
-              console.error(
-                "LOGOUT ERROR:",
-                error
-              );
-
-              Alert.alert(
-                "Log Out Failed",
-                "Unable to log out. Please try again."
-              );
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
-
 
   if (loading && !profile) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text style={styles.loadingProfileText}>
-            Loading profile...
-          </Text>
+          <Text style={styles.loadingProfileText}>Loading profile...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>
-          Profile
-        </Text>
+        <Text style={styles.headerTitle}>Profile</Text>
       </View>
 
       <ScrollView
@@ -331,10 +271,7 @@ export default function ProfileScreen() {
         <View style={styles.profileCard}>
           <Pressable
             onPress={chooseProfilePhoto}
-            style={({ pressed }) => [
-              styles.avatar,
-              pressed && styles.pressed,
-            ]}
+            style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}
           >
             {profilePhoto ? (
               <Image
@@ -342,19 +279,11 @@ export default function ProfileScreen() {
                 style={styles.avatarImage}
               />
             ) : (
-              <Ionicons
-                name="person"
-                size={42}
-                color="#176B3A"
-              />
+              <Ionicons name="person" size={42} color="#176B3A" />
             )}
 
             <View style={styles.cameraButton}>
-              <Ionicons
-                name="camera"
-                size={15}
-                color="#FFFFFF"
-              />
+              <Ionicons name="camera" size={15} color="#FFFFFF" />
             </View>
           </Pressable>
 
@@ -363,21 +292,13 @@ export default function ProfileScreen() {
           </Text>
 
           <View style={styles.ownerBadge}>
-            <Ionicons
-              name="paw"
-              size={14}
-              color="#267542"
-            />
+            <Ionicons name="paw" size={14} color="#267542" />
 
-            <Text style={styles.ownerBadgeText}>
-              Pet Owner
-            </Text>
+            <Text style={styles.ownerBadgeText}>Pet Owner</Text>
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>
-          Account Information
-        </Text>
+        <Text style={styles.sectionTitle}>Account Information</Text>
 
         <View style={styles.infoCard}>
           <InfoRow
@@ -411,18 +332,14 @@ export default function ProfileScreen() {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>
-          Account
-        </Text>
+        <Text style={styles.sectionTitle}>Account</Text>
 
         <View style={styles.menuCard}>
           <MenuItem
             icon="create-outline"
             title="Edit Profile"
             description="Update your personal information"
-            onPress={() =>
-              setEditProfileVisible(true)
-            }
+            onPress={() => setEditProfileVisible(true)}
           />
 
           <MenuDivider />
@@ -431,19 +348,13 @@ export default function ProfileScreen() {
             icon="lock-closed-outline"
             title="Change Password"
             description="Update your account password"
-            onPress={() =>
-              setChangePasswordVisible(true)
-            }
+            onPress={() => setChangePasswordVisible(true)}
           />
         </View>
 
         <View style={styles.securityCard}>
           <View style={styles.securityIcon}>
-            <Ionicons
-              name="shield-checkmark"
-              size={25}
-              color="#176B3A"
-            />
+            <Ionicons name="shield-checkmark" size={25} color="#176B3A" />
           </View>
 
           <View style={styles.securityContent}>
@@ -452,10 +363,9 @@ export default function ProfileScreen() {
             </Text>
 
             <Text style={styles.securityText}>
-              TIMAN only displays limited owner
-              information on a pet&apos;s public QR
-              profile. Private account and veterinary
-              information is not publicly shown.
+              TIMAN only displays limited owner information on a pet&apos;s
+              public QR profile. Private account and veterinary information is
+              not publicly shown.
             </Text>
           </View>
         </View>
@@ -467,53 +377,33 @@ export default function ProfileScreen() {
           ]}
           onPress={handleLogout}
         >
-          <Ionicons
-            name="log-out-outline"
-            size={21}
-            color="#A14343"
-          />
+          <Ionicons name="log-out-outline" size={21} color="#A14343" />
 
-          <Text style={styles.logoutText}>
-            Log Out
-          </Text>
+          <Text style={styles.logoutText}>Log Out</Text>
         </Pressable>
 
         <View style={styles.appInfo}>
           <View style={styles.appLogo}>
-            <Ionicons
-              name="paw"
-              size={19}
-              color="#176B3A"
-            />
+            <Ionicons name="paw" size={19} color="#176B3A" />
 
-            <Text style={styles.appName}>
-              TIMAN
-            </Text>
+            <Text style={styles.appName}>TIMAN</Text>
           </View>
 
-          <Text style={styles.version}>
-            Version 1.0.0
-          </Text>
+          <Text style={styles.version}>Version 1.0.0</Text>
         </View>
       </ScrollView>
-
 
       <EditProfileModal
         visible={editProfileVisible}
         profile={profile}
-        onClose={() =>
-          setEditProfileVisible(false)
-        }
+        onClose={() => setEditProfileVisible(false)}
         onUpdated={handleProfileUpdated}
       />
 
       <ChangePasswordModal
         visible={changePasswordVisible}
-        onClose={() =>
-          setChangePasswordVisible(false)
-        }
+        onClose={() => setChangePasswordVisible(false)}
       />
-
     </SafeAreaView>
   );
 }
@@ -530,21 +420,13 @@ function InfoRow({
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoIcon}>
-        <Ionicons
-          name={icon}
-          size={18}
-          color="#176B3A"
-        />
+        <Ionicons name={icon} size={18} color="#176B3A" />
       </View>
 
       <View style={styles.infoContent}>
-        <Text style={styles.infoLabel}>
-          {label}
-        </Text>
+        <Text style={styles.infoLabel}>{label}</Text>
 
-        <Text style={styles.infoValue}>
-          {value}
-        </Text>
+        <Text style={styles.infoValue}>{value}</Text>
       </View>
     </View>
   );
@@ -563,35 +445,20 @@ function MenuItem({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.menuItem,
-        pressed && styles.menuPressed,
-      ]}
+      style={({ pressed }) => [styles.menuItem, pressed && styles.menuPressed]}
       onPress={onPress}
     >
       <View style={styles.menuIcon}>
-        <Ionicons
-          name={icon}
-          size={21}
-          color="#176B3A"
-        />
+        <Ionicons name={icon} size={21} color="#176B3A" />
       </View>
 
       <View style={styles.menuContent}>
-        <Text style={styles.menuTitle}>
-          {title}
-        </Text>
+        <Text style={styles.menuTitle}>{title}</Text>
 
-        <Text style={styles.menuDescription}>
-          {description}
-        </Text>
+        <Text style={styles.menuDescription}>{description}</Text>
       </View>
 
-      <Ionicons
-        name="chevron-forward"
-        size={18}
-        color="#A0AAA4"
-      />
+      <Ionicons name="chevron-forward" size={18} color="#A0AAA4" />
     </Pressable>
   );
 }

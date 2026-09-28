@@ -1,10 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 
 import {
@@ -20,14 +16,7 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  API_URL,
-  getImageUrl,
-} from "../../config/api";
-
-
-
-
+import { API_URL, getImageUrl } from "../../config/api";
 
 type AuthorizationStatus =
   | "None"
@@ -48,10 +37,6 @@ type Pet = {
   pet_status: "Safe" | "Missing" | "Found";
 };
 
-
-
-
-
 export default function ClinicPetScreen() {
   const params = useLocalSearchParams<{
     petId?: string;
@@ -60,41 +45,26 @@ export default function ClinicPetScreen() {
 
   const petId = params.petId;
 
-  const [pet, setPet] =
-    useState<Pet | null>(null);
+  const [pet, setPet] = useState<Pet | null>(null);
 
-  const [status, setStatus] =
-    useState<AuthorizationStatus>(
-      normalizeStatus(
-        params.authorizationStatus
-      )
-    );
+  const [status, setStatus] = useState<AuthorizationStatus>(
+    normalizeStatus(params.authorizationStatus),
+  );
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [requesting, setRequesting] =
-    useState(false);
-
-
-
-
+  const [requesting, setRequesting] = useState(false);
 
   const loadPet = useCallback(async () => {
     if (!petId) {
       setLoading(false);
 
-      Alert.alert(
-        "Pet Error",
-        "No pet was selected.",
-        [
-          {
-            text: "OK",
-            onPress: () =>
-              router.back(),
-          },
-        ]
-      );
+      Alert.alert("Pet Error", "No pet was selected.", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
 
       return;
     }
@@ -102,67 +72,46 @@ export default function ClinicPetScreen() {
     try {
       setLoading(true);
 
-      const token =
-        await AsyncStorage.getItem(
-          "token"
-        );
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
 
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/authorizations/check/${petId}`,
-        {
-          method: "GET",
+      const response = await fetch(`${API_URL}/authorizations/check/${petId}`, {
+        method: "GET",
 
-          headers: {
-            Accept:
-              "application/json",
+        headers: {
+          Accept: "application/json",
 
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
-      );
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const text =
-        await response.text();
+      const text = await response.text();
 
       let data: any = {};
 
       try {
-        data = text
-          ? JSON.parse(text)
-          : {};
+        data = text ? JSON.parse(text) : {};
       } catch {
         data = {
           message: text,
         };
       }
 
-      console.log(
-        "CLINIC PET STATUS:",
-        response.status
-      );
+      console.log("CLINIC PET STATUS:", response.status);
 
-      console.log(
-        "CLINIC PET RESPONSE:",
-        data
-      );
+      console.log("CLINIC PET RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
           "Unable to Load Pet",
-          data.message ||
-            "Unable to load pet information."
+          data.message || "Unable to load pet information.",
         );
 
         return;
@@ -170,35 +119,23 @@ export default function ClinicPetScreen() {
 
       setPet(data.pet);
 
-      setStatus(
-        normalizeStatus(
-          data.status
-        )
-      );
+      setStatus(normalizeStatus(data.status));
     } catch (error) {
-      console.log(
-        "CLINIC PET ERROR:",
-        error
-      );
+      console.log("CLINIC PET ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     } finally {
       setLoading(false);
     }
   }, [petId]);
-
 
   useFocusEffect(
     useCallback(() => {
       loadPet();
 
       return () => {};
-    }, [loadPet])
+    }, [loadPet]),
   );
-
 
   const requestAccess = async () => {
     if (!petId || requesting) {
@@ -208,16 +145,10 @@ export default function ClinicPetScreen() {
     try {
       setRequesting(true);
 
-      const token =
-        await AsyncStorage.getItem(
-          "token"
-        );
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
 
@@ -230,54 +161,35 @@ export default function ClinicPetScreen() {
           method: "POST",
 
           headers: {
-            Accept:
-              "application/json",
+            Accept: "application/json",
 
-            Authorization:
-              `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      const text =
-        await response.text();
+      const text = await response.text();
 
       let data: any = {};
 
       try {
-        data = text
-          ? JSON.parse(text)
-          : {};
+        data = text ? JSON.parse(text) : {};
       } catch {
         data = {
           message: text,
         };
       }
 
-      console.log(
-        "REQUEST ACCESS STATUS:",
-        response.status
-      );
+      console.log("REQUEST ACCESS STATUS:", response.status);
 
-      console.log(
-        "REQUEST ACCESS RESPONSE:",
-        data
-      );
+      console.log("REQUEST ACCESS RESPONSE:", data);
 
-      if (
-        response.status === 409 &&
-        data.status
-      ) {
-        setStatus(
-          normalizeStatus(
-            data.status
-          )
-        );
+      if (response.status === 409 && data.status) {
+        setStatus(normalizeStatus(data.status));
 
         Alert.alert(
           "Clinic Access",
-          data.message ||
-            "Authorization already exists."
+          data.message || "Authorization already exists.",
         );
 
         return;
@@ -286,8 +198,7 @@ export default function ClinicPetScreen() {
       if (!response.ok) {
         Alert.alert(
           "Request Failed",
-          data.message ||
-            "Unable to request access."
+          data.message || "Unable to request access.",
         );
 
         return;
@@ -297,73 +208,45 @@ export default function ClinicPetScreen() {
 
       Alert.alert(
         "Request Sent",
-        "The pet owner must approve your clinic before veterinary records can be accessed."
+        "The pet owner must approve your clinic before veterinary records can be accessed.",
       );
     } catch (error) {
-      console.log(
-        "REQUEST ACCESS ERROR:",
-        error
-      );
+      console.log("REQUEST ACCESS ERROR:", error);
 
       Alert.alert(
         "Connection Error",
-        "Unable to send the authorization request."
+        "Unable to send the authorization request.",
       );
     } finally {
       setRequesting(false);
     }
   };
 
-
   if (loading) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
+      <SafeAreaView style={styles.container}>
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text
-            style={styles.loadingText}
-          >
-            Checking clinic access...
-          </Text>
+          <Text style={styles.loadingText}>Checking clinic access...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-
   if (!pet) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
+      <SafeAreaView style={styles.container}>
         <Header />
 
         <View style={styles.center}>
-          <Ionicons
-            name="paw-outline"
-            size={65}
-            color="#92A097"
-          />
+          <Ionicons name="paw-outline" size={65} color="#92A097" />
 
-          <Text
-            style={styles.errorTitle}
-          >
-            Pet unavailable
-          </Text>
+          <Text style={styles.errorTitle}>Pet unavailable</Text>
 
-          <Text
-            style={styles.errorText}
-          >
-            Unable to load this pet.
-          </Text>
+          <Text style={styles.errorText}>Unable to load this pet.</Text>
 
           <Pressable
             style={({ pressed }) => [
@@ -372,61 +255,34 @@ export default function ClinicPetScreen() {
             ]}
             onPress={loadPet}
           >
-            <Text
-              style={styles.retryText}
-            >
-              Try Again
-            </Text>
+            <Text style={styles.retryText}>Try Again</Text>
           </Pressable>
         </View>
       </SafeAreaView>
     );
   }
 
+  const photoUrl = getImageUrl(pet.photo_url);
 
-  const photoUrl =
-    getImageUrl(pet.photo_url);
+  const petCode = `PET-${String(pet.pet_id).padStart(4, "0")}`;
 
-  const petCode =
-    `PET-${String(
-      pet.pet_id
-    ).padStart(4, "0")}`;
+  const approved = status === "Approved";
 
-  const approved =
-    status === "Approved";
-
-  const pending =
-    status === "Pending";
+  const pending = status === "Pending";
 
   const canRequest =
-    status === "None" ||
-    status === "Declined" ||
-    status === "Revoked";
-
+    status === "None" || status === "Declined" || status === "Revoked";
 
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
+    <SafeAreaView style={styles.container}>
       <Header />
 
       <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={
-          styles.content
-        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
       >
-
-        <View
-          style={styles.petCard}
-        >
-          <View
-            style={
-              styles.photoContainer
-            }
-          >
+        <View style={styles.petCard}>
+          <View style={styles.photoContainer}>
             {photoUrl ? (
               <Image
                 source={{
@@ -436,63 +292,34 @@ export default function ClinicPetScreen() {
                 resizeMode="cover"
               />
             ) : (
-              <View
-                style={
-                  styles.photoPlaceholder
-                }
-              >
-                <Ionicons
-                  name="paw"
-                  size={40}
-                  color="#7DA28A"
-                />
+              <View style={styles.photoPlaceholder}>
+                <Ionicons name="paw" size={40} color="#7DA28A" />
               </View>
             )}
           </View>
 
-          <Text
-            style={styles.petName}
-          >
-            {pet.pet_name}
-          </Text>
+          <Text style={styles.petName}>{pet.pet_name}</Text>
 
-          <Text
-            style={styles.petBreed}
-          >
-            {pet.breed ||
-              pet.species}
-          </Text>
+          <Text style={styles.petBreed}>{pet.breed || pet.species}</Text>
 
-          <Text
-            style={styles.petCode}
-          >
-            {petCode}
-          </Text>
+          <Text style={styles.petCode}>{petCode}</Text>
 
           <View
             style={[
               styles.petStatus,
 
-              pet.pet_status ===
-                "Missing" &&
-                styles.petMissing,
+              pet.pet_status === "Missing" && styles.petMissing,
 
-              pet.pet_status ===
-                "Found" &&
-                styles.petFound,
+              pet.pet_status === "Found" && styles.petFound,
             ]}
           >
             <View
               style={[
                 styles.petStatusDot,
 
-                pet.pet_status ===
-                  "Missing" &&
-                  styles.petMissingDot,
+                pet.pet_status === "Missing" && styles.petMissingDot,
 
-                pet.pet_status ===
-                  "Found" &&
-                  styles.petFoundDot,
+                pet.pet_status === "Found" && styles.petFoundDot,
               ]}
             />
 
@@ -500,13 +327,9 @@ export default function ClinicPetScreen() {
               style={[
                 styles.petStatusText,
 
-                pet.pet_status ===
-                  "Missing" &&
-                  styles.petMissingText,
+                pet.pet_status === "Missing" && styles.petMissingText,
 
-                pet.pet_status ===
-                  "Found" &&
-                  styles.petFoundText,
+                pet.pet_status === "Found" && styles.petFoundText,
               ]}
             >
               {pet.pet_status}
@@ -514,78 +337,35 @@ export default function ClinicPetScreen() {
           </View>
         </View>
 
+        <Text style={styles.sectionTitle}>Clinic Access</Text>
 
-        <Text
-          style={styles.sectionTitle}
-        >
-          Clinic Access
-        </Text>
-
-        <AuthorizationCard
-          status={status}
-        />
-
+        <AuthorizationCard status={status} />
 
         {canRequest && (
-          <View
-            style={styles.requestCard}
-          >
-            <View
-              style={
-                styles.requestIcon
-              }
-            >
-              <Ionicons
-                name="shield-outline"
-                size={29}
-                color="#176B3A"
-              />
+          <View style={styles.requestCard}>
+            <View style={styles.requestIcon}>
+              <Ionicons name="shield-outline" size={29} color="#176B3A" />
             </View>
 
-            <Text
-              style={
-                styles.requestTitle
-              }
-            >
-              Owner Authorization
-              Required
+            <Text style={styles.requestTitle}>
+              Owner Authorization Required
             </Text>
 
-            <Text
-              style={
-                styles.requestDescription
-              }
-            >
-              The pet owner must
-              approve this clinic
-              before veterinary
-              records can be viewed
-              or updated.
+            <Text style={styles.requestDescription}>
+              The pet owner must approve this clinic before veterinary records
+              can be viewed or updated.
             </Text>
 
-            {(status ===
-              "Declined" ||
-              status ===
-                "Revoked") && (
-              <View
-                style={
-                  styles.previousStatus
-                }
-              >
+            {(status === "Declined" || status === "Revoked") && (
+              <View style={styles.previousStatus}>
                 <Ionicons
                   name="information-circle-outline"
                   size={17}
                   color="#8A6B22"
                 />
 
-                <Text
-                  style={
-                    styles.previousStatusText
-                  }
-                >
-                  Previous access was{" "}
-                  {status.toLowerCase()}.
-                  You may send a new
+                <Text style={styles.previousStatusText}>
+                  Previous access was {status.toLowerCase()}. You may send a new
                   request to the owner.
                 </Text>
               </View>
@@ -593,25 +373,17 @@ export default function ClinicPetScreen() {
 
             <Pressable
               disabled={requesting}
-              style={({
-                pressed,
-              }) => [
+              style={({ pressed }) => [
                 styles.requestButton,
 
-                pressed &&
-                  !requesting &&
-                  styles.pressed,
+                pressed && !requesting && styles.pressed,
 
-                requesting &&
-                  styles.disabledButton,
+                requesting && styles.disabledButton,
               ]}
               onPress={requestAccess}
             >
               {requesting ? (
-                <ActivityIndicator
-                  size="small"
-                  color="#FFFFFF"
-                />
+                <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
                   <Ionicons
@@ -620,13 +392,8 @@ export default function ClinicPetScreen() {
                     color="#FFFFFF"
                   />
 
-                  <Text
-                    style={
-                      styles.requestButtonText
-                    }
-                  >
-                    {status ===
-                      "None"
+                  <Text style={styles.requestButtonText}>
+                    {status === "None"
                       ? "Request Access"
                       : "Request Access Again"}
                   </Text>
@@ -636,133 +403,62 @@ export default function ClinicPetScreen() {
           </View>
         )}
 
-
         {pending && (
-          <View
-            style={styles.pendingCard}
-          >
-            <View
-              style={
-                styles.pendingIcon
-              }
-            >
-              <Ionicons
-                name="time-outline"
-                size={31}
-                color="#98701C"
-              />
+          <View style={styles.pendingCard}>
+            <View style={styles.pendingIcon}>
+              <Ionicons name="time-outline" size={31} color="#98701C" />
             </View>
 
-            <Text
-              style={
-                styles.pendingTitle
-              }
-            >
-              Waiting for Owner
-            </Text>
+            <Text style={styles.pendingTitle}>Waiting for Owner</Text>
 
-            <Text
-              style={
-                styles.pendingDescription
-              }
-            >
-              Your clinic access
-              request has been sent.
-              Veterinary records will
-              remain locked until the
-              pet owner approves the
-              request.
+            <Text style={styles.pendingDescription}>
+              Your clinic access request has been sent. Veterinary records will
+              remain locked until the pet owner approves the request.
             </Text>
 
             <Pressable
-              style={({
-                pressed,
-              }) => [
+              style={({ pressed }) => [
                 styles.refreshButton,
 
-                pressed &&
-                  styles.pressed,
+                pressed && styles.pressed,
               ]}
               onPress={loadPet}
             >
-              <Ionicons
-                name="refresh"
-                size={17}
-                color="#176B3A"
-              />
+              <Ionicons name="refresh" size={17} color="#176B3A" />
 
-              <Text
-                style={
-                  styles.refreshText
-                }
-              >
-                Check Status
-              </Text>
+              <Text style={styles.refreshText}>Check Status</Text>
             </Pressable>
           </View>
         )}
 
-
         {approved && (
           <>
-            <View
-              style={
-                styles.approvedMessage
-              }
-            >
-              <Ionicons
-                name="shield-checkmark"
-                size={22}
-                color="#176B3A"
-              />
+            <View style={styles.approvedMessage}>
+              <Ionicons name="shield-checkmark" size={22} color="#176B3A" />
 
-              <Text
-                style={
-                  styles.approvedMessageText
-                }
-              >
-                Owner authorization
-                confirmed. Veterinary
-                features are unlocked.
+              <Text style={styles.approvedMessageText}>
+                Owner authorization confirmed. Veterinary features are unlocked.
               </Text>
             </View>
 
-            <Text
-              style={
-                styles.sectionTitle
-              }
-            >
-              Veterinary Management
-            </Text>
+            <Text style={styles.sectionTitle}>Veterinary Management</Text>
 
-            <View
-              style={
-                styles.actionCard
-              }
-            >
+            <View style={styles.actionCard}>
               <ClinicAction
                 icon="document-text-outline"
                 title="Veterinary Records"
                 description="View the pet's authorized veterinary history."
                 onPress={() =>
                   router.push({
-                    pathname:
-                      "/clinic-vet-records",
+                    pathname: "/clinic-vet-records",
                     params: {
-                      petId:
-                        String(
-                          pet.pet_id
-                        ),
+                      petId: String(pet.pet_id),
                     },
                   })
                 }
               />
 
-              <View
-                style={
-                  styles.divider
-                }
-              />
+              <View style={styles.divider} />
 
               <ClinicAction
                 icon="add-circle-outline"
@@ -770,13 +466,9 @@ export default function ClinicPetScreen() {
                 description="Record a new visit, vaccination, treatment, or service."
                 onPress={() =>
                   router.push({
-                    pathname:
-                      "/add-vet-record",
+                    pathname: "/add-vet-record",
                     params: {
-                      petId:
-                        String(
-                          pet.pet_id
-                        ),
+                      petId: String(pet.pet_id),
                     },
                   })
                 }
@@ -785,117 +477,48 @@ export default function ClinicPetScreen() {
           </>
         )}
 
+        <Text style={styles.sectionTitle}>Pet Information</Text>
 
-        <Text
-          style={styles.sectionTitle}
-        >
-          Pet Information
-        </Text>
+        <View style={styles.infoCard}>
+          <InfoRow label="Species" value={pet.species} />
 
-        <View
-          style={styles.infoCard}
-        >
-          <InfoRow
-            label="Species"
-            value={pet.species}
-          />
+          <InfoRow label="Breed" value={pet.breed || "Not specified"} />
 
-          <InfoRow
-            label="Breed"
-            value={
-              pet.breed ||
-              "Not specified"
-            }
-          />
+          <InfoRow label="Sex" value={pet.sex} />
 
-          <InfoRow
-            label="Sex"
-            value={pet.sex}
-          />
-
-          <InfoRow
-            label="Color"
-            value={
-              pet.color ||
-              "Not specified"
-            }
-            last
-          />
+          <InfoRow label="Color" value={pet.color || "Not specified"} last />
         </View>
 
         {pet.identifying_marks && (
           <>
-            <Text
-              style={
-                styles.sectionTitle
-              }
-            >
-              Identifying Marks
-            </Text>
+            <Text style={styles.sectionTitle}>Identifying Marks</Text>
 
-            <View
-              style={
-                styles.marksCard
-              }
-            >
-              <Ionicons
-                name="paw-outline"
-                size={20}
-                color="#176B3A"
-              />
+            <View style={styles.marksCard}>
+              <Ionicons name="paw-outline" size={20} color="#176B3A" />
 
-              <Text
-                style={
-                  styles.marksText
-                }
-              >
-                {
-                  pet.identifying_marks
-                }
-              </Text>
+              <Text style={styles.marksText}>{pet.identifying_marks}</Text>
             </View>
           </>
         )}
 
-
         <Pressable
-          style={({
-            pressed,
-          }) => [
+          style={({ pressed }) => [
             styles.scanAnotherButton,
 
-            pressed &&
-              styles.pressed,
+            pressed && styles.pressed,
           ]}
-          onPress={() =>
-            router.replace(
-              "/qr-scanner"
-            )
-          }
+          onPress={() => router.replace("/qr-scanner")}
         >
-          <Ionicons
-            name="scan-outline"
-            size={19}
-            color="#176B3A"
-          />
+          <Ionicons name="scan-outline" size={19} color="#176B3A" />
 
-          <Text
-            style={
-              styles.scanAnotherText
-            }
-          >
-            Scan Another Pet
-          </Text>
+          <Text style={styles.scanAnotherText}>Scan Another Pet</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-
-function normalizeStatus(
-  value?: string
-): AuthorizationStatus {
+function normalizeStatus(value?: string): AuthorizationStatus {
   switch (value) {
     case "Pending":
     case "Approved":
@@ -908,7 +531,6 @@ function normalizeStatus(
   }
 }
 
-
 function Header() {
   return (
     <View style={styles.header}>
@@ -917,180 +539,103 @@ function Header() {
           styles.headerButton,
           pressed && styles.pressed,
         ]}
-        onPress={() =>
-          router.back()
-        }
+        onPress={() => router.back()}
       >
-        <Ionicons
-          name="chevron-back"
-          size={27}
-          color="#173D2A"
-        />
+        <Ionicons name="chevron-back" size={27} color="#173D2A" />
       </Pressable>
 
-      <Text
-        style={styles.headerTitle}
-      >
-        Clinic Pet
-      </Text>
+      <Text style={styles.headerTitle}>Clinic Pet</Text>
 
-      <View
-        style={styles.headerButton}
-      />
+      <View style={styles.headerButton} />
     </View>
   );
 }
 
+function AuthorizationCard({ status }: { status: AuthorizationStatus }) {
+  let icon: keyof typeof Ionicons.glyphMap = "lock-closed";
 
-function AuthorizationCard({
-  status,
-}: {
-  status: AuthorizationStatus;
-}) {
-  let icon:
-    keyof typeof Ionicons.glyphMap =
-    "lock-closed";
-
-  let title =
-    "Not Authorized";
+  let title = "Not Authorized";
 
   let description =
     "This clinic does not currently have access to this pet's veterinary records.";
 
-  let boxStyle =
-    styles.noneAuthorization;
+  let boxStyle = styles.noneAuthorization;
 
-  let iconStyle =
-    styles.noneAuthorizationIcon;
+  let iconStyle = styles.noneAuthorizationIcon;
 
-  let titleStyle =
-    styles.noneAuthorizationTitle;
+  let titleStyle = styles.noneAuthorizationTitle;
 
   if (status === "Pending") {
     icon = "time";
 
-    title =
-      "Approval Pending";
+    title = "Approval Pending";
 
-    description =
-      "An access request has been sent to the pet owner.";
+    description = "An access request has been sent to the pet owner.";
 
-    boxStyle =
-      styles.pendingAuthorization;
+    boxStyle = styles.pendingAuthorization;
 
-    iconStyle =
-      styles.pendingAuthorizationIcon;
+    iconStyle = styles.pendingAuthorizationIcon;
 
-    titleStyle =
-      styles.pendingAuthorizationTitle;
+    titleStyle = styles.pendingAuthorizationTitle;
   }
 
   if (status === "Approved") {
-    icon =
-      "shield-checkmark";
+    icon = "shield-checkmark";
 
-    title =
-      "Clinic Authorized";
+    title = "Clinic Authorized";
 
     description =
       "The pet owner has approved this clinic to manage veterinary records.";
 
-    boxStyle =
-      styles.approvedAuthorization;
+    boxStyle = styles.approvedAuthorization;
 
-    iconStyle =
-      styles.approvedAuthorizationIcon;
+    iconStyle = styles.approvedAuthorizationIcon;
 
-    titleStyle =
-      styles.approvedAuthorizationTitle;
+    titleStyle = styles.approvedAuthorizationTitle;
   }
 
   if (status === "Declined") {
-    icon =
-      "close-circle";
+    icon = "close-circle";
 
-    title =
-      "Request Declined";
+    title = "Request Declined";
 
-    description =
-      "The pet owner declined the previous clinic access request.";
+    description = "The pet owner declined the previous clinic access request.";
 
-    boxStyle =
-      styles.declinedAuthorization;
+    boxStyle = styles.declinedAuthorization;
 
-    iconStyle =
-      styles.declinedAuthorizationIcon;
+    iconStyle = styles.declinedAuthorizationIcon;
 
-    titleStyle =
-      styles.declinedAuthorizationTitle;
+    titleStyle = styles.declinedAuthorizationTitle;
   }
 
   if (status === "Revoked") {
-    icon =
-      "remove-circle";
+    icon = "remove-circle";
 
-    title =
-      "Access Revoked";
+    title = "Access Revoked";
 
-    description =
-      "The pet owner has removed this clinic's previous access.";
+    description = "The pet owner has removed this clinic's previous access.";
 
-    boxStyle =
-      styles.declinedAuthorization;
+    boxStyle = styles.declinedAuthorization;
 
-    iconStyle =
-      styles.declinedAuthorizationIcon;
+    iconStyle = styles.declinedAuthorizationIcon;
 
-    titleStyle =
-      styles.declinedAuthorizationTitle;
+    titleStyle = styles.declinedAuthorizationTitle;
   }
 
   return (
-    <View
-      style={[
-        styles.authorizationCard,
-        boxStyle,
-      ]}
-    >
-      <View
-        style={[
-          styles.authorizationIcon,
-          iconStyle,
-        ]}
-      >
-        <Ionicons
-          name={icon}
-          size={25}
-          color="#FFFFFF"
-        />
+    <View style={[styles.authorizationCard, boxStyle]}>
+      <View style={[styles.authorizationIcon, iconStyle]}>
+        <Ionicons name={icon} size={25} color="#FFFFFF" />
       </View>
 
-      <View
-        style={
-          styles.authorizationContent
-        }
-      >
-        <Text
-          style={[
-            styles.authorizationTitle,
-            titleStyle,
-          ]}
-        >
-          {title}
-        </Text>
+      <View style={styles.authorizationContent}>
+        <Text style={[styles.authorizationTitle, titleStyle]}>{title}</Text>
 
-        <Text
-          style={
-            styles.authorizationDescription
-          }
-        >
-          {description}
-        </Text>
+        <Text style={styles.authorizationDescription}>{description}</Text>
       </View>
     </View>
   );
 }
-
 
 function ClinicAction({
   icon,
@@ -1098,8 +643,7 @@ function ClinicAction({
   description,
   onPress,
 }: {
-  icon:
-    keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
   onPress: () => void;
@@ -1109,48 +653,24 @@ function ClinicAction({
       style={({ pressed }) => [
         styles.actionRow,
 
-        pressed &&
-          styles.actionPressed,
+        pressed && styles.actionPressed,
       ]}
       onPress={onPress}
     >
-      <View
-        style={styles.actionIcon}
-      >
-        <Ionicons
-          name={icon}
-          size={24}
-          color="#176B3A"
-        />
+      <View style={styles.actionIcon}>
+        <Ionicons name={icon} size={24} color="#176B3A" />
       </View>
 
-      <View
-        style={styles.actionContent}
-      >
-        <Text
-          style={styles.actionTitle}
-        >
-          {title}
-        </Text>
+      <View style={styles.actionContent}>
+        <Text style={styles.actionTitle}>{title}</Text>
 
-        <Text
-          style={
-            styles.actionDescription
-          }
-        >
-          {description}
-        </Text>
+        <Text style={styles.actionDescription}>{description}</Text>
       </View>
 
-      <Ionicons
-        name="chevron-forward"
-        size={20}
-        color="#9AA49E"
-      />
+      <Ionicons name="chevron-forward" size={20} color="#9AA49E" />
     </Pressable>
   );
 }
-
 
 function InfoRow({
   label,
@@ -1162,29 +682,13 @@ function InfoRow({
   last?: boolean;
 }) {
   return (
-    <View
-      style={[
-        styles.infoRow,
+    <View style={[styles.infoRow, last && styles.infoRowLast]}>
+      <Text style={styles.infoLabel}>{label}</Text>
 
-        last &&
-          styles.infoRowLast,
-      ]}
-    >
-      <Text
-        style={styles.infoLabel}
-      >
-        {label}
-      </Text>
-
-      <Text
-        style={styles.infoValue}
-      >
-        {value}
-      </Text>
+      <Text style={styles.infoValue}>{value}</Text>
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -1198,8 +702,7 @@ const styles = StyleSheet.create({
 
     flexDirection: "row",
     alignItems: "center",
-    justifyContent:
-      "space-between",
+    justifyContent: "space-between",
 
     borderBottomWidth: 1,
     borderBottomColor: "#EDF0EE",
@@ -1267,7 +770,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     fontSize: 12,
   },
-
 
   petCard: {
     backgroundColor: "#FFFFFF",
@@ -1390,7 +892,6 @@ const styles = StyleSheet.create({
     color: "#8C6A16",
   },
 
-
   sectionTitle: {
     marginTop: 25,
     marginBottom: 11,
@@ -1400,7 +901,6 @@ const styles = StyleSheet.create({
 
     color: "#26352B",
   },
-
 
   authorizationCard: {
     padding: 15,
@@ -1487,7 +987,6 @@ const styles = StyleSheet.create({
   declinedAuthorizationTitle: {
     color: "#A23E34",
   },
-
 
   requestCard: {
     marginTop: 16,
@@ -1591,7 +1090,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
 
-
   pendingCard: {
     marginTop: 16,
 
@@ -1666,7 +1164,6 @@ const styles = StyleSheet.create({
 
     color: "#176B3A",
   },
-
 
   approvedMessage: {
     marginTop: 16,
@@ -1757,7 +1254,6 @@ const styles = StyleSheet.create({
     marginLeft: 70,
   },
 
-
   infoCard: {
     backgroundColor: "#FFFFFF",
 
@@ -1825,7 +1321,6 @@ const styles = StyleSheet.create({
 
     color: "#5E6D64",
   },
-
 
   scanAnotherButton: {
     marginTop: 28,

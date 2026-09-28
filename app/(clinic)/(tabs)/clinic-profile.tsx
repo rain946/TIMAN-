@@ -99,7 +99,7 @@ export default function ClinicProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       loadProfile();
-    }, [loadProfile])
+    }, [loadProfile]),
   );
 
   const handleProfileUpdated = (updatedProfile: ClinicProfile) => {
@@ -138,16 +138,20 @@ export default function ClinicProfileScreen() {
       }
 
       setProfilePhoto(getImageUrl(data.profile_photo_url));
-      setProfile((current) => current ? {
-        ...current,
-        profile_photo_url: data.profile_photo_url,
-      } : current);
+      setProfile((current) =>
+        current
+          ? {
+              ...current,
+              profile_photo_url: data.profile_photo_url,
+            }
+          : current,
+      );
     } catch (uploadError) {
       Alert.alert(
         "Upload Failed",
         uploadError instanceof Error
           ? uploadError.message
-          : "Unable to update profile photo."
+          : "Unable to update profile photo.",
       );
     } finally {
       setUploadingPhoto(false);
@@ -157,7 +161,10 @@ export default function ClinicProfileScreen() {
   const chooseFromGallery = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission Required", "Please allow TIMAN to access your photos.");
+      Alert.alert(
+        "Permission Required",
+        "Please allow TIMAN to access your photos.",
+      );
       return;
     }
 
@@ -173,7 +180,10 @@ export default function ClinicProfileScreen() {
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission Required", "Please allow TIMAN to use your camera.");
+      Alert.alert(
+        "Permission Required",
+        "Please allow TIMAN to use your camera.",
+      );
       return;
     }
 
@@ -195,31 +205,30 @@ export default function ClinicProfileScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      "Log Out?",
-      "Are you sure you want to log out of TIMAN?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Log Out",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await unregisterDevicePushToken();
-              await AsyncStorage.multiRemove([
-                "token",
-                "user",
-                "timan_expo_push_token",
-              ]);
-              router.replace("/login");
-            } catch (logoutError) {
-              console.error("CLINIC LOGOUT ERROR:", logoutError);
-              Alert.alert("Log Out Failed", "Unable to log out. Please try again.");
-            }
-          },
+    Alert.alert("Log Out?", "Are you sure you want to log out of TIMAN?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await unregisterDevicePushToken();
+            await AsyncStorage.multiRemove([
+              "token",
+              "user",
+              "timan_expo_push_token",
+            ]);
+            router.replace("/login");
+          } catch (logoutError) {
+            console.error("CLINIC LOGOUT ERROR:", logoutError);
+            Alert.alert(
+              "Log Out Failed",
+              "Unable to log out. Please try again.",
+            );
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const onRefresh = () => {
@@ -246,7 +255,10 @@ export default function ClinicProfileScreen() {
           <Text style={styles.stateTitle}>Unable to load profile.</Text>
           <Pressable
             accessibilityRole="button"
-            style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.retryButton,
+              pressed && styles.pressed,
+            ]}
             onPress={() => loadProfile()}
           >
             <Text style={styles.retryText}>Retry</Text>
@@ -268,11 +280,16 @@ export default function ClinicProfileScreen() {
           {error && (
             <Pressable
               accessibilityRole="button"
-              style={({ pressed }) => [styles.inlineError, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.inlineError,
+                pressed && styles.pressed,
+              ]}
               onPress={() => loadProfile(false)}
             >
               <Ionicons name="alert-circle-outline" size={19} color="#A7483E" />
-              <Text style={styles.inlineErrorText}>Unable to refresh profile. Tap to retry.</Text>
+              <Text style={styles.inlineErrorText}>
+                Unable to refresh profile. Tap to retry.
+              </Text>
             </Pressable>
           )}
 
@@ -288,7 +305,10 @@ export default function ClinicProfileScreen() {
               ]}
             >
               {profilePhoto ? (
-                <Image source={{ uri: profilePhoto }} style={styles.profileImage} />
+                <Image
+                  source={{ uri: profilePhoto }}
+                  style={styles.profileImage}
+                />
               ) : (
                 <View style={styles.clinicIconInner}>
                   <Ionicons name="medkit" size={38} color="#FFFFFF" />
@@ -303,13 +323,17 @@ export default function ClinicProfileScreen() {
               </View>
             </Pressable>
             <Text style={styles.clinicName} numberOfLines={2}>
-              {profile?.clinic_name || profile?.full_name || "Veterinary Clinic"}
+              {profile?.clinic_name ||
+                profile?.full_name ||
+                "Veterinary Clinic"}
             </Text>
             <View style={styles.roleBadge}>
               <Ionicons name="medical" size={13} color="#176B3A" />
               <Text style={styles.roleBadgeText}>Veterinary Clinic</Text>
             </View>
-            {profile?.email ? <Text style={styles.summaryEmail}>{profile.email}</Text> : null}
+            {profile?.email ? (
+              <Text style={styles.summaryEmail}>{profile.email}</Text>
+            ) : null}
           </View>
 
           <Text style={styles.sectionTitle}>Clinic Information</Text>
@@ -326,7 +350,11 @@ export default function ClinicProfileScreen() {
               value={profile?.full_name || "Not provided"}
             />
             <Divider />
-            <InfoRow icon="mail-outline" label="Email" value={profile?.email || "Not provided"} />
+            <InfoRow
+              icon="mail-outline"
+              label="Email"
+              value={profile?.email || "Not provided"}
+            />
             <Divider />
             <InfoRow
               icon="call-outline"
@@ -344,6 +372,13 @@ export default function ClinicProfileScreen() {
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.actionCard}>
             <ActionRow
+              icon="bar-chart-outline"
+              title="Reports"
+              description="View and download clinic reports"
+              onPress={() => router.push("/(clinic)/clinic-reports")}
+            />
+            <Divider inset />
+            <ActionRow
               icon="create-outline"
               title="Edit Profile"
               description="Update clinic and contact information"
@@ -360,7 +395,10 @@ export default function ClinicProfileScreen() {
 
           <Pressable
             accessibilityRole="button"
-            style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.logoutButton,
+              pressed && styles.pressed,
+            ]}
             onPress={handleLogout}
           >
             <Ionicons name="log-out-outline" size={21} color="#A14343" />
@@ -419,7 +457,10 @@ function ActionRow({
   return (
     <Pressable
       accessibilityRole="button"
-      style={({ pressed }) => [styles.actionRow, pressed && styles.actionPressed]}
+      style={({ pressed }) => [
+        styles.actionRow,
+        pressed && styles.actionPressed,
+      ]}
       onPress={onPress}
     >
       <View style={styles.actionIcon}>
@@ -440,43 +481,200 @@ function Divider({ inset = false }: { inset?: boolean }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFDF7" },
-  header: { minHeight: 60, paddingHorizontal: 20, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: "#E9EDE9" },
+  header: {
+    minHeight: 60,
+    paddingHorizontal: 20,
+    justifyContent: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9EDE9",
+  },
   headerTitle: { fontSize: 20, fontWeight: "900", color: "#1E2D24" },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
-  stateContainer: { flex: 1, paddingHorizontal: 24, alignItems: "center", justifyContent: "center" },
+  stateContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   loadingText: { marginTop: 12, fontSize: 12, color: "#77847C" },
-  errorIcon: { width: 58, height: 58, borderRadius: 18, backgroundColor: "#FDEDEA", alignItems: "center", justifyContent: "center" },
-  stateTitle: { marginTop: 14, fontSize: 15, fontWeight: "900", color: "#34453B" },
-  retryButton: { minWidth: 112, minHeight: 44, marginTop: 17, borderRadius: 13, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  errorIcon: {
+    width: 58,
+    height: 58,
+    borderRadius: 18,
+    backgroundColor: "#FDEDEA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stateTitle: {
+    marginTop: 14,
+    fontSize: 15,
+    fontWeight: "900",
+    color: "#34453B",
+  },
+  retryButton: {
+    minWidth: 112,
+    minHeight: 44,
+    marginTop: 17,
+    borderRadius: 13,
+    backgroundColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   retryText: { fontSize: 11, fontWeight: "900", color: "#FFFFFF" },
-  inlineError: { minHeight: 48, marginBottom: 14, borderRadius: 13, paddingHorizontal: 13, backgroundColor: "#FFF1EF", borderWidth: 1, borderColor: "#F1CBC6", flexDirection: "row", alignItems: "center" },
+  inlineError: {
+    minHeight: 48,
+    marginBottom: 14,
+    borderRadius: 13,
+    paddingHorizontal: 13,
+    backgroundColor: "#FFF1EF",
+    borderWidth: 1,
+    borderColor: "#F1CBC6",
+    flexDirection: "row",
+    alignItems: "center",
+  },
   inlineErrorText: { flex: 1, marginLeft: 9, fontSize: 10, color: "#843C34" },
-  identityCard: { minHeight: 232, borderRadius: 22, padding: 22, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", alignItems: "center" },
-  clinicIconOuter: { width: 92, height: 92, borderRadius: 29, backgroundColor: "#E5F3E8", alignItems: "center", justifyContent: "center" },
-  clinicIconInner: { width: 70, height: 70, borderRadius: 23, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  identityCard: {
+    minHeight: 232,
+    borderRadius: 22,
+    padding: 22,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    alignItems: "center",
+  },
+  clinicIconOuter: {
+    width: 92,
+    height: 92,
+    borderRadius: 29,
+    backgroundColor: "#E5F3E8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clinicIconInner: {
+    width: 70,
+    height: 70,
+    borderRadius: 23,
+    backgroundColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   profileImage: { width: 92, height: 92, borderRadius: 29 },
-  cameraButton: { position: "absolute", right: -3, bottom: -2, width: 30, height: 30, borderRadius: 15, backgroundColor: "#176B3A", borderWidth: 2, borderColor: "#FFFFFF", alignItems: "center", justifyContent: "center" },
-  clinicName: { maxWidth: 290, marginTop: 14, fontSize: 20, lineHeight: 26, fontWeight: "900", color: "#24352B", textAlign: "center" },
-  roleBadge: { minHeight: 29, marginTop: 9, borderRadius: 10, paddingHorizontal: 10, backgroundColor: "#E5F3E8", flexDirection: "row", alignItems: "center", gap: 5 },
+  cameraButton: {
+    position: "absolute",
+    right: -3,
+    bottom: -2,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#176B3A",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clinicName: {
+    maxWidth: 290,
+    marginTop: 14,
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: "900",
+    color: "#24352B",
+    textAlign: "center",
+  },
+  roleBadge: {
+    minHeight: 29,
+    marginTop: 9,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#E5F3E8",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
   roleBadgeText: { fontSize: 9, fontWeight: "900", color: "#176B3A" },
   summaryEmail: { marginTop: 9, fontSize: 10, color: "#7A877F" },
-  sectionTitle: { marginTop: 27, marginBottom: 12, fontSize: 17, fontWeight: "900", color: "#1E2D24" },
-  infoCard: { borderRadius: 19, paddingHorizontal: 15, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3" },
-  infoRow: { minHeight: 72, paddingVertical: 12, flexDirection: "row", alignItems: "center" },
-  infoIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  sectionTitle: {
+    marginTop: 27,
+    marginBottom: 12,
+    fontSize: 17,
+    fontWeight: "900",
+    color: "#1E2D24",
+  },
+  infoCard: {
+    borderRadius: 19,
+    paddingHorizontal: 15,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+  },
+  infoRow: {
+    minHeight: 72,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  infoIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   infoContent: { flex: 1, minWidth: 0, marginLeft: 12 },
-  infoLabel: { fontSize: 9, fontWeight: "800", color: "#839087", textTransform: "uppercase", letterSpacing: 0.35 },
-  infoValue: { marginTop: 4, fontSize: 12, lineHeight: 18, fontWeight: "700", color: "#34453B" },
+  infoLabel: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#839087",
+    textTransform: "uppercase",
+    letterSpacing: 0.35,
+  },
+  infoValue: {
+    marginTop: 4,
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: "700",
+    color: "#34453B",
+  },
   divider: { height: 1, backgroundColor: "#EDF0ED" },
   dividerInset: { marginLeft: 65 },
-  actionCard: { borderRadius: 19, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", overflow: "hidden" },
-  actionRow: { minHeight: 76, paddingHorizontal: 15, flexDirection: "row", alignItems: "center" },
+  actionCard: {
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    overflow: "hidden",
+  },
+  actionRow: {
+    minHeight: 76,
+    paddingHorizontal: 15,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   actionPressed: { backgroundColor: "#F3F8F4" },
-  actionIcon: { width: 42, height: 42, borderRadius: 13, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  actionIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   actionContent: { flex: 1, marginLeft: 12 },
   actionTitle: { fontSize: 13, fontWeight: "900", color: "#2B3B31" },
   actionDescription: { marginTop: 3, fontSize: 9, color: "#849088" },
-  logoutButton: { minHeight: 54, marginTop: 28, borderRadius: 15, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#ECCFCD", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  logoutButton: {
+    minHeight: 54,
+    marginTop: 28,
+    borderRadius: 15,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#ECCFCD",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
   logoutText: { fontSize: 12, fontWeight: "900", color: "#A14343" },
   pressed: { opacity: 0.72 },
 });

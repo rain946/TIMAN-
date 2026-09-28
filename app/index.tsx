@@ -26,9 +26,7 @@ export default function WelcomeScreen() {
       </View>
 
       <View style={styles.tagline}>
-        <Text style={styles.taglineText}>
-          Same QR. A Safer, Happier Life.
-        </Text>
+        <Text style={styles.taglineText}>Same QR. A Safer, Happier Life.</Text>
       </View>
 
       <Pressable
@@ -43,9 +41,7 @@ export default function WelcomeScreen() {
       </Pressable>
 
       <View style={styles.loginContainer}>
-        <Text style={styles.loginText}>
-          Already have an account?{" "}
-        </Text>
+        <Text style={styles.loginText}>Already have an account? </Text>
 
         <Pressable
           style={({ pressed }) => [

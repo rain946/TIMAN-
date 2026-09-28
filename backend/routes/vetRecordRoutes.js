@@ -55,6 +55,65 @@ const checkClinicAuthorization = async (
   return rows[0].status === "Approved";
 };
 
+const parseDateOnly = (value) => {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return date;
+};
+
+const getPhilippineToday = () => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+};
+
+const notifyClinicOfOwnerScheduleChange = async ({
+  clinicUserId,
+  petId,
+  petName,
+  serviceType,
+  action,
+  nextDueDate,
+}) => {
+  const rescheduled = action === "rescheduled";
+  const title = rescheduled ? "Treatment Rescheduled" : "Treatment Cancelled";
+  const message = rescheduled
+    ? `${petName}'s ${serviceType} treatment was rescheduled to ${nextDueDate}.`
+    : `${petName}'s ${serviceType} treatment was cancelled by the owner.`;
+
+  try {
+    await db.query(
+      `
+      INSERT INTO notifications (
+        user_id, type, title, message, pet_id, authorization_id, is_read
+      )
+      VALUES (?, ?, ?, ?, ?, NULL, FALSE)
+      `,
+      [clinicUserId, `schedule_${action}`, title, message, petId]
+    );
+  } catch (error) {
+    console.error("CLINIC SCHEDULE NOTIFICATION ERROR:", error);
+  }
+};
+
 
 
 
@@ -879,6 +938,268 @@ router.get(
         success: false,
         message:
           "Unable to load veterinary records.",
+      });
+    }
+  }
+);
+
+router.patch(
+  "/:recordId/cancel",
+  authMiddleware,
+  requireRole("owner"),
+  async (req, res) => {
+    try {
+      const recordId = Number(req.params.recordId);
+      const ownerId = req.user.userId;
+
+      if (!Number.isInteger(recordId) || recordId <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid veterinary record ID.",
+        });
+      }
+
+      const [records] = await db.query(
+        `
+        SELECT
+          vr.record_id,
+          vr.pet_id,
+          vr.clinic_user_id,
+          vr.service_type,
+          vr.next_due_date,
+          vr.schedule_status,
+          p.pet_name
+        FROM vet_records vr
+        INNER JOIN pets p ON p.pet_id = vr.pet_id
+        WHERE vr.record_id = ?
+          AND p.owner_id = ?
+        LIMIT 1
+        `,
+        [recordId, ownerId]
+      );
+
+      if (records.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Schedule not found or you do not own this pet.",
+        });
+      }
+
+      const schedule = records[0];
+      if (!schedule.next_due_date) {
+        return res.status(400).json({
+          success: false,
+          message: "This veterinary record does not have a schedule.",
+        });
+      }
+      if (schedule.schedule_status !== "Pending") {
+        return res.status(409).json({
+          success: false,
+          message:
+            schedule.schedule_status === "Completed"
+              ? "A completed schedule cannot be cancelled."
+              : "This schedule has already been cancelled.",
+        });
+      }
+
+      const [result] = await db.query(
+        `
+        UPDATE vet_records vr
+        INNER JOIN pets p ON p.pet_id = vr.pet_id
+        SET
+          vr.schedule_status = 'Cancelled',
+          vr.completed_at = NULL,
+          vr.cancelled_at = CONVERT_TZ(
+            UTC_TIMESTAMP(),
+            '+00:00',
+            '+08:00'
+          )
+        WHERE vr.record_id = ?
+          AND p.owner_id = ?
+          AND vr.next_due_date IS NOT NULL
+          AND vr.schedule_status = 'Pending'
+        `,
+        [recordId, ownerId]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(409).json({
+          success: false,
+          message: "This schedule is no longer pending.",
+        });
+      }
+
+      await notifyClinicOfOwnerScheduleChange({
+        clinicUserId: schedule.clinic_user_id,
+        petId: schedule.pet_id,
+        petName: schedule.pet_name,
+        serviceType: schedule.service_type,
+        action: "cancelled",
+      });
+
+      return res.json({
+        success: true,
+        message: "Scheduled treatment cancelled.",
+        schedule: {
+          record_id: schedule.record_id,
+          schedule_status: "Cancelled",
+          next_due_date: schedule.next_due_date,
+        },
+      });
+    } catch (error) {
+      console.error("CANCEL OWNER SCHEDULE ERROR:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to cancel the schedule.",
+      });
+    }
+  }
+);
+
+router.patch(
+  "/:recordId/reschedule",
+  authMiddleware,
+  requireRole("owner"),
+  async (req, res) => {
+    try {
+      const recordId = Number(req.params.recordId);
+      const ownerId = req.user.userId;
+      const nextDueDate = String(req.body.next_due_date || "").trim();
+      const parsedDate = parseDateOnly(nextDueDate);
+
+      if (!Number.isInteger(recordId) || recordId <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid veterinary record ID.",
+        });
+      }
+      if (!nextDueDate) {
+        return res.status(400).json({
+          success: false,
+          message: "A new schedule date is required.",
+        });
+      }
+      if (!parsedDate) {
+        return res.status(400).json({
+          success: false,
+          message: "The new schedule date is invalid.",
+        });
+      }
+      if (nextDueDate <= getPhilippineToday()) {
+        return res.status(400).json({
+          success: false,
+          message: "The new schedule date must be in the future.",
+        });
+      }
+
+      const [records] = await db.query(
+        `
+        SELECT
+          vr.record_id,
+          vr.pet_id,
+          vr.clinic_user_id,
+          vr.service_type,
+          DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
+          vr.schedule_status,
+          p.pet_name
+        FROM vet_records vr
+        INNER JOIN pets p ON p.pet_id = vr.pet_id
+        WHERE vr.record_id = ?
+          AND p.owner_id = ?
+        LIMIT 1
+        `,
+        [recordId, ownerId]
+      );
+
+      if (records.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Schedule not found or you do not own this pet.",
+        });
+      }
+
+      const schedule = records[0];
+      if (!schedule.next_due_date) {
+        return res.status(400).json({
+          success: false,
+          message: "This veterinary record does not have a schedule.",
+        });
+      }
+      if (schedule.schedule_status !== "Pending") {
+        return res.status(409).json({
+          success: false,
+          message:
+            schedule.schedule_status === "Completed"
+              ? "A completed schedule cannot be rescheduled."
+              : "A cancelled schedule cannot be rescheduled.",
+        });
+      }
+      if (schedule.next_due_date === nextDueDate) {
+        return res.status(400).json({
+          success: false,
+          message: "Please choose a date different from the current schedule.",
+        });
+      }
+
+      const connection = await db.getConnection();
+      let result;
+      try {
+        await connection.beginTransaction();
+        [result] = await connection.query(
+          `
+          UPDATE vet_records vr
+          INNER JOIN pets p ON p.pet_id = vr.pet_id
+          SET
+            vr.next_due_date = ?,
+            vr.cancelled_at = NULL
+          WHERE vr.record_id = ?
+            AND p.owner_id = ?
+            AND vr.next_due_date IS NOT NULL
+            AND vr.schedule_status = 'Pending'
+          `,
+          [nextDueDate, recordId, ownerId]
+        );
+
+        if (result.affectedRows === 0) {
+          await connection.rollback();
+          return res.status(409).json({
+            success: false,
+            message: "This schedule is no longer pending.",
+          });
+        }
+
+        await connection.query("DELETE FROM reminder_logs WHERE record_id = ?", [recordId]);
+        await connection.commit();
+      } catch (transactionError) {
+        await connection.rollback();
+        throw transactionError;
+      } finally {
+        connection.release();
+      }
+
+      await notifyClinicOfOwnerScheduleChange({
+        clinicUserId: schedule.clinic_user_id,
+        petId: schedule.pet_id,
+        petName: schedule.pet_name,
+        serviceType: schedule.service_type,
+        action: "rescheduled",
+        nextDueDate,
+      });
+
+      return res.json({
+        success: true,
+        message: "Scheduled treatment rescheduled.",
+        schedule: {
+          record_id: schedule.record_id,
+          schedule_status: "Pending",
+          next_due_date: nextDueDate,
+        },
+      });
+    } catch (error) {
+      console.error("RESCHEDULE OWNER SCHEDULE ERROR:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to reschedule the treatment.",
       });
     }
   }

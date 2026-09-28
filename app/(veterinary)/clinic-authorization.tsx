@@ -1,13 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  router,
-  useFocusEffect,
-} from "expo-router";
-import {
-  useCallback,
-  useState,
-} from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 
 import {
   ActivityIndicator,
@@ -23,20 +17,9 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  API_URL,
-  getImageUrl,
-} from "../../config/api";
+import { API_URL, getImageUrl } from "../../config/api";
 
-
-
-
-
-type AuthorizationStatus =
-  | "Pending"
-  | "Approved"
-  | "Declined"
-  | "Revoked";
+type AuthorizationStatus = "Pending" | "Approved" | "Declined" | "Revoked";
 
 type Authorization = {
   authorization_id: number;
@@ -58,144 +41,86 @@ type Authorization = {
   clinic_name: string | null;
 };
 
-
-
-
-
 export default function ClinicAuthorizationScreen() {
-  const [
-    authorizations,
-    setAuthorizations,
-  ] = useState<Authorization[]>([]);
+  const [authorizations, setAuthorizations] = useState<Authorization[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [refreshing, setRefreshing] =
-    useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const [
-    processingId,
-    setProcessingId,
-  ] = useState<number | null>(null);
+  const [processingId, setProcessingId] = useState<number | null>(null);
 
+  const loadAuthorizations = useCallback(async (showLoading = true) => {
+    try {
+      if (showLoading) {
+        setLoading(true);
+      }
 
+      const token = await AsyncStorage.getItem("token");
 
+      if (!token) {
+        Alert.alert("Session Expired", "Please log in again.");
 
+        router.replace("/login");
 
-  const loadAuthorizations =
-    useCallback(
-      async (
-        showLoading = true
-      ) => {
-        try {
-          if (showLoading) {
-            setLoading(true);
-          }
+        return;
+      }
 
-          const token =
-            await AsyncStorage.getItem(
-              "token"
-            );
+      const response = await fetch(`${API_URL}/authorizations/owner`, {
+        method: "GET",
 
-          if (!token) {
-            Alert.alert(
-              "Session Expired",
-              "Please log in again."
-            );
+        headers: {
+          Accept: "application/json",
 
-            router.replace(
-              "/login"
-            );
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-            return;
-          }
+      const text = await response.text();
 
-          const response =
-            await fetch(
-              `${API_URL}/authorizations/owner`,
-              {
-                method: "GET",
+      let data: any = {};
 
-                headers: {
-                  Accept:
-                    "application/json",
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = {
+          message: text,
+        };
+      }
 
-                  Authorization:
-                    `Bearer ${token}`,
-                },
-              }
-            );
+      console.log("OWNER AUTHORIZATION STATUS:", response.status);
 
-          const text =
-            await response.text();
+      console.log("OWNER AUTHORIZATION RESPONSE:", data);
 
-          let data: any = {};
+      if (!response.ok) {
+        Alert.alert(
+          "Unable to Load",
+          data.message || "Unable to load clinic requests.",
+        );
 
-          try {
-            data = text
-              ? JSON.parse(text)
-              : {};
-          } catch {
-            data = {
-              message: text,
-            };
-          }
+        return;
+      }
 
-          console.log(
-            "OWNER AUTHORIZATION STATUS:",
-            response.status
-          );
+      setAuthorizations(
+        Array.isArray(data.authorizations) ? data.authorizations : [],
+      );
+    } catch (error) {
+      console.log("LOAD AUTHORIZATION ERROR:", error);
 
-          console.log(
-            "OWNER AUTHORIZATION RESPONSE:",
-            data
-          );
-
-          if (!response.ok) {
-            Alert.alert(
-              "Unable to Load",
-              data.message ||
-                "Unable to load clinic requests."
-            );
-
-            return;
-          }
-
-          setAuthorizations(
-            Array.isArray(
-              data.authorizations
-            )
-              ? data.authorizations
-              : []
-          );
-        } catch (error) {
-          console.log(
-            "LOAD AUTHORIZATION ERROR:",
-            error
-          );
-
-          Alert.alert(
-            "Connection Error",
-            "Unable to connect to the TIMAN server."
-          );
-        } finally {
-          setLoading(false);
-          setRefreshing(false);
-        }
-      },
-      []
-    );
-
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
       loadAuthorizations();
 
       return () => {};
-    }, [loadAuthorizations])
+    }, [loadAuthorizations]),
   );
-
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -203,155 +128,98 @@ export default function ClinicAuthorizationScreen() {
     loadAuthorizations(false);
   };
 
+  const updateAuthorization = async (
+    authorizationId: number,
+    action: "approve" | "decline" | "revoke",
+  ) => {
+    if (processingId !== null) {
+      return;
+    }
 
-  const updateAuthorization =
-    async (
-      authorizationId: number,
-      action:
-        | "approve"
-        | "decline"
-        | "revoke"
-    ) => {
-      if (processingId !== null) {
+    try {
+      setProcessingId(authorizationId);
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        Alert.alert("Session Expired", "Please log in again.");
+
+        router.replace("/login");
+
         return;
       }
 
+      const response = await fetch(
+        `${API_URL}/authorizations/${authorizationId}/${action}`,
+        {
+          method: "PATCH",
+
+          headers: {
+            Accept: "application/json",
+
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const text = await response.text();
+
+      let data: any = {};
+
       try {
-        setProcessingId(
-          authorizationId
-        );
-
-        const token =
-          await AsyncStorage.getItem(
-            "token"
-          );
-
-        if (!token) {
-          Alert.alert(
-            "Session Expired",
-            "Please log in again."
-          );
-
-          router.replace(
-            "/login"
-          );
-
-          return;
-        }
-
-        const response =
-          await fetch(
-            `${API_URL}/authorizations/${authorizationId}/${action}`,
-            {
-              method: "PATCH",
-
-              headers: {
-                Accept:
-                  "application/json",
-
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          );
-
-        const text =
-          await response.text();
-
-        let data: any = {};
-
-        try {
-          data = text
-            ? JSON.parse(text)
-            : {};
-        } catch {
-          data = {
-            message: text,
-          };
-        }
-
-        console.log(
-          "AUTHORIZATION ACTION:",
-          action
-        );
-
-        console.log(
-          "AUTHORIZATION ACTION STATUS:",
-          response.status
-        );
-
-        console.log(
-          "AUTHORIZATION ACTION RESPONSE:",
-          data
-        );
-
-        if (!response.ok) {
-          Alert.alert(
-            "Action Failed",
-            data.message ||
-              "Unable to update clinic access."
-          );
-
-          return;
-        }
-
-        let title =
-          "Access Updated";
-
-        if (
-          action === "approve"
-        ) {
-          title =
-            "Clinic Approved";
-        }
-
-        if (
-          action === "decline"
-        ) {
-          title =
-            "Request Declined";
-        }
-
-        if (
-          action === "revoke"
-        ) {
-          title =
-            "Access Revoked";
-        }
-
-        Alert.alert(
-          title,
-          data.message ||
-            "Clinic authorization updated."
-        );
-
-        await loadAuthorizations(
-          false
-        );
-      } catch (error) {
-        console.log(
-          "UPDATE AUTHORIZATION ERROR:",
-          error
-        );
-
-        Alert.alert(
-          "Connection Error",
-          "Unable to update clinic access."
-        );
-      } finally {
-        setProcessingId(null);
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = {
+          message: text,
+        };
       }
-    };
 
+      console.log("AUTHORIZATION ACTION:", action);
 
-  const confirmApprove = (
-    item: Authorization
-  ) => {
+      console.log("AUTHORIZATION ACTION STATUS:", response.status);
+
+      console.log("AUTHORIZATION ACTION RESPONSE:", data);
+
+      if (!response.ok) {
+        Alert.alert(
+          "Action Failed",
+          data.message || "Unable to update clinic access.",
+        );
+
+        return;
+      }
+
+      let title = "Access Updated";
+
+      if (action === "approve") {
+        title = "Clinic Approved";
+      }
+
+      if (action === "decline") {
+        title = "Request Declined";
+      }
+
+      if (action === "revoke") {
+        title = "Access Revoked";
+      }
+
+      Alert.alert(title, data.message || "Clinic authorization updated.");
+
+      await loadAuthorizations(false);
+    } catch (error) {
+      console.log("UPDATE AUTHORIZATION ERROR:", error);
+
+      Alert.alert("Connection Error", "Unable to update clinic access.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const confirmApprove = (item: Authorization) => {
     Alert.alert(
       "Approve Clinic Access",
       `Allow ${
-        item.clinic_name ||
-        item.clinic_contact_name
+        item.clinic_name || item.clinic_contact_name
       } to access and manage ${item.pet_name}'s veterinary records?`,
       [
         {
@@ -362,23 +230,13 @@ export default function ClinicAuthorizationScreen() {
         {
           text: "Approve",
 
-          onPress: () =>
-            updateAuthorization(
-              item.authorization_id,
-              "approve"
-            ),
+          onPress: () => updateAuthorization(item.authorization_id, "approve"),
         },
-      ]
+      ],
     );
   };
 
-
-
-
-
-  const confirmDecline = (
-    item: Authorization
-  ) => {
+  const confirmDecline = (item: Authorization) => {
     Alert.alert(
       "Decline Request",
       `Decline the clinic access request for ${item.pet_name}?`,
@@ -392,25 +250,17 @@ export default function ClinicAuthorizationScreen() {
           text: "Decline",
           style: "destructive",
 
-          onPress: () =>
-            updateAuthorization(
-              item.authorization_id,
-              "decline"
-            ),
+          onPress: () => updateAuthorization(item.authorization_id, "decline"),
         },
-      ]
+      ],
     );
   };
 
-
-  const confirmRevoke = (
-    item: Authorization
-  ) => {
+  const confirmRevoke = (item: Authorization) => {
     Alert.alert(
       "Revoke Clinic Access",
       `Remove ${
-        item.clinic_name ||
-        item.clinic_contact_name
+        item.clinic_name || item.clinic_contact_name
       }'s access to ${item.pet_name}'s veterinary records?`,
       [
         {
@@ -422,94 +272,47 @@ export default function ClinicAuthorizationScreen() {
           text: "Revoke",
           style: "destructive",
 
-          onPress: () =>
-            updateAuthorization(
-              item.authorization_id,
-              "revoke"
-            ),
+          onPress: () => updateAuthorization(item.authorization_id, "revoke"),
         },
-      ]
+      ],
     );
   };
 
+  const pendingCount = authorizations.filter(
+    (item) => item.status === "Pending",
+  ).length;
 
-  const pendingCount =
-    authorizations.filter(
-      (item) =>
-        item.status ===
-        "Pending"
-    ).length;
-
-  const approvedCount =
-    authorizations.filter(
-      (item) =>
-        item.status ===
-        "Approved"
-    ).length;
-
+  const approvedCount = authorizations.filter(
+    (item) => item.status === "Approved",
+  ).length;
 
   if (loading) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
+      <SafeAreaView style={styles.container}>
         <Header />
 
-        <View
-          style={styles.center}
-        >
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text
-            style={
-              styles.loadingText
-            }
-          >
-            Loading clinic
-            requests...
-          </Text>
+          <Text style={styles.loadingText}>Loading clinic requests...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
+    <SafeAreaView style={styles.container}>
       <Header />
 
       <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={
-          styles.content
-        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl
-            refreshing={
-              refreshing
-            }
-            onRefresh={
-              onRefresh
-            }
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-
-        <View
-          style={styles.introCard}
-        >
-          <View
-            style={
-              styles.introIcon
-            }
-          >
+        <View style={styles.introCard}>
+          <View style={styles.introIcon}>
             <Ionicons
               name="shield-checkmark-outline"
               size={30}
@@ -517,85 +320,29 @@ export default function ClinicAuthorizationScreen() {
             />
           </View>
 
-          <View
-            style={
-              styles.introContent
-            }
-          >
-            <Text
-              style={
-                styles.introTitle
-              }
-            >
-              Clinic Access
-            </Text>
+          <View style={styles.introContent}>
+            <Text style={styles.introTitle}>Clinic Access</Text>
 
-            <Text
-              style={
-                styles.introText
-              }
-            >
-              You control which
-              veterinary clinics can
-              access and update your
-              pet&apos;s veterinary
-              records.
+            <Text style={styles.introText}>
+              You control which veterinary clinics can access and update your
+              pet&apos;s veterinary records.
             </Text>
           </View>
         </View>
 
-
-        <View
-          style={
-            styles.summaryRow
-          }
-        >
-          <View
-            style={
-              styles.summaryCard
-            }
-          >
-            <View
-              style={[
-                styles.summaryIcon,
-                styles.pendingSummaryIcon,
-              ]}
-            >
-              <Ionicons
-                name="time-outline"
-                size={21}
-                color="#98701C"
-              />
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryCard}>
+            <View style={[styles.summaryIcon, styles.pendingSummaryIcon]}>
+              <Ionicons name="time-outline" size={21} color="#98701C" />
             </View>
 
-            <Text
-              style={
-                styles.summaryNumber
-              }
-            >
-              {pendingCount}
-            </Text>
+            <Text style={styles.summaryNumber}>{pendingCount}</Text>
 
-            <Text
-              style={
-                styles.summaryLabel
-              }
-            >
-              Pending
-            </Text>
+            <Text style={styles.summaryLabel}>Pending</Text>
           </View>
 
-          <View
-            style={
-              styles.summaryCard
-            }
-          >
-            <View
-              style={[
-                styles.summaryIcon,
-                styles.approvedSummaryIcon,
-              ]}
-            >
+          <View style={styles.summaryCard}>
+            <View style={[styles.summaryIcon, styles.approvedSummaryIcon]}>
               <Ionicons
                 name="checkmark-circle-outline"
                 size={21}
@@ -603,174 +350,84 @@ export default function ClinicAuthorizationScreen() {
               />
             </View>
 
-            <Text
-              style={
-                styles.summaryNumber
-              }
-            >
-              {approvedCount}
-            </Text>
+            <Text style={styles.summaryNumber}>{approvedCount}</Text>
 
-            <Text
-              style={
-                styles.summaryLabel
-              }
-            >
-              Approved
-            </Text>
+            <Text style={styles.summaryLabel}>Approved</Text>
           </View>
         </View>
 
-
-        {authorizations.length ===
-        0 ? (
-          <View
-            style={styles.emptyCard}
-          >
-            <View
-              style={
-                styles.emptyIcon
-              }
-            >
-              <Ionicons
-                name="business-outline"
-                size={35}
-                color="#789180"
-              />
+        {authorizations.length === 0 ? (
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIcon}>
+              <Ionicons name="business-outline" size={35} color="#789180" />
             </View>
 
-            <Text
-              style={
-                styles.emptyTitle
-              }
-            >
-              No Clinic Requests
-            </Text>
+            <Text style={styles.emptyTitle}>No Clinic Requests</Text>
 
-            <Text
-              style={
-                styles.emptyText
-              }
-            >
-              Clinic access requests
-              will appear here after
-              a veterinary clinic
-              scans your pet&apos;s TIMAN
-              QR and requests access.
+            <Text style={styles.emptyText}>
+              Clinic access requests will appear here after a veterinary clinic
+              scans your pet&apos;s TIMAN QR and requests access.
             </Text>
           </View>
         ) : (
           <>
-
             {pendingCount > 0 && (
               <>
-                <SectionHeader
-                  title="Pending Requests"
-                  count={
-                    pendingCount
-                  }
-                />
+                <SectionHeader title="Pending Requests" count={pendingCount} />
 
                 {authorizations
-                  .filter(
-                    (item) =>
-                      item.status ===
-                      "Pending"
-                  )
+                  .filter((item) => item.status === "Pending")
                   .map((item) => (
                     <AuthorizationCard
-                      key={
-                        item.authorization_id
-                      }
+                      key={item.authorization_id}
                       item={item}
-                      processing={
-                        processingId ===
-                        item.authorization_id
-                      }
-                      onApprove={() =>
-                        confirmApprove(
-                          item
-                        )
-                      }
-                      onDecline={() =>
-                        confirmDecline(
-                          item
-                        )
-                      }
+                      processing={processingId === item.authorization_id}
+                      onApprove={() => confirmApprove(item)}
+                      onDecline={() => confirmDecline(item)}
                       onRevoke={() => {}}
                     />
                   ))}
               </>
             )}
 
-
             {approvedCount > 0 && (
               <>
                 <SectionHeader
                   title="Authorized Clinics"
-                  count={
-                    approvedCount
-                  }
+                  count={approvedCount}
                 />
 
                 {authorizations
-                  .filter(
-                    (item) =>
-                      item.status ===
-                      "Approved"
-                  )
+                  .filter((item) => item.status === "Approved")
                   .map((item) => (
                     <AuthorizationCard
-                      key={
-                        item.authorization_id
-                      }
+                      key={item.authorization_id}
                       item={item}
-                      processing={
-                        processingId ===
-                        item.authorization_id
-                      }
+                      processing={processingId === item.authorization_id}
                       onApprove={() => {}}
                       onDecline={() => {}}
-                      onRevoke={() =>
-                        confirmRevoke(
-                          item
-                        )
-                      }
+                      onRevoke={() => confirmRevoke(item)}
                     />
                   ))}
               </>
             )}
 
-
             {authorizations.some(
-              (item) =>
-                item.status ===
-                  "Declined" ||
-                item.status ===
-                  "Revoked"
+              (item) => item.status === "Declined" || item.status === "Revoked",
             ) && (
               <>
-                <SectionHeader
-                  title="Previous Access"
-                />
+                <SectionHeader title="Previous Access" />
 
                 {authorizations
                   .filter(
                     (item) =>
-                      item.status ===
-                        "Declined" ||
-                      item.status ===
-                        "Revoked"
+                      item.status === "Declined" || item.status === "Revoked",
                   )
                   .map((item) => (
                     <AuthorizationCard
-                      key={
-                        item.authorization_id
-                      }
+                      key={item.authorization_id}
                       item={item}
-                      processing={
-                        false
-                      }
+                      processing={false}
                       onApprove={() => {}}
                       onDecline={() => {}}
                       onRevoke={() => {}}
@@ -781,35 +438,18 @@ export default function ClinicAuthorizationScreen() {
           </>
         )}
 
-        <View
-          style={
-            styles.securityCard
-          }
-        >
-          <Ionicons
-            name="lock-closed-outline"
-            size={19}
-            color="#176B3A"
-          />
+        <View style={styles.securityCard}>
+          <Ionicons name="lock-closed-outline" size={19} color="#176B3A" />
 
-          <Text
-            style={
-              styles.securityText
-            }
-          >
-            Clinics cannot access
-            protected veterinary
-            records until you approve
-            their request. You may
-            revoke approved access
-            later.
+          <Text style={styles.securityText}>
+            Clinics cannot access protected veterinary records until you approve
+            their request. You may revoke approved access later.
           </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
 
 function Header() {
   return (
@@ -819,75 +459,31 @@ function Header() {
           styles.headerButton,
           pressed && styles.pressed,
         ]}
-        onPress={() =>
-          router.back()
-        }
+        onPress={() => router.back()}
       >
-        <Ionicons
-          name="chevron-back"
-          size={27}
-          color="#173D2A"
-        />
+        <Ionicons name="chevron-back" size={27} color="#173D2A" />
       </Pressable>
 
-      <Text
-        style={
-          styles.headerTitle
-        }
-      >
-        Clinic Authorization
-      </Text>
+      <Text style={styles.headerTitle}>Clinic Authorization</Text>
 
-      <View
-        style={
-          styles.headerButton
-        }
-      />
+      <View style={styles.headerButton} />
     </View>
   );
 }
 
-
-function SectionHeader({
-  title,
-  count,
-}: {
-  title: string;
-  count?: number;
-}) {
+function SectionHeader({ title, count }: { title: string; count?: number }) {
   return (
-    <View
-      style={
-        styles.sectionHeader
-      }
-    >
-      <Text
-        style={
-          styles.sectionTitle
-        }
-      >
-        {title}
-      </Text>
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
 
       {count !== undefined && (
-        <View
-          style={
-            styles.countBadge
-          }
-        >
-          <Text
-            style={
-              styles.countText
-            }
-          >
-            {count}
-          </Text>
+        <View style={styles.countBadge}>
+          <Text style={styles.countText}>{count}</Text>
         </View>
       )}
     </View>
   );
 }
-
 
 function AuthorizationCard({
   item,
@@ -902,278 +498,125 @@ function AuthorizationCard({
   onDecline: () => void;
   onRevoke: () => void;
 }) {
-  const photoUrl =
-    getImageUrl(
-      item.photo_url
-    );
+  const photoUrl = getImageUrl(item.photo_url);
 
   const clinicDisplay =
-    item.clinic_name ||
-    item.clinic_contact_name ||
-    "Veterinary Clinic";
+    item.clinic_name || item.clinic_contact_name || "Veterinary Clinic";
 
   return (
-    <View
-      style={styles.requestCard}
-    >
-
-      <View
-        style={
-          styles.petSection
-        }
-      >
+    <View style={styles.requestCard}>
+      <View style={styles.petSection}>
         {photoUrl ? (
           <Image
             source={{
               uri: photoUrl,
             }}
-            style={
-              styles.petPhoto
-            }
+            style={styles.petPhoto}
           />
         ) : (
-          <View
-            style={
-              styles.petPlaceholder
-            }
-          >
-            <Ionicons
-              name="paw"
-              size={25}
-              color="#75947E"
-            />
+          <View style={styles.petPlaceholder}>
+            <Ionicons name="paw" size={25} color="#75947E" />
           </View>
         )}
 
-        <View
-          style={
-            styles.petInfo
-          }
-        >
-          <Text
-            style={
-              styles.petName
-            }
-          >
-            {item.pet_name}
-          </Text>
+        <View style={styles.petInfo}>
+          <Text style={styles.petName}>{item.pet_name}</Text>
 
-          <Text
-            style={
-              styles.petBreed
-            }
-          >
-            {item.breed ||
-              item.species}
-          </Text>
+          <Text style={styles.petBreed}>{item.breed || item.species}</Text>
         </View>
 
-        <StatusBadge
-          status={item.status}
-        />
+        <StatusBadge status={item.status} />
       </View>
 
-      <View
-        style={styles.divider}
-      />
+      <View style={styles.divider} />
 
-
-      <View
-        style={
-          styles.clinicSection
-        }
-      >
-        <View
-          style={
-            styles.clinicIcon
-          }
-        >
-          <Ionicons
-            name="medical-outline"
-            size={23}
-            color="#176B3A"
-          />
+      <View style={styles.clinicSection}>
+        <View style={styles.clinicIcon}>
+          <Ionicons name="medical-outline" size={23} color="#176B3A" />
         </View>
 
-        <View
-          style={
-            styles.clinicInfo
-          }
-        >
-          <Text
-            style={
-              styles.clinicLabel
-            }
-          >
-            Veterinary Clinic
-          </Text>
+        <View style={styles.clinicInfo}>
+          <Text style={styles.clinicLabel}>Veterinary Clinic</Text>
 
-          <Text
-            style={
-              styles.clinicName
-            }
-          >
-            {clinicDisplay}
-          </Text>
+          <Text style={styles.clinicName}>{clinicDisplay}</Text>
 
-          {item.clinic_name &&
-            item.clinic_contact_name && (
-              <Text
-                style={
-                  styles.contactName
-                }
-              >
-                Requested by{" "}
-                {
-                  item.clinic_contact_name
-                }
-              </Text>
-            )}
-        </View>
-      </View>
-
-
-      <View
-        style={
-          styles.dateRow
-        }
-      >
-        <Ionicons
-          name="calendar-outline"
-          size={15}
-          color="#849088"
-        />
-
-        <Text
-          style={styles.dateText}
-        >
-          Requested{" "}
-          {formatDate(
-            item.requested_at
+          {item.clinic_name && item.clinic_contact_name && (
+            <Text style={styles.contactName}>
+              Requested by {item.clinic_contact_name}
+            </Text>
           )}
+        </View>
+      </View>
+
+      <View style={styles.dateRow}>
+        <Ionicons name="calendar-outline" size={15} color="#849088" />
+
+        <Text style={styles.dateText}>
+          Requested {formatDate(item.requested_at)}
         </Text>
       </View>
 
-
-      {item.status ===
-        "Pending" && (
-        <View
-          style={
-            styles.actionRow
-          }
-        >
+      {item.status === "Pending" && (
+        <View style={styles.actionRow}>
           <Pressable
             disabled={processing}
-            style={({
-              pressed,
-            }) => [
+            style={({ pressed }) => [
               styles.declineButton,
 
-              pressed &&
-                !processing &&
-                styles.pressed,
+              pressed && !processing && styles.pressed,
 
-              processing &&
-                styles.disabled,
+              processing && styles.disabled,
             ]}
             onPress={onDecline}
           >
-            <Ionicons
-              name="close"
-              size={18}
-              color="#A3453C"
-            />
+            <Ionicons name="close" size={18} color="#A3453C" />
 
-            <Text
-              style={
-                styles.declineText
-              }
-            >
-              Decline
-            </Text>
+            <Text style={styles.declineText}>Decline</Text>
           </Pressable>
 
           <Pressable
             disabled={processing}
-            style={({
-              pressed,
-            }) => [
+            style={({ pressed }) => [
               styles.approveButton,
 
-              pressed &&
-                !processing &&
-                styles.pressed,
+              pressed && !processing && styles.pressed,
 
-              processing &&
-                styles.disabled,
+              processing && styles.disabled,
             ]}
             onPress={onApprove}
           >
             {processing ? (
-              <ActivityIndicator
-                size="small"
-                color="#FFFFFF"
-              />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <>
-                <Ionicons
-                  name="checkmark"
-                  size={18}
-                  color="#FFFFFF"
-                />
+                <Ionicons name="checkmark" size={18} color="#FFFFFF" />
 
-                <Text
-                  style={
-                    styles.approveText
-                  }
-                >
-                  Approve
-                </Text>
+                <Text style={styles.approveText}>Approve</Text>
               </>
             )}
           </Pressable>
         </View>
       )}
 
-
-      {item.status ===
-        "Approved" && (
+      {item.status === "Approved" && (
         <Pressable
           disabled={processing}
-          style={({
-            pressed,
-          }) => [
+          style={({ pressed }) => [
             styles.revokeButton,
 
-            pressed &&
-              !processing &&
-              styles.pressed,
+            pressed && !processing && styles.pressed,
 
-            processing &&
-              styles.disabled,
+            processing && styles.disabled,
           ]}
           onPress={onRevoke}
         >
           {processing ? (
-            <ActivityIndicator
-              size="small"
-              color="#A3453C"
-            />
+            <ActivityIndicator size="small" color="#A3453C" />
           ) : (
             <>
-              <Ionicons
-                name="shield-outline"
-                size={17}
-                color="#A3453C"
-              />
+              <Ionicons name="shield-outline" size={17} color="#A3453C" />
 
-              <Text
-                style={
-                  styles.revokeText
-                }
-              >
-                Revoke Access
-              </Text>
+              <Text style={styles.revokeText}>Revoke Access</Text>
             </>
           )}
         </Pressable>
@@ -1182,62 +625,39 @@ function AuthorizationCard({
   );
 }
 
+function StatusBadge({ status }: { status: AuthorizationStatus }) {
+  let icon: keyof typeof Ionicons.glyphMap = "time";
 
-function StatusBadge({
-  status,
-}: {
-  status: AuthorizationStatus;
-}) {
-  let icon:
-    keyof typeof Ionicons.glyphMap =
-    "time";
+  let badgeStyle = styles.pendingBadge;
 
-  let badgeStyle =
-    styles.pendingBadge;
-
-  let textStyle =
-    styles.pendingBadgeText;
+  let textStyle = styles.pendingBadgeText;
 
   if (status === "Approved") {
-    icon =
-      "checkmark-circle";
+    icon = "checkmark-circle";
 
-    badgeStyle =
-      styles.approvedBadge;
+    badgeStyle = styles.approvedBadge;
 
-    textStyle =
-      styles.approvedBadgeText;
+    textStyle = styles.approvedBadgeText;
   }
 
   if (status === "Declined") {
-    icon =
-      "close-circle";
+    icon = "close-circle";
 
-    badgeStyle =
-      styles.declinedBadge;
+    badgeStyle = styles.declinedBadge;
 
-    textStyle =
-      styles.declinedBadgeText;
+    textStyle = styles.declinedBadgeText;
   }
 
   if (status === "Revoked") {
-    icon =
-      "remove-circle";
+    icon = "remove-circle";
 
-    badgeStyle =
-      styles.revokedBadge;
+    badgeStyle = styles.revokedBadge;
 
-    textStyle =
-      styles.revokedBadgeText;
+    textStyle = styles.revokedBadgeText;
   }
 
   return (
-    <View
-      style={[
-        styles.statusBadge,
-        badgeStyle,
-      ]}
-    >
+    <View style={[styles.statusBadge, badgeStyle]}>
       <Ionicons
         name={icon}
         size={13}
@@ -1245,629 +665,561 @@ function StatusBadge({
           status === "Approved"
             ? "#176B3A"
             : status === "Pending"
-            ? "#8B691C"
-            : "#A3453C"
+              ? "#8B691C"
+              : "#A3453C"
         }
       />
 
-      <Text
-        style={[
-          styles.statusText,
-          textStyle,
-        ]}
-      >
-        {status}
-      </Text>
+      <Text style={[styles.statusText, textStyle]}>{status}</Text>
     </View>
   );
 }
 
-
-function formatDate(
-  value: string
-) {
+function formatDate(value: string) {
   if (!value) {
     return "";
   }
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return "";
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFDF7",
+  },
 
-const styles =
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor:
-        "#FFFDF7",
-    },
+  header: {
+    height: 60,
+    paddingHorizontal: 20,
 
-    header: {
-      height: 60,
-      paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
 
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EDF0EE",
+  },
 
-      borderBottomWidth: 1,
-      borderBottomColor:
-        "#EDF0EE",
-    },
+  headerButton: {
+    width: 42,
+    height: 42,
 
-    headerButton: {
-      width: 42,
-      height: 42,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1E2D24",
+  },
 
-    headerTitle: {
-      fontSize: 18,
-      fontWeight: "800",
-      color: "#1E2D24",
-    },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 45,
+  },
 
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 45,
-    },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    center: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  loadingText: {
+    marginTop: 12,
 
-    loadingText: {
-      marginTop: 12,
+    fontSize: 12,
+    color: "#76837B",
+  },
 
-      fontSize: 12,
-      color: "#76837B",
-    },
+  introCard: {
+    padding: 17,
 
+    borderRadius: 18,
 
-    introCard: {
-      padding: 17,
+    backgroundColor: "#EAF4EB",
 
-      borderRadius: 18,
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      backgroundColor:
-        "#EAF4EB",
+  introIcon: {
+    width: 53,
+    height: 53,
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    borderRadius: 17,
 
-    introIcon: {
-      width: 53,
-      height: 53,
+    backgroundColor: "#FFFFFF",
 
-      borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      backgroundColor:
-        "#FFFFFF",
+  introContent: {
+    flex: 1,
+    marginLeft: 13,
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  introTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: "#23442F",
+  },
 
-    introContent: {
-      flex: 1,
-      marginLeft: 13,
-    },
+  introText: {
+    marginTop: 4,
 
-    introTitle: {
-      fontSize: 16,
-      fontWeight: "900",
-      color: "#23442F",
-    },
+    fontSize: 10,
+    lineHeight: 15,
 
-    introText: {
-      marginTop: 4,
+    color: "#607266",
+  },
 
-      fontSize: 10,
-      lineHeight: 15,
+  summaryRow: {
+    marginTop: 16,
 
-      color: "#607266",
-    },
+    flexDirection: "row",
+    gap: 11,
+  },
 
+  summaryCard: {
+    flex: 1,
 
-    summaryRow: {
-      marginTop: 16,
+    padding: 14,
 
-      flexDirection: "row",
-      gap: 11,
-    },
+    borderRadius: 17,
 
-    summaryCard: {
-      flex: 1,
+    backgroundColor: "#FFFFFF",
 
-      padding: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8E3",
 
-      borderRadius: 17,
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      backgroundColor:
-        "#FFFFFF",
+  summaryIcon: {
+    width: 39,
+    height: 39,
 
-      borderWidth: 1,
-      borderColor:
-        "#E2E8E3",
+    borderRadius: 12,
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    summaryIcon: {
-      width: 39,
-      height: 39,
+  pendingSummaryIcon: {
+    backgroundColor: "#FFF1C9",
+  },
 
-      borderRadius: 12,
+  approvedSummaryIcon: {
+    backgroundColor: "#E5F2E7",
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  summaryNumber: {
+    marginLeft: 10,
 
-    pendingSummaryIcon: {
-      backgroundColor:
-        "#FFF1C9",
-    },
+    fontSize: 19,
+    fontWeight: "900",
 
-    approvedSummaryIcon: {
-      backgroundColor:
-        "#E5F2E7",
-    },
+    color: "#26352B",
+  },
 
-    summaryNumber: {
-      marginLeft: 10,
+  summaryLabel: {
+    marginLeft: 5,
 
-      fontSize: 19,
-      fontWeight: "900",
+    fontSize: 9,
 
-      color: "#26352B",
-    },
+    color: "#7B877F",
+  },
 
-    summaryLabel: {
-      marginLeft: 5,
+  sectionHeader: {
+    marginTop: 26,
+    marginBottom: 11,
 
-      fontSize: 9,
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      color: "#7B877F",
-    },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "900",
 
+    color: "#26352B",
+  },
 
-    sectionHeader: {
-      marginTop: 26,
-      marginBottom: 11,
+  countBadge: {
+    marginLeft: 8,
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    minWidth: 23,
+    height: 23,
 
-    sectionTitle: {
-      fontSize: 16,
-      fontWeight: "900",
+    paddingHorizontal: 7,
 
-      color: "#26352B",
-    },
+    borderRadius: 12,
 
-    countBadge: {
-      marginLeft: 8,
+    backgroundColor: "#E7F2E8",
 
-      minWidth: 23,
-      height: 23,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      paddingHorizontal: 7,
+  countText: {
+    fontSize: 10,
+    fontWeight: "800",
 
-      borderRadius: 12,
+    color: "#176B3A",
+  },
 
-      backgroundColor:
-        "#E7F2E8",
+  requestCard: {
+    marginBottom: 13,
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+    padding: 16,
 
-    countText: {
-      fontSize: 10,
-      fontWeight: "800",
+    borderRadius: 19,
 
-      color: "#176B3A",
-    },
+    backgroundColor: "#FFFFFF",
 
+    borderWidth: 1,
+    borderColor: "#E1E7E2",
+  },
 
-    requestCard: {
-      marginBottom: 13,
+  petSection: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      padding: 16,
+  petPhoto: {
+    width: 53,
+    height: 53,
 
-      borderRadius: 19,
+    borderRadius: 17,
 
-      backgroundColor:
-        "#FFFFFF",
+    backgroundColor: "#EAF2EB",
+  },
 
-      borderWidth: 1,
-      borderColor:
-        "#E1E7E2",
-    },
+  petPlaceholder: {
+    width: 53,
+    height: 53,
 
-    petSection: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    borderRadius: 17,
 
-    petPhoto: {
-      width: 53,
-      height: 53,
+    backgroundColor: "#EAF2EB",
 
-      borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      backgroundColor:
-        "#EAF2EB",
-    },
+  petInfo: {
+    flex: 1,
 
-    petPlaceholder: {
-      width: 53,
-      height: 53,
+    marginLeft: 11,
+    marginRight: 7,
+  },
 
-      borderRadius: 17,
+  petName: {
+    fontSize: 14,
+    fontWeight: "900",
 
-      backgroundColor:
-        "#EAF2EB",
+    color: "#26352B",
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  petBreed: {
+    marginTop: 3,
 
-    petInfo: {
-      flex: 1,
+    fontSize: 9,
 
-      marginLeft: 11,
-      marginRight: 7,
-    },
+    color: "#7D8981",
+  },
 
-    petName: {
-      fontSize: 14,
-      fontWeight: "900",
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 5,
 
-      color: "#26352B",
-    },
+    borderRadius: 20,
 
-    petBreed: {
-      marginTop: 3,
+    flexDirection: "row",
+    alignItems: "center",
 
-      fontSize: 9,
+    gap: 4,
+  },
 
-      color: "#7D8981",
-    },
+  statusText: {
+    fontSize: 8,
+    fontWeight: "800",
+  },
 
-    statusBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 5,
+  pendingBadge: {
+    backgroundColor: "#FFF2CC",
+  },
 
-      borderRadius: 20,
+  pendingBadgeText: {
+    color: "#8B691C",
+  },
 
-      flexDirection: "row",
-      alignItems: "center",
+  approvedBadge: {
+    backgroundColor: "#E5F2E7",
+  },
 
-      gap: 4,
-    },
+  approvedBadgeText: {
+    color: "#176B3A",
+  },
 
-    statusText: {
-      fontSize: 8,
-      fontWeight: "800",
-    },
+  declinedBadge: {
+    backgroundColor: "#FBE8E5",
+  },
 
-    pendingBadge: {
-      backgroundColor:
-        "#FFF2CC",
-    },
+  declinedBadgeText: {
+    color: "#A3453C",
+  },
 
-    pendingBadgeText: {
-      color: "#8B691C",
-    },
+  revokedBadge: {
+    backgroundColor: "#F3E8E7",
+  },
 
-    approvedBadge: {
-      backgroundColor:
-        "#E5F2E7",
-    },
+  revokedBadgeText: {
+    color: "#A3453C",
+  },
 
-    approvedBadgeText: {
-      color: "#176B3A",
-    },
+  divider: {
+    height: 1,
 
-    declinedBadge: {
-      backgroundColor:
-        "#FBE8E5",
-    },
+    marginVertical: 14,
 
-    declinedBadgeText: {
-      color: "#A3453C",
-    },
+    backgroundColor: "#EDF1EE",
+  },
 
-    revokedBadge: {
-      backgroundColor:
-        "#F3E8E7",
-    },
+  clinicSection: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-    revokedBadgeText: {
-      color: "#A3453C",
-    },
+  clinicIcon: {
+    width: 43,
+    height: 44,
 
-    divider: {
-      height: 1,
+    borderRadius: 14,
 
-      marginVertical: 14,
+    backgroundColor: "#EAF4EB",
 
-      backgroundColor:
-        "#EDF1EE",
-    },
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
+  clinicInfo: {
+    flex: 1,
+    marginLeft: 11,
+  },
 
-    clinicSection: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
+  clinicLabel: {
+    fontSize: 8,
+    fontWeight: "700",
 
-    clinicIcon: {
-      width: 43,
-      height: 44,
+    color: "#8B958F",
+  },
 
-      borderRadius: 14,
+  clinicName: {
+    marginTop: 2,
 
-      backgroundColor:
-        "#EAF4EB",
+    fontSize: 12,
+    fontWeight: "800",
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+    color: "#31453A",
+  },
 
-    clinicInfo: {
-      flex: 1,
-      marginLeft: 11,
-    },
+  contactName: {
+    marginTop: 2,
 
-    clinicLabel: {
-      fontSize: 8,
-      fontWeight: "700",
+    fontSize: 8,
 
-      color: "#8B958F",
-    },
+    color: "#849088",
+  },
 
-    clinicName: {
-      marginTop: 2,
+  dateRow: {
+    marginTop: 13,
 
-      fontSize: 12,
-      fontWeight: "800",
+    flexDirection: "row",
+    alignItems: "center",
 
-      color: "#31453A",
-    },
+    gap: 5,
+  },
 
-    contactName: {
-      marginTop: 2,
+  dateText: {
+    fontSize: 8,
 
-      fontSize: 8,
+    color: "#849088",
+  },
 
-      color: "#849088",
-    },
+  actionRow: {
+    marginTop: 15,
 
-    dateRow: {
-      marginTop: 13,
+    flexDirection: "row",
+    gap: 9,
+  },
 
-      flexDirection: "row",
-      alignItems: "center",
+  declineButton: {
+    flex: 1,
+    height: 48,
 
-      gap: 5,
-    },
+    borderRadius: 13,
 
-    dateText: {
-      fontSize: 8,
+    borderWidth: 1,
+    borderColor: "#E5C6C2",
 
-      color: "#849088",
-    },
+    backgroundColor: "#FFF8F7",
 
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
 
-    actionRow: {
-      marginTop: 15,
+    gap: 6,
+  },
 
-      flexDirection: "row",
-      gap: 9,
-    },
+  declineText: {
+    fontSize: 11,
+    fontWeight: "800",
 
-    declineButton: {
-      flex: 1,
-      height: 48,
+    color: "#A3453C",
+  },
 
-      borderRadius: 13,
+  approveButton: {
+    flex: 1,
+    height: 48,
 
-      borderWidth: 1,
-      borderColor:
-        "#E5C6C2",
+    borderRadius: 13,
 
-      backgroundColor:
-        "#FFF8F7",
+    backgroundColor: "#176B3A",
 
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
 
-      gap: 6,
-    },
+    gap: 6,
+  },
 
-    declineText: {
-      fontSize: 11,
-      fontWeight: "800",
+  approveText: {
+    fontSize: 11,
+    fontWeight: "800",
 
-      color: "#A3453C",
-    },
+    color: "#FFFFFF",
+  },
 
-    approveButton: {
-      flex: 1,
-      height: 48,
+  revokeButton: {
+    marginTop: 15,
 
-      borderRadius: 13,
+    height: 43,
 
-      backgroundColor:
-        "#176B3A",
+    borderRadius: 13,
 
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "center",
+    borderWidth: 1,
+    borderColor: "#E3C4C0",
 
-      gap: 6,
-    },
+    backgroundColor: "#FFF9F8",
 
-    approveText: {
-      fontSize: 11,
-      fontWeight: "800",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
 
-      color: "#FFFFFF",
-    },
+    gap: 6,
+  },
 
-    revokeButton: {
-      marginTop: 15,
+  revokeText: {
+    fontSize: 10,
+    fontWeight: "800",
 
-      height: 43,
+    color: "#A3453C",
+  },
 
-      borderRadius: 13,
+  disabled: {
+    opacity: 0.55,
+  },
 
-      borderWidth: 1,
-      borderColor:
-        "#E3C4C0",
+  pressed: {
+    opacity: 0.75,
+  },
 
-      backgroundColor:
-        "#FFF9F8",
+  emptyCard: {
+    marginTop: 30,
 
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "center",
+    padding: 28,
 
-      gap: 6,
-    },
+    borderRadius: 20,
 
-    revokeText: {
-      fontSize: 10,
-      fontWeight: "800",
+    backgroundColor: "#FFFFFF",
 
-      color: "#A3453C",
-    },
+    borderWidth: 1,
+    borderColor: "#E2E8E3",
 
-    disabled: {
-      opacity: 0.55,
-    },
+    alignItems: "center",
+  },
 
-    pressed: {
-      opacity: 0.75,
-    },
+  emptyIcon: {
+    width: 70,
+    height: 70,
 
+    borderRadius: 23,
 
-    emptyCard: {
-      marginTop: 30,
+    backgroundColor: "#EDF4EE",
 
-      padding: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      borderRadius: 20,
+  emptyTitle: {
+    marginTop: 13,
 
-      backgroundColor:
-        "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "900",
 
-      borderWidth: 1,
-      borderColor:
-        "#E2E8E3",
+    color: "#31453A",
+  },
 
-      alignItems: "center",
-    },
+  emptyText: {
+    marginTop: 6,
 
-    emptyIcon: {
-      width: 70,
-      height: 70,
+    maxWidth: 280,
 
-      borderRadius: 23,
+    fontSize: 10,
+    lineHeight: 16,
 
-      backgroundColor:
-        "#EDF4EE",
+    textAlign: "center",
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+    color: "#7D8981",
+  },
 
-    emptyTitle: {
-      marginTop: 13,
+  securityCard: {
+    marginTop: 25,
 
-      fontSize: 16,
-      fontWeight: "900",
+    padding: 14,
 
-      color: "#31453A",
-    },
+    borderRadius: 15,
 
-    emptyText: {
-      marginTop: 6,
+    backgroundColor: "#EFF6F0",
 
-      maxWidth: 280,
+    flexDirection: "row",
+    alignItems: "flex-start",
 
-      fontSize: 10,
-      lineHeight: 16,
+    gap: 9,
+  },
 
-      textAlign: "center",
+  securityText: {
+    flex: 1,
 
-      color: "#7D8981",
-    },
+    fontSize: 9,
+    lineHeight: 15,
 
-
-    securityCard: {
-      marginTop: 25,
-
-      padding: 14,
-
-      borderRadius: 15,
-
-      backgroundColor:
-        "#EFF6F0",
-
-      flexDirection: "row",
-      alignItems: "flex-start",
-
-      gap: 9,
-    },
-
-    securityText: {
-      flex: 1,
-
-      fontSize: 9,
-      lineHeight: 15,
-
-      color: "#617167",
-    },
-  });
+    color: "#617167",
+  },
+});

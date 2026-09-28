@@ -140,6 +140,13 @@ CREATE TABLE IF NOT EXISTS vet_records (
     medication VARCHAR(255) NULL,
     notes TEXT NULL,
     next_due_date DATE NULL,
+    schedule_status ENUM(
+        'Pending',
+        'Completed',
+        'Cancelled'
+    ) NOT NULL DEFAULT 'Pending',
+    completed_at DATETIME NULL,
+    cancelled_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (pet_id)

@@ -1,11 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type ClinicTabItemProps = {
   activeIcon: keyof typeof Ionicons.glyphMap;
@@ -31,10 +26,7 @@ export function ClinicTabItem({
       />
       <Text
         numberOfLines={1}
-        style={[
-          styles.tabText,
-          focused && styles.activeTabText,
-        ]}
+        style={[styles.tabText, focused && styles.activeTabText]}
       >
         {label}
       </Text>

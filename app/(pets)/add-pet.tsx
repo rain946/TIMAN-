@@ -46,9 +46,9 @@ export default function AddPetScreen() {
   const [color, setColor] = useState("");
   const [marks, setMarks] = useState("");
 
-
-  const [petImage, setPetImage] =
-    useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [petImage, setPetImage] = useState<ImagePicker.ImagePickerAsset | null>(
+    null,
+  );
 
   const [loading, setLoading] = useState(false);
 
@@ -61,10 +61,7 @@ export default function AddPetScreen() {
       value: parseDateValue(birthDate) || new Date(),
       mode: "date",
       maximumDate: new Date(),
-      onChange: (
-        event: DateTimePickerEvent,
-        selectedDate?: Date
-      ) => {
+      onChange: (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === "set" && selectedDate) {
           setBirthDate(formatDateValue(selectedDate));
         }
@@ -72,13 +69,7 @@ export default function AddPetScreen() {
     });
   };
 
-
-
-
-
-  const handleSelectedImage = (
-    result: ImagePicker.ImagePickerResult
-  ) => {
+  const handleSelectedImage = (result: ImagePicker.ImagePickerResult) => {
     if (!result.canceled && result.assets.length > 0) {
       setPetImage(result.assets[0]);
     }
@@ -92,39 +83,34 @@ export default function AddPetScreen() {
       if (!permission.granted) {
         Alert.alert(
           "Permission Required",
-          "Please allow TIMAN to access your photos."
+          "Please allow TIMAN to access your photos.",
         );
         return;
       }
 
-      const result =
-        await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.8,
-        });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
 
       handleSelectedImage(result);
     } catch (error) {
       console.log("IMAGE PICKER ERROR:", error);
 
-      Alert.alert(
-        "Photo Error",
-        "Unable to select a pet photo."
-      );
+      Alert.alert("Photo Error", "Unable to select a pet photo.");
     }
   };
 
   const takePhoto = async () => {
     try {
-      const permission =
-        await ImagePicker.requestCameraPermissionsAsync();
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
 
       if (!permission.granted) {
         Alert.alert(
           "Permission Required",
-          "Please allow TIMAN to use your camera."
+          "Please allow TIMAN to use your camera.",
         );
         return;
       }
@@ -140,63 +126,44 @@ export default function AddPetScreen() {
     } catch (error) {
       console.log("CAMERA ERROR:", error);
 
-      Alert.alert(
-        "Camera Error",
-        "Unable to take a pet photo."
-      );
+      Alert.alert("Camera Error", "Unable to take a pet photo.");
     }
   };
 
   const pickImage = () => {
-    Alert.alert(
-      "Add Pet Photo",
-      "Choose where to get the pet photo.",
-      [
-        {
-          text: "Take Photo",
-          onPress: () => {
-            void takePhoto();
-          },
+    Alert.alert("Add Pet Photo", "Choose where to get the pet photo.", [
+      {
+        text: "Take Photo",
+        onPress: () => {
+          void takePhoto();
         },
-        {
-          text: "Choose from Gallery",
-          onPress: () => {
-            void chooseFromGallery();
-          },
+      },
+      {
+        text: "Choose from Gallery",
+        onPress: () => {
+          void chooseFromGallery();
         },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ]
-    );
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
-
-
-
-
 
   const removePhoto = () => {
-    Alert.alert(
-      "Remove Photo",
-      "Remove the selected pet photo?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => setPetImage(null),
-        },
-      ]
-    );
+    Alert.alert("Remove Photo", "Remove the selected pet photo?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: () => setPetImage(null),
+      },
+    ]);
   };
-
-
-
-
 
   const isValidDate = (value: string) => {
     if (!value) {
@@ -214,55 +181,36 @@ export default function AddPetScreen() {
     return !Number.isNaN(date.getTime());
   };
 
-
   const handleSave = async () => {
     if (!petName.trim()) {
-      Alert.alert(
-        "Missing Information",
-        "Please enter your pet's name."
-      );
+      Alert.alert("Missing Information", "Please enter your pet's name.");
       return;
     }
 
     if (!species) {
-      Alert.alert(
-        "Missing Information",
-        "Please select a species."
-      );
+      Alert.alert("Missing Information", "Please select a species.");
       return;
     }
 
     if (species === "Other" && !otherSpecies.trim()) {
-      Alert.alert(
-        "Missing Information",
-        "Please enter your pet's species."
-      );
+      Alert.alert("Missing Information", "Please enter your pet's species.");
       return;
     }
 
     if (!breed.trim()) {
-      Alert.alert(
-        "Missing Information",
-        "Please enter your pet's breed."
-      );
+      Alert.alert("Missing Information", "Please enter your pet's breed.");
       return;
     }
 
     if (!sex) {
-      Alert.alert(
-        "Missing Information",
-        "Please select your pet's sex."
-      );
+      Alert.alert("Missing Information", "Please select your pet's sex.");
       return;
     }
 
-    if (
-      birthDate.trim() &&
-      !isValidDate(birthDate.trim())
-    ) {
+    if (birthDate.trim() && !isValidDate(birthDate.trim())) {
       Alert.alert(
         "Invalid Birth Date",
-        "Please use YYYY-MM-DD format. Example: 2024-03-12."
+        "Please use YYYY-MM-DD format. Example: 2024-03-12.",
       );
       return;
     }
@@ -270,57 +218,39 @@ export default function AddPetScreen() {
     try {
       setLoading(true);
 
-      const token =
-        await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
         return;
       }
-
 
       const formData = new FormData();
 
       formData.append("petName", petName.trim());
       formData.append(
         "species",
-        species === "Other"
-          ? otherSpecies.trim()
-          : species
+        species === "Other" ? otherSpecies.trim() : species,
       );
       formData.append("breed", breed.trim());
       formData.append("sex", sex);
 
       if (birthDate.trim()) {
-        formData.append(
-          "birthDate",
-          birthDate.trim()
-        );
+        formData.append("birthDate", birthDate.trim());
       }
 
       if (color.trim()) {
-        formData.append(
-          "color",
-          color.trim()
-        );
+        formData.append("color", color.trim());
       }
 
       if (marks.trim()) {
-        formData.append(
-          "identifyingMarks",
-          marks.trim()
-        );
+        formData.append("identifyingMarks", marks.trim());
       }
 
-
       if (petImage) {
-        let mimeType =
-          petImage.mimeType || "image/jpeg";
+        let mimeType = petImage.mimeType || "image/jpeg";
 
         let extension = "jpg";
 
@@ -335,9 +265,7 @@ export default function AddPetScreen() {
 
         const fileName =
           petImage.fileName &&
-          !petImage.fileName
-            .toLowerCase()
-            .endsWith(".heic")
+          !petImage.fileName.toLowerCase().endsWith(".heic")
             ? petImage.fileName
             : `pet-${Date.now()}.${extension}`;
 
@@ -345,56 +273,36 @@ export default function AddPetScreen() {
         console.log("PHOTO NAME:", fileName);
         console.log("PHOTO TYPE:", mimeType);
 
-        formData.append(
-          "photo",
-          {
-            uri: petImage.uri,
-            name: fileName,
-            type: mimeType,
-          } as any
-        );
+        formData.append("photo", {
+          uri: petImage.uri,
+          name: fileName,
+          type: mimeType,
+        } as any);
       }
 
+      console.log("REGISTERING PET:", `${API_URL}/pets`);
 
-      console.log(
-        "REGISTERING PET:",
-        `${API_URL}/pets`
-      );
+      const response = await fetch(`${API_URL}/pets`, {
+        method: "POST",
 
-      const response = await fetch(
-        `${API_URL}/pets`,
-        {
-          method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
 
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
+        body: formData,
+      });
 
-          },
+      const responseText = await response.text();
 
-          body: formData,
-        }
-      );
+      console.log("ADD PET STATUS:", response.status);
 
-      const responseText =
-        await response.text();
-
-      console.log(
-        "ADD PET STATUS:",
-        response.status
-      );
-
-      console.log(
-        "ADD PET RAW RESPONSE:",
-        responseText
-      );
+      console.log("ADD PET RAW RESPONSE:", responseText);
 
       let data: any = {};
 
       try {
-        data = responseText
-          ? JSON.parse(responseText)
-          : {};
+        data = responseText ? JSON.parse(responseText) : {};
       } catch {
         data = {
           message: responseText,
@@ -404,8 +312,7 @@ export default function AddPetScreen() {
       if (!response.ok) {
         Alert.alert(
           "Unable to Register Pet",
-          data.message ||
-            `Server returned status ${response.status}.`
+          data.message || `Server returned status ${response.status}.`,
         );
 
         return;
@@ -421,18 +328,14 @@ export default function AddPetScreen() {
               router.back();
             },
           },
-        ]
+        ],
       );
     } catch (error: any) {
-      console.log(
-        "ADD PET ERROR:",
-        error
-      );
+      console.log("ADD PET ERROR:", error);
 
       Alert.alert(
         "Connection Error",
-        error?.message ||
-          "Unable to connect to the TIMAN server."
+        error?.message || "Unable to connect to the TIMAN server.",
       );
     } finally {
       setLoading(false);
@@ -441,7 +344,6 @@ export default function AddPetScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-
       <View style={styles.header}>
         <Pressable
           style={({ pressed }) => [
@@ -452,27 +354,17 @@ export default function AddPetScreen() {
           disabled={loading}
           onPress={() => router.back()}
         >
-          <Ionicons
-            name="chevron-back"
-            size={27}
-            color="#173D2A"
-          />
+          <Ionicons name="chevron-back" size={27} color="#173D2A" />
         </Pressable>
 
-        <Text style={styles.headerTitle}>
-          Register Pet
-        </Text>
+        <Text style={styles.headerTitle}>Register Pet</Text>
 
         <View style={styles.headerButton} />
       </View>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={
-          Platform.OS === "ios"
-            ? "padding"
-            : undefined
-        }
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -486,7 +378,6 @@ export default function AddPetScreen() {
             keyboardContentContainerStyle,
           ]}
         >
-
           <View style={styles.photoSection}>
             <Pressable
               disabled={loading}
@@ -505,23 +396,13 @@ export default function AddPetScreen() {
                   resizeMode="cover"
                 />
               ) : (
-                <View
-                  style={styles.photoPlaceholder}
-                >
-                  <Ionicons
-                    name="paw"
-                    size={48}
-                    color="#7EA48A"
-                  />
+                <View style={styles.photoPlaceholder}>
+                  <Ionicons name="paw" size={48} color="#7EA48A" />
                 </View>
               )}
 
               <View style={styles.cameraButton}>
-                <Ionicons
-                  name="camera"
-                  size={20}
-                  color="#FFFFFF"
-                />
+                <Ionicons name="camera" size={20} color="#FFFFFF" />
               </View>
             </Pressable>
 
@@ -535,26 +416,19 @@ export default function AddPetScreen() {
                   loading && styles.disabledButton,
                 ]}
               >
-                <Text style={styles.removePhoto}>
-                  Remove Photo
-                </Text>
+                <Text style={styles.removePhoto}>Remove Photo</Text>
               </Pressable>
             )}
           </View>
 
-
-          <Text style={styles.sectionTitle}>
-            Basic Information
-          </Text>
+          <Text style={styles.sectionTitle}>Basic Information</Text>
 
           <View style={styles.formCard}>
             <InputField
               inputRef={(input) => {
                 inputRefs.current.petName = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.petName)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.petName)}
               label="Pet Name"
               placeholder="Enter pet name"
               value={petName}
@@ -566,18 +440,14 @@ export default function AddPetScreen() {
             <FieldDivider />
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>
-                Species
-              </Text>
+              <Text style={styles.fieldLabel}>Species</Text>
 
               <View style={styles.optionRow}>
                 <OptionButton
                   label="Dog"
                   icon="paw-outline"
                   selected={species === "Dog"}
-                  onPress={() =>
-                    setSpecies("Dog")
-                  }
+                  onPress={() => setSpecies("Dog")}
                   disabled={loading}
                 />
 
@@ -585,9 +455,7 @@ export default function AddPetScreen() {
                   label="Cat"
                   icon="paw-outline"
                   selected={species === "Cat"}
-                  onPress={() =>
-                    setSpecies("Cat")
-                  }
+                  onPress={() => setSpecies("Cat")}
                   disabled={loading}
                 />
 
@@ -595,9 +463,7 @@ export default function AddPetScreen() {
                   label="Other"
                   icon="ellipse-outline"
                   selected={species === "Other"}
-                  onPress={() =>
-                    setSpecies("Other")
-                  }
+                  onPress={() => setSpecies("Other")}
                   disabled={loading}
                 />
               </View>
@@ -608,9 +474,7 @@ export default function AddPetScreen() {
                     inputRefs.current.otherSpecies = input;
                   }}
                   onFocus={() =>
-                    handleInputFocus(
-                      inputRefs.current.otherSpecies
-                    )
+                    handleInputFocus(inputRefs.current.otherSpecies)
                   }
                   label="Other Species"
                   placeholder="Enter pet species"
@@ -628,9 +492,7 @@ export default function AddPetScreen() {
               inputRef={(input) => {
                 inputRefs.current.breed = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.breed)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.breed)}
               label="Breed"
               placeholder="Example: Golden Retriever"
               value={breed}
@@ -642,18 +504,14 @@ export default function AddPetScreen() {
             <FieldDivider />
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>
-                Sex
-              </Text>
+              <Text style={styles.fieldLabel}>Sex</Text>
 
               <View style={styles.optionRow}>
                 <OptionButton
                   label="Male"
                   icon="male-outline"
                   selected={sex === "Male"}
-                  onPress={() =>
-                    setSex("Male")
-                  }
+                  onPress={() => setSex("Male")}
                   disabled={loading}
                 />
 
@@ -661,9 +519,7 @@ export default function AddPetScreen() {
                   label="Female"
                   icon="female-outline"
                   selected={sex === "Female"}
-                  onPress={() =>
-                    setSex("Female")
-                  }
+                  onPress={() => setSex("Female")}
                   disabled={loading}
                 />
               </View>
@@ -675,9 +531,7 @@ export default function AddPetScreen() {
               inputRef={(input) => {
                 inputRefs.current.birthDate = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.birthDate)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.birthDate)}
               label="Birth Date"
               placeholder="YYYY-MM-DD"
               value={birthDate}
@@ -685,9 +539,7 @@ export default function AddPetScreen() {
               icon="calendar-outline"
               editable={!loading}
               onPress={
-                Platform.OS === "android"
-                  ? openBirthDatePicker
-                  : undefined
+                Platform.OS === "android" ? openBirthDatePicker : undefined
               }
             />
 
@@ -697,9 +549,7 @@ export default function AddPetScreen() {
               inputRef={(input) => {
                 inputRefs.current.color = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.color)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.color)}
               label="Color"
               placeholder="Example: Golden Brown"
               value={color}
@@ -709,31 +559,20 @@ export default function AddPetScreen() {
             />
           </View>
 
-
-          <Text style={styles.sectionTitle}>
-            Identifying Marks
-          </Text>
+          <Text style={styles.sectionTitle}>Identifying Marks</Text>
 
           <View style={styles.marksCard}>
             <View style={styles.marksHeader}>
-              <Ionicons
-                name="eye-outline"
-                size={21}
-                color="#176B3A"
-              />
+              <Ionicons name="eye-outline" size={21} color="#176B3A" />
 
-              <Text style={styles.marksLabel}>
-                Distinguishing Features
-              </Text>
+              <Text style={styles.marksLabel}>Distinguishing Features</Text>
             </View>
 
             <TextInput
               ref={(input) => {
                 inputRefs.current.marks = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.marks)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.marks)}
               style={styles.marksInput}
               placeholder="Example: White patch on chest, dark spot near left ear..."
               placeholderTextColor="#A0AAA4"
@@ -745,11 +584,8 @@ export default function AddPetScreen() {
               maxLength={250}
             />
 
-            <Text style={styles.characterCount}>
-              {marks.length}/250
-            </Text>
+            <Text style={styles.characterCount}>{marks.length}/250</Text>
           </View>
-
 
           <View style={styles.infoCard}>
             <Ionicons
@@ -759,13 +595,11 @@ export default function AddPetScreen() {
             />
 
             <Text style={styles.infoText}>
-              After registration, TIMAN will create
-              one permanent QR identification for
-              this pet. You can change the pet photo
-              later from the Pet Profile.
+              After registration, TIMAN will create one permanent QR
+              identification for this pet. You can change the pet photo later
+              from the Pet Profile.
             </Text>
           </View>
-
 
           <Pressable
             disabled={loading}
@@ -773,36 +607,22 @@ export default function AddPetScreen() {
             style={({ pressed }) => [
               styles.registerButton,
 
-              pressed &&
-                !loading &&
-                styles.registerPressed,
+              pressed && !loading && styles.registerPressed,
 
-              loading &&
-                styles.disabledButton,
+              loading && styles.disabledButton,
             ]}
           >
             {loading ? (
               <>
-                <ActivityIndicator
-                  size="small"
-                  color="#FFFFFF"
-                />
+                <ActivityIndicator size="small" color="#FFFFFF" />
 
-                <Text style={styles.registerText}>
-                  Registering...
-                </Text>
+                <Text style={styles.registerText}>Registering...</Text>
               </>
             ) : (
               <>
-                <Ionicons
-                  name="paw"
-                  size={21}
-                  color="#FFFFFF"
-                />
+                <Ionicons name="paw" size={21} color="#FFFFFF" />
 
-                <Text style={styles.registerText}>
-                  Register Pet
-                </Text>
+                <Text style={styles.registerText}>Register Pet</Text>
               </>
             )}
           </Pressable>
@@ -811,7 +631,6 @@ export default function AddPetScreen() {
     </SafeAreaView>
   );
 }
-
 
 function InputField({
   label,
@@ -836,9 +655,7 @@ function InputField({
 }) {
   return (
     <View style={styles.fieldGroup}>
-      <Text style={styles.fieldLabel}>
-        {label}
-      </Text>
+      <Text style={styles.fieldLabel}>{label}</Text>
 
       <Pressable
         style={({ pressed }) => [
@@ -848,11 +665,7 @@ function InputField({
         onPress={onPress}
         disabled={!editable}
       >
-        <Ionicons
-          name={icon}
-          size={20}
-          color="#6C7C72"
-        />
+        <Ionicons name={icon} size={20} color="#6C7C72" />
 
         <TextInput
           ref={inputRef}
@@ -877,11 +690,7 @@ function parseDateValue(value: string) {
     return null;
   }
 
-  return new Date(
-    Number(match[1]),
-    Number(match[2]) - 1,
-    Number(match[3])
-  );
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 }
 
 function formatDateValue(date: Date) {
@@ -891,7 +700,6 @@ function formatDateValue(date: Date) {
 
   return `${year}-${month}-${day}`;
 }
-
 
 function OptionButton({
   label,
@@ -912,28 +720,17 @@ function OptionButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.optionButton,
-        selected &&
-          styles.optionButtonSelected,
+        selected && styles.optionButtonSelected,
         pressed && styles.pressed,
       ]}
     >
       <Ionicons
         name={icon}
         size={18}
-        color={
-          selected
-            ? "#176B3A"
-            : "#77847C"
-        }
+        color={selected ? "#176B3A" : "#77847C"}
       />
 
-      <Text
-        style={[
-          styles.optionText,
-          selected &&
-            styles.optionTextSelected,
-        ]}
-      >
+      <Text style={[styles.optionText, selected && styles.optionTextSelected]}>
         {label}
       </Text>
     </Pressable>
@@ -941,11 +738,8 @@ function OptionButton({
 }
 
 function FieldDivider() {
-  return (
-    <View style={styles.fieldDivider} />
-  );
+  return <View style={styles.fieldDivider} />;
 }
-
 
 const styles = StyleSheet.create({
   container: {

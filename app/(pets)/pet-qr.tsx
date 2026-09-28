@@ -1,10 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState, useRef } from "react";
 
 import {
@@ -24,10 +20,6 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
 import { API_URL, getImageUrl } from "../../config/api";
 
-
-
-
-
 type Pet = {
   pet_id: number;
   owner_id: number;
@@ -44,8 +36,6 @@ type Pet = {
   created_at: string;
 };
 
-
-
 export default function PetQRScreen() {
   const { petId } = useLocalSearchParams<{
     petId?: string;
@@ -59,96 +49,66 @@ export default function PetQRScreen() {
 
   const saveQRCode = async () => {
     if (!qrRef.current || !pet) {
-      Alert.alert(
-        "QR Unavailable",
-        "The QR code is not ready yet."
-      );
+      Alert.alert("QR Unavailable", "The QR code is not ready yet.");
       return;
     }
 
     try {
       setSavingQR(true);
 
-      const permission =
-        await MediaLibrary.requestPermissionsAsync();
+      const permission = await MediaLibrary.requestPermissionsAsync();
 
       if (!permission.granted) {
         Alert.alert(
           "Permission Required",
-          "Please allow TIMAN to save images to your device."
+          "Please allow TIMAN to save images to your device.",
         );
         return;
       }
 
       qrRef.current.toDataURL(async (data: string) => {
         try {
-          const fileName =
-            `TIMAN-${pet.pet_name.replace(/\s+/g, "-")}-QR.png`;
+          const fileName = `TIMAN-${pet.pet_name.replace(/\s+/g, "-")}-QR.png`;
 
-          const fileUri =
-            `${FileSystem.cacheDirectory}${fileName}`;
+          const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
 
-          await FileSystem.writeAsStringAsync(
-            fileUri,
-            data,
-            {
-              encoding:
-                FileSystem.EncodingType.Base64,
-            }
-          );
+          await FileSystem.writeAsStringAsync(fileUri, data, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
 
-          await MediaLibrary.saveToLibraryAsync(
-            fileUri
-          );
+          await MediaLibrary.saveToLibraryAsync(fileUri);
 
           Alert.alert(
             "QR Saved",
-            `${pet.pet_name}'s QR code has been saved to your gallery.`
+            `${pet.pet_name}'s QR code has been saved to your gallery.`,
           );
         } catch (error) {
-          console.log(
-            "SAVE QR ERROR:",
-            error
-          );
+          console.log("SAVE QR ERROR:", error);
 
-          Alert.alert(
-            "Save Failed",
-            "Unable to save the QR code."
-          );
+          Alert.alert("Save Failed", "Unable to save the QR code.");
         } finally {
           setSavingQR(false);
         }
       });
     } catch (error) {
-      console.log(
-        "QR PERMISSION ERROR:",
-        error
-      );
+      console.log("QR PERMISSION ERROR:", error);
 
       setSavingQR(false);
 
-      Alert.alert(
-        "Save Failed",
-        "Unable to save the QR code."
-      );
+      Alert.alert("Save Failed", "Unable to save the QR code.");
     }
   };
-
 
   const loadPet = useCallback(async () => {
     if (!petId) {
       setLoading(false);
 
-      Alert.alert(
-        "Pet Error",
-        "No pet was selected.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      Alert.alert("Pet Error", "No pet was selected.", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
 
       return;
     }
@@ -156,62 +116,45 @@ export default function PetQRScreen() {
     try {
       setLoading(true);
 
-      const token =
-        await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
 
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/pets/${petId}`,
-        {
-          method: "GET",
+      const response = await fetch(`${API_URL}/pets/${petId}`, {
+        method: "GET",
 
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const responseText =
-        await response.text();
+      const responseText = await response.text();
 
       let data: any = {};
 
       try {
-        data = responseText
-          ? JSON.parse(responseText)
-          : {};
+        data = responseText ? JSON.parse(responseText) : {};
       } catch {
         data = {
           message: responseText,
         };
       }
 
-      console.log(
-        "PET QR STATUS:",
-        response.status
-      );
+      console.log("PET QR STATUS:", response.status);
 
-      console.log(
-        "PET QR RESPONSE:",
-        data
-      );
+      console.log("PET QR RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
           "Unable to Load QR",
-          data.message ||
-            "Unable to load pet information."
+          data.message || "Unable to load pet information.",
         );
 
         return;
@@ -219,29 +162,21 @@ export default function PetQRScreen() {
 
       setPet(data.pet);
     } catch (error) {
-      console.log(
-        "PET QR ERROR:",
-        error
-      );
+      console.log("PET QR ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     } finally {
       setLoading(false);
     }
   }, [petId]);
-
 
   useFocusEffect(
     useCallback(() => {
       loadPet();
 
       return () => {};
-    }, [loadPet])
+    }, [loadPet]),
   );
-
 
   if (loading) {
     return (
@@ -249,21 +184,13 @@ export default function PetQRScreen() {
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text style={styles.loadingText}>
-            Loading pet QR...
-          </Text>
+          <Text style={styles.loadingText}>Loading pet QR...</Text>
         </View>
       </SafeAreaView>
     );
   }
-
-
-
 
   if (!pet) {
     return (
@@ -271,15 +198,9 @@ export default function PetQRScreen() {
         <Header />
 
         <View style={styles.center}>
-          <Ionicons
-            name="qr-code-outline"
-            size={70}
-            color="#91A097"
-          />
+          <Ionicons name="qr-code-outline" size={70} color="#91A097" />
 
-          <Text style={styles.errorTitle}>
-            QR unavailable
-          </Text>
+          <Text style={styles.errorTitle}>QR unavailable</Text>
 
           <Text style={styles.errorText}>
             Unable to load this pet&apos;s QR code.
@@ -289,25 +210,16 @@ export default function PetQRScreen() {
     );
   }
 
+  const photoUrl = getImageUrl(pet.photo_url);
 
-  const photoUrl =
-    getImageUrl(pet.photo_url);
-
-  const petCode =
-    `PET-${String(pet.pet_id).padStart(
-      4,
-      "0"
-    )}`;
+  const petCode = `PET-${String(pet.pet_id).padStart(4, "0")}`;
 
   const PUBLIC_WEB_URL =
     "https://invoice-producer-seniors-usc.trycloudflare.com";
 
   const publicProfileUrl = pet.qr_code
-    ? `${PUBLIC_WEB_URL}/public/pet/${encodeURIComponent(
-        pet.qr_code
-      )}`
+    ? `${PUBLIC_WEB_URL}/public/pet/${encodeURIComponent(pet.qr_code)}`
     : null;
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -317,26 +229,17 @@ export default function PetQRScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-
         <View style={styles.titleSection}>
           <View style={styles.iconCircle}>
-            <Ionicons
-              name="qr-code"
-              size={28}
-              color="#176B3A"
-            />
+            <Ionicons name="qr-code" size={28} color="#176B3A" />
           </View>
 
-          <Text style={styles.title}>
-            Permanent Pet QR
-          </Text>
+          <Text style={styles.title}>Permanent Pet QR</Text>
 
           <Text style={styles.subtitle}>
-            This QR is permanently assigned to{" "}
-            {pet.pet_name}.
+            This QR is permanently assigned to {pet.pet_name}.
           </Text>
         </View>
-
 
         <View style={styles.petCard}>
           <View style={styles.photoContainer}>
@@ -349,57 +252,31 @@ export default function PetQRScreen() {
                 resizeMode="cover"
               />
             ) : (
-              <View
-                style={
-                  styles.photoPlaceholder
-                }
-              >
-                <Ionicons
-                  name="paw"
-                  size={30}
-                  color="#7EA48A"
-                />
+              <View style={styles.photoPlaceholder}>
+                <Ionicons name="paw" size={30} color="#7EA48A" />
               </View>
             )}
           </View>
 
           <View style={styles.petInformation}>
-            <Text style={styles.petName}>
-              {pet.pet_name}
-            </Text>
+            <Text style={styles.petName}>{pet.pet_name}</Text>
 
-            <Text style={styles.petDetails}>
-              {pet.breed ||
-                pet.species}
-            </Text>
+            <Text style={styles.petDetails}>{pet.breed || pet.species}</Text>
 
-            <Text style={styles.petCode}>
-              {petCode}
-            </Text>
+            <Text style={styles.petCode}>{petCode}</Text>
           </View>
 
-          <StatusBadge
-            status={pet.pet_status}
-          />
+          <StatusBadge status={pet.pet_status} />
         </View>
-
 
         <View style={styles.qrCard}>
           <View style={styles.brandIcon}>
-            <Ionicons
-              name="paw"
-              size={21}
-              color="#FFFFFF"
-            />
+            <Ionicons name="paw" size={21} color="#FFFFFF" />
           </View>
 
-          <Text style={styles.brand}>
-            TIMAN
-          </Text>
+          <Text style={styles.brand}>TIMAN</Text>
 
-          <Text style={styles.qrLabel}>
-            PERMANENT PET IDENTIFICATION
-          </Text>
+          <Text style={styles.qrLabel}>PERMANENT PET IDENTIFICATION</Text>
 
           <View style={styles.qrBox}>
             {publicProfileUrl ? (
@@ -414,37 +291,21 @@ export default function PetQRScreen() {
               />
             ) : (
               <View style={styles.noQr}>
-                <Ionicons
-                  name="qr-code-outline"
-                  size={70}
-                  color="#9BA69F"
-                />
+                <Ionicons name="qr-code-outline" size={70} color="#9BA69F" />
 
-                <Text style={styles.noQrText}>
-                  No permanent QR assigned
-                </Text>
+                <Text style={styles.noQrText}>No permanent QR assigned</Text>
               </View>
             )}
           </View>
 
-          <Text style={styles.qrPetName}>
-            {pet.pet_name}
-          </Text>
+          <Text style={styles.qrPetName}>{pet.pet_name}</Text>
 
-          <Text style={styles.qrPetCode}>
-            {petCode}
-          </Text>
+          <Text style={styles.qrPetCode}>{petCode}</Text>
 
           <View style={styles.permanentBadge}>
-            <Ionicons
-              name="shield-checkmark"
-              size={16}
-              color="#176B3A"
-            />
+            <Ionicons name="shield-checkmark" size={16} color="#176B3A" />
 
-            <Text style={styles.permanentText}>
-              Permanent QR
-            </Text>
+            <Text style={styles.permanentText}>Permanent QR</Text>
           </View>
 
           <Pressable
@@ -457,30 +318,18 @@ export default function PetQRScreen() {
             disabled={savingQR || !publicProfileUrl}
           >
             {savingQR ? (
-              <ActivityIndicator
-                size="small"
-                color="#FFFFFF"
-              />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Ionicons
-                name="download-outline"
-                size={21}
-                color="#FFFFFF"
-              />
+              <Ionicons name="download-outline" size={21} color="#FFFFFF" />
             )}
 
             <Text style={styles.saveQRText}>
-              {savingQR
-                ? "Saving..."
-                : "Save QR Code"}
+              {savingQR ? "Saving..." : "Save QR Code"}
             </Text>
           </Pressable>
         </View>
 
-
-        <Text style={styles.sectionTitle}>
-          How it works
-        </Text>
+        <Text style={styles.sectionTitle}>How it works</Text>
 
         <View style={styles.stepsCard}>
           <Step
@@ -518,25 +367,20 @@ export default function PetQRScreen() {
           />
         </View>
 
-
         <Pressable
           style={({ pressed }) => [
             styles.doneButton,
 
-            pressed &&
-              styles.buttonPressed,
+            pressed && styles.buttonPressed,
           ]}
           onPress={() => router.back()}
         >
-          <Text style={styles.doneText}>
-            Done
-          </Text>
+          <Text style={styles.doneText}>Done</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
 
 function Header() {
   return (
@@ -548,81 +392,49 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons
-          name="chevron-back"
-          size={27}
-          color="#173D2A"
-        />
+        <Ionicons name="chevron-back" size={27} color="#173D2A" />
       </Pressable>
 
-      <Text style={styles.headerTitle}>
-        Pet QR Code
-      </Text>
+      <Text style={styles.headerTitle}>Pet QR Code</Text>
 
       <View style={styles.headerButton} />
     </View>
   );
 }
 
+function StatusBadge({ status }: { status: Pet["pet_status"] }) {
+  let badgeStyle = styles.safeBadge;
 
-function StatusBadge({
-  status,
-}: {
-  status: Pet["pet_status"];
-}) {
-  let badgeStyle =
-    styles.safeBadge;
-
-  let textStyle =
-    styles.safeText;
+  let textStyle = styles.safeText;
 
   if (status === "Missing") {
-    badgeStyle =
-      styles.missingBadge;
+    badgeStyle = styles.missingBadge;
 
-    textStyle =
-      styles.missingText;
+    textStyle = styles.missingText;
   }
 
   if (status === "Found") {
-    badgeStyle =
-      styles.foundBadge;
+    badgeStyle = styles.foundBadge;
 
-    textStyle =
-      styles.foundText;
+    textStyle = styles.foundText;
   }
 
   return (
-    <View
-      style={[
-        styles.statusBadge,
-        badgeStyle,
-      ]}
-    >
+    <View style={[styles.statusBadge, badgeStyle]}>
       <View
         style={[
           styles.statusDot,
 
-          status === "Missing" &&
-            styles.missingDot,
+          status === "Missing" && styles.missingDot,
 
-          status === "Found" &&
-            styles.foundDot,
+          status === "Found" && styles.foundDot,
         ]}
       />
 
-      <Text
-        style={[
-          styles.statusText,
-          textStyle,
-        ]}
-      >
-        {status}
-      </Text>
+      <Text style={[styles.statusText, textStyle]}>{status}</Text>
     </View>
   );
 }
-
 
 function Step({
   number,
@@ -638,43 +450,25 @@ function Step({
   return (
     <View style={styles.step}>
       <View style={styles.stepNumber}>
-        <Text style={styles.stepNumberText}>
-          {number}
-        </Text>
+        <Text style={styles.stepNumberText}>{number}</Text>
       </View>
 
       <View style={styles.stepIcon}>
-        <Ionicons
-          name={icon}
-          size={21}
-          color="#176B3A"
-        />
+        <Ionicons name={icon} size={21} color="#176B3A" />
       </View>
 
       <View style={styles.stepContent}>
-        <Text style={styles.stepTitle}>
-          {title}
-        </Text>
+        <Text style={styles.stepTitle}>{title}</Text>
 
-        <Text
-          style={
-            styles.stepDescription
-          }
-        >
-          {description}
-        </Text>
+        <Text style={styles.stepDescription}>{description}</Text>
       </View>
     </View>
   );
 }
 
 function Divider() {
-  return (
-    <View style={styles.divider} />
-  );
+  return <View style={styles.divider} />;
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -742,7 +536,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-
   titleSection: {
     alignItems: "center",
     marginBottom: 22,
@@ -776,7 +569,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#7A867F",
   },
-
 
   petCard: {
     backgroundColor: "#FFFFFF",
@@ -891,7 +683,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#8C6A16",
   },
 
-
   qrCard: {
     backgroundColor: "#FFFFFF",
 
@@ -1001,7 +792,6 @@ const styles = StyleSheet.create({
     color: "#176B3A",
   },
 
-
   sectionTitle: {
     marginTop: 27,
     marginBottom: 12,
@@ -1087,7 +877,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF1EF",
     marginLeft: 82,
   },
-
 
   privacyCard: {
     marginTop: 18,

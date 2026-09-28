@@ -17,10 +17,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { API_URL } from "../../config/api";
 
-
-
-
-
 type PetStatus = "Safe" | "Missing" | "Found";
 
 type Pet = {
@@ -60,10 +56,6 @@ type QRScan = {
   scannedAt: string;
 };
 
-
-
-
-
 export default function LostPetScreen() {
   const params = useLocalSearchParams<{
     petId?: string;
@@ -73,18 +65,12 @@ export default function LostPetScreen() {
   const petId = params.petId ?? params.id;
 
   const [pet, setPet] = useState<Pet | null>(null);
-  const [lostReport, setLostReport] =
-    useState<LostReport | null>(null);
-  const [scanHistory, setScanHistory] =
-    useState<QRScan[]>([]);
+  const [lostReport, setLostReport] = useState<LostReport | null>(null);
+  const [scanHistory, setScanHistory] = useState<QRScan[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [recovering, setRecovering] = useState(false);
-
-
-
-
 
   const loadLostPetDetails = useCallback(
     async (showLoading = true) => {
@@ -101,105 +87,56 @@ export default function LostPetScreen() {
           setLoading(true);
         }
 
-        const token =
-          await AsyncStorage.getItem("token");
+        const token = await AsyncStorage.getItem("token");
 
         if (!token) {
-          Alert.alert(
-            "Session Expired",
-            "Please log in again."
-          );
+          Alert.alert("Session Expired", "Please log in again.");
 
           router.replace("/login");
           return;
         }
 
+        const petResponse = await fetch(`${API_URL}/pets/${petId}`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
+        const petData = await petResponse.json();
 
+        console.log("LOST PET - PET STATUS:", petResponse.status);
 
+        console.log("LOST PET - PET RESPONSE:", petData);
 
-        const petResponse = await fetch(
-          `${API_URL}/pets/${petId}`,
-          {
+        if (!petResponse.ok) {
+          throw new Error(petData.message || "Unable to load pet.");
+        }
+
+        setPet(petData.pet);
+
+        if (petData.pet.pet_status === "Missing") {
+          const reportResponse = await fetch(`${API_URL}/lost-pets/${petId}`, {
             method: "GET",
             headers: {
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }
-        );
+          });
 
-        const petData =
-          await petResponse.json();
+          const reportData = await reportResponse.json();
 
-        console.log(
-          "LOST PET - PET STATUS:",
-          petResponse.status
-        );
+          console.log("LOST REPORT STATUS:", reportResponse.status);
 
-        console.log(
-          "LOST PET - PET RESPONSE:",
-          petData
-        );
-
-        if (!petResponse.ok) {
-          throw new Error(
-            petData.message ||
-              "Unable to load pet."
-          );
-        }
-
-        setPet(petData.pet);
-
-
-        if (
-          petData.pet.pet_status ===
-          "Missing"
-        ) {
-          const reportResponse =
-            await fetch(
-              `${API_URL}/lost-pets/${petId}`,
-              {
-                method: "GET",
-                headers: {
-                  Accept:
-                    "application/json",
-                  Authorization:
-                    `Bearer ${token}`,
-                },
-              }
-            );
-
-          const reportData =
-            await reportResponse.json();
-
-          console.log(
-            "LOST REPORT STATUS:",
-            reportResponse.status
-          );
-
-          console.log(
-            "LOST REPORT RESPONSE:",
-            reportData
-          );
+          console.log("LOST REPORT RESPONSE:", reportData);
 
           if (reportResponse.ok) {
-            setLostReport(
-              reportData.report ||
-                reportData.lostReport ||
-                null
-            );
+            setLostReport(reportData.report || reportData.lostReport || null);
 
-            const scans =
-              reportData.scanHistory ||
-              reportData.scans ||
-              [];
+            const scans = reportData.scanHistory || reportData.scans || [];
 
-            setScanHistory(
-              Array.isArray(scans)
-                ? scans
-                : []
-            );
+            setScanHistory(Array.isArray(scans) ? scans : []);
           } else {
             setLostReport(null);
             setScanHistory([]);
@@ -209,16 +146,11 @@ export default function LostPetScreen() {
           setScanHistory([]);
         }
       } catch (error) {
-        console.error(
-          "LOAD LOST PET DETAILS ERROR:",
-          error
-        );
+        console.error("LOAD LOST PET DETAILS ERROR:", error);
 
         Alert.alert(
           "Unable to Load Details",
-          error instanceof Error
-            ? error.message
-            : "Something went wrong."
+          error instanceof Error ? error.message : "Something went wrong.",
         );
       } finally {
         if (showLoading) {
@@ -226,14 +158,12 @@ export default function LostPetScreen() {
         }
       }
     },
-    [petId]
+    [petId],
   );
-
 
   useEffect(() => {
     loadLostPetDetails();
   }, [loadLostPetDetails]);
-
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -243,10 +173,7 @@ export default function LostPetScreen() {
     setRefreshing(false);
   };
 
-
-  const formatDateTime = (
-    value: string | null | undefined
-  ) => {
+  const formatDateTime = (value: string | null | undefined) => {
     if (!value) {
       return "Not available";
     }
@@ -266,24 +193,13 @@ export default function LostPetScreen() {
     });
   };
 
-
-  const latestScan =
-    scanHistory.length > 0
-      ? scanHistory[0]
-      : null;
-
+  const latestScan = scanHistory.length > 0 ? scanHistory[0] : null;
 
   const latestLocationScan =
     scanHistory.find((scan) => {
-      const latitude =
-        scan.latitude != null
-          ? Number(scan.latitude)
-          : NaN;
+      const latitude = scan.latitude != null ? Number(scan.latitude) : NaN;
 
-      const longitude =
-        scan.longitude != null
-          ? Number(scan.longitude)
-          : NaN;
+      const longitude = scan.longitude != null ? Number(scan.longitude) : NaN;
 
       return (
         scan.locationShared &&
@@ -294,43 +210,25 @@ export default function LostPetScreen() {
 
   const latestLocationLatitude =
     latestLocationScan?.latitude != null
-      ? Number(
-          latestLocationScan.latitude
-        )
+      ? Number(latestLocationScan.latitude)
       : null;
 
   const latestLocationLongitude =
     latestLocationScan?.longitude != null
-      ? Number(
-          latestLocationScan.longitude
-        )
+      ? Number(latestLocationScan.longitude)
       : null;
 
   const hasLatestAvailableLocation =
     latestLocationLatitude !== null &&
     latestLocationLongitude !== null &&
-    Number.isFinite(
-      latestLocationLatitude
-    ) &&
-    Number.isFinite(
-      latestLocationLongitude
-    );
+    Number.isFinite(latestLocationLatitude) &&
+    Number.isFinite(latestLocationLongitude);
 
-
-
-
-
-  const openScanLocation = async (
-    latitude: number,
-    longitude: number
-  ) => {
-    if (
-      !Number.isFinite(latitude) ||
-      !Number.isFinite(longitude)
-    ) {
+  const openScanLocation = async (latitude: number, longitude: number) => {
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       Alert.alert(
         "Location Unavailable",
-        "This scan does not have a valid location."
+        "This scan does not have a valid location.",
       );
 
       return;
@@ -343,130 +241,83 @@ export default function LostPetScreen() {
     try {
       await Linking.openURL(googleMapsUrl);
     } catch (error) {
-      console.error(
-        "OPEN GOOGLE MAPS ERROR:",
-        error
-      );
+      console.error("OPEN GOOGLE MAPS ERROR:", error);
 
-      Alert.alert(
-        "Unable to Open Map",
-        "Google Maps could not be opened."
-      );
+      Alert.alert("Unable to Open Map", "Google Maps could not be opened.");
     }
   };
 
-
-  const openLastScanLocation =
-    async () => {
-      if (
-        !hasLatestAvailableLocation ||
-        latestLocationLatitude === null ||
-        latestLocationLongitude === null
-      ) {
-        Alert.alert(
-          "Location Unavailable",
-          "No shared scan location is available yet."
-        );
-
-        return;
-      }
-
-      await openScanLocation(
-        latestLocationLatitude,
-        latestLocationLongitude
+  const openLastScanLocation = async () => {
+    if (
+      !hasLatestAvailableLocation ||
+      latestLocationLatitude === null ||
+      latestLocationLongitude === null
+    ) {
+      Alert.alert(
+        "Location Unavailable",
+        "No shared scan location is available yet.",
       );
-    };
 
+      return;
+    }
+
+    await openScanLocation(latestLocationLatitude, latestLocationLongitude);
+  };
 
   const recoverPet = async () => {
-    if (
-      !pet ||
-      !petId ||
-      recovering
-    ) {
+    if (!pet || !petId || recovering) {
       return;
     }
 
     try {
       setRecovering(true);
 
-      const token =
-        await AsyncStorage.getItem(
-          "token"
-        );
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/lost-pets/${petId}/recovered`,
-        {
-          method: "PATCH",
-          headers: {
-            Accept:
-              "application/json",
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/lost-pets/${petId}/recovered`, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
-      console.log(
-        "RECOVER PET STATUS:",
-        response.status
-      );
+      console.log("RECOVER PET STATUS:", response.status);
 
-      console.log(
-        "RECOVER PET RESPONSE:",
-        data
-      );
+      console.log("RECOVER PET RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
           "Unable to Update Pet",
-          data.message ||
-            "Please try again."
+          data.message || "Please try again.",
         );
 
         return;
       }
 
-      Alert.alert(
-        "Pet is Safe",
-        `${pet.pet_name} has been marked as safe.`,
-        [
-          {
-            text: "OK",
-            onPress: () =>
-              router.back(),
-          },
-        ]
-      );
+      Alert.alert("Pet is Safe", `${pet.pet_name} has been marked as safe.`, [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
     } catch (error) {
-      console.error(
-        "RECOVER PET ERROR:",
-        error
-      );
+      console.error("RECOVER PET ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     } finally {
       setRecovering(false);
     }
   };
-
 
   const confirmRecovery = () => {
     if (!pet) {
@@ -482,141 +333,67 @@ export default function LostPetScreen() {
           style: "cancel",
         },
         {
-          text:
-            "Yes, Pet is Safe",
+          text: "Yes, Pet is Safe",
           onPress: recoverPet,
         },
-      ]
+      ],
     );
   };
 
-
   if (loading) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
+      <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Pressable
             style={({ pressed }) => [
               styles.headerButton,
               pressed && styles.pressed,
             ]}
-            onPress={() =>
-              router.back()
-            }
+            onPress={() => router.back()}
           >
-            <Ionicons
-              name="chevron-back"
-              size={27}
-              color="#173D2A"
-            />
+            <Ionicons name="chevron-back" size={27} color="#173D2A" />
           </Pressable>
 
-          <Text
-            style={
-              styles.headerTitle
-            }
-          >
-            Missing Pet Details
-          </Text>
+          <Text style={styles.headerTitle}>Missing Pet Details</Text>
 
-          <View
-            style={
-              styles.headerButton
-            }
-          />
+          <View style={styles.headerButton} />
         </View>
 
-        <View
-          style={
-            styles.loadingContainer
-          }
-        >
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text
-            style={
-              styles.loadingText
-            }
-          >
-            Loading missing pet
-            details...
-          </Text>
+          <Text style={styles.loadingText}>Loading missing pet details...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-
-
-
   if (!petId || !pet) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
+      <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Pressable
             style={({ pressed }) => [
               styles.headerButton,
               pressed && styles.pressed,
             ]}
-            onPress={() =>
-              router.back()
-            }
+            onPress={() => router.back()}
           >
-            <Ionicons
-              name="chevron-back"
-              size={27}
-              color="#173D2A"
-            />
+            <Ionicons name="chevron-back" size={27} color="#173D2A" />
           </Pressable>
 
-          <Text
-            style={
-              styles.headerTitle
-            }
-          >
-            Missing Pet Details
-          </Text>
+          <Text style={styles.headerTitle}>Missing Pet Details</Text>
 
-          <View
-            style={
-              styles.headerButton
-            }
-          />
+          <View style={styles.headerButton} />
         </View>
 
-        <View
-          style={
-            styles.emptyPetContainer
-          }
-        >
-          <Ionicons
-            name="paw-outline"
-            size={50}
-            color="#9BA69F"
-          />
+        <View style={styles.emptyPetContainer}>
+          <Ionicons name="paw-outline" size={50} color="#9BA69F" />
 
-          <Text
-            style={
-              styles.emptyPetTitle
-            }
-          >
-            Pet Not Found
-          </Text>
+          <Text style={styles.emptyPetTitle}>Pet Not Found</Text>
 
-          <Text
-            style={
-              styles.emptyPetText
-            }
-          >
-            Unable to load the
-            selected pet.
+          <Text style={styles.emptyPetText}>
+            Unable to load the selected pet.
           </Text>
 
           <Pressable
@@ -624,222 +401,100 @@ export default function LostPetScreen() {
               styles.backButton,
               pressed && styles.pressed,
             ]}
-            onPress={() =>
-              router.back()
-            }
+            onPress={() => router.back()}
           >
-            <Text
-              style={
-                styles.backButtonText
-              }
-            >
-              Go Back
-            </Text>
+            <Text style={styles.backButtonText}>Go Back</Text>
           </Pressable>
         </View>
       </SafeAreaView>
     );
   }
 
-  const petLabel =
-    pet.breed?.trim() ||
-    pet.species ||
-    "Pet";
-
-
-
+  const petLabel = pet.breed?.trim() || pet.species || "Pet";
 
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
-
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable
           style={({ pressed }) => [
             styles.headerButton,
             pressed && styles.pressed,
           ]}
-          onPress={() =>
-            router.back()
-          }
+          onPress={() => router.back()}
         >
-          <Ionicons
-            name="chevron-back"
-            size={27}
-            color="#173D2A"
-          />
+          <Ionicons name="chevron-back" size={27} color="#173D2A" />
         </Pressable>
 
-        <Text
-          style={styles.headerTitle}
-        >
-          Missing Pet Details
-        </Text>
+        <Text style={styles.headerTitle}>Missing Pet Details</Text>
 
-        <View
-          style={styles.headerButton}
-        />
+        <View style={styles.headerButton} />
       </View>
 
       <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={
-          styles.content
-        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
-
         <View style={styles.petCard}>
-          <View
-            style={styles.petIcon}
-          >
-            <Ionicons
-              name="paw"
-              size={38}
-              color="#176B3A"
-            />
+          <View style={styles.petIcon}>
+            <Ionicons name="paw" size={38} color="#176B3A" />
           </View>
 
-          <View
-            style={styles.petInfo}
-          >
-            <Text
-              style={styles.petName}
-            >
-              {pet.pet_name}
-            </Text>
+          <View style={styles.petInfo}>
+            <Text style={styles.petName}>{pet.pet_name}</Text>
 
-            <Text
-              style={styles.petBreed}
-            >
+            <Text style={styles.petBreed}>
               {petLabel} • {pet.sex}
             </Text>
 
-            <Text
-              style={styles.petId}
-            >
+            <Text style={styles.petId}>
               PET-
-              {String(
-                pet.pet_id
-              ).padStart(4, "0")}
+              {String(pet.pet_id).padStart(4, "0")}
             </Text>
           </View>
 
-          <StatusBadge
-            status={pet.pet_status}
-          />
+          <StatusBadge status={pet.pet_status} />
         </View>
 
-
-        {pet.pet_status ===
-        "Missing" ? (
-          <View
-            style={
-              styles.missingCard
-            }
-          >
-            <View
-              style={
-                styles.missingIcon
-              }
-            >
-              <Ionicons
-                name="alert-circle"
-                size={30}
-                color="#A14343"
-              />
+        {pet.pet_status === "Missing" ? (
+          <View style={styles.missingCard}>
+            <View style={styles.missingIcon}>
+              <Ionicons name="alert-circle" size={30} color="#A14343" />
             </View>
 
-            <View
-              style={
-                styles.statusContent
-              }
-            >
-              <Text
-                style={
-                  styles.missingTitle
-                }
-              >
-                {pet.pet_name} is
-                Missing
-              </Text>
+            <View style={styles.statusContent}>
+              <Text style={styles.missingTitle}>{pet.pet_name} is Missing</Text>
 
-              <Text
-                style={
-                  styles.statusText
-                }
-              >
-                QR scan activity and
-                the latest shared
-                location can be viewed
+              <Text style={styles.statusText}>
+                QR scan activity and the latest shared location can be viewed
                 below.
               </Text>
             </View>
           </View>
         ) : (
-          <View
-            style={styles.safeCard}
-          >
-            <View
-              style={styles.safeIcon}
-            >
-              <Ionicons
-                name="shield-checkmark"
-                size={30}
-                color="#267542"
-              />
+          <View style={styles.safeCard}>
+            <View style={styles.safeIcon}>
+              <Ionicons name="shield-checkmark" size={30} color="#267542" />
             </View>
 
-            <View
-              style={
-                styles.statusContent
-              }
-            >
-              <Text
-                style={
-                  styles.safeTitle
-                }
-              >
-                {pet.pet_name} is Safe
-              </Text>
+            <View style={styles.statusContent}>
+              <Text style={styles.safeTitle}>{pet.pet_name} is Safe</Text>
 
-              <Text
-                style={
-                  styles.statusText
-                }
-              >
-                This pet is no longer
-                marked as missing.
+              <Text style={styles.statusText}>
+                This pet is no longer marked as missing.
               </Text>
             </View>
           </View>
         )}
 
-
         {lostReport && (
           <>
-            <Text
-              style={
-                styles.sectionTitle
-              }
-            >
-              Missing Report
-            </Text>
+            <Text style={styles.sectionTitle}>Missing Report</Text>
 
-            <View
-              style={styles.qrCard}
-            >
-              <View
-                style={styles.qrIcon}
-              >
+            <View style={styles.qrCard}>
+              <View style={styles.qrIcon}>
                 <Ionicons
                   name="document-text-outline"
                   size={27}
@@ -847,29 +502,13 @@ export default function LostPetScreen() {
                 />
               </View>
 
-              <View
-                style={
-                  styles.qrContent
-                }
-              >
-                <Text
-                  style={
-                    styles.qrTitle
-                  }
-                >
-                  Condition:{" "}
-                  {
-                    lostReport.current_condition
-                  }
+              <View style={styles.qrContent}>
+                <Text style={styles.qrTitle}>
+                  Condition: {lostReport.current_condition}
                 </Text>
 
-                <Text
-                  style={
-                    styles.qrText
-                  }
-                >
-                  {lostReport.owner_message ||
-                    "No message provided."}
+                <Text style={styles.qrText}>
+                  {lostReport.owner_message || "No message provided."}
                 </Text>
 
                 <Text
@@ -880,75 +519,30 @@ export default function LostPetScreen() {
                     },
                   ]}
                 >
-                  Missing since:{" "}
-                  {formatDateTime(
-                    lostReport.missing_since
-                  )}
+                  Missing since: {formatDateTime(lostReport.missing_since)}
                 </Text>
               </View>
             </View>
           </>
         )}
 
-
-        <Text
-          style={styles.sectionTitle}
-        >
-          Latest QR Scan
-        </Text>
+        <Text style={styles.sectionTitle}>Latest QR Scan</Text>
 
         {latestScan ? (
-          <View
-            style={
-              styles.processCard
-            }
-          >
-
-            <View
-              style={
-                styles.processItem
-              }
-            >
-              <View
-                style={
-                  styles.processIcon
-                }
-              >
-                <Ionicons
-                  name="qr-code-outline"
-                  size={24}
-                  color="#176B3A"
-                />
+          <View style={styles.processCard}>
+            <View style={styles.processItem}>
+              <View style={styles.processIcon}>
+                <Ionicons name="qr-code-outline" size={24} color="#176B3A" />
               </View>
 
-              <View
-                style={
-                  styles.processContent
-                }
-              >
-                <Text
-                  style={
-                    styles.processTitle
-                  }
-                >
-                  Latest Scan
+              <View style={styles.processContent}>
+                <Text style={styles.processTitle}>Latest Scan</Text>
+
+                <Text style={styles.processDescription}>
+                  {formatDateTime(latestScan.scannedAt)}
                 </Text>
 
-                <Text
-                  style={
-                    styles.processDescription
-                  }
-                >
-                  {formatDateTime(
-                    latestScan.scannedAt
-                  )}
-                </Text>
-
-                <Text
-                  style={
-                    styles.processDescription
-                  }
-                >
+                <Text style={styles.processDescription}>
                   {latestScan.locationShared
                     ? "Location was shared."
                     : "Location was not shared."}
@@ -956,92 +550,41 @@ export default function LostPetScreen() {
               </View>
             </View>
 
-
             <View
               style={{
                 height: 1,
-                backgroundColor:
-                  "#E5EAE7",
+                backgroundColor: "#E5EAE7",
                 marginVertical: 14,
               }}
             />
 
-
-            <View
-              style={
-                styles.processItem
-              }
-            >
-              <View
-                style={
-                  styles.processIcon
-                }
-              >
-                <Ionicons
-                  name="location-outline"
-                  size={24}
-                  color="#176B3A"
-                />
+            <View style={styles.processItem}>
+              <View style={styles.processIcon}>
+                <Ionicons name="location-outline" size={24} color="#176B3A" />
               </View>
 
-              <View
-                style={
-                  styles.processContent
-                }
-              >
-                <Text
-                  style={
-                    styles.processTitle
-                  }
-                >
-                  Latest Available
-                  Location
+              <View style={styles.processContent}>
+                <Text style={styles.processTitle}>
+                  Latest Available Location
                 </Text>
 
-                {hasLatestAvailableLocation &&
-                latestLocationScan ? (
+                {hasLatestAvailableLocation && latestLocationScan ? (
                   <>
-                    <Text
-                      style={
-                        styles.processDescription
-                      }
-                    >
-                      Latitude:{" "}
-                      {
-                        latestLocationLatitude
-                      }
+                    <Text style={styles.processDescription}>
+                      Latitude: {latestLocationLatitude}
                     </Text>
 
-                    <Text
-                      style={
-                        styles.processDescription
-                      }
-                    >
-                      Longitude:{" "}
-                      {
-                        latestLocationLongitude
-                      }
+                    <Text style={styles.processDescription}>
+                      Longitude: {latestLocationLongitude}
                     </Text>
 
-                    <Text
-                      style={
-                        styles.processDescription
-                      }
-                    >
-                      Shared:{" "}
-                      {formatDateTime(
-                        latestLocationScan.scannedAt
-                      )}
+                    <Text style={styles.processDescription}>
+                      Shared: {formatDateTime(latestLocationScan.scannedAt)}
                     </Text>
                   </>
                 ) : (
-                  <Text
-                    style={
-                      styles.processDescription
-                    }
-                  >
-                    No scan location has
-                    been shared yet.
+                  <Text style={styles.processDescription}>
+                    No scan location has been shared yet.
                   </Text>
                 )}
               </View>
@@ -1049,259 +592,134 @@ export default function LostPetScreen() {
 
             {hasLatestAvailableLocation && (
               <Pressable
-                style={({
-                  pressed,
-                }) => [
+                style={({ pressed }) => [
                   styles.previewButton,
                   {
                     marginTop: 16,
                   },
-                  pressed &&
-                    styles.pressed,
+                  pressed && styles.pressed,
                 ]}
-                onPress={
-                  openLastScanLocation
-                }
+                onPress={openLastScanLocation}
               >
-                <Ionicons
-                  name="map-outline"
-                  size={20}
-                  color="#176B3A"
-                />
+                <Ionicons name="map-outline" size={20} color="#176B3A" />
 
-                <Text
-                  style={
-                    styles.previewText
-                  }
-                >
-                  Open Location in Maps
-                </Text>
+                <Text style={styles.previewText}>Open Location in Maps</Text>
               </Pressable>
             )}
           </View>
         ) : (
-          <View
-            style={
-              styles.emptyReport
-            }
-          >
-            <Ionicons
-              name="location-outline"
-              size={31}
-              color="#9BA69F"
-            />
+          <View style={styles.emptyReport}>
+            <Ionicons name="location-outline" size={31} color="#9BA69F" />
 
-            <Text
-              style={
-                styles.emptyTitle
-              }
-            >
-              No QR Scans Yet
-            </Text>
+            <Text style={styles.emptyTitle}>No QR Scans Yet</Text>
 
-            <Text
-              style={
-                styles.emptyText
-              }
-            >
-              QR scan activity and
-              shared locations will
-              appear here when someone
-              scans {pet.pet_name}&apos;s QR
-              code.
+            <Text style={styles.emptyText}>
+              QR scan activity and shared locations will appear here when
+              someone scans {pet.pet_name}&apos;s QR code.
             </Text>
           </View>
         )}
 
-
-        {scanHistory.length >
-          0 && (
+        {scanHistory.length > 0 && (
           <>
-            <View
-              style={
-                styles.sectionHeader
-              }
-            >
-              <Text
-                style={
-                  styles.sectionTitle
-                }
-              >
-                Recent QR Scans
-              </Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Recent QR Scans</Text>
 
-              <View
-                style={
-                  styles.reportCount
-                }
-              >
-                <Text
-                  style={
-                    styles.reportCountText
-                  }
-                >
-                  {scanHistory.length}
-                </Text>
+              <View style={styles.reportCount}>
+                <Text style={styles.reportCountText}>{scanHistory.length}</Text>
               </View>
             </View>
 
-            {scanHistory.map(
-              (scan, index) => {
-                const latitude =
-                  scan.latitude !=
-                  null
-                    ? Number(
-                        scan.latitude
-                      )
-                    : null;
+            {scanHistory.map((scan, index) => {
+              const latitude =
+                scan.latitude != null ? Number(scan.latitude) : null;
 
-                const longitude =
-                  scan.longitude !=
-                  null
-                    ? Number(
-                        scan.longitude
-                      )
-                    : null;
+              const longitude =
+                scan.longitude != null ? Number(scan.longitude) : null;
 
-                const hasLocation =
-                  latitude !== null &&
-                  longitude !== null &&
-                  Number.isFinite(
-                    latitude
-                  ) &&
-                  Number.isFinite(
-                    longitude
-                  );
+              const hasLocation =
+                latitude !== null &&
+                longitude !== null &&
+                Number.isFinite(latitude) &&
+                Number.isFinite(longitude);
 
-                return (
-                  <View
-                    key={
-                      scan.scanId ??
-                      `scan-${index}`
-                    }
-                    style={[
-                      styles.qrCard,
-                      {
-                        marginBottom: 10,
-                      },
-                    ]}
-                  >
-                    <View
-                      style={
-                        styles.qrIcon
-                      }
-                    >
-                      <Ionicons
-                        name={
-                          index === 0
-                            ? "location"
-                            : "location-outline"
-                        }
-                        size={24}
-                        color="#176B3A"
-                      />
-                    </View>
-
-                    <View
-                      style={
-                        styles.qrContent
-                      }
-                    >
-                      <Text
-                        style={
-                          styles.qrTitle
-                        }
-                      >
-                        {index === 0
-                          ? "Latest Scan"
-                          : `Scan ${index + 1}`}
-                      </Text>
-
-                      <Text
-                        style={
-                          styles.qrText
-                        }
-                      >
-                        {formatDateTime(
-                          scan.scannedAt
-                        )}
-                      </Text>
-
-                      <Text
-                        style={[
-                          styles.qrText,
-                          {
-                            marginTop: 3,
-                          },
-                        ]}
-                      >
-                        {hasLocation
-                          ? `${latitude}, ${longitude}`
-                          : "Location not shared"}
-                      </Text>
-
-                      {hasLocation &&
-                        latitude !==
-                          null &&
-                        longitude !==
-                          null && (
-                          <Pressable
-                            style={({
-                              pressed,
-                            }) => [
-                              styles.scanMapButton,
-                              pressed &&
-                                styles.pressed,
-                            ]}
-                            onPress={() =>
-                              openScanLocation(
-                                latitude,
-                                longitude
-                              )
-                            }
-                          >
-                            <Ionicons
-                              name="map-outline"
-                              size={17}
-                              color="#176B3A"
-                            />
-
-                            <Text
-                              style={
-                                styles.scanMapButtonText
-                              }
-                            >
-                              View Location
-                            </Text>
-                          </Pressable>
-                        )}
-                    </View>
+              return (
+                <View
+                  key={scan.scanId ?? `scan-${index}`}
+                  style={[
+                    styles.qrCard,
+                    {
+                      marginBottom: 10,
+                    },
+                  ]}
+                >
+                  <View style={styles.qrIcon}>
+                    <Ionicons
+                      name={index === 0 ? "location" : "location-outline"}
+                      size={24}
+                      color="#176B3A"
+                    />
                   </View>
-                );
-              }
-            )}
+
+                  <View style={styles.qrContent}>
+                    <Text style={styles.qrTitle}>
+                      {index === 0 ? "Latest Scan" : `Scan ${index + 1}`}
+                    </Text>
+
+                    <Text style={styles.qrText}>
+                      {formatDateTime(scan.scannedAt)}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.qrText,
+                        {
+                          marginTop: 3,
+                        },
+                      ]}
+                    >
+                      {hasLocation
+                        ? `${latitude}, ${longitude}`
+                        : "Location not shared"}
+                    </Text>
+
+                    {hasLocation && latitude !== null && longitude !== null && (
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.scanMapButton,
+                          pressed && styles.pressed,
+                        ]}
+                        onPress={() => openScanLocation(latitude, longitude)}
+                      >
+                        <Ionicons
+                          name="map-outline"
+                          size={17}
+                          color="#176B3A"
+                        />
+
+                        <Text style={styles.scanMapButtonText}>
+                          View Location
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
           </>
         )}
 
-        {pet.pet_status ===
-          "Missing" && (
+        {pet.pet_status === "Missing" && (
           <Pressable
             disabled={recovering}
             style={({ pressed }) => [
               styles.safeButton,
-              (pressed ||
-                recovering) &&
-                styles.pressed,
+              (pressed || recovering) && styles.pressed,
             ]}
-            onPress={
-              confirmRecovery
-            }
+            onPress={confirmRecovery}
           >
             {recovering ? (
-              <ActivityIndicator
-                size="small"
-                color="#FFFFFF"
-              />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <>
                 <Ionicons
@@ -1310,35 +728,22 @@ export default function LostPetScreen() {
                   color="#FFFFFF"
                 />
 
-                <Text
-                  style={
-                    styles.safeButtonText
-                  }
-                >
-                  I Saw the Pet
-                </Text>
+                <Text style={styles.safeButtonText}>I Saw the Pet</Text>
               </>
             )}
           </Pressable>
         )}
 
-
-        <View
-          style={styles.infoCard}
-        >
+        <View style={styles.infoCard}>
           <Ionicons
             name="information-circle-outline"
             size={21}
             color="#176B3A"
           />
 
-          <Text
-            style={styles.infoText}
-          >
-            Scan locations are only
-            available when the person
-            scanning the QR allows
-            location access.
+          <Text style={styles.infoText}>
+            Scan locations are only available when the person scanning the QR
+            allows location access.
           </Text>
         </View>
       </ScrollView>
@@ -1346,17 +751,10 @@ export default function LostPetScreen() {
   );
 }
 
+function StatusBadge({ status }: { status: PetStatus }) {
+  const isSafe = status === "Safe";
 
-function StatusBadge({
-  status,
-}: {
-  status: PetStatus;
-}) {
-  const isSafe =
-    status === "Safe";
-
-  const isFound =
-    status === "Found";
+  const isFound = status === "Found";
 
   return (
     <View
@@ -1373,12 +771,11 @@ function StatusBadge({
         style={[
           styles.statusDot,
           {
-            backgroundColor:
-              isSafe
-                ? "#2E9C52"
-                : isFound
-                  ? "#D99B35"
-                  : "#B84A4A",
+            backgroundColor: isSafe
+              ? "#2E9C52"
+              : isFound
+                ? "#D99B35"
+                : "#B84A4A",
           },
         ]}
       />
@@ -1387,11 +784,7 @@ function StatusBadge({
         style={[
           styles.statusBadgeText,
           {
-            color: isSafe
-              ? "#267542"
-              : isFound
-                ? "#99691E"
-                : "#A14343",
+            color: isSafe ? "#267542" : isFound ? "#99691E" : "#A14343",
           },
         ]}
       >

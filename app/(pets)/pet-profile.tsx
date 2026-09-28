@@ -1,11 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
-import {
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 
 import {
@@ -27,10 +23,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
 
-
-
-
-
 type PetStatus = "Safe" | "Missing" | "Found";
 
 type MissingCondition = "Safe" | "Not Safe";
@@ -51,21 +43,14 @@ type Pet = {
   created_at: string;
 };
 
-
-
-
-
 export default function PetProfileScreen() {
   const {
     scrollViewRef: missingFormScrollViewRef,
-    handleInputFocus:
-      handleMissingInputFocus,
+    handleInputFocus: handleMissingInputFocus,
     handleScroll: handleMissingFormScroll,
-    keyboardContentContainerStyle:
-      missingKeyboardContentContainerStyle,
+    keyboardContentContainerStyle: missingKeyboardContentContainerStyle,
   } = useKeyboardAwareScroll(20);
-  const finderMessageInputRef =
-    useRef<TextInput>(null);
+  const finderMessageInputRef = useRef<TextInput>(null);
 
   const { petId } = useLocalSearchParams<{
     petId?: string;
@@ -75,61 +60,39 @@ export default function PetProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
-
-
-
-
-  const [missingModalVisible, setMissingModalVisible] =
-    useState(false);
+  const [missingModalVisible, setMissingModalVisible] = useState(false);
 
   const [missingCondition, setMissingCondition] =
     useState<MissingCondition>("Safe");
 
   const [finderMessage, setFinderMessage] = useState("");
 
-  const [reportingMissing, setReportingMissing] =
-    useState(false);
-
-
-
-
+  const [reportingMissing, setReportingMissing] = useState(false);
 
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
-
-
-
-
 
   const getPhotoUrl = (photoUrl: string | null) => {
     if (!photoUrl) {
       return null;
     }
 
-    if (
-      photoUrl.startsWith("http://") ||
-      photoUrl.startsWith("https://")
-    ) {
+    if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
       return photoUrl;
     }
 
     return `${SERVER_URL}${photoUrl}`;
   };
 
-
   const loadPet = useCallback(async () => {
     if (!petId) {
       setLoading(false);
 
-      Alert.alert(
-        "Pet Error",
-        "No pet was selected.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      Alert.alert("Pet Error", "No pet was selected.", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
 
       return;
     }
@@ -140,25 +103,19 @@ export default function PetProfileScreen() {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/pets/${petId}`,
-        {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/pets/${petId}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
 
@@ -168,8 +125,7 @@ export default function PetProfileScreen() {
       if (!response.ok) {
         Alert.alert(
           "Unable to Load Pet",
-          data.message ||
-            "Pet information could not be loaded."
+          data.message || "Pet information could not be loaded.",
         );
 
         return;
@@ -179,24 +135,19 @@ export default function PetProfileScreen() {
     } catch (error) {
       console.log("GET PET ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     } finally {
       setLoading(false);
     }
   }, [petId]);
-
 
   useFocusEffect(
     useCallback(() => {
       loadPet();
 
       return () => {};
-    }, [loadPet])
+    }, [loadPet]),
   );
-
 
   const formatDate = (value: string | null) => {
     if (!value) {
@@ -216,9 +167,8 @@ export default function PetProfileScreen() {
     });
   };
 
-
   const handlePetPhotoResult = async (
-    result: ImagePicker.ImagePickerResult
+    result: ImagePicker.ImagePickerResult,
   ) => {
     if (result.canceled) {
       return;
@@ -227,17 +177,14 @@ export default function PetProfileScreen() {
     const selectedImage = result.assets[0];
 
     if (!selectedImage?.uri) {
-      Alert.alert(
-        "Photo Error",
-        "Unable to read the selected photo."
-      );
+      Alert.alert("Photo Error", "Unable to read the selected photo.");
       return;
     }
 
     await uploadPetPhoto(
       selectedImage.uri,
       selectedImage.mimeType ?? null,
-      selectedImage.fileName ?? null
+      selectedImage.fileName ?? null,
     );
   };
 
@@ -253,28 +200,24 @@ export default function PetProfileScreen() {
       if (!permission.granted) {
         Alert.alert(
           "Permission Required",
-          "Please allow TIMAN to access your photos."
+          "Please allow TIMAN to access your photos.",
         );
 
         return;
       }
 
-      const result =
-        await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ["images"],
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.8,
-        });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
 
       await handlePetPhotoResult(result);
     } catch (error) {
       console.log("PHOTO PICKER ERROR:", error);
 
-      Alert.alert(
-        "Photo Error",
-        "Unable to select the pet photo."
-      );
+      Alert.alert("Photo Error", "Unable to select the pet photo.");
     }
   };
 
@@ -284,13 +227,12 @@ export default function PetProfileScreen() {
     }
 
     try {
-      const permission =
-        await ImagePicker.requestCameraPermissionsAsync();
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
 
       if (!permission.granted) {
         Alert.alert(
           "Permission Required",
-          "Please allow TIMAN to use your camera."
+          "Please allow TIMAN to use your camera.",
         );
         return;
       }
@@ -306,10 +248,7 @@ export default function PetProfileScreen() {
     } catch (error) {
       console.log("CAMERA ERROR:", error);
 
-      Alert.alert(
-        "Camera Error",
-        "Unable to take the pet photo."
-      );
+      Alert.alert("Camera Error", "Unable to take the pet photo.");
     }
   };
 
@@ -318,35 +257,30 @@ export default function PetProfileScreen() {
       return;
     }
 
-    Alert.alert(
-      "Pet Photo",
-      "Choose where to get the pet photo.",
-      [
-        {
-          text: "Take Photo",
-          onPress: () => {
-            void takePetPhoto();
-          },
+    Alert.alert("Pet Photo", "Choose where to get the pet photo.", [
+      {
+        text: "Take Photo",
+        onPress: () => {
+          void takePetPhoto();
         },
-        {
-          text: "Choose from Gallery",
-          onPress: () => {
-            void chooseFromGallery();
-          },
+      },
+      {
+        text: "Choose from Gallery",
+        onPress: () => {
+          void chooseFromGallery();
         },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-      ]
-    );
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
-
 
   const uploadPetPhoto = async (
     imageUri: string,
     providedMimeType: string | null,
-    providedFileName: string | null
+    providedFileName: string | null,
   ) => {
     if (!petId) {
       return;
@@ -358,10 +292,7 @@ export default function PetProfileScreen() {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
         return;
@@ -369,18 +300,15 @@ export default function PetProfileScreen() {
 
       const uriWithoutQuery = imageUri.split("?")[0];
 
-      const extensionMatch =
-        uriWithoutQuery.match(/\.([a-zA-Z0-9]+)$/);
+      const extensionMatch = uriWithoutQuery.match(/\.([a-zA-Z0-9]+)$/);
 
-      let extension =
-        extensionMatch?.[1]?.toLowerCase() || "jpg";
+      let extension = extensionMatch?.[1]?.toLowerCase() || "jpg";
 
       if (extension === "jpeg") {
         extension = "jpg";
       }
 
-      let mimeType =
-        providedMimeType || "image/jpeg";
+      let mimeType = providedMimeType || "image/jpeg";
 
       if (!providedMimeType) {
         if (extension === "png") {
@@ -392,49 +320,35 @@ export default function PetProfileScreen() {
         }
       }
 
-      const fileName =
-        providedFileName ||
-        `pet-${Date.now()}.${extension}`;
+      const fileName = providedFileName || `pet-${Date.now()}.${extension}`;
 
       const formData = new FormData();
 
-      formData.append(
-        "photo",
-        {
-          uri: imageUri,
-          name: fileName,
-          type: mimeType,
-        } as any
-      );
+      formData.append("photo", {
+        uri: imageUri,
+        name: fileName,
+        type: mimeType,
+      } as any);
 
-      const response = await fetch(
-        `${API_URL}/pets/${petId}/photo`,
-        {
-          method: "PUT",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_URL}/pets/${petId}/photo`, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
       const data = await response.json();
 
-      console.log(
-        "UPDATE PHOTO STATUS:",
-        response.status
-      );
+      console.log("UPDATE PHOTO STATUS:", response.status);
 
-      console.log(
-        "UPDATE PHOTO RESPONSE:",
-        data
-      );
+      console.log("UPDATE PHOTO RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
           "Unable to Update Photo",
-          data.message || "Please try again."
+          data.message || "Please try again.",
         );
 
         return;
@@ -453,28 +367,18 @@ export default function PetProfileScreen() {
 
       Alert.alert(
         "Photo Updated",
-        `${pet?.pet_name || "Pet"}'s photo has been updated.`
+        `${pet?.pet_name || "Pet"}'s photo has been updated.`,
       );
 
       await loadPet();
     } catch (error) {
-      console.log(
-        "UPLOAD PET PHOTO ERROR:",
-        error
-      );
+      console.log("UPLOAD PET PHOTO ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to upload the pet photo."
-      );
+      Alert.alert("Connection Error", "Unable to upload the pet photo.");
     } finally {
       setUploadingPhoto(false);
     }
   };
-
-
-
-
 
   const markAsMissing = () => {
     if (!pet) {
@@ -486,10 +390,6 @@ export default function PetProfileScreen() {
     setMissingModalVisible(true);
   };
 
-
-
-
-
   const closeMissingModal = () => {
     if (reportingMissing) {
       return;
@@ -500,16 +400,8 @@ export default function PetProfileScreen() {
     setFinderMessage("");
   };
 
-
-
-
-
   const submitMissingReport = async () => {
-    if (
-      !pet ||
-      !petId ||
-      reportingMissing
-    ) {
+    if (!pet || !petId || reportingMissing) {
       return;
     }
 
@@ -518,7 +410,7 @@ export default function PetProfileScreen() {
     if (!cleanMessage) {
       Alert.alert(
         "Message Required",
-        "Please enter a message for anyone who scans your pet's QR code."
+        "Please enter a message for anyone who scans your pet's QR code.",
       );
 
       return;
@@ -527,53 +419,40 @@ export default function PetProfileScreen() {
     try {
       setReportingMissing(true);
 
-      const token =
-        await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/lost-pets/${petId}/missing`,
-        {
-          method: "POST",
+      const response = await fetch(`${API_URL}/lost-pets/${petId}/missing`, {
+        method: "POST",
 
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
 
-          body: JSON.stringify({
-            currentCondition: missingCondition,
-            ownerMessage: cleanMessage,
-          }),
-        }
-      );
+        body: JSON.stringify({
+          currentCondition: missingCondition,
+          ownerMessage: cleanMessage,
+        }),
+      });
 
       const data = await response.json();
 
-      console.log(
-        "REPORT MISSING STATUS:",
-        response.status
-      );
+      console.log("REPORT MISSING STATUS:", response.status);
 
-      console.log(
-        "REPORT MISSING RESPONSE:",
-        data
-      );
+      console.log("REPORT MISSING RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
           "Unable to Report Pet",
-          data.message || "Please try again."
+          data.message || "Please try again.",
         );
 
         return;
@@ -587,23 +466,16 @@ export default function PetProfileScreen() {
 
       Alert.alert(
         "Pet Marked as Missing",
-        `${pet.pet_name} is now marked as missing.`
+        `${pet.pet_name} is now marked as missing.`,
       );
     } catch (error) {
-      console.log(
-        "REPORT MISSING ERROR:",
-        error
-      );
+      console.log("REPORT MISSING ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     } finally {
       setReportingMissing(false);
     }
   };
-
 
   const openMissingDetails = () => {
     if (!pet) {
@@ -617,7 +489,6 @@ export default function PetProfileScreen() {
       },
     });
   };
-
 
   const sawThePet = () => {
     if (!pet) {
@@ -636,10 +507,9 @@ export default function PetProfileScreen() {
           text: "Yes",
           onPress: recoverPet,
         },
-      ]
+      ],
     );
   };
-
 
   const recoverPet = async () => {
     if (!pet || !petId) {
@@ -647,46 +517,33 @@ export default function PetProfileScreen() {
     }
 
     try {
-      const token =
-        await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/lost-pets/${petId}/recovered`,
-        {
-          method: "PATCH",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/lost-pets/${petId}/recovered`, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
 
-      console.log(
-        "RECOVER PET STATUS:",
-        response.status
-      );
+      console.log("RECOVER PET STATUS:", response.status);
 
-      console.log(
-        "RECOVER PET RESPONSE:",
-        data
-      );
+      console.log("RECOVER PET RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
           "Unable to Update Pet",
-          data.message || "Please try again."
+          data.message || "Please try again.",
         );
 
         return;
@@ -694,23 +551,13 @@ export default function PetProfileScreen() {
 
       await loadPet();
 
-      Alert.alert(
-        "Pet is Safe",
-        `${pet.pet_name} has been marked as safe.`
-      );
+      Alert.alert("Pet is Safe", `${pet.pet_name} has been marked as safe.`);
     } catch (error) {
-      console.log(
-        "RECOVER PET ERROR:",
-        error
-      );
+      console.log("RECOVER PET ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     }
   };
-
 
   if (loading) {
     return (
@@ -723,34 +570,22 @@ export default function PetProfileScreen() {
             ]}
             onPress={() => router.back()}
           >
-            <Ionicons
-              name="chevron-back"
-              size={27}
-              color="#173D2A"
-            />
+            <Ionicons name="chevron-back" size={27} color="#173D2A" />
           </Pressable>
 
-          <Text style={styles.headerTitle}>
-            Pet Profile
-          </Text>
+          <Text style={styles.headerTitle}>Pet Profile</Text>
 
           <View style={styles.headerButton} />
         </View>
 
         <View style={styles.loadingContainer}>
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text style={styles.loadingText}>
-            Loading pet profile...
-          </Text>
+          <Text style={styles.loadingText}>Loading pet profile...</Text>
         </View>
       </SafeAreaView>
     );
   }
-
 
   if (!pet) {
     return (
@@ -763,48 +598,30 @@ export default function PetProfileScreen() {
             ]}
             onPress={() => router.back()}
           >
-            <Ionicons
-              name="chevron-back"
-              size={27}
-              color="#173D2A"
-            />
+            <Ionicons name="chevron-back" size={27} color="#173D2A" />
           </Pressable>
 
-          <Text style={styles.headerTitle}>
-            Pet Profile
-          </Text>
+          <Text style={styles.headerTitle}>Pet Profile</Text>
 
           <View style={styles.headerButton} />
         </View>
 
         <View style={styles.loadingContainer}>
-          <Ionicons
-            name="paw-outline"
-            size={55}
-            color="#7EA48A"
-          />
+          <Ionicons name="paw-outline" size={55} color="#7EA48A" />
 
-          <Text style={styles.loadingText}>
-            Pet information unavailable.
-          </Text>
+          <Text style={styles.loadingText}>Pet information unavailable.</Text>
         </View>
       </SafeAreaView>
     );
   }
 
+  const photoSource = getPhotoUrl(pet.photo_url);
 
-  const photoSource =
-    getPhotoUrl(pet.photo_url);
+  const isMissing = pet.pet_status === "Missing";
 
-  const isMissing =
-    pet.pet_status === "Missing";
+  const isFound = pet.pet_status === "Found";
 
-  const isFound =
-    pet.pet_status === "Found";
-
-  const displayPetId =
-    `PET-${String(pet.pet_id).padStart(4, "0")}`;
-
+  const displayPetId = `PET-${String(pet.pet_id).padStart(4, "0")}`;
 
   const getStatusBackground = () => {
     if (isMissing) {
@@ -830,10 +647,8 @@ export default function PetProfileScreen() {
     return "#267542";
   };
 
-
   return (
     <SafeAreaView style={styles.container}>
-
       <View style={styles.header}>
         <Pressable
           style={({ pressed }) => [
@@ -844,16 +659,10 @@ export default function PetProfileScreen() {
           onPress={() => router.back()}
           disabled={uploadingPhoto}
         >
-          <Ionicons
-            name="chevron-back"
-            size={27}
-            color="#173D2A"
-          />
+          <Ionicons name="chevron-back" size={27} color="#173D2A" />
         </Pressable>
 
-        <Text style={styles.headerTitle}>
-          Pet Profile
-        </Text>
+        <Text style={styles.headerTitle}>Pet Profile</Text>
         <View style={styles.headerButton} />
       </View>
 
@@ -861,7 +670,6 @@ export default function PetProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-
         <View style={styles.profileSection}>
           <Pressable
             onPress={choosePetPhoto}
@@ -882,44 +690,30 @@ export default function PetProfileScreen() {
               />
             ) : (
               <View style={styles.placeholderImage}>
-                <Ionicons
-                  name="paw"
-                  size={55}
-                  color="#7EA48A"
-                />
+                <Ionicons name="paw" size={55} color="#7EA48A" />
               </View>
             )}
 
             {uploadingPhoto && (
               <View style={styles.uploadOverlay}>
-                <ActivityIndicator
-                  size="large"
-                  color="#FFFFFF"
-                />
+                <ActivityIndicator size="large" color="#FFFFFF" />
               </View>
             )}
 
             {!uploadingPhoto && (
               <View style={styles.cameraButton}>
-                <Ionicons
-                  name="camera"
-                  size={19}
-                  color="#FFFFFF"
-                />
+                <Ionicons name="camera" size={19} color="#FFFFFF" />
               </View>
             )}
           </Pressable>
 
-          <Text style={styles.petName}>
-            {pet.pet_name}
-          </Text>
+          <Text style={styles.petName}>{pet.pet_name}</Text>
 
           <View
             style={[
               styles.statusBadge,
               {
-                backgroundColor:
-                  getStatusBackground(),
+                backgroundColor: getStatusBackground(),
               },
             ]}
           >
@@ -927,8 +721,7 @@ export default function PetProfileScreen() {
               style={[
                 styles.statusDot,
                 {
-                  backgroundColor:
-                    getStatusColor(),
+                  backgroundColor: getStatusColor(),
                 },
               ]}
             />
@@ -944,9 +737,7 @@ export default function PetProfileScreen() {
               {pet.pet_status.toUpperCase()}
             </Text>
           </View>
-
         </View>
-
 
         <View style={styles.actionRow}>
           <ActionButton
@@ -956,8 +747,7 @@ export default function PetProfileScreen() {
               router.push({
                 pathname: "/pet-qr",
                 params: {
-                  petId:
-                    pet.pet_id.toString(),
+                  petId: pet.pet_id.toString(),
                 },
               })
             }
@@ -970,8 +760,7 @@ export default function PetProfileScreen() {
               router.push({
                 pathname: "/(veterinary)/pet-health-records",
                 params: {
-                  petId:
-                    pet.pet_id.toString(),
+                  petId: pet.pet_id.toString(),
                 },
               })
             }
@@ -984,52 +773,34 @@ export default function PetProfileScreen() {
               router.push({
                 pathname: "/schedules",
                 params: {
-                  petId:
-                    pet.pet_id.toString(),
+                  petId: pet.pet_id.toString(),
                 },
               })
             }
           />
         </View>
 
-
-        <Text style={styles.sectionTitle}>
-          Basic Information
-        </Text>
+        <Text style={styles.sectionTitle}>Basic Information</Text>
 
         <View style={styles.infoCard}>
-          <InfoRow
-            icon="barcode-outline"
-            label="Pet ID"
-            value={displayPetId}
-          />
+          <InfoRow icon="barcode-outline" label="Pet ID" value={displayPetId} />
 
           <Divider />
 
-          <InfoRow
-            icon="paw-outline"
-            label="Species"
-            value={pet.species}
-          />
+          <InfoRow icon="paw-outline" label="Species" value={pet.species} />
 
           <Divider />
 
           <InfoRow
             icon="information-circle-outline"
             label="Breed"
-            value={
-              pet.breed || "Not specified"
-            }
+            value={pet.breed || "Not specified"}
           />
 
           <Divider />
 
           <InfoRow
-            icon={
-              pet.sex === "Female"
-                ? "female-outline"
-                : "male-outline"
-            }
+            icon={pet.sex === "Female" ? "female-outline" : "male-outline"}
             label="Sex"
             value={pet.sex}
           />
@@ -1047,42 +818,24 @@ export default function PetProfileScreen() {
           <InfoRow
             icon="color-palette-outline"
             label="Color"
-            value={
-              pet.color || "Not specified"
-            }
+            value={pet.color || "Not specified"}
           />
         </View>
 
-
-        <Text style={styles.sectionTitle}>
-          Identifying Marks
-        </Text>
+        <Text style={styles.sectionTitle}>Identifying Marks</Text>
 
         <View style={styles.descriptionCard}>
-          <Ionicons
-            name="eye-outline"
-            size={22}
-            color="#176B3A"
-          />
+          <Ionicons name="eye-outline" size={22} color="#176B3A" />
 
           <Text style={styles.descriptionText}>
-            {pet.identifying_marks ||
-              "No identifying marks recorded."}
+            {pet.identifying_marks || "No identifying marks recorded."}
           </Text>
         </View>
 
-
-
-        <Text style={styles.sectionTitle}>
-          Pet Safety
-        </Text>
+        <Text style={styles.sectionTitle}>Pet Safety</Text>
 
         <View
-          style={[
-            styles.safetyCard,
-            isMissing &&
-              styles.missingSafetyCard,
-          ]}
+          style={[styles.safetyCard, isMissing && styles.missingSafetyCard]}
         >
           <View style={styles.safetyTop}>
             <View style={styles.safetyIcon}>
@@ -1093,37 +846,24 @@ export default function PetProfileScreen() {
                     : "shield-checkmark-outline"
                 }
                 size={25}
-                color={
-                  isMissing
-                    ? "#C34539"
-                    : "#176B3A"
-                }
+                color={isMissing ? "#C34539" : "#176B3A"}
               />
             </View>
 
-            <View
-              style={
-                styles.safetyTextContainer
-              }
-            >
+            <View style={styles.safetyTextContainer}>
               <Text style={styles.safetyTitle}>
                 {isMissing
                   ? `${pet.pet_name} is Missing`
                   : `${pet.pet_name} is currently ${pet.pet_status.toLowerCase()}`}
               </Text>
 
-              <Text
-                style={
-                  styles.safetyDescription
-                }
-              >
+              <Text style={styles.safetyDescription}>
                 {isMissing
                   ? "The TIMAN QR profile will show that this pet is currently missing."
                   : "If your pet goes missing, mark the pet as missing so anyone who scans the QR can contact you."}
               </Text>
             </View>
           </View>
-
 
           {!isMissing && (
             <Pressable
@@ -1133,22 +873,11 @@ export default function PetProfileScreen() {
               ]}
               onPress={markAsMissing}
             >
-              <Ionicons
-                name="alert-circle-outline"
-                size={20}
-                color="#C34539"
-              />
+              <Ionicons name="alert-circle-outline" size={20} color="#C34539" />
 
-              <Text
-                style={
-                  styles.missingButtonText
-                }
-              >
-                Mark as Missing
-              </Text>
+              <Text style={styles.missingButtonText}>Mark as Missing</Text>
             </Pressable>
           )}
-
 
           {isMissing && (
             <View style={{ marginTop: 15 }}>
@@ -1192,11 +921,7 @@ export default function PetProfileScreen() {
                 ]}
                 onPress={openMissingDetails}
               >
-                <Ionicons
-                  name="location-outline"
-                  size={20}
-                  color="#176B3A"
-                />
+                <Ionicons name="location-outline" size={20} color="#176B3A" />
 
                 <Text
                   style={[
@@ -1222,16 +947,9 @@ export default function PetProfileScreen() {
       >
         <KeyboardAvoidingView
           style={styles.modalOverlay}
-          behavior={
-            Platform.OS === "ios"
-              ? "padding"
-              : undefined
-          }
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <Pressable
-            style={styles.modalBackdrop}
-            onPress={closeMissingModal}
-          />
+          <Pressable style={styles.modalBackdrop} onPress={closeMissingModal} />
 
           <View style={styles.missingModal}>
             <ScrollView
@@ -1247,227 +965,155 @@ export default function PetProfileScreen() {
               keyboardDismissMode="on-drag"
               showsVerticalScrollIndicator={false}
             >
-            <View style={styles.modalHeader}>
-              <View
-                style={
-                  styles.modalWarningIcon
-                }
-              >
-                <Ionicons
-                  name="alert-circle-outline"
-                  size={26}
-                  color="#C34539"
-                />
-              </View>
-
-              <View
-                style={styles.modalHeaderText}
-              >
-                <Text
-                  style={styles.modalTitle}
-                >
-                  Mark {pet.pet_name} as
-                  Missing
-                </Text>
-
-                <Text
-                  style={
-                    styles.modalSubtitle
-                  }
-                >
-                  Add information that can
-                  help the person who scans
-                  the QR code.
-                </Text>
-              </View>
-            </View>
-
-            <Text style={styles.modalLabel}>
-              Pet Condition
-            </Text>
-
-            <View
-              style={styles.conditionRow}
-            >
-              <Pressable
-                style={({ pressed }) => [
-                  styles.conditionButton,
-                  missingCondition ===
-                    "Safe" &&
-                    styles.conditionButtonSelected,
-                  pressed && styles.pressed,
-                  reportingMissing &&
-                    styles.disabledButton,
-                ]}
-                onPress={() =>
-                  setMissingCondition("Safe")
-                }
-                disabled={reportingMissing}
-              >
-                <Ionicons
-                  name="shield-checkmark-outline"
-                  size={21}
-                  color={
-                    missingCondition ===
-                    "Safe"
-                      ? "#FFFFFF"
-                      : "#176B3A"
-                  }
-                />
-
-                <Text
-                  style={[
-                    styles.conditionButtonText,
-                    missingCondition ===
-                      "Safe" &&
-                      styles.conditionButtonTextSelected,
-                  ]}
-                >
-                  Safe
-                </Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [
-                  styles.conditionButton,
-                  styles.notSafeButton,
-                  missingCondition ===
-                    "Not Safe" &&
-                    styles.notSafeButtonSelected,
-                  pressed && styles.pressed,
-                  reportingMissing &&
-                    styles.disabledButton,
-                ]}
-                onPress={() =>
-                  setMissingCondition(
-                    "Not Safe"
-                  )
-                }
-                disabled={reportingMissing}
-              >
-                <Ionicons
-                  name="warning-outline"
-                  size={21}
-                  color={
-                    missingCondition ===
-                    "Not Safe"
-                      ? "#FFFFFF"
-                      : "#C34539"
-                  }
-                />
-
-                <Text
-                  style={[
-                    styles.conditionButtonText,
-                    styles.notSafeButtonText,
-                    missingCondition ===
-                      "Not Safe" &&
-                      styles.conditionButtonTextSelected,
-                  ]}
-                >
-                  Not Safe
-                </Text>
-              </Pressable>
-            </View>
-
-            <Text
-              style={
-                styles.conditionHelpText
-              }
-            >
-              Select the condition you
-              believe {pet.pet_name} is
-              currently in.
-            </Text>
-
-            <Text style={styles.modalLabel}>
-              Message for Finder
-            </Text>
-
-            <TextInput
-              ref={finderMessageInputRef}
-              onFocus={() =>
-                handleMissingInputFocus(
-                  finderMessageInputRef.current
-                )
-              }
-              style={
-                styles.finderMessageInput
-              }
-              value={finderMessage}
-              onChangeText={setFinderMessage}
-              placeholder={`Please contact me if you see ${pet.pet_name}...`}
-              placeholderTextColor="#A0AAA4"
-              multiline
-              textAlignVertical="top"
-              maxLength={500}
-              editable={!reportingMissing}
-            />
-
-            <Text
-              style={styles.characterCount}
-            >
-              {finderMessage.length}/500
-            </Text>
-
-            <View
-              style={styles.modalActions}
-            >
-              <Pressable
-                style={({ pressed }) => [
-                  styles.cancelModalButton,
-                  pressed &&
-                    styles.pressed,
-                ]}
-                onPress={closeMissingModal}
-                disabled={reportingMissing}
-              >
-                <Text
-                  style={
-                    styles.cancelModalText
-                  }
-                >
-                  Cancel
-                </Text>
-              </Pressable>
-
-              <Pressable
-                style={({ pressed }) => [
-                  styles.reportMissingButton,
-                  pressed &&
-                    styles.pressed,
-                  reportingMissing &&
-                    styles.disabledButton,
-                ]}
-                onPress={
-                  submitMissingReport
-                }
-                disabled={reportingMissing}
-              >
-                {reportingMissing ? (
-                  <ActivityIndicator
-                    size="small"
-                    color="#FFFFFF"
+              <View style={styles.modalHeader}>
+                <View style={styles.modalWarningIcon}>
+                  <Ionicons
+                    name="alert-circle-outline"
+                    size={26}
+                    color="#C34539"
                   />
-                ) : (
-                  <>
-                    <Ionicons
-                      name="alert-circle-outline"
-                      size={19}
-                      color="#FFFFFF"
-                    />
+                </View>
 
-                    <Text
-                      style={
-                        styles.reportMissingButtonText
-                      }
-                    >
-                      Mark as Missing
-                    </Text>
-                  </>
-                )}
-              </Pressable>
-            </View>
+                <View style={styles.modalHeaderText}>
+                  <Text style={styles.modalTitle}>
+                    Mark {pet.pet_name} as Missing
+                  </Text>
+
+                  <Text style={styles.modalSubtitle}>
+                    Add information that can help the person who scans the QR
+                    code.
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={styles.modalLabel}>Pet Condition</Text>
+
+              <View style={styles.conditionRow}>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.conditionButton,
+                    missingCondition === "Safe" &&
+                      styles.conditionButtonSelected,
+                    pressed && styles.pressed,
+                    reportingMissing && styles.disabledButton,
+                  ]}
+                  onPress={() => setMissingCondition("Safe")}
+                  disabled={reportingMissing}
+                >
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={21}
+                    color={missingCondition === "Safe" ? "#FFFFFF" : "#176B3A"}
+                  />
+
+                  <Text
+                    style={[
+                      styles.conditionButtonText,
+                      missingCondition === "Safe" &&
+                        styles.conditionButtonTextSelected,
+                    ]}
+                  >
+                    Safe
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.conditionButton,
+                    styles.notSafeButton,
+                    missingCondition === "Not Safe" &&
+                      styles.notSafeButtonSelected,
+                    pressed && styles.pressed,
+                    reportingMissing && styles.disabledButton,
+                  ]}
+                  onPress={() => setMissingCondition("Not Safe")}
+                  disabled={reportingMissing}
+                >
+                  <Ionicons
+                    name="warning-outline"
+                    size={21}
+                    color={
+                      missingCondition === "Not Safe" ? "#FFFFFF" : "#C34539"
+                    }
+                  />
+
+                  <Text
+                    style={[
+                      styles.conditionButtonText,
+                      styles.notSafeButtonText,
+                      missingCondition === "Not Safe" &&
+                        styles.conditionButtonTextSelected,
+                    ]}
+                  >
+                    Not Safe
+                  </Text>
+                </Pressable>
+              </View>
+
+              <Text style={styles.conditionHelpText}>
+                Select the condition you believe {pet.pet_name} is currently in.
+              </Text>
+
+              <Text style={styles.modalLabel}>Message for Finder</Text>
+
+              <TextInput
+                ref={finderMessageInputRef}
+                onFocus={() =>
+                  handleMissingInputFocus(finderMessageInputRef.current)
+                }
+                style={styles.finderMessageInput}
+                value={finderMessage}
+                onChangeText={setFinderMessage}
+                placeholder={`Please contact me if you see ${pet.pet_name}...`}
+                placeholderTextColor="#A0AAA4"
+                multiline
+                textAlignVertical="top"
+                maxLength={500}
+                editable={!reportingMissing}
+              />
+
+              <Text style={styles.characterCount}>
+                {finderMessage.length}/500
+              </Text>
+
+              <View style={styles.modalActions}>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.cancelModalButton,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={closeMissingModal}
+                  disabled={reportingMissing}
+                >
+                  <Text style={styles.cancelModalText}>Cancel</Text>
+                </Pressable>
+
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.reportMissingButton,
+                    pressed && styles.pressed,
+                    reportingMissing && styles.disabledButton,
+                  ]}
+                  onPress={submitMissingReport}
+                  disabled={reportingMissing}
+                >
+                  {reportingMissing ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name="alert-circle-outline"
+                        size={19}
+                        color="#FFFFFF"
+                      />
+
+                      <Text style={styles.reportMissingButtonText}>
+                        Mark as Missing
+                      </Text>
+                    </>
+                  )}
+                </Pressable>
+              </View>
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
@@ -1475,7 +1121,6 @@ export default function PetProfileScreen() {
     </SafeAreaView>
   );
 }
-
 
 function ActionButton({
   icon,
@@ -1488,27 +1133,17 @@ function ActionButton({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.actionButton,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
       onPress={onPress}
     >
       <View style={styles.actionIcon}>
-        <Ionicons
-          name={icon}
-          size={24}
-          color="#176B3A"
-        />
+        <Ionicons name={icon} size={24} color="#176B3A" />
       </View>
 
-      <Text style={styles.actionTitle}>
-        {title}
-      </Text>
+      <Text style={styles.actionTitle}>{title}</Text>
     </Pressable>
   );
 }
-
 
 function InfoRow({
   icon,
@@ -1522,20 +1157,18 @@ function InfoRow({
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoLeft}>
-        <Ionicons
-          name={icon}
-          size={20}
-          color="#176B3A"
-        />
+        <Ionicons name={icon} size={20} color="#176B3A" />
 
         <Text style={styles.infoLabel}>
-          {label}{"\u00A0"}
+          {label}
+          {"\u00A0"}
         </Text>
       </View>
 
       <View style={styles.infoValueContainer}>
         <Text style={styles.infoValue}>
-          {value}{"\u00A0"}
+          {value}
+          {"\u00A0"}
         </Text>
       </View>
     </View>
@@ -1715,7 +1348,6 @@ const styles = StyleSheet.create({
     marginBottom: 11,
     marginTop: 22,
   },
-
 
   infoCard: {
     backgroundColor: "#FFFFFF",
@@ -2034,6 +1666,4 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.6,
   },
-
-
 });

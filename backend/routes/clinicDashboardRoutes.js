@@ -34,17 +34,22 @@ router.get("/", authMiddleware, async (req, res) => {
       });
     }
 
-    const [[recordCountRows], [pendingCountRows], [pendingRequests], [recentActivity]] =
+    const [[bookedCountRows], [cancelledCountRows], [pendingRequests], [recentActivity]] =
       await Promise.all([
         db.query(
           `
           SELECT COUNT(*) AS total
           FROM vet_records
           WHERE clinic_user_id = ?
-            AND DATE(
-              CONVERT_TZ(created_at, '+00:00', '+08:00')
-            ) = DATE(
-              CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')
+            AND next_due_date IS NOT NULL
+            AND schedule_status = 'Pending'
+            AND next_due_date >= DATE_FORMAT(
+              CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
+              '%Y-%m-01'
+            )
+            AND next_due_date < DATE_ADD(
+              LAST_DAY(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')),
+              INTERVAL 1 DAY
             )
           `,
           [clinicUserId]
@@ -52,9 +57,17 @@ router.get("/", authMiddleware, async (req, res) => {
         db.query(
           `
           SELECT COUNT(*) AS total
-          FROM clinic_authorizations
+          FROM vet_records
           WHERE clinic_user_id = ?
-            AND status = 'Pending'
+            AND schedule_status = 'Cancelled'
+            AND cancelled_at >= DATE_FORMAT(
+              CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
+              '%Y-%m-01'
+            )
+            AND cancelled_at < DATE_ADD(
+              LAST_DAY(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')),
+              INTERVAL 1 DAY
+            )
           `,
           [clinicUserId]
         ),
@@ -113,8 +126,8 @@ router.get("/", authMiddleware, async (req, res) => {
         clinic_name: clinic.clinic_name,
       },
       overview: {
-        records_today: Number(recordCountRows[0]?.total || 0),
-        pending_access: Number(pendingCountRows[0]?.total || 0),
+        booked: Number(bookedCountRows[0]?.total || 0),
+        cancelled: Number(cancelledCountRows[0]?.total || 0),
       },
       pending_requests: pendingRequests,
       recent_activity: recentActivity.map((item) => ({

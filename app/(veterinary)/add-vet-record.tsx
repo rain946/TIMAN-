@@ -4,10 +4,7 @@ import {
   DateTimePickerAndroid,
   type DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import {
-  router,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 
 import {
@@ -28,11 +25,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
 
-
-
-
-
-
 const SERVICE_TYPES = [
   "Checkup",
   "Vaccination",
@@ -42,12 +34,7 @@ const SERVICE_TYPES = [
   "Other",
 ] as const;
 
-type ServiceType =
-  (typeof SERVICE_TYPES)[number];
-
-
-
-
+type ServiceType = (typeof SERVICE_TYPES)[number];
 
 export default function AddVetRecordScreen() {
   const inputRefs = useRef<Record<string, TextInput | null>>({});
@@ -57,54 +44,29 @@ export default function AddVetRecordScreen() {
     handleScroll,
     keyboardContentContainerStyle,
   } = useKeyboardAwareScroll(45);
-  const params =
-    useLocalSearchParams<{
-      petId?: string;
-    }>();
+  const params = useLocalSearchParams<{
+    petId?: string;
+  }>();
 
   const petId = params.petId;
 
-  const [visitDate, setVisitDate] =
-    useState(getToday());
+  const [visitDate, setVisitDate] = useState(getToday());
 
-  const [
-    serviceType,
-    setServiceType,
-  ] =
-    useState<ServiceType | null>(
-      null
-    );
+  const [serviceType, setServiceType] = useState<ServiceType | null>(null);
 
-  const [
-    diagnosis,
-    setDiagnosis,
-  ] = useState("");
+  const [diagnosis, setDiagnosis] = useState("");
 
-  const [
-    treatment,
-    setTreatment,
-  ] = useState("");
+  const [treatment, setTreatment] = useState("");
 
-  const [
-    medication,
-    setMedication,
-  ] = useState("");
+  const [medication, setMedication] = useState("");
 
-  const [notes, setNotes] =
-    useState("");
+  const [notes, setNotes] = useState("");
 
-  const [
-    nextDueDate,
-    setNextDueDate,
-  ] = useState("");
+  const [nextDueDate, setNextDueDate] = useState("");
 
-  const [saving, setSaving] =
-    useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const openDatePicker = (
-    value: string,
-    onSelect: (value: string) => void
-  ) => {
+  const openDatePicker = (value: string, onSelect: (value: string) => void) => {
     if (Platform.OS !== "android") {
       return;
     }
@@ -112,10 +74,7 @@ export default function AddVetRecordScreen() {
     DateTimePickerAndroid.open({
       value: parseDateValue(value) || new Date(),
       mode: "date",
-      onChange: (
-        event: DateTimePickerEvent,
-        selectedDate?: Date
-      ) => {
+      onChange: (event: DateTimePickerEvent, selectedDate?: Date) => {
         if (event.type === "set" && selectedDate) {
           onSelect(formatDateValue(selectedDate));
         }
@@ -123,64 +82,42 @@ export default function AddVetRecordScreen() {
     });
   };
 
-
-
-
-
   const saveRecord = async () => {
     if (saving) {
       return;
     }
 
     if (!petId) {
-      Alert.alert(
-        "Pet Error",
-        "No pet was selected."
-      );
+      Alert.alert("Pet Error", "No pet was selected.");
 
       return;
     }
 
     if (!visitDate.trim()) {
-      Alert.alert(
-        "Visit Date Required",
-        "Please enter the visit date."
-      );
+      Alert.alert("Visit Date Required", "Please enter the visit date.");
 
       return;
     }
 
-    if (
-      !isValidDate(
-        visitDate.trim()
-      )
-    ) {
+    if (!isValidDate(visitDate.trim())) {
       Alert.alert(
         "Invalid Visit Date",
-        "Use YYYY-MM-DD format. Example: 2026-09-19."
+        "Use YYYY-MM-DD format. Example: 2026-09-19.",
       );
 
       return;
     }
 
     if (!serviceType) {
-      Alert.alert(
-        "Service Required",
-        "Please select the veterinary service."
-      );
+      Alert.alert("Service Required", "Please select the veterinary service.");
 
       return;
     }
 
-    if (
-      nextDueDate.trim() &&
-      !isValidDate(
-        nextDueDate.trim()
-      )
-    ) {
+    if (nextDueDate.trim() && !isValidDate(nextDueDate.trim())) {
       Alert.alert(
         "Invalid Next Due Date",
-        "Use YYYY-MM-DD format. Example: 2026-10-19."
+        "Use YYYY-MM-DD format. Example: 2026-10-19.",
       );
 
       return;
@@ -189,16 +126,10 @@ export default function AddVetRecordScreen() {
     try {
       setSaving(true);
 
-      const token =
-        await AsyncStorage.getItem(
-          "token"
-        );
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
 
@@ -206,87 +137,57 @@ export default function AddVetRecordScreen() {
       }
 
       const body = {
-        visit_date:
-          visitDate.trim(),
+        visit_date: visitDate.trim(),
 
-        service_type:
-          serviceType,
+        service_type: serviceType,
 
-        diagnosis:
-          diagnosis.trim(),
+        diagnosis: diagnosis.trim(),
 
-        treatment:
-          treatment.trim(),
+        treatment: treatment.trim(),
 
-        medication:
-          medication.trim(),
+        medication: medication.trim(),
 
-        notes:
-          notes.trim(),
+        notes: notes.trim(),
 
-        next_due_date:
-          nextDueDate.trim() ||
-          null,
+        next_due_date: nextDueDate.trim() || null,
       };
 
-      console.log(
-        "SAVE VET RECORD:",
-        body
-      );
+      console.log("SAVE VET RECORD:", body);
 
-      const response =
-        await fetch(
-          `${API_URL}/vet-records/${petId}`,
-          {
-            method: "POST",
+      const response = await fetch(`${API_URL}/vet-records/${petId}`, {
+        method: "POST",
 
-            headers: {
-              Accept:
-                "application/json",
+        headers: {
+          Accept: "application/json",
 
-              "Content-Type":
-                "application/json",
+          "Content-Type": "application/json",
 
-              Authorization:
-                `Bearer ${token}`,
-            },
+          Authorization: `Bearer ${token}`,
+        },
 
-            body: JSON.stringify(
-              body
-            ),
-          }
-        );
+        body: JSON.stringify(body),
+      });
 
-      const text =
-        await response.text();
+      const text = await response.text();
 
       let data: any = {};
 
       try {
-        data = text
-          ? JSON.parse(text)
-          : {};
+        data = text ? JSON.parse(text) : {};
       } catch {
         data = {
           message: text,
         };
       }
 
-      console.log(
-        "SAVE VET RECORD STATUS:",
-        response.status
-      );
+      console.log("SAVE VET RECORD STATUS:", response.status);
 
-      console.log(
-        "SAVE VET RECORD RESPONSE:",
-        data
-      );
+      console.log("SAVE VET RECORD RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
           "Unable to Save",
-          data.message ||
-            "Unable to save veterinary record."
+          data.message || "Unable to save veterinary record.",
         );
 
         return;
@@ -299,48 +200,32 @@ export default function AddVetRecordScreen() {
           {
             text: "OK",
 
-            onPress: () =>
-              router.back(),
+            onPress: () => router.back(),
           },
-        ]
+        ],
       );
     } catch (error) {
-      console.log(
-        "SAVE VET RECORD ERROR:",
-        error
-      );
+      console.log("SAVE VET RECORD ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     } finally {
       setSaving(false);
     }
   };
 
-
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
+    <SafeAreaView style={styles.container}>
       <Header />
 
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={
-          Platform.OS === "ios"
-            ? "padding"
-            : undefined
-        }
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           ref={scrollViewRef}
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          showsVerticalScrollIndicator={
-            false
-          }
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           contentContainerStyle={[
@@ -348,279 +233,152 @@ export default function AddVetRecordScreen() {
             keyboardContentContainerStyle,
           ]}
         >
-
-          <View
-            style={styles.introCard}
-          >
-            <View
-              style={
-                styles.introIcon
-              }
-            >
-              <Ionicons
-                name="medical"
-                size={27}
-                color="#176B3A"
-              />
+          <View style={styles.introCard}>
+            <View style={styles.introIcon}>
+              <Ionicons name="medical" size={27} color="#176B3A" />
             </View>
 
-            <View
-              style={
-                styles.introContent
-              }
-            >
-              <Text
-                style={
-                  styles.introTitle
-                }
-              >
-                New Veterinary
-                Record
-              </Text>
+            <View style={styles.introContent}>
+              <Text style={styles.introTitle}>New Veterinary Record</Text>
 
-              <Text
-                style={
-                  styles.introText
-                }
-              >
-                Record the pet&apos;s
-                veterinary visit,
-                service, treatment,
-                and next schedule.
+              <Text style={styles.introText}>
+                Record the pet&apos;s veterinary visit, service, treatment, and
+                next schedule.
               </Text>
             </View>
           </View>
 
+          <SectionTitle title="Visit Details" />
 
-          <SectionTitle
-            title="Visit Details"
-          />
+          <View style={styles.formCard}>
+            <FieldLabel title="Visit Date" required />
 
-          <View
-            style={styles.formCard}
-          >
-            <FieldLabel
-              title="Visit Date"
-              required
-            />
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.inputContainer,
-              pressed && styles.pressed,
-            ]}
-              onPress={() =>
-                openDatePicker(
-                  visitDate,
-                  setVisitDate
-                )
-              }
+            <Pressable
+              style={({ pressed }) => [
+                styles.inputContainer,
+                pressed && styles.pressed,
+              ]}
+              onPress={() => openDatePicker(visitDate, setVisitDate)}
             >
-              <Ionicons
-                name="calendar-outline"
-                size={19}
-                color="#718078"
-              />
+              <Ionicons name="calendar-outline" size={19} color="#718078" />
 
               <TextInput
                 value={visitDate}
-                onChangeText={
-                  setVisitDate
-                }
+                onChangeText={setVisitDate}
                 placeholder="YYYY-MM-DD"
                 placeholderTextColor="#A4ADA7"
                 style={styles.input}
                 autoCapitalize="none"
                 maxLength={10}
                 editable={Platform.OS !== "android"}
-                pointerEvents={
-                  Platform.OS === "android"
-                    ? "none"
-                    : "auto"
-                }
+                pointerEvents={Platform.OS === "android" ? "none" : "auto"}
               />
             </Pressable>
 
-            <Text
-              style={
-                styles.helperText
-              }
-            >
-              Example: 2026-09-19
-            </Text>
+            <Text style={styles.helperText}>Example: 2026-09-19</Text>
 
-            <FieldLabel
-              title="Service Type"
-              required
-              top
-            />
+            <FieldLabel title="Service Type" required top />
 
-            <View
-              style={
-                styles.serviceContainer
-              }
-            >
-              {SERVICE_TYPES.map(
-                (service) => {
-                  const selected =
-                    serviceType ===
-                    service;
+            <View style={styles.serviceContainer}>
+              {SERVICE_TYPES.map((service) => {
+                const selected = serviceType === service;
 
-                  return (
-                    <Pressable
-                      key={service}
-                      style={({
-                        pressed,
-                      }) => [
-                        styles.serviceButton,
+                return (
+                  <Pressable
+                    key={service}
+                    style={({ pressed }) => [
+                      styles.serviceButton,
 
-                        selected &&
-                          styles.serviceButtonSelected,
+                      selected && styles.serviceButtonSelected,
 
-                        pressed &&
-                          styles.pressed,
+                      pressed && styles.pressed,
+                    ]}
+                    onPress={() => setServiceType(service)}
+                  >
+                    <Ionicons
+                      name={getServiceIcon(service)}
+                      size={17}
+                      color={selected ? "#FFFFFF" : "#176B3A"}
+                    />
+
+                    <Text
+                      style={[
+                        styles.serviceText,
+
+                        selected && styles.serviceTextSelected,
                       ]}
-                      onPress={() =>
-                        setServiceType(
-                          service
-                        )
-                      }
                     >
-                      <Ionicons
-                        name={getServiceIcon(
-                          service
-                        )}
-                        size={17}
-                        color={
-                          selected
-                            ? "#FFFFFF"
-                            : "#176B3A"
-                        }
-                      />
-
-                      <Text
-                        style={[
-                          styles.serviceText,
-
-                          selected &&
-                            styles.serviceTextSelected,
-                        ]}
-                      >
-                        {service}
-                      </Text>
-                    </Pressable>
-                  );
-                }
-              )}
+                      {service}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 
+          <SectionTitle title="Medical Details" />
 
-          <SectionTitle
-            title="Medical Details"
-          />
-
-          <View
-            style={styles.formCard}
-          >
-            <FieldLabel
-              title="Diagnosis"
-            />
+          <View style={styles.formCard}>
+            <FieldLabel title="Diagnosis" />
 
             <TextInput
               ref={(input) => {
                 inputRefs.current.diagnosis = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.diagnosis)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.diagnosis)}
               value={diagnosis}
-              onChangeText={
-                setDiagnosis
-              }
+              onChangeText={setDiagnosis}
               placeholder="Enter diagnosis, if applicable"
               placeholderTextColor="#A4ADA7"
-              style={
-                styles.textArea
-              }
+              style={styles.textArea}
               multiline
               textAlignVertical="top"
             />
 
-            <FieldLabel
-              title="Treatment / Procedure"
-              top
-            />
+            <FieldLabel title="Treatment / Procedure" top />
 
             <TextInput
               ref={(input) => {
                 inputRefs.current.treatment = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.treatment)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.treatment)}
               value={treatment}
-              onChangeText={
-                setTreatment
-              }
+              onChangeText={setTreatment}
               placeholder="Treatment or procedure performed"
               placeholderTextColor="#A4ADA7"
-              style={
-                styles.textArea
-              }
+              style={styles.textArea}
               multiline
               textAlignVertical="top"
             />
 
-            <FieldLabel
-              title="Medication"
-              top
-            />
+            <FieldLabel title="Medication" top />
 
             <TextInput
               ref={(input) => {
                 inputRefs.current.medication = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.medication)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.medication)}
               value={medication}
-              onChangeText={
-                setMedication
-              }
+              onChangeText={setMedication}
               placeholder="Medication given or prescribed"
               placeholderTextColor="#A4ADA7"
-              style={
-                styles.textArea
-              }
+              style={styles.textArea}
               multiline
               textAlignVertical="top"
             />
           </View>
 
+          <SectionTitle title="Follow-up" />
 
-          <SectionTitle
-            title="Follow-up"
-          />
+          <View style={styles.formCard}>
+            <FieldLabel title="Next Due Date" />
 
-          <View
-            style={styles.formCard}
-          >
-            <FieldLabel
-              title="Next Due Date"
-            />
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.inputContainer,
-              pressed && styles.pressed,
-            ]}
-              onPress={() =>
-                openDatePicker(
-                  nextDueDate,
-                  setNextDueDate
-                )
-              }
+            <Pressable
+              style={({ pressed }) => [
+                styles.inputContainer,
+                pressed && styles.pressed,
+              ]}
+              onPress={() => openDatePicker(nextDueDate, setNextDueDate)}
             >
               <Ionicons
                 name="notifications-outline"
@@ -629,77 +387,43 @@ export default function AddVetRecordScreen() {
               />
 
               <TextInput
-                value={
-                  nextDueDate
-                }
-                onChangeText={
-                  setNextDueDate
-                }
+                value={nextDueDate}
+                onChangeText={setNextDueDate}
                 placeholder="YYYY-MM-DD"
                 placeholderTextColor="#A4ADA7"
                 style={styles.input}
                 autoCapitalize="none"
                 maxLength={10}
                 editable={Platform.OS !== "android"}
-                pointerEvents={
-                  Platform.OS === "android"
-                    ? "none"
-                    : "auto"
-                }
+                pointerEvents={Platform.OS === "android" ? "none" : "auto"}
               />
             </Pressable>
 
-            <Text
-              style={
-                styles.helperText
-              }
-            >
-              Optional. Use this for
-              the next vaccination,
-              deworming, follow-up, or
-              other scheduled visit.
+            <Text style={styles.helperText}>
+              Optional. Use this for the next vaccination, deworming, follow-up,
+              or other scheduled visit.
             </Text>
 
-            <FieldLabel
-              title="Notes"
-              top
-            />
+            <FieldLabel title="Notes" top />
 
             <TextInput
               ref={(input) => {
                 inputRefs.current.notes = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.notes)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.notes)}
               value={notes}
-              onChangeText={
-                setNotes
-              }
+              onChangeText={setNotes}
               placeholder="Additional veterinary notes..."
               placeholderTextColor="#A4ADA7"
-              style={[
-                styles.textArea,
-                styles.notesInput,
-              ]}
+              style={[styles.textArea, styles.notesInput]}
               multiline
               textAlignVertical="top"
             />
           </View>
 
-
-          {nextDueDate.trim() !==
-            "" && (
-            <View
-              style={
-                styles.reminderCard
-              }
-            >
-              <View
-                style={
-                  styles.reminderIcon
-                }
-              >
+          {nextDueDate.trim() !== "" && (
+            <View style={styles.reminderCard}>
+              <View style={styles.reminderIcon}>
                 <Ionicons
                   name="notifications-outline"
                   size={21}
@@ -707,94 +431,48 @@ export default function AddVetRecordScreen() {
                 />
               </View>
 
-              <View
-                style={
-                  styles.reminderContent
-                }
-              >
-                <Text
-                  style={
-                    styles.reminderTitle
-                  }
-                >
-                  Schedule Created
-                </Text>
+              <View style={styles.reminderContent}>
+                <Text style={styles.reminderTitle}>Schedule Created</Text>
 
-                <Text
-                  style={
-                    styles.reminderText
-                  }
-                >
-                  Saving a next due
-                  date allows TIMAN to
-                  use this record for
-                  the pet&apos;s upcoming
-                  health schedule.
+                <Text style={styles.reminderText}>
+                  Saving a next due date allows TIMAN to use this record for the
+                  pet&apos;s upcoming health schedule.
                 </Text>
               </View>
             </View>
           )}
 
-
-          <View
-            style={
-              styles.securityCard
-            }
-          >
+          <View style={styles.securityCard}>
             <Ionicons
               name="shield-checkmark-outline"
               size={20}
               color="#176B3A"
             />
 
-            <Text
-              style={
-                styles.securityText
-              }
-            >
-              Only a clinic approved
-              by the pet owner can
-              save veterinary records
-              for this pet.
+            <Text style={styles.securityText}>
+              Only a clinic approved by the pet owner can save veterinary
+              records for this pet.
             </Text>
           </View>
-
 
           <Pressable
             disabled={saving}
             style={({ pressed }) => [
               styles.saveButton,
 
-              pressed &&
-                !saving &&
-                styles.pressed,
+              pressed && !saving && styles.pressed,
 
-              saving &&
-                styles.disabled,
+              saving && styles.disabled,
             ]}
             onPress={saveRecord}
           >
             {saving ? (
-              <ActivityIndicator
-                size="small"
-                color="#FFFFFF"
-              />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <>
-                <Ionicons
-                  name="save-outline"
-                  size={20}
-                  color="#FFFFFF"
-                />
+                <Ionicons name="save-outline" size={20} color="#FFFFFF" />
 
-                <Text
-                  style={
-                    styles.saveText
-                  }
-                >
-                  Save Veterinary
-                  Record
-                </Text>
+                <Text style={styles.saveText}>Save Veterinary Record</Text>
               </>
             )}
           </Pressable>
@@ -804,27 +482,17 @@ export default function AddVetRecordScreen() {
             style={({ pressed }) => [
               styles.cancelButton,
 
-              pressed &&
-                styles.pressed,
+              pressed && styles.pressed,
             ]}
-            onPress={() =>
-              router.back()
-            }
+            onPress={() => router.back()}
           >
-            <Text
-              style={
-                styles.cancelText
-              }
-            >
-              Cancel
-            </Text>
+            <Text style={styles.cancelText}>Cancel</Text>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
 
 function Header() {
   return (
@@ -834,45 +502,21 @@ function Header() {
           styles.headerButton,
           pressed && styles.pressed,
         ]}
-        onPress={() =>
-          router.back()
-        }
+        onPress={() => router.back()}
       >
-        <Ionicons
-          name="chevron-back"
-          size={27}
-          color="#173D2A"
-        />
+        <Ionicons name="chevron-back" size={27} color="#173D2A" />
       </Pressable>
 
-      <Text
-        style={styles.headerTitle}
-      >
-        Add Vet Record
-      </Text>
+      <Text style={styles.headerTitle}>Add Vet Record</Text>
 
-      <View
-        style={styles.headerButton}
-      />
+      <View style={styles.headerButton} />
     </View>
   );
 }
 
-
-function SectionTitle({
-  title,
-}: {
-  title: string;
-}) {
-  return (
-    <Text
-      style={styles.sectionTitle}
-    >
-      {title}
-    </Text>
-  );
+function SectionTitle({ title }: { title: string }) {
+  return <Text style={styles.sectionTitle}>{title}</Text>;
 }
-
 
 function FieldLabel({
   title,
@@ -884,47 +528,22 @@ function FieldLabel({
   top?: boolean;
 }) {
   return (
-    <View
-      style={[
-        styles.labelRow,
+    <View style={[styles.labelRow, top && styles.labelTop]}>
+      <Text style={styles.label}>{title}</Text>
 
-        top &&
-          styles.labelTop,
-      ]}
-    >
-      <Text
-        style={styles.label}
-      >
-        {title}
-      </Text>
-
-      {required && (
-        <Text
-          style={
-            styles.required
-          }
-        >
-          *
-        </Text>
-      )}
+      {required && <Text style={styles.required}>*</Text>}
     </View>
   );
 }
 
-
 function getToday() {
   const date = new Date();
 
-  const year =
-    date.getFullYear();
+  const year = date.getFullYear();
 
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
 
-  const day = String(
-    date.getDate()
-  ).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }
@@ -934,9 +553,7 @@ function parseDateValue(value: string) {
     return null;
   }
 
-  const [year, month, day] = value
-    .split("-")
-    .map(Number);
+  const [year, month, day] = value.split("-").map(Number);
 
   return new Date(year, month - 1, day);
 }
@@ -949,47 +566,29 @@ function formatDateValue(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function isValidDate(
-  value: string
-) {
-  const match =
-    /^(\d{4})-(\d{2})-(\d{2})$/.exec(
-      value
-    );
+function isValidDate(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
 
   if (!match) {
     return false;
   }
 
-  const year =
-    Number(match[1]);
+  const year = Number(match[1]);
 
-  const month =
-    Number(match[2]);
+  const month = Number(match[2]);
 
-  const day =
-    Number(match[3]);
+  const day = Number(match[3]);
 
-  const date =
-    new Date(
-      year,
-      month - 1,
-      day
-    );
+  const date = new Date(year, month - 1, day);
 
   return (
-    date.getFullYear() ===
-      year &&
-    date.getMonth() ===
-      month - 1 &&
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
     date.getDate() === day
   );
 }
 
-
-function getServiceIcon(
-  service: ServiceType
-): keyof typeof Ionicons.glyphMap {
+function getServiceIcon(service: ServiceType): keyof typeof Ionicons.glyphMap {
   switch (service) {
     case "Checkup":
       return "medical-outline";
@@ -1011,407 +610,373 @@ function getServiceIcon(
   }
 }
 
+const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
 
-const styles =
-  StyleSheet.create({
-    flex: {
-      flex: 1,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFDF7",
+  },
 
-    container: {
-      flex: 1,
-      backgroundColor:
-        "#FFFDF7",
-    },
+  header: {
+    height: 60,
 
-    header: {
-      height: 60,
+    paddingHorizontal: 20,
 
-      paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
 
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EDF0EE",
+  },
 
-      borderBottomWidth: 1,
-      borderBottomColor:
-        "#EDF0EE",
-    },
+  headerButton: {
+    width: 42,
+    height: 42,
 
-    headerButton: {
-      width: 42,
-      height: 42,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "800",
 
-    headerTitle: {
-      fontSize: 18,
-      fontWeight: "800",
+    color: "#1E2D24",
+  },
 
-      color: "#1E2D24",
-    },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 45,
+  },
 
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 45,
-    },
+  introCard: {
+    padding: 17,
 
+    borderRadius: 19,
 
-    introCard: {
-      padding: 17,
+    backgroundColor: "#EAF4EB",
 
-      borderRadius: 19,
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      backgroundColor:
-        "#EAF4EB",
+  introIcon: {
+    width: 52,
+    height: 52,
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    borderRadius: 17,
 
-    introIcon: {
-      width: 52,
-      height: 52,
+    backgroundColor: "#FFFFFF",
 
-      borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      backgroundColor:
-        "#FFFFFF",
+  introContent: {
+    flex: 1,
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+    marginLeft: 13,
+  },
 
-    introContent: {
-      flex: 1,
+  introTitle: {
+    fontSize: 16,
+    fontWeight: "900",
 
-      marginLeft: 13,
-    },
+    color: "#23442F",
+  },
 
-    introTitle: {
-      fontSize: 16,
-      fontWeight: "900",
+  introText: {
+    marginTop: 4,
 
-      color: "#23442F",
-    },
+    fontSize: 10,
+    lineHeight: 15,
 
-    introText: {
-      marginTop: 4,
+    color: "#607266",
+  },
 
-      fontSize: 10,
-      lineHeight: 15,
+  sectionTitle: {
+    marginTop: 25,
+    marginBottom: 10,
 
-      color: "#607266",
-    },
+    fontSize: 16,
+    fontWeight: "900",
 
+    color: "#26352B",
+  },
 
-    sectionTitle: {
-      marginTop: 25,
-      marginBottom: 10,
+  formCard: {
+    padding: 16,
 
-      fontSize: 16,
-      fontWeight: "900",
+    borderRadius: 18,
 
-      color: "#26352B",
-    },
+    backgroundColor: "#FFFFFF",
 
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+  },
 
-    formCard: {
-      padding: 16,
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      borderRadius: 18,
+  labelTop: {
+    marginTop: 18,
+  },
 
-      backgroundColor:
-        "#FFFFFF",
+  label: {
+    fontSize: 11,
+    fontWeight: "800",
 
-      borderWidth: 1,
-      borderColor:
-        "#E1E8E3",
-    },
+    color: "#405148",
+  },
 
-    labelRow: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
+  required: {
+    marginLeft: 3,
 
-    labelTop: {
-      marginTop: 18,
-    },
+    fontSize: 12,
+    fontWeight: "900",
 
-    label: {
-      fontSize: 11,
-      fontWeight: "800",
+    color: "#B54C40",
+  },
 
-      color: "#405148",
-    },
+  inputContainer: {
+    marginTop: 8,
 
-    required: {
-      marginLeft: 3,
+    minHeight: 49,
 
-      fontSize: 12,
-      fontWeight: "900",
+    paddingHorizontal: 13,
 
-      color: "#B54C40",
-    },
+    borderRadius: 13,
 
-    inputContainer: {
-      marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#DCE4DE",
 
-      minHeight: 49,
+    backgroundColor: "#FBFCFA",
 
-      paddingHorizontal: 13,
+    flexDirection: "row",
+    alignItems: "center",
 
-      borderRadius: 13,
+    gap: 9,
+  },
 
-      borderWidth: 1,
-      borderColor:
-        "#DCE4DE",
+  input: {
+    flex: 1,
 
-      backgroundColor:
-        "#FBFCFA",
+    paddingVertical: 11,
 
-      flexDirection: "row",
-      alignItems: "center",
+    fontSize: 12,
 
-      gap: 9,
-    },
+    color: "#26352B",
+  },
 
-    input: {
-      flex: 1,
+  helperText: {
+    marginTop: 6,
 
-      paddingVertical: 11,
+    fontSize: 8,
+    lineHeight: 13,
 
-      fontSize: 12,
+    color: "#8B958F",
+  },
 
-      color: "#26352B",
-    },
+  textArea: {
+    marginTop: 8,
 
-    helperText: {
-      marginTop: 6,
+    minHeight: 80,
 
-      fontSize: 8,
-      lineHeight: 13,
+    paddingHorizontal: 13,
+    paddingVertical: 12,
 
-      color: "#8B958F",
-    },
+    borderRadius: 13,
 
-    textArea: {
-      marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#DCE4DE",
 
-      minHeight: 80,
+    backgroundColor: "#FBFCFA",
 
-      paddingHorizontal: 13,
-      paddingVertical: 12,
+    fontSize: 11,
+    lineHeight: 17,
 
-      borderRadius: 13,
+    color: "#26352B",
+  },
 
-      borderWidth: 1,
-      borderColor:
-        "#DCE4DE",
+  notesInput: {
+    minHeight: 105,
+  },
 
-      backgroundColor:
-        "#FBFCFA",
+  serviceContainer: {
+    marginTop: 9,
 
-      fontSize: 11,
-      lineHeight: 17,
+    flexDirection: "row",
+    flexWrap: "wrap",
 
-      color: "#26352B",
-    },
+    gap: 8,
+  },
 
-    notesInput: {
-      minHeight: 105,
-    },
+  serviceButton: {
+    minHeight: 41,
 
+    paddingHorizontal: 12,
 
-    serviceContainer: {
-      marginTop: 9,
+    borderRadius: 12,
 
-      flexDirection: "row",
-      flexWrap: "wrap",
+    borderWidth: 1,
+    borderColor: "#CFE0D3",
 
-      gap: 8,
-    },
+    backgroundColor: "#F5FAF6",
 
-    serviceButton: {
-      minHeight: 41,
+    flexDirection: "row",
+    alignItems: "center",
 
-      paddingHorizontal: 12,
+    gap: 6,
+  },
 
-      borderRadius: 12,
+  serviceButtonSelected: {
+    backgroundColor: "#176B3A",
 
-      borderWidth: 1,
-      borderColor:
-        "#CFE0D3",
+    borderColor: "#176B3A",
+  },
 
-      backgroundColor:
-        "#F5FAF6",
+  serviceText: {
+    fontSize: 10,
+    fontWeight: "700",
 
-      flexDirection: "row",
-      alignItems: "center",
+    color: "#176B3A",
+  },
 
-      gap: 6,
-    },
+  serviceTextSelected: {
+    color: "#FFFFFF",
+  },
 
-    serviceButtonSelected: {
-      backgroundColor:
-        "#176B3A",
+  reminderCard: {
+    marginTop: 14,
 
-      borderColor:
-        "#176B3A",
-    },
+    padding: 14,
 
-    serviceText: {
-      fontSize: 10,
-      fontWeight: "700",
+    borderRadius: 15,
 
-      color: "#176B3A",
-    },
+    backgroundColor: "#FFF7DC",
 
-    serviceTextSelected: {
-      color: "#FFFFFF",
-    },
+    borderWidth: 1,
+    borderColor: "#F0E2B6",
 
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
 
-    reminderCard: {
-      marginTop: 14,
+  reminderIcon: {
+    width: 39,
+    height: 39,
 
-      padding: 14,
+    borderRadius: 12,
 
-      borderRadius: 15,
+    backgroundColor: "#FFF0BE",
 
-      backgroundColor:
-        "#FFF7DC",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      borderWidth: 1,
-      borderColor:
-        "#F0E2B6",
+  reminderContent: {
+    flex: 1,
 
-      flexDirection: "row",
-      alignItems: "flex-start",
-    },
+    marginLeft: 10,
+  },
 
-    reminderIcon: {
-      width: 39,
-      height: 39,
+  reminderTitle: {
+    fontSize: 11,
+    fontWeight: "800",
 
-      borderRadius: 12,
+    color: "#75591A",
+  },
 
-      backgroundColor:
-        "#FFF0BE",
+  reminderText: {
+    marginTop: 3,
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+    fontSize: 9,
+    lineHeight: 14,
 
-    reminderContent: {
-      flex: 1,
+    color: "#7B6B3F",
+  },
 
-      marginLeft: 10,
-    },
+  securityCard: {
+    marginTop: 20,
 
-    reminderTitle: {
-      fontSize: 11,
-      fontWeight: "800",
+    padding: 14,
 
-      color: "#75591A",
-    },
+    borderRadius: 15,
 
-    reminderText: {
-      marginTop: 3,
+    backgroundColor: "#EFF6F0",
 
-      fontSize: 9,
-      lineHeight: 14,
+    flexDirection: "row",
+    alignItems: "flex-start",
 
-      color: "#7B6B3F",
-    },
+    gap: 9,
+  },
 
+  securityText: {
+    flex: 1,
 
-    securityCard: {
-      marginTop: 20,
+    fontSize: 9,
+    lineHeight: 15,
 
-      padding: 14,
+    color: "#617167",
+  },
 
-      borderRadius: 15,
+  saveButton: {
+    marginTop: 21,
 
-      backgroundColor:
-        "#EFF6F0",
+    height: 52,
 
-      flexDirection: "row",
-      alignItems: "flex-start",
+    borderRadius: 14,
 
-      gap: 9,
-    },
+    backgroundColor: "#176B3A",
 
-    securityText: {
-      flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
 
-      fontSize: 9,
-      lineHeight: 15,
+    gap: 8,
+  },
 
-      color: "#617167",
-    },
+  saveText: {
+    fontSize: 12,
+    fontWeight: "900",
 
+    color: "#FFFFFF",
+  },
 
-    saveButton: {
-      marginTop: 21,
+  cancelButton: {
+    marginTop: 10,
 
-      height: 52,
+    height: 48,
 
-      borderRadius: 14,
+    borderRadius: 14,
 
-      backgroundColor:
-        "#176B3A",
+    borderWidth: 1,
+    borderColor: "#BFD5C5",
+    backgroundColor: "#FFFFFF",
 
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      gap: 8,
-    },
+  cancelText: {
+    fontSize: 11,
+    fontWeight: "700",
 
-    saveText: {
-      fontSize: 12,
-      fontWeight: "900",
+    color: "#176B3A",
+  },
 
-      color: "#FFFFFF",
-    },
+  pressed: {
+    opacity: 0.75,
+  },
 
-    cancelButton: {
-      marginTop: 10,
-
-      height: 48,
-
-      borderRadius: 14,
-
-      borderWidth: 1,
-      borderColor: "#BFD5C5",
-      backgroundColor: "#FFFFFF",
-
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
-
-    cancelText: {
-      fontSize: 11,
-      fontWeight: "700",
-
-      color: "#176B3A",
-    },
-
-    pressed: {
-      opacity: 0.75,
-    },
-
-    disabled: {
-      opacity: 0.55,
-    },
-  });
+  disabled: {
+    opacity: 0.55,
+  },
+});

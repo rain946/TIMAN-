@@ -44,7 +44,8 @@ const STATUSES: ScheduleStatus[] = ["Pending", "Completed", "Cancelled"];
 
 export default function ClinicSchedulesScreen() {
   const [schedules, setSchedules] = useState<ClinicSchedule[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<ScheduleStatus>("Pending");
+  const [selectedStatus, setSelectedStatus] =
+    useState<ScheduleStatus>("Pending");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -107,7 +108,7 @@ export default function ClinicSchedulesScreen() {
   useFocusEffect(
     useCallback(() => {
       loadSchedules();
-    }, [loadSchedules])
+    }, [loadSchedules]),
   );
 
   const counts = useMemo(
@@ -115,27 +116,39 @@ export default function ClinicSchedulesScreen() {
       STATUSES.reduce(
         (result, status) => ({
           ...result,
-          [status]: schedules.filter((schedule) => schedule.schedule_status === status).length,
+          [status]: schedules.filter(
+            (schedule) => schedule.schedule_status === status,
+          ).length,
         }),
-        {} as Record<ScheduleStatus, number>
+        {} as Record<ScheduleStatus, number>,
       ),
-    [schedules]
+    [schedules],
   );
 
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const statusSchedules = useMemo(
-    () => schedules.filter((schedule) => schedule.schedule_status === selectedStatus),
-    [schedules, selectedStatus]
+    () =>
+      schedules.filter(
+        (schedule) => schedule.schedule_status === selectedStatus,
+      ),
+    [schedules, selectedStatus],
   );
   const visibleSchedules = useMemo(
     () =>
       statusSchedules.filter((schedule) => {
         if (!normalizedSearch) return true;
-        return [schedule.pet_name, schedule.breed, schedule.species, schedule.service_type].some(
-          (value) => String(value || "").toLocaleLowerCase().includes(normalizedSearch)
+        return [
+          schedule.pet_name,
+          schedule.breed,
+          schedule.species,
+          schedule.service_type,
+        ].some((value) =>
+          String(value || "")
+            .toLocaleLowerCase()
+            .includes(normalizedSearch),
         );
       }),
-    [normalizedSearch, statusSchedules]
+    [normalizedSearch, statusSchedules],
   );
 
   const refresh = useCallback(() => {
@@ -163,7 +176,7 @@ export default function ClinicSchedulesScreen() {
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
         const responseText = await response.text();
         let data: any = {};
@@ -180,23 +193,28 @@ export default function ClinicSchedulesScreen() {
         }
 
         if (!response.ok || !data.success) {
-          throw new Error(data.message || "Unable to complete health schedule.");
+          throw new Error(
+            data.message || "Unable to complete health schedule.",
+          );
         }
 
         await loadSchedules(false);
-        Alert.alert("Schedule Completed", data.message || "The schedule has been completed.");
+        Alert.alert(
+          "Schedule Completed",
+          data.message || "The schedule has been completed.",
+        );
       } catch (completeError) {
         Alert.alert(
           "Unable to Complete Schedule",
           completeError instanceof Error
             ? completeError.message
-            : "Please try again."
+            : "Please try again.",
         );
       } finally {
         setCompletingId(null);
       }
     },
-    [completingId, loadSchedules]
+    [completingId, loadSchedules],
   );
 
   const confirmCompletion = (schedule: ClinicSchedule) => {
@@ -206,11 +224,12 @@ export default function ClinicSchedulesScreen() {
       [
         { text: "Cancel", style: "cancel" },
         { text: "Mark Completed", onPress: () => completeSchedule(schedule) },
-      ]
+      ],
     );
   };
 
-  const showSearchEmpty = statusSchedules.length > 0 && visibleSchedules.length === 0;
+  const showSearchEmpty =
+    statusSchedules.length > 0 && visibleSchedules.length === 0;
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
@@ -218,7 +237,10 @@ export default function ClinicSchedulesScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
-          style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.pressed,
+          ]}
           onPress={() => router.back()}
         >
           <Ionicons name="arrow-back" size={23} color="#1E2D24" />
@@ -231,10 +253,16 @@ export default function ClinicSchedulesScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#176B3A" />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor="#176B3A"
+          />
         }
       >
-        <Text style={styles.subtitle}>Pet care schedules managed by your clinic</Text>
+        <Text style={styles.subtitle}>
+          Pet care schedules managed by your clinic
+        </Text>
 
         <View style={styles.searchContainer}>
           <Ionicons name="search-outline" size={20} color="#758178" />
@@ -248,7 +276,11 @@ export default function ClinicSchedulesScreen() {
             returnKeyType="search"
           />
           {search.length > 0 && (
-            <Pressable accessibilityRole="button" onPress={() => setSearch("")} hitSlop={10}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setSearch("")}
+              hitSlop={10}
+            >
               <Ionicons name="close-circle" size={19} color="#91A097" />
             </Pressable>
           )}
@@ -273,7 +305,9 @@ export default function ClinicSchedulesScreen() {
                 ]}
                 onPress={() => setSelectedStatus(status)}
               >
-                <Text style={[styles.tabText, selected && styles.tabTextSelected]}>
+                <Text
+                  style={[styles.tabText, selected && styles.tabTextSelected]}
+                >
                   {status} ({counts[status]})
                 </Text>
               </Pressable>
@@ -285,7 +319,8 @@ export default function ClinicSchedulesScreen() {
           <View style={styles.summaryRow}>
             <Text style={styles.summaryTitle}>{selectedStatus} Schedules</Text>
             <Text style={styles.summaryCount}>
-              {visibleSchedules.length} {visibleSchedules.length === 1 ? "schedule" : "schedules"}
+              {visibleSchedules.length}{" "}
+              {visibleSchedules.length === 1 ? "schedule" : "schedules"}
             </Text>
           </View>
         )}
@@ -303,7 +338,10 @@ export default function ClinicSchedulesScreen() {
             <Text style={styles.stateTitle}>Unable to load schedules.</Text>
             <Pressable
               accessibilityRole="button"
-              style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.retryButton,
+                pressed && styles.pressed,
+              ]}
               onPress={() => loadSchedules()}
             >
               <Text style={styles.retryText}>Retry</Text>
@@ -317,7 +355,10 @@ export default function ClinicSchedulesScreen() {
             <Text style={styles.stateTitle}>No matching schedules</Text>
             <Pressable
               accessibilityRole="button"
-              style={({ pressed }) => [styles.clearButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.clearButton,
+                pressed && styles.pressed,
+              ]}
               onPress={() => setSearch("")}
             >
               <Text style={styles.clearText}>Clear Search</Text>
@@ -356,7 +397,9 @@ function ScheduleCard({
 }) {
   const imageUrl = getImageUrl(schedule.photo_url);
   const dueState = getDueState(schedule.next_due_date);
-  const petContext = [schedule.breed, schedule.species].filter(Boolean).join(" • ");
+  const petContext = [schedule.breed, schedule.species]
+    .filter(Boolean)
+    .join(" • ");
 
   const openPet = () =>
     router.push({
@@ -368,7 +411,10 @@ function ScheduleCard({
     <View style={styles.scheduleCard}>
       <Pressable
         accessibilityRole="button"
-        style={({ pressed }) => [styles.cardMain, pressed && styles.cardPressed]}
+        style={({ pressed }) => [
+          styles.cardMain,
+          pressed && styles.cardPressed,
+        ]}
         onPress={openPet}
       >
         <View style={styles.photoContainer}>
@@ -381,10 +427,14 @@ function ScheduleCard({
 
         <View style={styles.cardContent}>
           <View style={styles.cardTopRow}>
-            <Text style={styles.petName} numberOfLines={1}>{schedule.pet_name}</Text>
+            <Text style={styles.petName} numberOfLines={1}>
+              {schedule.pet_name}
+            </Text>
             <StatusBadge status={schedule.schedule_status} />
           </View>
-          <Text style={styles.petContext} numberOfLines={1}>{petContext}</Text>
+          <Text style={styles.petContext} numberOfLines={1}>
+            {petContext}
+          </Text>
           <Text style={styles.serviceType}>{schedule.service_type}</Text>
           <View style={styles.dueRow}>
             <Ionicons name="calendar-outline" size={14} color="#76837B" />
@@ -393,15 +443,27 @@ function ScheduleCard({
               {formatDateOnly(schedule.next_due_date)}
             </Text>
             {schedule.schedule_status === "Pending" && (
-              <View style={[styles.dueBadge, { backgroundColor: dueState.backgroundColor }]}>
-                <Text style={[styles.dueBadgeText, { color: dueState.color }]}>{dueState.label}</Text>
+              <View
+                style={[
+                  styles.dueBadge,
+                  { backgroundColor: dueState.backgroundColor },
+                ]}
+              >
+                <Text style={[styles.dueBadgeText, { color: dueState.color }]}>
+                  {dueState.label}
+                </Text>
               </View>
             )}
           </View>
-          {schedule.schedule_status === "Completed" && schedule.completed_at && (
-            <Text style={styles.completedAt}>Completed {formatDateTime(schedule.completed_at)}</Text>
+          {schedule.schedule_status === "Completed" &&
+            schedule.completed_at && (
+              <Text style={styles.completedAt}>
+                Completed {formatDateTime(schedule.completed_at)}
+              </Text>
+            )}
+          {!schedule.can_open && (
+            <Text style={styles.accessChanged}>Current access has changed</Text>
           )}
-          {!schedule.can_open && <Text style={styles.accessChanged}>Current access has changed</Text>}
         </View>
 
         <Ionicons name="chevron-forward" size={19} color="#95A099" />
@@ -422,7 +484,11 @@ function ScheduleCard({
           {completing ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Ionicons name="checkmark-circle-outline" size={18} color="#FFFFFF" />
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={18}
+              color="#FFFFFF"
+            />
           )}
           <Text style={styles.completeButtonText}>
             {completing ? "Completing..." : "Mark Completed"}
@@ -461,7 +527,8 @@ function EmptyState({ status }: { status: ScheduleStatus }) {
   const content = {
     Pending: {
       title: "No pending schedules",
-      description: "New follow-up schedules created from veterinary records will appear here.",
+      description:
+        "New follow-up schedules created from veterinary records will appear here.",
       icon: "calendar-outline" as const,
     },
     Completed: {
@@ -500,64 +567,167 @@ function parseDateOnly(value: string) {
 
 function getDueState(value: string) {
   const dueDate = parseDateOnly(value);
-  if (!dueDate) return { label: "SCHEDULED", color: "#176B3A", backgroundColor: "#E5F3E8" };
+  if (!dueDate)
+    return { label: "SCHEDULED", color: "#176B3A", backgroundColor: "#E5F3E8" };
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const days = Math.round((dueDate.getTime() - today.getTime()) / 86_400_000);
 
-  if (days < 0) return { label: "OVERDUE", color: "#A7483E", backgroundColor: "#FBE9E6" };
-  if (days === 0) return { label: "TODAY", color: "#A66A15", backgroundColor: "#FFF0D5" };
-  if (days <= 30) return { label: `${days} DAYS`, color: "#A66A15", backgroundColor: "#FFF0D5" };
+  if (days < 0)
+    return { label: "OVERDUE", color: "#A7483E", backgroundColor: "#FBE9E6" };
+  if (days === 0)
+    return { label: "TODAY", color: "#A66A15", backgroundColor: "#FFF0D5" };
+  if (days <= 30)
+    return {
+      label: `${days} DAYS`,
+      color: "#A66A15",
+      backgroundColor: "#FFF0D5",
+    };
   return { label: "SCHEDULED", color: "#176B3A", backgroundColor: "#E5F3E8" };
 }
 
 function formatDateOnly(value: string) {
   const date = parseDateOnly(value);
   if (!date) return "Date unavailable";
-  return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function formatDateTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Date unavailable";
-  return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFDF7" },
-  header: { height: 60, paddingHorizontal: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#E9EDE9" },
-  backButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  header: {
+    height: 60,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9EDE9",
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
   headerSpacer: { width: 44, height: 44 },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
   subtitle: { fontSize: 12, color: "#77847C" },
-  searchContainer: { minHeight: 50, marginTop: 17, borderRadius: 15, paddingHorizontal: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#DDE5DF", flexDirection: "row", alignItems: "center" },
-  searchInput: { flex: 1, minHeight: 48, marginHorizontal: 10, paddingVertical: 0, fontSize: 13, color: "#26372C" },
+  searchContainer: {
+    minHeight: 50,
+    marginTop: 17,
+    borderRadius: 15,
+    paddingHorizontal: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DDE5DF",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    minHeight: 48,
+    marginHorizontal: 10,
+    paddingVertical: 0,
+    fontSize: 13,
+    color: "#26372C",
+  },
   tabs: { gap: 8, paddingTop: 17, paddingBottom: 4 },
-  tab: { minHeight: 42, borderRadius: 13, paddingHorizontal: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#DDE5DF" },
+  tab: {
+    minHeight: 42,
+    borderRadius: 13,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DDE5DF",
+  },
   tabSelected: { backgroundColor: "#176B3A", borderColor: "#176B3A" },
   tabText: { fontSize: 10, fontWeight: "800", color: "#66746B" },
   tabTextSelected: { color: "#FFFFFF" },
-  summaryRow: { marginTop: 22, marginBottom: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  summaryRow: {
+    marginTop: 22,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   summaryTitle: { fontSize: 17, fontWeight: "900", color: "#1E2D24" },
   summaryCount: { fontSize: 10, fontWeight: "700", color: "#718078" },
   scheduleList: { gap: 11 },
-  scheduleCard: { borderRadius: 19, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", overflow: "hidden" },
-  cardMain: { minHeight: 142, padding: 14, flexDirection: "row", alignItems: "center" },
+  scheduleCard: {
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    overflow: "hidden",
+  },
+  cardMain: {
+    minHeight: 142,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   cardPressed: { backgroundColor: "#F5F9F5", opacity: 0.82 },
-  photoContainer: { width: 62, height: 62, borderRadius: 20, overflow: "hidden", backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  photoContainer: {
+    width: 62,
+    height: 62,
+    borderRadius: 20,
+    overflow: "hidden",
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   petPhoto: { width: "100%", height: "100%" },
   cardContent: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 6 },
   cardTopRow: { flexDirection: "row", alignItems: "center", gap: 7 },
   petName: { flex: 1, fontSize: 15, fontWeight: "900", color: "#27372D" },
   petContext: { marginTop: 3, fontSize: 10, color: "#7B877F" },
-  serviceType: { marginTop: 8, fontSize: 12, fontWeight: "800", color: "#395044" },
-  dueRow: { marginTop: 8, flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 5 },
+  serviceType: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#395044",
+  },
+  dueRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 5,
+  },
   dueDate: { fontSize: 9, color: "#76837B" },
-  dueBadge: { minHeight: 21, borderRadius: 8, paddingHorizontal: 7, alignItems: "center", justifyContent: "center" },
+  dueBadge: {
+    minHeight: 21,
+    borderRadius: 8,
+    paddingHorizontal: 7,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   dueBadgeText: { fontSize: 7, fontWeight: "900" },
-  statusBadge: { minHeight: 23, borderRadius: 9, paddingHorizontal: 8, alignItems: "center", justifyContent: "center" },
+  statusBadge: {
+    minHeight: 23,
+    borderRadius: 9,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   statusBadgeText: { fontSize: 7, fontWeight: "900" },
   pendingBadge: { backgroundColor: "#FFF0D5" },
   pendingBadgeText: { color: "#A66A15" },
@@ -566,20 +736,96 @@ const styles = StyleSheet.create({
   cancelledBadge: { backgroundColor: "#FBE9E6" },
   cancelledBadgeText: { color: "#A7483E" },
   completedAt: { marginTop: 7, fontSize: 9, color: "#4D725D" },
-  accessChanged: { marginTop: 7, fontSize: 8, fontWeight: "800", color: "#A66A15" },
-  completeButton: { minHeight: 47, marginHorizontal: 14, marginBottom: 14, borderRadius: 13, backgroundColor: "#176B3A", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  accessChanged: {
+    marginTop: 7,
+    fontSize: 8,
+    fontWeight: "800",
+    color: "#A66A15",
+  },
+  completeButton: {
+    minHeight: 47,
+    marginHorizontal: 14,
+    marginBottom: 14,
+    borderRadius: 13,
+    backgroundColor: "#176B3A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
   completeButtonDisabled: { opacity: 0.58 },
   completeButtonText: { fontSize: 11, fontWeight: "900", color: "#FFFFFF" },
-  stateCard: { minHeight: 245, marginTop: 12, borderRadius: 19, padding: 25, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", alignItems: "center", justifyContent: "center" },
+  stateCard: {
+    minHeight: 245,
+    marginTop: 12,
+    borderRadius: 19,
+    padding: 25,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   loadingText: { marginTop: 12, fontSize: 11, color: "#77847C" },
-  emptyIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#E8F4EA", alignItems: "center", justifyContent: "center" },
-  emptyIconMuted: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#EEF2EF", alignItems: "center", justifyContent: "center" },
-  errorIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#FDEDEA", alignItems: "center", justifyContent: "center" },
-  stateTitle: { marginTop: 13, fontSize: 14, fontWeight: "900", color: "#34453B", textAlign: "center" },
-  stateDescription: { maxWidth: 280, marginTop: 6, fontSize: 10, lineHeight: 16, color: "#77847C", textAlign: "center" },
-  retryButton: { minWidth: 108, minHeight: 42, marginTop: 16, borderRadius: 12, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  emptyIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#E8F4EA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyIconMuted: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#EEF2EF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#FDEDEA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stateTitle: {
+    marginTop: 13,
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#34453B",
+    textAlign: "center",
+  },
+  stateDescription: {
+    maxWidth: 280,
+    marginTop: 6,
+    fontSize: 10,
+    lineHeight: 16,
+    color: "#77847C",
+    textAlign: "center",
+  },
+  retryButton: {
+    minWidth: 108,
+    minHeight: 42,
+    marginTop: 16,
+    borderRadius: 12,
+    backgroundColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   retryText: { fontSize: 11, fontWeight: "900", color: "#FFFFFF" },
-  clearButton: { minWidth: 108, minHeight: 42, marginTop: 16, borderRadius: 12, borderWidth: 1, borderColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  clearButton: {
+    minWidth: 108,
+    minHeight: 42,
+    marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   clearText: { fontSize: 11, fontWeight: "900", color: "#176B3A" },
   pressed: { opacity: 0.72 },
 });

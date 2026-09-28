@@ -33,26 +33,19 @@ export default function ChangePasswordModal({
     handleScroll,
     keyboardContentContainerStyle,
   } = useKeyboardAwareScroll(28);
-  const currentPasswordInputRef =
-    useRef<TextInput>(null);
-  const newPasswordInputRef =
-    useRef<TextInput>(null);
-  const confirmPasswordInputRef =
-    useRef<TextInput>(null);
+  const currentPasswordInputRef = useRef<TextInput>(null);
+  const newPasswordInputRef = useRef<TextInput>(null);
+  const confirmPasswordInputRef = useRef<TextInput>(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showCurrentPassword, setShowCurrentPassword] =
-    useState(false);
-  const [showNewPassword, setShowNewPassword] =
-    useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [saving, setSaving] = useState(false);
-
 
   useEffect(() => {
     if (!visible) {
@@ -87,14 +80,10 @@ export default function ChangePasswordModal({
     const newPass = newPassword.trim();
     const confirmPass = confirmPassword.trim();
 
-
-
-
-
     if (!current || !newPass || !confirmPass) {
       Alert.alert(
         "Incomplete Information",
-        "Please complete all password fields."
+        "Please complete all password fields.",
       );
       return;
     }
@@ -102,7 +91,7 @@ export default function ChangePasswordModal({
     if (newPass.length < 6) {
       Alert.alert(
         "Invalid Password",
-        "New password must contain at least 6 characters."
+        "New password must contain at least 6 characters.",
       );
       return;
     }
@@ -110,7 +99,7 @@ export default function ChangePasswordModal({
     if (newPass !== confirmPass) {
       Alert.alert(
         "Password Mismatch",
-        "New password and confirm password do not match."
+        "New password and confirm password do not match.",
       );
       return;
     }
@@ -118,7 +107,7 @@ export default function ChangePasswordModal({
     if (current === newPass) {
       Alert.alert(
         "Invalid Password",
-        "Your new password must be different from your current password."
+        "Your new password must be different from your current password.",
       );
       return;
     }
@@ -126,50 +115,35 @@ export default function ChangePasswordModal({
     try {
       setSaving(true);
 
-      const token =
-        await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         setSaving(false);
         return;
       }
 
+      const response = await fetch(`${API_URL}/profile/change-password`, {
+        method: "PUT",
 
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
 
-
-
-      const response = await fetch(
-        `${API_URL}/profile/change-password`,
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-
-          body: JSON.stringify({
-            current_password: current,
-            new_password: newPass,
-            confirm_password: confirmPass,
-          }),
-        }
-      );
+        body: JSON.stringify({
+          current_password: current,
+          new_password: newPass,
+          confirm_password: confirmPass,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(
-          data.message ||
-            "Unable to change password."
-        );
+        throw new Error(data.message || "Unable to change password.");
       }
-
 
       setCurrentPassword("");
       setNewPassword("");
@@ -183,19 +157,16 @@ export default function ChangePasswordModal({
 
       Alert.alert(
         "Password Updated",
-        "Your password has been changed successfully."
+        "Your password has been changed successfully.",
       );
     } catch (error) {
-      console.error(
-        "CHANGE PASSWORD ERROR:",
-        error
-      );
+      console.error("CHANGE PASSWORD ERROR:", error);
 
       Alert.alert(
         "Change Password Failed",
         error instanceof Error
           ? error.message
-          : "Unable to change password. Please try again."
+          : "Unable to change password. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -212,37 +183,22 @@ export default function ChangePasswordModal({
     >
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={
-          Platform.OS === "ios"
-            ? "padding"
-            : undefined
-        }
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Pressable
-          style={styles.backdrop}
-          onPress={handleClose}
-        />
+        <Pressable style={styles.backdrop} onPress={handleClose} />
 
         <View style={styles.modalContainer}>
           <View style={styles.handle} />
 
           <View style={styles.header}>
             <View style={styles.headerIcon}>
-              <Ionicons
-                name="lock-closed"
-                size={22}
-                color="#176B3A"
-              />
+              <Ionicons name="lock-closed" size={22} color="#176B3A" />
             </View>
 
             <View style={styles.headerTextContainer}>
-              <Text style={styles.title}>
-                Change Password
-              </Text>
+              <Text style={styles.title}>Change Password</Text>
 
-              <Text style={styles.subtitle}>
-                Update your account password
-              </Text>
+              <Text style={styles.subtitle}>Update your account password</Text>
             </View>
 
             <Pressable
@@ -253,11 +209,7 @@ export default function ChangePasswordModal({
               onPress={handleClose}
               disabled={saving}
             >
-              <Ionicons
-                name="close"
-                size={22}
-                color="#65736A"
-              />
+              <Ionicons name="close" size={22} color="#65736A" />
             </Pressable>
           </View>
 
@@ -274,32 +226,22 @@ export default function ChangePasswordModal({
               keyboardContentContainerStyle,
             ]}
           >
-            <Text style={styles.label}>
-              Current Password
-            </Text>
+            <Text style={styles.label}>Current Password</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={19}
-                color="#758179"
-              />
+              <Ionicons name="lock-closed-outline" size={19} color="#758179" />
 
               <TextInput
                 ref={currentPasswordInputRef}
                 onFocus={() =>
-                  handleInputFocus(
-                    currentPasswordInputRef.current
-                  )
+                  handleInputFocus(currentPasswordInputRef.current)
                 }
                 style={styles.input}
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
                 placeholder="Enter current password"
                 placeholderTextColor="#A2AAA5"
-                secureTextEntry={
-                  !showCurrentPassword
-                }
+                secureTextEntry={!showCurrentPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!saving}
@@ -311,43 +253,25 @@ export default function ChangePasswordModal({
                   pressed && styles.pressed,
                   saving && styles.disabledButton,
                 ]}
-                onPress={() =>
-                  setShowCurrentPassword(
-                    (previous) => !previous
-                  )
-                }
+                onPress={() => setShowCurrentPassword((previous) => !previous)}
                 disabled={saving}
               >
                 <Ionicons
-                  name={
-                    showCurrentPassword
-                      ? "eye-off-outline"
-                      : "eye-outline"
-                  }
+                  name={showCurrentPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
                   color="#758179"
                 />
               </Pressable>
             </View>
 
-            <Text style={styles.label}>
-              New Password
-            </Text>
+            <Text style={styles.label}>New Password</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons
-                name="key-outline"
-                size={19}
-                color="#758179"
-              />
+              <Ionicons name="key-outline" size={19} color="#758179" />
 
               <TextInput
                 ref={newPasswordInputRef}
-                onFocus={() =>
-                  handleInputFocus(
-                    newPasswordInputRef.current
-                  )
-                }
+                onFocus={() => handleInputFocus(newPasswordInputRef.current)}
                 style={styles.input}
                 value={newPassword}
                 onChangeText={setNewPassword}
@@ -365,32 +289,20 @@ export default function ChangePasswordModal({
                   pressed && styles.pressed,
                   saving && styles.disabledButton,
                 ]}
-                onPress={() =>
-                  setShowNewPassword(
-                    (previous) => !previous
-                  )
-                }
+                onPress={() => setShowNewPassword((previous) => !previous)}
                 disabled={saving}
               >
                 <Ionicons
-                  name={
-                    showNewPassword
-                      ? "eye-off-outline"
-                      : "eye-outline"
-                  }
+                  name={showNewPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
                   color="#758179"
                 />
               </Pressable>
             </View>
 
-            <Text style={styles.passwordHint}>
-              Use at least 6 characters.
-            </Text>
+            <Text style={styles.passwordHint}>Use at least 6 characters.</Text>
 
-            <Text style={styles.label}>
-              Confirm New Password
-            </Text>
+            <Text style={styles.label}>Confirm New Password</Text>
 
             <View style={styles.inputContainer}>
               <Ionicons
@@ -402,25 +314,19 @@ export default function ChangePasswordModal({
               <TextInput
                 ref={confirmPasswordInputRef}
                 onFocus={() =>
-                  handleInputFocus(
-                    confirmPasswordInputRef.current
-                  )
+                  handleInputFocus(confirmPasswordInputRef.current)
                 }
                 style={styles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Confirm new password"
                 placeholderTextColor="#A2AAA5"
-                secureTextEntry={
-                  !showConfirmPassword
-                }
+                secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!saving}
                 returnKeyType="done"
-                onSubmitEditing={
-                  handleChangePassword
-                }
+                onSubmitEditing={handleChangePassword}
               />
 
               <Pressable
@@ -429,19 +335,11 @@ export default function ChangePasswordModal({
                   pressed && styles.pressed,
                   saving && styles.disabledButton,
                 ]}
-                onPress={() =>
-                  setShowConfirmPassword(
-                    (previous) => !previous
-                  )
-                }
+                onPress={() => setShowConfirmPassword((previous) => !previous)}
                 disabled={saving}
               >
                 <Ionicons
-                  name={
-                    showConfirmPassword
-                      ? "eye-off-outline"
-                      : "eye-outline"
-                  }
+                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
                   color="#758179"
                 />
@@ -456,9 +354,8 @@ export default function ChangePasswordModal({
               />
 
               <Text style={styles.securityText}>
-                For your security, you need to
-                enter your current password before
-                creating a new one.
+                For your security, you need to enter your current password
+                before creating a new one.
               </Text>
             </View>
 
@@ -471,37 +368,25 @@ export default function ChangePasswordModal({
                 onPress={handleClose}
                 disabled={saving}
               >
-                <Text style={styles.cancelText}>
-                  Cancel
-                </Text>
+                <Text style={styles.cancelText}>Cancel</Text>
               </Pressable>
 
               <Pressable
                 style={({ pressed }) => [
                   styles.saveButton,
                   pressed && styles.savePressed,
-                  saving &&
-                    styles.disabledButton,
+                  saving && styles.disabledButton,
                 ]}
                 onPress={handleChangePassword}
                 disabled={saving}
               >
                 {saving ? (
-                  <ActivityIndicator
-                    size="small"
-                    color="#FFFFFF"
-                  />
+                  <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
                   <>
-                    <Ionicons
-                      name="checkmark"
-                      size={19}
-                      color="#FFFFFF"
-                    />
+                    <Ionicons name="checkmark" size={19} color="#FFFFFF" />
 
-                    <Text style={styles.saveText}>
-                      Change Password
-                    </Text>
+                    <Text style={styles.saveText}>Change Password</Text>
                   </>
                 )}
               </Pressable>

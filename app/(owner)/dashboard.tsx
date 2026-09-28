@@ -17,9 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCallback, useState } from "react";
 
-
 import { API_URL } from "../../config/api";
-
 
 type Pet = {
   pet_id: number;
@@ -75,173 +73,112 @@ const DEFAULT_SUMMARY: HealthSummary = {
   total: 0,
 };
 
-
 export default function DashboardScreen() {
-  const [ownerName, setOwnerName] =
-    useState("Pet Owner");
+  const [ownerName, setOwnerName] = useState("Pet Owner");
 
   const [pets, setPets] = useState<Pet[]>([]);
 
-  const [summary, setSummary] =
-    useState<HealthSummary>(DEFAULT_SUMMARY);
+  const [summary, setSummary] = useState<HealthSummary>(DEFAULT_SUMMARY);
 
-  const [reminders, setReminders] = useState<
-    HealthSchedule[]
-  >([]);
+  const [reminders, setReminders] = useState<HealthSchedule[]>([]);
 
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] =
-    useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-
-  const loadDashboard = useCallback(
-    async (showLoading = true) => {
-      try {
-        if (showLoading) {
-          setLoading(true);
-        }
-
-        const token =
-          await AsyncStorage.getItem("token");
-
-        const storedUser =
-          await AsyncStorage.getItem("user");
-
-        if (!token) {
-          Alert.alert(
-            "Session Expired",
-            "Please log in again."
-          );
-
-          router.replace("/login");
-          return;
-        }
-
-
-
-        if (storedUser) {
-          try {
-            const parsedUser =
-              JSON.parse(storedUser);
-
-            const name =
-              parsedUser.full_name ||
-              parsedUser.fullName ||
-              parsedUser.name;
-
-            if (name) {
-              const firstName =
-                String(name)
-                  .trim()
-                  .split(" ")[0];
-
-              setOwnerName(firstName);
-            }
-          } catch (error) {
-            console.log(
-              "PARSE USER ERROR:",
-              error
-            );
-          }
-        }
-
-
-
-
-        const [
-          petsResponse,
-          overviewResponse,
-        ] = await Promise.all([
-          fetch(`${API_URL}/pets`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-
-          fetch(
-            `${API_URL}/vet-records/owner-health-overview`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          ),
-        ]);
-
-
-
-
-        const petsData =
-          await petsResponse.json();
-
-        if (!petsResponse.ok) {
-          throw new Error(
-            petsData.message ||
-              "Unable to load pets."
-          );
-        }
-
-        let loadedPets: Pet[] = [];
-
-        if (Array.isArray(petsData)) {
-          loadedPets = petsData;
-        } else if (
-          Array.isArray(petsData.pets)
-        ) {
-          loadedPets = petsData.pets;
-        } else if (
-          Array.isArray(petsData.data)
-        ) {
-          loadedPets = petsData.data;
-        }
-        setPets(loadedPets);
-
-
-
-        const overviewData: HealthOverviewResponse =
-          await overviewResponse.json();
-
-        if (!overviewResponse.ok) {
-          throw new Error(
-            overviewData.message ||
-              "Unable to load health overview."
-          );
-        }
-
-        setSummary(
-          overviewData.summary ||
-            DEFAULT_SUMMARY
-        );
-
-        const allSchedules =
-          overviewData.allSchedules || [];
-
-        setReminders(
-          allSchedules.slice(0, 4)
-        );
-      } catch (error) {
-        console.error(
-          "LOAD DASHBOARD ERROR:",
-          error
-        );
-
-        Alert.alert(
-          "Dashboard Error",
-          error instanceof Error
-            ? error.message
-            : "Unable to load dashboard."
-        );
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
+  const loadDashboard = useCallback(async (showLoading = true) => {
+    try {
+      if (showLoading) {
+        setLoading(true);
       }
-    },
-    []
-  );
+
+      const token = await AsyncStorage.getItem("token");
+
+      const storedUser = await AsyncStorage.getItem("user");
+
+      if (!token) {
+        Alert.alert("Session Expired", "Please log in again.");
+
+        router.replace("/login");
+        return;
+      }
+
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+
+          const name =
+            parsedUser.full_name || parsedUser.fullName || parsedUser.name;
+
+          if (name) {
+            const firstName = String(name).trim().split(" ")[0];
+
+            setOwnerName(firstName);
+          }
+        } catch (error) {
+          console.log("PARSE USER ERROR:", error);
+        }
+      }
+
+      const [petsResponse, overviewResponse] = await Promise.all([
+        fetch(`${API_URL}/pets`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+
+        fetch(`${API_URL}/vet-records/owner-health-overview`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+      ]);
+
+      const petsData = await petsResponse.json();
+
+      if (!petsResponse.ok) {
+        throw new Error(petsData.message || "Unable to load pets.");
+      }
+
+      let loadedPets: Pet[] = [];
+
+      if (Array.isArray(petsData)) {
+        loadedPets = petsData;
+      } else if (Array.isArray(petsData.pets)) {
+        loadedPets = petsData.pets;
+      } else if (Array.isArray(petsData.data)) {
+        loadedPets = petsData.data;
+      }
+      setPets(loadedPets);
+
+      const overviewData: HealthOverviewResponse =
+        await overviewResponse.json();
+
+      if (!overviewResponse.ok) {
+        throw new Error(
+          overviewData.message || "Unable to load health overview.",
+        );
+      }
+
+      setSummary(overviewData.summary || DEFAULT_SUMMARY);
+
+      const allSchedules = overviewData.allSchedules || [];
+
+      setReminders(allSchedules.slice(0, 4));
+    } catch (error) {
+      console.error("LOAD DASHBOARD ERROR:", error);
+
+      Alert.alert(
+        "Dashboard Error",
+        error instanceof Error ? error.message : "Unable to load dashboard.",
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-
       loadDashboard(true);
 
       const onBackPress = () => {
@@ -251,24 +188,21 @@ export default function DashboardScreen() {
         return true;
       };
 
-      const subscription =
-        BackHandler.addEventListener(
-          "hardwareBackPress",
-          onBackPress
-        );
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
 
       return () => {
         subscription.remove();
       };
-    }, [loadDashboard])
+    }, [loadDashboard]),
   );
-
 
   const handleRefresh = () => {
     setRefreshing(true);
     loadDashboard(false);
   };
-
 
   const openPet = (petId: number) => {
     router.push({
@@ -279,11 +213,7 @@ export default function DashboardScreen() {
     });
   };
 
-
-
-  const openSchedule = (
-    petId: number
-  ) => {
+  const openSchedule = (petId: number) => {
     router.push({
       pathname: "/schedules",
       params: {
@@ -292,82 +222,46 @@ export default function DashboardScreen() {
     });
   };
 
-
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={
-          styles.content
-        }
+        contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
-
         <View style={styles.header}>
           <View>
-            <Text style={styles.smallText}>
-              Good day,
-            </Text>
+            <Text style={styles.smallText}>Good day,</Text>
 
-            <Text style={styles.ownerName}>
-              {ownerName} 👋
-            </Text>
+            <Text style={styles.ownerName}>{ownerName} 👋</Text>
           </View>
         </View>
-
 
         <View style={styles.welcomeCard}>
-          <View
-            style={
-              styles.welcomeTextContainer
-            }
-          >
-            <Text style={styles.welcomeTitle} >
-              Keep your pets{"\n"}healthy &
-              safe.
+          <View style={styles.welcomeTextContainer}>
+            <Text style={styles.welcomeTitle}>
+              Keep your pets{"\n"}healthy & safe.
             </Text>
 
-            <Text
-              style={styles.welcomeSubtitle} >
-              Monitor their health records
-              and important schedules.
+            <Text style={styles.welcomeSubtitle}>
+              Monitor their health records and important schedules.
             </Text>
           </View>
 
-          <Text style={styles.bigPaw}>
-            🐾
-          </Text>
+          <Text style={styles.bigPaw}>🐾</Text>
         </View>
 
-
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            Health Overview
-          </Text>
+          <Text style={styles.sectionTitle}>Health Overview</Text>
         </View>
 
         {loading ? (
-          <View
-            style={
-              styles.overviewLoadingContainer
-            }
-          >
-            <ActivityIndicator
-              size="small"
-              color="#176B3A"
-            />
+          <View style={styles.overviewLoadingContainer}>
+            <ActivityIndicator size="small" color="#176B3A" />
 
-            <Text
-              style={styles.loadingText}
-            >
-              Loading health schedules...
-            </Text>
+            <Text style={styles.loadingText}>Loading health schedules...</Text>
           </View>
         ) : (
           <View style={styles.overviewRow}>
@@ -418,112 +312,74 @@ export default function DashboardScreen() {
           </View>
         )}
 
-
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            My Pets
-          </Text>
+          <Text style={styles.sectionTitle}>My Pets</Text>
 
           <Pressable
             style={({ pressed }) => [
               styles.seeAllButton,
               pressed && styles.pressed,
             ]}
-            onPress={() =>
-              router.push("/pets")
-            }
+            onPress={() => router.push("/pets")}
           >
-            <Text style={styles.seeAll}>
-              See All
-            </Text>
+            <Text style={styles.seeAll}>See All</Text>
           </Pressable>
         </View>
 
         {!loading && pets.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
-              <Ionicons
-                name="paw-outline"
-                size={28}
-                color="#176B3A"
-              />
+              <Ionicons name="paw-outline" size={28} color="#176B3A" />
             </View>
 
-            <Text style={styles.emptyTitle}>
-              No pets registered
-            </Text>
+            <Text style={styles.emptyTitle}>No pets registered</Text>
 
             <Text style={styles.emptyDescription}>
-              Add your first pet to start
-              monitoring health records and
+              Add your first pet to start monitoring health records and
               schedules.
             </Text>
 
-            <Pressable style={({ pressed }) => [
+            <Pressable
+              style={({ pressed }) => [
                 styles.addPetButton,
                 pressed && styles.pressed,
               ]}
-              onPress={() =>
-                router.push("/add-pet")
-              }
+              onPress={() => router.push("/add-pet")}
             >
-              <Ionicons
-                name="add"
-                size={18}
-                color="#FFFFFF"
-              />
+              <Ionicons name="add" size={18} color="#FFFFFF" />
 
-              <Text style={styles.addPetText}>
-                Add Pet
-              </Text>
+              <Text style={styles.addPetText}>Add Pet</Text>
             </Pressable>
           </View>
         ) : (
-          pets.slice(0, 2).map((pet) => (
-            <PetCard
-              key={pet.pet_id}
-              pet={pet}
-              onPress={() =>
-                openPet(pet.pet_id)
-              }
-            />
-          ))
+          pets
+            .slice(0, 2)
+            .map((pet) => (
+              <PetCard
+                key={pet.pet_id}
+                pet={pet}
+                onPress={() => openPet(pet.pet_id)}
+              />
+            ))
         )}
 
-
-        <View
-          style={[
-            styles.sectionHeader,
-            styles.remindersSectionHeader,
-          ]}
-        >
-          <Text style={styles.sectionTitle}>
-            Health Reminders
-          </Text>
+        <View style={[styles.sectionHeader, styles.remindersSectionHeader]}>
+          <Text style={styles.sectionTitle}>Health Reminders</Text>
 
           <Pressable
             style={({ pressed }) => [
               styles.seeAllButton,
               pressed && styles.pressed,
             ]}
-            onPress={() =>
-              router.push("/health-reminders")
-            }
+            onPress={() => router.push("/health-reminders")}
           >
-            <Text style={styles.seeAll}>
-              See All
-            </Text>
+            <Text style={styles.seeAll}>See All</Text>
           </Pressable>
         </View>
 
-        {!loading &&
-        reminders.length === 0 ? (
+        {!loading && reminders.length === 0 ? (
           <View style={styles.emptyReminder}>
-            <View
-              style={
-                styles.emptyReminderIcon
-              }
-            >
+            <View style={styles.emptyReminderIcon}>
               <Ionicons
                 name="checkmark-circle-outline"
                 size={27}
@@ -531,26 +387,11 @@ export default function DashboardScreen() {
               />
             </View>
 
-            <View
-              style={
-                styles.emptyReminderText
-              }
-            >
-              <Text
-                style={
-                  styles.emptyReminderTitle
-                }
-              >
-                No health reminders
-              </Text>
+            <View style={styles.emptyReminderText}>
+              <Text style={styles.emptyReminderTitle}>No health reminders</Text>
 
-              <Text
-                style={
-                  styles.emptyReminderDescription
-                }
-              >
-                Upcoming veterinary schedules
-                will appear here.
+              <Text style={styles.emptyReminderDescription}>
+                Upcoming veterinary schedules will appear here.
               </Text>
             </View>
           </View>
@@ -559,20 +400,14 @@ export default function DashboardScreen() {
             <ReminderCard
               key={schedule.record_id}
               schedule={schedule}
-              onPress={() =>
-                openSchedule(
-                  schedule.pet_id
-                )
-              }
+              onPress={() => openSchedule(schedule.pet_id)}
             />
           ))
         )}
       </ScrollView>
-
     </SafeAreaView>
   );
 }
-
 
 function OverviewCard({
   count,
@@ -591,24 +426,19 @@ function OverviewCard({
     <Pressable
       style={({ pressed }) => [
         styles.overviewCard,
-        type === "overdue" &&
-          styles.overdueCard,
-        type === "due" &&
-          styles.dueCard,
-        type === "upcoming" &&
-          styles.upcomingCard,
+        type === "overdue" && styles.overdueCard,
+        type === "due" && styles.dueCard,
+        type === "upcoming" && styles.upcomingCard,
         pressed && styles.pressed,
       ]}
       onPress={onPress}
     >
       <View
-        style={[ styles.overviewIcon,
-          type === "overdue" &&
-            styles.overdueIcon,
-          type === "due" &&
-            styles.dueIcon,
-          type === "upcoming" &&
-            styles.upcomingIcon,
+        style={[
+          styles.overviewIcon,
+          type === "overdue" && styles.overdueIcon,
+          type === "due" && styles.dueIcon,
+          type === "upcoming" && styles.upcomingIcon,
         ]}
       >
         <Ionicons
@@ -618,65 +448,44 @@ function OverviewCard({
             type === "overdue"
               ? "#B84C4C"
               : type === "due"
-              ? "#B87516"
-              : "#176B3A"
+                ? "#B87516"
+                : "#176B3A"
           }
         />
       </View>
 
       <Text
-        style={[styles.overviewCount,
-          type === "overdue" &&
-            styles.overdueCount,
-          type === "due" &&
-            styles.dueCount,
+        style={[
+          styles.overviewCount,
+          type === "overdue" && styles.overdueCount,
+          type === "due" && styles.dueCount,
         ]}
       >
         {count}
       </Text>
 
-      <Text style={styles.overviewLabel}>
-        {label}
-      </Text>
+      <Text style={styles.overviewLabel}>{label}</Text>
     </Pressable>
   );
 }
 
+function PetCard({ pet, onPress }: { pet: Pet; onPress: () => void }) {
+  const imageSource = getPetImageSource(pet.photo_url);
 
+  const status = pet.pet_status || "Safe";
 
-function PetCard({
-  pet,
-  onPress,
-}: {
-  pet: Pet;
-  onPress: () => void;
-}) {
-  const imageSource =
-    getPetImageSource(pet.photo_url);
+  const isMissing = status.toLowerCase() === "missing";
 
-  const status =
-    pet.pet_status || "Safe";
-
-  const isMissing =
-    status.toLowerCase() === "missing";
-
-  const details = [
-    pet.breed || pet.species,
-    pet.sex,
-  ]
+  const details = [pet.breed || pet.species, pet.sex]
     .filter(Boolean)
     .join(" • ");
 
   return (
-    <Pressable style={({ pressed }) => [
-        styles.petCard,
-        pressed && styles.pressed,
-      ]}
+    <Pressable
+      style={({ pressed }) => [styles.petCard, pressed && styles.pressed]}
       onPress={onPress}
     >
-      <View
-        style={styles.petImageContainer}
-      >
+      <View style={styles.petImageContainer}>
         {imageSource ? (
           <Image
             source={imageSource}
@@ -684,85 +493,42 @@ function PetCard({
             resizeMode="cover"
           />
         ) : (
-          <View style={styles.petPlaceholder
-            }
-          >
-            <Ionicons
-              name="paw"
-              size={30}
-              color="#176B3A"
-            />
+          <View style={styles.petPlaceholder}>
+            <Ionicons name="paw" size={30} color="#176B3A" />
           </View>
         )}
       </View>
 
       <View style={styles.petInfo}>
         <View style={styles.petNameRow}>
-          <Text
-            style={styles.petName}
-            numberOfLines={1}
-          >
+          <Text style={styles.petName} numberOfLines={1}>
             {pet.pet_name}
           </Text>
 
-          <View
-            style={[
-              styles.safeBadge,
-              isMissing &&
-                styles.missingBadge,
-            ]}
-          >
-            <View
-              style={[
-                styles.safeDot,
-                isMissing &&
-                  styles.missingDot,
-              ]}
-            />
+          <View style={[styles.safeBadge, isMissing && styles.missingBadge]}>
+            <View style={[styles.safeDot, isMissing && styles.missingDot]} />
 
-            <Text
-              style={[
-                styles.safeText,
-                isMissing &&
-                  styles.missingText,
-              ]}
-            >
+            <Text style={[styles.safeText, isMissing && styles.missingText]}>
               {status}
             </Text>
           </View>
         </View>
 
-        <Text style={styles.petBreed}>
-          {details ||
-            pet.species ||
-            "Pet"}
-        </Text>
+        <Text style={styles.petBreed}>{details || pet.species || "Pet"}</Text>
 
         <View style={styles.petDetail}>
-          <Ionicons
-            name="medical-outline"
-            size={16}
-            color="#176B3A"
-          />
+          <Ionicons name="medical-outline" size={16} color="#176B3A" />
 
-          <Text
-            style={styles.petDetailText}
-          >
+          <Text style={styles.petDetailText}>
             View health records & schedules
           </Text>
         </View>
       </View>
 
-      <Ionicons
-        name="chevron-forward"
-        size={22}
-        color="#A4AEA8"
-      />
+      <Ionicons name="chevron-forward" size={22} color="#A4AEA8" />
     </Pressable>
   );
 }
-
-
 
 function ReminderCard({
   schedule,
@@ -771,70 +537,47 @@ function ReminderCard({
   schedule: HealthSchedule;
   onPress: () => void;
 }) {
-  const days =
-    Number(schedule.days_until_due);
+  const days = Number(schedule.days_until_due);
 
-  const statusInfo =
-    getScheduleStatus(days);
+  const statusInfo = getScheduleStatus(days);
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.reminderCard,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.reminderCard, pressed && styles.pressed]}
       onPress={onPress}
     >
       <View
         style={[
           styles.reminderIcon,
-          statusInfo.type ===
-            "overdue" &&
-            styles.overdueReminderIcon,
-          statusInfo.type === "due" &&
-            styles.warningIcon,
+          statusInfo.type === "overdue" && styles.overdueReminderIcon,
+          statusInfo.type === "due" && styles.warningIcon,
         ]}
       >
         <Ionicons
-          name={getServiceIcon(
-            schedule.service_type
-          )}
+          name={getServiceIcon(schedule.service_type)}
           size={23}
           color={
-            statusInfo.type ===
-            "overdue"
+            statusInfo.type === "overdue"
               ? "#B84C4C"
               : statusInfo.type === "due"
-              ? "#B87516"
-              : "#176B3A"
+                ? "#B87516"
+                : "#176B3A"
           }
         />
       </View>
 
       <View style={styles.reminderInfo}>
-        <Text
-          style={styles.reminderTitle}
-          numberOfLines={1}
-        >
+        <Text style={styles.reminderTitle} numberOfLines={1}>
           {schedule.service_type}
         </Text>
 
-        <Text style={styles.reminderPet}>
-          {schedule.pet_name}
-        </Text>
+        <Text style={styles.reminderPet}>{schedule.pet_name}</Text>
 
         <View style={styles.dateRow}>
-          <Ionicons
-            name="calendar-outline"
-            size={14}
-            color="#7A877F"
-          />
+          <Ionicons name="calendar-outline" size={14} color="#7A877F" />
 
           <Text style={styles.dateText}>
-            {formatDueText(
-              days,
-              schedule.next_due_date
-            )}
+            {formatDueText(days, schedule.next_due_date)}
           </Text>
         </View>
       </View>
@@ -842,23 +585,21 @@ function ReminderCard({
       <View
         style={[
           styles.statusBadge,
-          statusInfo.type ===
-            "overdue"
+          statusInfo.type === "overdue"
             ? styles.overdueBadge
             : statusInfo.type === "due"
-            ? styles.warningBadge
-            : styles.upcomingBadge,
+              ? styles.warningBadge
+              : styles.upcomingBadge,
         ]}
       >
         <Text
           style={[
             styles.statusText,
-            statusInfo.type ===
-              "overdue"
+            statusInfo.type === "overdue"
               ? styles.overdueText
               : statusInfo.type === "due"
-              ? styles.warningText
-              : styles.upcomingText,
+                ? styles.warningText
+                : styles.upcomingText,
           ]}
         >
           {statusInfo.label}
@@ -868,10 +609,8 @@ function ReminderCard({
   );
 }
 
-
-
 function getPetImageSource(
-  photoUrl?: string | null
+  photoUrl?: string | null,
 ): ImageSourcePropType | null {
   if (!photoUrl) {
     return null;
@@ -889,13 +628,7 @@ function getPetImageSource(
   }
 
   return {
-    uri: `${API_URL.replace(
-      "/api",
-      ""
-    )}/${photoUrl.replace(
-      /^\/+/,
-      ""
-    )}`,
+    uri: `${API_URL.replace("/api", "")}/${photoUrl.replace(/^\/+/, "")}`,
   };
 }
 
@@ -920,10 +653,7 @@ function getScheduleStatus(days: number) {
   };
 }
 
-function formatDueText(
-  days: number,
-  date: string
-) {
+function formatDueText(days: number, date: string) {
   if (days === 0) {
     return "Due today";
   }
@@ -941,9 +671,7 @@ function formatDueText(
   }
 
   if (days < -1) {
-    return `Overdue by ${Math.abs(
-      days
-    )} days`;
+    return `Overdue by ${Math.abs(days)} days`;
   }
 
   return formatDate(date);
@@ -954,11 +682,9 @@ function formatDate(date: string) {
     return "No due date";
   }
 
-  const cleanDate =
-    String(date).split("T")[0];
+  const cleanDate = String(date).split("T")[0];
 
-  const parts =
-    cleanDate.split("-");
+  const parts = cleanDate.split("-");
 
   if (parts.length !== 3) {
     return cleanDate;
@@ -968,27 +694,17 @@ function formatDate(date: string) {
   const month = Number(parts[1]);
   const day = Number(parts[2]);
 
-  const localDate = new Date(
-    year,
-    month - 1,
-    day
-  );
+  const localDate = new Date(year, month - 1, day);
 
-  return localDate.toLocaleDateString(
-    "en-US",
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
+  return localDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function getServiceIcon(
-  serviceType: string
-): keyof typeof Ionicons.glyphMap {
-  const service =
-    serviceType.toLowerCase();
+function getServiceIcon(serviceType: string): keyof typeof Ionicons.glyphMap {
+  const service = serviceType.toLowerCase();
 
   if (service.includes("vacc")) {
     return "medical";
@@ -1329,8 +1045,6 @@ const styles = StyleSheet.create({
     color: "#176B3A",
     fontWeight: "600",
   },
-
-
 
   emptyCard: {
     backgroundColor: "#FFFFFF",

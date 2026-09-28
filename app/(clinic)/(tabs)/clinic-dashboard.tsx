@@ -43,8 +43,8 @@ type DashboardData = {
     clinic_name: string | null;
   };
   overview: {
-    records_today: number;
-    pending_access: number;
+    booked: number;
+    cancelled: number;
   };
   pending_requests: PendingRequest[];
   recent_activity: RecentActivity[];
@@ -57,16 +57,15 @@ const EMPTY_DASHBOARD: DashboardData = {
     clinic_name: null,
   },
   overview: {
-    records_today: 0,
-    pending_access: 0,
+    booked: 0,
+    cancelled: 0,
   },
   pending_requests: [],
   recent_activity: [],
 };
 
 export default function ClinicDashboardScreen() {
-  const [dashboard, setDashboard] =
-    useState<DashboardData>(EMPTY_DASHBOARD);
+  const [dashboard, setDashboard] = useState<DashboardData>(EMPTY_DASHBOARD);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -130,7 +129,7 @@ export default function ClinicDashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       loadDashboard();
-    }, [loadDashboard])
+    }, [loadDashboard]),
   );
 
   const clinicName =
@@ -167,7 +166,9 @@ export default function ClinicDashboardScreen() {
         <Text style={styles.clinicName} numberOfLines={2}>
           {loading ? "Loading clinic..." : clinicName}
         </Text>
-        <Text style={styles.subtitle}>Manage pet visits and health records</Text>
+        <Text style={styles.subtitle}>
+          Manage pet visits and health records
+        </Text>
 
         {error && (
           <Pressable
@@ -204,17 +205,17 @@ export default function ClinicDashboardScreen() {
           <Ionicons name="arrow-forward" size={23} color="#FFFFFF" />
         </Pressable>
 
-        <SectionTitle title="Today's Overview" />
+        <SectionTitle title="This Month" />
         <View style={styles.overviewRow}>
           <OverviewCard
-            icon="document-text-outline"
-            value={loading ? "—" : String(dashboard.overview.records_today)}
-            label="Records Today"
+            icon="calendar-outline"
+            value={loading ? "—" : String(dashboard.overview.booked)}
+            label="Booked"
           />
           <OverviewCard
-            icon="time-outline"
-            value={loading ? "—" : String(dashboard.overview.pending_access)}
-            label="Pending Access"
+            icon="close-circle-outline"
+            value={loading ? "—" : String(dashboard.overview.cancelled)}
+            label="Cancelled"
             pending
           />
         </View>
@@ -259,10 +260,16 @@ export default function ClinicDashboardScreen() {
         {loading ? (
           <LoadingCard label="Loading access requests..." />
         ) : dashboard.pending_requests.length === 0 ? (
-          <EmptyCard icon="shield-checkmark-outline" text="No pending access requests." />
+          <EmptyCard
+            icon="shield-checkmark-outline"
+            text="No pending access requests."
+          />
         ) : (
           dashboard.pending_requests.map((request) => (
-            <PendingRequestCard key={request.authorization_id} request={request} />
+            <PendingRequestCard
+              key={request.authorization_id}
+              request={request}
+            />
           ))
         )}
 
@@ -273,7 +280,10 @@ export default function ClinicDashboardScreen() {
         {loading ? (
           <LoadingCard label="Loading veterinary activity..." />
         ) : dashboard.recent_activity.length === 0 ? (
-          <EmptyCard icon="document-text-outline" text="No recent veterinary activity yet." />
+          <EmptyCard
+            icon="document-text-outline"
+            text="No recent veterinary activity yet."
+          />
         ) : (
           dashboard.recent_activity.map((activity) => (
             <ActivityCard key={activity.record_id} activity={activity} />
@@ -333,8 +343,14 @@ function OverviewCard({
 }) {
   return (
     <View style={styles.overviewCard}>
-      <View style={[styles.overviewIcon, pending && styles.overviewIconPending]}>
-        <Ionicons name={icon} size={22} color={pending ? "#A66A15" : "#176B3A"} />
+      <View
+        style={[styles.overviewIcon, pending && styles.overviewIconPending]}
+      >
+        <Ionicons
+          name={icon}
+          size={22}
+          color={pending ? "#A66A15" : "#176B3A"}
+        />
       </View>
       <Text style={styles.overviewValue}>{value}</Text>
       <Text style={styles.overviewLabel}>{label}</Text>
@@ -408,7 +424,9 @@ function PendingRequestCard({ request }: { request: PendingRequest }) {
         )}
       </View>
       <View style={styles.requestInfo}>
-        <Text style={styles.petName} numberOfLines={1}>{request.pet_name}</Text>
+        <Text style={styles.petName} numberOfLines={1}>
+          {request.pet_name}
+        </Text>
         <Text style={styles.petDetails} numberOfLines={1}>
           {request.breed || request.species}
         </Text>
@@ -428,9 +446,15 @@ function ActivityCard({ activity }: { activity: RecentActivity }) {
         <Ionicons name="medical-outline" size={21} color="#176B3A" />
       </View>
       <View style={styles.activityInfo}>
-        <Text style={styles.activityTitle} numberOfLines={1}>{activity.service_type}</Text>
-        <Text style={styles.activityPet} numberOfLines={1}>{activity.pet_name}</Text>
-        <Text style={styles.activityTime}>{formatActivityTime(activity.created_at)}</Text>
+        <Text style={styles.activityTitle} numberOfLines={1}>
+          {activity.service_type}
+        </Text>
+        <Text style={styles.activityPet} numberOfLines={1}>
+          {activity.pet_name}
+        </Text>
+        <Text style={styles.activityTime}>
+          {formatActivityTime(activity.created_at)}
+        </Text>
       </View>
       {activity.can_open && (
         <Ionicons name="chevron-forward" size={18} color="#9AA49E" />
@@ -518,62 +542,245 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFDF7" },
   content: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 48 },
   brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
-  brandIcon: { width: 38, height: 38, borderRadius: 13, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center", marginRight: 10 },
-  brandName: { fontSize: 17, fontWeight: "900", color: "#173D2A", letterSpacing: 0.5 },
-  brandRole: { fontSize: 10, fontWeight: "800", color: "#7B887F", letterSpacing: 1.2, marginTop: 1 },
+  brandIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 13,
+    backgroundColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  brandName: {
+    fontSize: 17,
+    fontWeight: "900",
+    color: "#173D2A",
+    letterSpacing: 0.5,
+  },
+  brandRole: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#7B887F",
+    letterSpacing: 1.2,
+    marginTop: 1,
+  },
   greeting: { fontSize: 16, color: "#718078", fontWeight: "600" },
-  clinicName: { fontSize: 26, lineHeight: 32, fontWeight: "900", color: "#1E2D24", marginTop: 2 },
+  clinicName: {
+    fontSize: 26,
+    lineHeight: 32,
+    fontWeight: "900",
+    color: "#1E2D24",
+    marginTop: 2,
+  },
   subtitle: { fontSize: 15, color: "#7B887F", marginTop: 5 },
-  errorCard: { marginTop: 16, borderRadius: 14, borderWidth: 1, borderColor: "#F1CBC6", backgroundColor: "#FFF1EF", padding: 13, flexDirection: "row", alignItems: "center" },
+  errorCard: {
+    marginTop: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#F1CBC6",
+    backgroundColor: "#FFF1EF",
+    padding: 13,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   errorContent: { flex: 1, marginLeft: 10 },
   errorText: { fontSize: 14, lineHeight: 20, color: "#843C34" },
-  retryText: { fontSize: 13, fontWeight: "800", color: "#A7483E", marginTop: 3 },
-  scanCard: { minHeight: 112, marginTop: 23, borderRadius: 22, backgroundColor: "#176B3A", padding: 18, flexDirection: "row", alignItems: "center" },
+  retryText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#A7483E",
+    marginTop: 3,
+  },
+  scanCard: {
+    minHeight: 112,
+    marginTop: 23,
+    borderRadius: 22,
+    backgroundColor: "#176B3A",
+    padding: 18,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   scanCardPressed: { opacity: 0.84, transform: [{ scale: 0.985 }] },
-  scanIcon: { width: 62, height: 62, borderRadius: 19, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center" },
+  scanIcon: {
+    width: 62,
+    height: 62,
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   scanCopy: { flex: 1, marginHorizontal: 15 },
   scanTitle: { fontSize: 20, fontWeight: "900", color: "#FFFFFF" },
   scanDescription: { fontSize: 15, color: "#D9E9DD", marginTop: 5 },
-  sectionTitle: { fontSize: 21, fontWeight: "900", color: "#1E2D24", marginTop: 27, marginBottom: 13 },
+  sectionTitle: {
+    fontSize: 21,
+    fontWeight: "900",
+    color: "#1E2D24",
+    marginTop: 27,
+    marginBottom: 13,
+  },
   overviewRow: { flexDirection: "row", gap: 11 },
-  overviewCard: { flex: 1, minHeight: 127, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8E4", borderRadius: 18, padding: 15 },
-  overviewIcon: { width: 39, height: 39, borderRadius: 12, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  overviewCard: {
+    flex: 1,
+    minHeight: 127,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8E4",
+    borderRadius: 18,
+    padding: 15,
+  },
+  overviewIcon: {
+    width: 39,
+    height: 39,
+    borderRadius: 12,
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   overviewIconPending: { backgroundColor: "#FFF1DA" },
-  overviewValue: { fontSize: 27, fontWeight: "900", color: "#26372C", marginTop: 10 },
+  overviewValue: {
+    fontSize: 27,
+    fontWeight: "900",
+    color: "#26372C",
+    marginTop: 10,
+  },
   overviewLabel: { fontSize: 13, color: "#78857D", marginTop: 2 },
   actionGrid: { gap: 10 },
-  actionCard: { minHeight: 66, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8E4", borderRadius: 16, paddingHorizontal: 13, flexDirection: "row", alignItems: "center" },
+  actionCard: {
+    minHeight: 66,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8E4",
+    borderRadius: 16,
+    paddingHorizontal: 13,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   actionCardDisabled: { opacity: 0.72 },
-  actionIcon: { width: 42, height: 42, borderRadius: 13, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  actionIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   actionText: { flex: 1, marginLeft: 12 },
   actionTitle: { fontSize: 16, fontWeight: "800", color: "#26372C" },
   actionDescription: { fontSize: 13, color: "#8A958E", marginTop: 2 },
-  soonBadge: { backgroundColor: "#F0F3F1", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 5 },
+  soonBadge: {
+    backgroundColor: "#F0F3F1",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
   soonText: { fontSize: 11, fontWeight: "800", color: "#7B877F" },
-  unavailableHint: { fontSize: 12, lineHeight: 17, color: "#88938C", marginTop: 9 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 28, marginBottom: 12 },
+  unavailableHint: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: "#88938C",
+    marginTop: 9,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 28,
+    marginBottom: 12,
+  },
   sectionTitleNoMargin: { fontSize: 21, fontWeight: "900", color: "#1E2D24" },
   seeAll: { fontSize: 15, fontWeight: "700", color: "#176B3A" },
   seeAllDisabled: { fontSize: 15, fontWeight: "700", color: "#A4ADA7" },
-  requestCard: { minHeight: 78, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8E4", borderRadius: 17, padding: 13, flexDirection: "row", alignItems: "center", marginBottom: 9 },
-  petAvatar: { width: 50, height: 50, borderRadius: 16, overflow: "hidden", backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  requestCard: {
+    minHeight: 78,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8E4",
+    borderRadius: 17,
+    padding: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 9,
+  },
+  petAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   petPhoto: { width: "100%", height: "100%" },
   requestInfo: { flex: 1, marginLeft: 12, marginRight: 8 },
   petName: { fontSize: 16, fontWeight: "900", color: "#27372D" },
   petDetails: { fontSize: 14, color: "#808C84", marginTop: 2 },
   requestStatus: { fontSize: 13, color: "#A66A15", marginTop: 5 },
-  pendingBadge: { backgroundColor: "#FFF1DA", paddingHorizontal: 8, paddingVertical: 5, borderRadius: 9 },
+  pendingBadge: {
+    backgroundColor: "#FFF1DA",
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 9,
+  },
   pendingText: { fontSize: 11, fontWeight: "800", color: "#A66A15" },
-  activityCard: { minHeight: 74, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8E4", borderRadius: 16, padding: 13, marginBottom: 9, flexDirection: "row", alignItems: "center" },
-  activityIcon: { width: 45, height: 45, borderRadius: 14, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  activityCard: {
+    minHeight: 74,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8E4",
+    borderRadius: 16,
+    padding: 13,
+    marginBottom: 9,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  activityIcon: {
+    width: 45,
+    height: 45,
+    borderRadius: 14,
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   activityInfo: { flex: 1, marginLeft: 11 },
   activityTitle: { fontSize: 16, fontWeight: "800", color: "#29382F" },
-  activityPet: { fontSize: 14, fontWeight: "700", color: "#176B3A", marginTop: 3 },
+  activityPet: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#176B3A",
+    marginTop: 3,
+  },
   activityTime: { fontSize: 13, color: "#909A94", marginTop: 3 },
-  loadingCard: { minHeight: 88, borderRadius: 17, borderWidth: 1, borderColor: "#E2E8E4", backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", flexDirection: "row" },
+  loadingCard: {
+    minHeight: 88,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: "#E2E8E4",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
   loadingText: { fontSize: 14, color: "#77847C", marginLeft: 9 },
-  emptyCard: { minHeight: 102, borderRadius: 17, borderWidth: 1, borderColor: "#E2E8E4", backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", padding: 18 },
-  emptyIcon: { width: 42, height: 42, borderRadius: 14, backgroundColor: "#F0F4F1", alignItems: "center", justifyContent: "center", marginBottom: 8 },
+  emptyCard: {
+    minHeight: 102,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: "#E2E8E4",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 18,
+  },
+  emptyIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: "#F0F4F1",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
   emptyText: { fontSize: 14, color: "#77847C", textAlign: "center" },
   pressed: { opacity: 0.72 },
 });

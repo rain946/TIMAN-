@@ -79,8 +79,8 @@ export default function AuthorizedPetsScreen() {
 
       setPets(
         authorizations.filter(
-          (item: { status?: string }) => item.status === "Approved"
-        )
+          (item: { status?: string }) => item.status === "Approved",
+        ),
       );
     } catch (loadError) {
       console.log("AUTHORIZED PETS LOAD ERROR:", loadError);
@@ -94,7 +94,7 @@ export default function AuthorizedPetsScreen() {
   useFocusEffect(
     useCallback(() => {
       loadAuthorizedPets();
-    }, [loadAuthorizedPets])
+    }, [loadAuthorizedPets]),
   );
 
   const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -105,8 +105,8 @@ export default function AuthorizedPetsScreen() {
       [pet.pet_name, pet.breed, pet.species].some((value) =>
         String(value || "")
           .toLocaleLowerCase()
-          .includes(normalizedSearch)
-      )
+          .includes(normalizedSearch),
+      ),
     );
   }, [normalizedSearch, pets]);
 
@@ -116,7 +116,10 @@ export default function AuthorizedPetsScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
-          style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.pressed,
+          ]}
           onPress={() => router.back()}
         >
           <Ionicons name="chevron-back" size={27} color="#173D2A" />
@@ -141,7 +144,9 @@ export default function AuthorizedPetsScreen() {
           />
         }
       >
-        <Text style={styles.subtitle}>Pets your clinic can currently manage</Text>
+        <Text style={styles.subtitle}>
+          Pets your clinic can currently manage
+        </Text>
 
         <View style={styles.searchContainer}>
           <Ionicons name="search-outline" size={20} color="#718078" />
@@ -186,10 +191,15 @@ export default function AuthorizedPetsScreen() {
             <View style={styles.errorIcon}>
               <Ionicons name="alert-circle-outline" size={28} color="#A7483E" />
             </View>
-            <Text style={styles.stateTitle}>Unable to load authorized pets.</Text>
+            <Text style={styles.stateTitle}>
+              Unable to load authorized pets.
+            </Text>
             <Pressable
               accessibilityRole="button"
-              style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.retryButton,
+                pressed && styles.pressed,
+              ]}
               onPress={() => loadAuthorizedPets()}
             >
               <Text style={styles.retryText}>Retry</Text>
@@ -198,7 +208,11 @@ export default function AuthorizedPetsScreen() {
         ) : pets.length === 0 ? (
           <StateCard>
             <View style={styles.emptyIcon}>
-              <Ionicons name="shield-checkmark-outline" size={29} color="#176B3A" />
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={29}
+                color="#176B3A"
+              />
             </View>
             <Text style={styles.stateTitle}>No authorized pets yet</Text>
             <Text style={styles.stateDescription}>
@@ -206,7 +220,10 @@ export default function AuthorizedPetsScreen() {
             </Text>
             <Pressable
               accessibilityRole="button"
-              style={({ pressed }) => [styles.scanButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.scanButton,
+                pressed && styles.pressed,
+              ]}
               onPress={() => router.push("/qr-scanner")}
             >
               <Ionicons name="qr-code-outline" size={18} color="#FFFFFF" />
@@ -258,7 +275,9 @@ function PetCard({ pet }: { pet: AuthorizedPet }) {
       </View>
 
       <View style={styles.petContent}>
-        <Text style={styles.petName} numberOfLines={1}>{pet.pet_name}</Text>
+        <Text style={styles.petName} numberOfLines={1}>
+          {pet.pet_name}
+        </Text>
         <Text style={styles.petBreed} numberOfLines={1}>
           {pet.breed || "Breed not specified"}
         </Text>
@@ -297,40 +316,180 @@ function formatDate(value: string) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFDF7" },
-  header: { height: 60, paddingHorizontal: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#E9EDE9" },
-  backButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  header: {
+    height: 60,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9EDE9",
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
   headerSpacer: { width: 44, height: 44 },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
   subtitle: { fontSize: 12, color: "#77847C" },
-  searchContainer: { minHeight: 50, marginTop: 17, borderRadius: 15, paddingHorizontal: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#DDE5DF", flexDirection: "row", alignItems: "center" },
-  searchInput: { flex: 1, minHeight: 48, marginHorizontal: 10, paddingVertical: 0, fontSize: 13, color: "#26372C" },
-  resultHeader: { marginTop: 24, marginBottom: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  searchContainer: {
+    minHeight: 50,
+    marginTop: 17,
+    borderRadius: 15,
+    paddingHorizontal: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DDE5DF",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    minHeight: 48,
+    marginHorizontal: 10,
+    paddingVertical: 0,
+    fontSize: 13,
+    color: "#26372C",
+  },
+  resultHeader: {
+    marginTop: 24,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   resultTitle: { fontSize: 17, fontWeight: "900", color: "#1E2D24" },
   resultCount: { fontSize: 10, fontWeight: "700", color: "#718078" },
   petList: { gap: 10 },
-  petCard: { minHeight: 128, borderRadius: 19, padding: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", flexDirection: "row", alignItems: "center" },
+  petCard: {
+    minHeight: 128,
+    borderRadius: 19,
+    padding: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    flexDirection: "row",
+    alignItems: "center",
+  },
   cardPressed: { opacity: 0.74, transform: [{ scale: 0.99 }] },
-  photoContainer: { width: 72, height: 72, borderRadius: 22, overflow: "hidden", backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  photoContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    overflow: "hidden",
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   petPhoto: { width: "100%", height: "100%" },
   petContent: { flex: 1, minWidth: 0, marginLeft: 13, marginRight: 7 },
   petName: { fontSize: 16, fontWeight: "900", color: "#27372D" },
   petBreed: { marginTop: 3, fontSize: 11, color: "#68766E" },
-  petSpecies: { marginTop: 2, fontSize: 9, fontWeight: "700", color: "#8A958E" },
-  petMetaRow: { marginTop: 10, flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 7 },
-  authorizedBadge: { minHeight: 24, borderRadius: 9, paddingHorizontal: 7, backgroundColor: "#E5F3E8", flexDirection: "row", alignItems: "center", gap: 4 },
-  authorizedText: { fontSize: 7, fontWeight: "900", color: "#176B3A", letterSpacing: 0.3 },
+  petSpecies: {
+    marginTop: 2,
+    fontSize: 9,
+    fontWeight: "700",
+    color: "#8A958E",
+  },
+  petMetaRow: {
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 7,
+  },
+  authorizedBadge: {
+    minHeight: 24,
+    borderRadius: 9,
+    paddingHorizontal: 7,
+    backgroundColor: "#E5F3E8",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  authorizedText: {
+    fontSize: 7,
+    fontWeight: "900",
+    color: "#176B3A",
+    letterSpacing: 0.3,
+  },
   authorizedDate: { maxWidth: 130, fontSize: 8, color: "#929C96" },
-  stateCard: { minHeight: 245, marginTop: 24, borderRadius: 19, padding: 25, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", alignItems: "center", justifyContent: "center" },
+  stateCard: {
+    minHeight: 245,
+    marginTop: 24,
+    borderRadius: 19,
+    padding: 25,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   loadingText: { marginTop: 12, fontSize: 11, color: "#77847C" },
-  emptyIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#E8F4EA", alignItems: "center", justifyContent: "center" },
-  emptyIconMuted: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#EEF2EF", alignItems: "center", justifyContent: "center" },
-  errorIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#FDEDEA", alignItems: "center", justifyContent: "center" },
-  stateTitle: { marginTop: 13, fontSize: 14, fontWeight: "900", color: "#34453B", textAlign: "center" },
-  stateDescription: { maxWidth: 270, marginTop: 6, fontSize: 10, lineHeight: 16, color: "#77847C", textAlign: "center" },
-  retryButton: { minWidth: 102, minHeight: 44, marginTop: 17, borderRadius: 12, paddingHorizontal: 18, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  emptyIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#E8F4EA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyIconMuted: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#EEF2EF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#FDEDEA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stateTitle: {
+    marginTop: 13,
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#34453B",
+    textAlign: "center",
+  },
+  stateDescription: {
+    maxWidth: 270,
+    marginTop: 6,
+    fontSize: 10,
+    lineHeight: 16,
+    color: "#77847C",
+    textAlign: "center",
+  },
+  retryButton: {
+    minWidth: 102,
+    minHeight: 44,
+    marginTop: 17,
+    borderRadius: 12,
+    paddingHorizontal: 18,
+    backgroundColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   retryText: { fontSize: 11, fontWeight: "800", color: "#FFFFFF" },
-  scanButton: { minHeight: 46, marginTop: 18, borderRadius: 13, paddingHorizontal: 18, backgroundColor: "#176B3A", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 },
+  scanButton: {
+    minHeight: 46,
+    marginTop: 18,
+    borderRadius: 13,
+    paddingHorizontal: 18,
+    backgroundColor: "#176B3A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+  },
   scanButtonText: { fontSize: 11, fontWeight: "800", color: "#FFFFFF" },
   pressed: { opacity: 0.7 },
 });

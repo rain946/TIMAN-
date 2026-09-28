@@ -1,11 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 export default function OwnerTabsLayout() {
   return (
@@ -105,25 +100,12 @@ function TabItem({
   return (
     <View style={styles.tabItemContent}>
       <Ionicons
-        name={
-          focused
-            ? activeIcon
-            : inactiveIcon
-        }
+        name={focused ? activeIcon : inactiveIcon}
         size={23}
-        color={
-          focused
-            ? "#176B3A"
-            : "#89948E"
-        }
+        color={focused ? "#176B3A" : "#89948E"}
       />
 
-      <Text
-        style={[
-          styles.tabText,
-          focused && styles.activeTabText,
-        ]}
-      >
+      <Text style={[styles.tabText, focused && styles.activeTabText]}>
         {label}
       </Text>
     </View>
@@ -140,8 +122,7 @@ const styles = StyleSheet.create({
 
     paddingTop: 5,
 
-    paddingBottom:
-      Platform.OS === "android" ? 5 : 8,
+    paddingBottom: Platform.OS === "android" ? 5 : 8,
 
     elevation: 0,
 

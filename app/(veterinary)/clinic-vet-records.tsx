@@ -1,10 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 
 import {
@@ -21,16 +17,7 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  API_URL,
-  getImageUrl,
-} from "../../config/api";
-
-
-
-
-
-
+import { API_URL, getImageUrl } from "../../config/api";
 
 type Pet = {
   pet_id: number;
@@ -55,10 +42,7 @@ type VetRecord = {
 
   next_due_date: string | null;
 
-  schedule_status:
-    | "Pending"
-    | "Completed"
-    | "Cancelled";
+  schedule_status: "Pending" | "Completed" | "Cancelled";
 
   completed_at: string | null;
 
@@ -68,43 +52,27 @@ type VetRecord = {
   clinic_name: string | null;
 };
 
-
-
-
-
 export default function ClinicVetRecordsScreen() {
-  const params =
-    useLocalSearchParams<{
-      petId?: string;
-    }>();
+  const params = useLocalSearchParams<{
+    petId?: string;
+  }>();
 
   const petId = params.petId;
 
-  const [pet, setPet] =
-    useState<Pet | null>(null);
+  const [pet, setPet] = useState<Pet | null>(null);
 
-  const [records, setRecords] =
-    useState<VetRecord[]>([]);
+  const [records, setRecords] = useState<VetRecord[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [refreshing, setRefreshing] =
-    useState(false);
-
-
-
-
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadRecords = useCallback(
     async (showLoading = true) => {
       if (!petId) {
         setLoading(false);
 
-        Alert.alert(
-          "Pet Error",
-          "No pet was selected."
-        );
+        Alert.alert("Pet Error", "No pet was selected.");
 
         return;
       }
@@ -114,68 +82,46 @@ export default function ClinicVetRecordsScreen() {
           setLoading(true);
         }
 
-        const token =
-          await AsyncStorage.getItem(
-            "token"
-          );
+        const token = await AsyncStorage.getItem("token");
 
         if (!token) {
-          Alert.alert(
-            "Session Expired",
-            "Please log in again."
-          );
+          Alert.alert("Session Expired", "Please log in again.");
 
           router.replace("/login");
 
           return;
         }
 
-        const response =
-          await fetch(
-            `${API_URL}/vet-records/clinic/${petId}`,
-            {
-              method: "GET",
+        const response = await fetch(`${API_URL}/vet-records/clinic/${petId}`, {
+          method: "GET",
 
-              headers: {
-                Accept:
-                  "application/json",
+          headers: {
+            Accept: "application/json",
 
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          );
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        const text =
-          await response.text();
+        const text = await response.text();
 
         let data: any = {};
 
         try {
-          data = text
-            ? JSON.parse(text)
-            : {};
+          data = text ? JSON.parse(text) : {};
         } catch {
           data = {
             message: text,
           };
         }
 
-        console.log(
-          "CLINIC VET RECORDS STATUS:",
-          response.status
-        );
+        console.log("CLINIC VET RECORDS STATUS:", response.status);
 
-        console.log(
-          "CLINIC VET RECORDS RESPONSE:",
-          data
-        );
+        console.log("CLINIC VET RECORDS RESPONSE:", data);
 
         if (!response.ok) {
           Alert.alert(
             "Unable to Load",
-            data.message ||
-              "Unable to load veterinary records."
+            data.message || "Unable to load veterinary records.",
           );
 
           return;
@@ -183,38 +129,29 @@ export default function ClinicVetRecordsScreen() {
 
         setPet(data.pet || null);
 
-        setRecords(
-          Array.isArray(data.records)
-            ? data.records
-            : []
-        );
+        setRecords(Array.isArray(data.records) ? data.records : []);
       } catch (error) {
-        console.log(
-          "LOAD CLINIC VET RECORDS ERROR:",
-          error
-        );
+        console.log("LOAD CLINIC VET RECORDS ERROR:", error);
 
         Alert.alert(
           "Connection Error",
-          "Unable to connect to the TIMAN server."
+          "Unable to connect to the TIMAN server.",
         );
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [petId]
+    [petId],
   );
-
 
   useFocusEffect(
     useCallback(() => {
       loadRecords();
 
       return () => {};
-    }, [loadRecords])
+    }, [loadRecords]),
   );
-
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -222,19 +159,12 @@ export default function ClinicVetRecordsScreen() {
     loadRecords(false);
   };
 
-
-  const completeSchedule = async (
-    record: VetRecord
-  ) => {
+  const completeSchedule = async (record: VetRecord) => {
     try {
-      const token =
-        await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
 
         router.replace("/login");
         return;
@@ -249,39 +179,29 @@ export default function ClinicVetRecordsScreen() {
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      const text =
-        await response.text();
+      const text = await response.text();
 
       let data: any = {};
 
       try {
-        data = text
-          ? JSON.parse(text)
-          : {};
+        data = text ? JSON.parse(text) : {};
       } catch {
         data = {
           message: text,
         };
       }
 
-      console.log(
-        "COMPLETE SCHEDULE STATUS:",
-        response.status
-      );
+      console.log("COMPLETE SCHEDULE STATUS:", response.status);
 
-      console.log(
-        "COMPLETE SCHEDULE RESPONSE:",
-        data
-      );
+      console.log("COMPLETE SCHEDULE RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
           "Unable to Complete",
-          data.message ||
-            "Unable to complete this health schedule."
+          data.message || "Unable to complete this health schedule.",
         );
 
         return;
@@ -289,47 +209,31 @@ export default function ClinicVetRecordsScreen() {
 
       Alert.alert(
         "Schedule Completed",
-        data.message ||
-          `${record.service_type} has been marked as completed.`
+        data.message || `${record.service_type} has been marked as completed.`,
       );
 
       await loadRecords(false);
     } catch (error) {
-      console.log(
-        "COMPLETE SCHEDULE ERROR:",
-        error
-      );
+      console.log("COMPLETE SCHEDULE ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     }
   };
 
-
-  const confirmCompleteSchedule = (
-    record: VetRecord
-  ) => {
-    if (
-      record.schedule_status ===
-      "Completed"
-    ) {
+  const confirmCompleteSchedule = (record: VetRecord) => {
+    if (record.schedule_status === "Completed") {
       Alert.alert(
         "Already Completed",
-        "This health schedule has already been completed."
+        "This health schedule has already been completed.",
       );
 
       return;
     }
 
-    if (
-      record.schedule_status ===
-      "Cancelled"
-    ) {
+    if (record.schedule_status === "Cancelled") {
       Alert.alert(
         "Schedule Cancelled",
-        "A cancelled health schedule cannot be completed."
+        "A cancelled health schedule cannot be completed.",
       );
 
       return;
@@ -347,13 +251,11 @@ export default function ClinicVetRecordsScreen() {
         },
         {
           text: "Confirm",
-          onPress: () =>
-            completeSchedule(record),
+          onPress: () => completeSchedule(record),
         },
-      ]
+      ],
     );
   };
-
 
   const addRecord = () => {
     if (!petId) {
@@ -368,229 +270,96 @@ export default function ClinicVetRecordsScreen() {
     });
   };
 
-
   if (loading) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
+      <SafeAreaView style={styles.container}>
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text
-            style={styles.loadingText}
-          >
-            Loading veterinary
-            records...
-          </Text>
+          <Text style={styles.loadingText}>Loading veterinary records...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
+    <SafeAreaView style={styles.container}>
       <Header />
 
       <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={
-          styles.content
-        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-
         {pet && (
-          <View
-            style={styles.petCard}
-          >
-            {getImageUrl(
-              pet.photo_url
-            ) ? (
+          <View style={styles.petCard}>
+            {getImageUrl(pet.photo_url) ? (
               <Image
                 source={{
-                  uri:
-                    getImageUrl(
-                      pet.photo_url
-                    ) || "",
+                  uri: getImageUrl(pet.photo_url) || "",
                 }}
-                style={
-                  styles.petPhoto
-                }
+                style={styles.petPhoto}
               />
             ) : (
-              <View
-                style={
-                  styles.petPlaceholder
-                }
-              >
-                <Ionicons
-                  name="paw"
-                  size={32}
-                  color="#6F9179"
-                />
+              <View style={styles.petPlaceholder}>
+                <Ionicons name="paw" size={32} color="#6F9179" />
               </View>
             )}
 
-            <View
-              style={styles.petInfo}
-            >
-              <Text
-                style={styles.petLabel}
-              >
-                Veterinary History
-              </Text>
+            <View style={styles.petInfo}>
+              <Text style={styles.petLabel}>Veterinary History</Text>
 
-              <Text
-                style={styles.petName}
-              >
-                {pet.pet_name}
-              </Text>
+              <Text style={styles.petName}>{pet.pet_name}</Text>
 
-              <Text
-                style={
-                  styles.petDetails
-                }
-              >
-                {pet.breed ||
-                  pet.species}
-              </Text>
+              <Text style={styles.petDetails}>{pet.breed || pet.species}</Text>
             </View>
 
-            <View
-              style={
-                styles.recordCount
-              }
-            >
-              <Text
-                style={
-                  styles.recordNumber
-                }
-              >
-                {records.length}
-              </Text>
+            <View style={styles.recordCount}>
+              <Text style={styles.recordNumber}>{records.length}</Text>
 
-              <Text
-                style={
-                  styles.recordCountLabel
-                }
-              >
-                Records
-              </Text>
+              <Text style={styles.recordCountLabel}>Records</Text>
             </View>
           </View>
         )}
 
-
         <Pressable
-          style={({ pressed }) => [
-            styles.addButton,
-
-            pressed &&
-              styles.pressed,
-          ]}
+          style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
           onPress={addRecord}
         >
-          <View
-            style={
-              styles.addButtonIcon
-            }
-          >
-            <Ionicons
-              name="add"
-              size={22}
-              color="#176B3A"
-            />
+          <View style={styles.addButtonIcon}>
+            <Ionicons name="add" size={22} color="#176B3A" />
           </View>
 
-          <View
-            style={
-              styles.addButtonContent
-            }
-          >
-            <Text
-              style={
-                styles.addButtonTitle
-              }
-            >
-              Add Veterinary Record
-            </Text>
+          <View style={styles.addButtonContent}>
+            <Text style={styles.addButtonTitle}>Add Veterinary Record</Text>
 
-            <Text
-              style={
-                styles.addButtonText
-              }
-            >
-              Record a new visit,
-              treatment, vaccination,
-              or follow-up.
+            <Text style={styles.addButtonText}>
+              Record a new visit, treatment, vaccination, or follow-up.
             </Text>
           </View>
 
-          <Ionicons
-            name="chevron-forward"
-            size={20}
-            color="#FFFFFF"
-          />
+          <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
         </Pressable>
 
-
-        <View
-          style={
-            styles.sectionHeader
-          }
-        >
-          <Text
-            style={
-              styles.sectionTitle
-            }
-          >
-            Medical History
-          </Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Medical History</Text>
 
           {records.length > 0 && (
-            <View
-              style={
-                styles.totalBadge
-              }
-            >
-              <Text
-                style={
-                  styles.totalBadgeText
-                }
-              >
-                {records.length}{" "}
-                {records.length === 1
-                  ? "record"
-                  : "records"}
+            <View style={styles.totalBadge}>
+              <Text style={styles.totalBadgeText}>
+                {records.length} {records.length === 1 ? "record" : "records"}
               </Text>
             </View>
           )}
         </View>
 
-
         {records.length === 0 ? (
-          <View
-            style={styles.emptyCard}
-          >
-            <View
-              style={styles.emptyIcon}
-            >
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIcon}>
               <Ionicons
                 name="document-text-outline"
                 size={35}
@@ -598,93 +367,49 @@ export default function ClinicVetRecordsScreen() {
               />
             </View>
 
-            <Text
-              style={
-                styles.emptyTitle
-              }
-            >
-              No Veterinary Records
-            </Text>
+            <Text style={styles.emptyTitle}>No Veterinary Records</Text>
 
-            <Text
-              style={
-                styles.emptyText
-              }
-            >
-              This pet does not have
-              any veterinary records
-              yet. Add the first
-              record after completing
-              the veterinary service.
+            <Text style={styles.emptyText}>
+              This pet does not have any veterinary records yet. Add the first
+              record after completing the veterinary service.
             </Text>
 
             <Pressable
               style={({ pressed }) => [
                 styles.emptyButton,
 
-                pressed &&
-                  styles.pressed,
+                pressed && styles.pressed,
               ]}
               onPress={addRecord}
             >
-              <Ionicons
-                name="add-circle-outline"
-                size={18}
-                color="#FFFFFF"
-              />
+              <Ionicons name="add-circle-outline" size={18} color="#FFFFFF" />
 
-              <Text
-                style={
-                  styles.emptyButtonText
-                }
-              >
-                Add First Record
-              </Text>
+              <Text style={styles.emptyButtonText}>Add First Record</Text>
             </Pressable>
           </View>
         ) : (
-          records.map(
-            (record, index) => (
-              <VetRecordCard
-                key={record.record_id}
-                record={record}
-                isLatest={index === 0}
-                onComplete={() =>
-                  confirmCompleteSchedule(record)
-                }
-              />
-            )
-          )
+          records.map((record, index) => (
+            <VetRecordCard
+              key={record.record_id}
+              record={record}
+              isLatest={index === 0}
+              onComplete={() => confirmCompleteSchedule(record)}
+            />
+          ))
         )}
 
+        <View style={styles.securityCard}>
+          <Ionicons name="shield-checkmark-outline" size={20} color="#176B3A" />
 
-        <View
-          style={
-            styles.securityCard
-          }
-        >
-          <Ionicons
-            name="shield-checkmark-outline"
-            size={20}
-            color="#176B3A"
-          />
-
-          <Text
-            style={
-              styles.securityText
-            }
-          >
-            Veterinary records are
-            available because the pet
-            owner has approved your
-            clinic&apos;s access.
+          <Text style={styles.securityText}>
+            Veterinary records are available because the pet owner has approved
+            your clinic&apos;s access.
           </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
 
 function Header() {
   return (
@@ -694,30 +419,17 @@ function Header() {
           styles.headerButton,
           pressed && styles.pressed,
         ]}
-        onPress={() =>
-          router.back()
-        }
+        onPress={() => router.back()}
       >
-        <Ionicons
-          name="chevron-back"
-          size={27}
-          color="#173D2A"
-        />
+        <Ionicons name="chevron-back" size={27} color="#173D2A" />
       </Pressable>
 
-      <Text
-        style={styles.headerTitle}
-      >
-        Veterinary Records
-      </Text>
+      <Text style={styles.headerTitle}>Veterinary Records</Text>
 
-      <View
-        style={styles.headerButton}
-      />
+      <View style={styles.headerButton} />
     </View>
   );
 }
-
 
 function VetRecordCard({
   record,
@@ -729,89 +441,52 @@ function VetRecordCard({
   onComplete: () => void;
 }) {
   const clinic =
-    record.clinic_name ||
-    record.clinic_contact_name ||
-    "Veterinary Clinic";
+    record.clinic_name || record.clinic_contact_name || "Veterinary Clinic";
 
-  const hasSchedule =
-    Boolean(record.next_due_date);
+  const hasSchedule = Boolean(record.next_due_date);
 
-  const isPending =
-    record.schedule_status === "Pending";
+  const isPending = record.schedule_status === "Pending";
 
-  const isCompleted =
-    record.schedule_status ===
-    "Completed";
+  const isCompleted = record.schedule_status === "Completed";
 
-  const isCancelled =
-    record.schedule_status ===
-    "Cancelled";
+  const isCancelled = record.schedule_status === "Cancelled";
 
   return (
     <View style={styles.recordCard}>
-
       <View style={styles.recordHeader}>
         <View
           style={[
             styles.serviceIcon,
             {
-              backgroundColor:
-                getServiceBackground(
-                  record.service_type
-                ),
+              backgroundColor: getServiceBackground(record.service_type),
             },
           ]}
         >
           <Ionicons
-            name={getServiceIcon(
-              record.service_type
-            )}
+            name={getServiceIcon(record.service_type)}
             size={22}
             color="#176B3A"
           />
         </View>
 
-        <View
-          style={styles.recordHeaderInfo}
-        >
-          <View
-            style={styles.serviceTitleRow}
-          >
-            <Text
-              style={styles.serviceTitle}
-            >
-              {record.service_type}
-            </Text>
+        <View style={styles.recordHeaderInfo}>
+          <View style={styles.serviceTitleRow}>
+            <Text style={styles.serviceTitle}>{record.service_type}</Text>
 
             {isLatest && (
-              <View
-                style={styles.latestBadge}
-              >
-                <Text
-                  style={styles.latestText}
-                >
-                  Latest
-                </Text>
+              <View style={styles.latestBadge}>
+                <Text style={styles.latestText}>Latest</Text>
               </View>
             )}
           </View>
 
           <View style={styles.dateRow}>
-            <Ionicons
-              name="calendar-outline"
-              size={13}
-              color="#7D8981"
-            />
+            <Ionicons name="calendar-outline" size={13} color="#7D8981" />
 
-            <Text style={styles.dateText}>
-              {formatDate(
-                record.visit_date
-              )}
-            </Text>
+            <Text style={styles.dateText}>{formatDate(record.visit_date)}</Text>
           </View>
         </View>
       </View>
-
 
       <View style={styles.divider} />
 
@@ -847,29 +522,24 @@ function VetRecordCard({
         />
       )}
 
-
       {hasSchedule && (
         <>
           <View
             style={[
               styles.nextDueCard,
 
-              isCompleted &&
-                styles.completedDueCard,
+              isCompleted && styles.completedDueCard,
 
-              isCancelled &&
-                styles.cancelledDueCard,
+              isCancelled && styles.cancelledDueCard,
             ]}
           >
             <View
               style={[
                 styles.nextDueIcon,
 
-                isCompleted &&
-                  styles.completedDueIcon,
+                isCompleted && styles.completedDueIcon,
 
-                isCancelled &&
-                  styles.cancelledDueIcon,
+                isCancelled && styles.cancelledDueIcon,
               ]}
             >
               <Ionicons
@@ -877,329 +547,167 @@ function VetRecordCard({
                   isCompleted
                     ? "checkmark-circle-outline"
                     : isCancelled
-                    ? "close-circle-outline"
-                    : "notifications-outline"
+                      ? "close-circle-outline"
+                      : "notifications-outline"
                 }
                 size={18}
                 color={
-                  isCompleted
-                    ? "#176B3A"
-                    : isCancelled
-                    ? "#9A5550"
-                    : "#896819"
+                  isCompleted ? "#176B3A" : isCancelled ? "#9A5550" : "#896819"
                 }
               />
             </View>
 
-            <View
-              style={styles.nextDueInfo}
-            >
+            <View style={styles.nextDueInfo}>
               <Text
                 style={[
                   styles.nextDueLabel,
 
-                  isCompleted &&
-                    styles.completedDueLabel,
+                  isCompleted && styles.completedDueLabel,
 
-                  isCancelled &&
-                    styles.cancelledDueLabel,
+                  isCancelled && styles.cancelledDueLabel,
                 ]}
               >
                 {isCompleted
                   ? "Completed Schedule"
                   : isCancelled
-                  ? "Cancelled Schedule"
-                  : "Next Due Date"}
+                    ? "Cancelled Schedule"
+                    : "Next Due Date"}
               </Text>
 
               <Text
                 style={[
                   styles.nextDueDate,
 
-                  isCompleted &&
-                    styles.completedDueDate,
+                  isCompleted && styles.completedDueDate,
 
-                  isCancelled &&
-                    styles.cancelledDueDate,
+                  isCancelled && styles.cancelledDueDate,
                 ]}
               >
-                {isCompleted &&
-                record.completed_at
-                  ? `Completed ${formatDateTime(
-                      record.completed_at
-                    )}`
-                  : formatDate(
-                      record.next_due_date!
-                    )}
+                {isCompleted && record.completed_at
+                  ? `Completed ${formatDateTime(record.completed_at)}`
+                  : formatDate(record.next_due_date!)}
               </Text>
             </View>
 
-            {isPending && (
-              <DueStatus
-                value={
-                  record.next_due_date!
-                }
-              />
-            )}
+            {isPending && <DueStatus value={record.next_due_date!} />}
 
             {isCompleted && (
-              <View
-                style={
-                  styles.completedBadge
-                }
-              >
-                <Text
-                  style={
-                    styles.completedBadgeText
-                  }
-                >
-                  Completed
-                </Text>
+              <View style={styles.completedBadge}>
+                <Text style={styles.completedBadgeText}>Completed</Text>
               </View>
             )}
 
             {isCancelled && (
-              <View
-                style={
-                  styles.cancelledBadge
-                }
-              >
-                <Text
-                  style={
-                    styles.cancelledBadgeText
-                  }
-                >
-                  Cancelled
-                </Text>
+              <View style={styles.cancelledBadge}>
+                <Text style={styles.cancelledBadgeText}>Cancelled</Text>
               </View>
             )}
           </View>
-
 
           {isPending && (
             <Pressable
               style={({ pressed }) => [
                 styles.completeButton,
-                pressed &&
-                  styles.pressed,
+                pressed && styles.pressed,
               ]}
               onPress={onComplete}
             >
-              <View
-                style={
-                  styles.completeButtonIcon
-                }
-              >
-                <Ionicons
-                  name="checkmark"
-                  size={18}
-                  color="#FFFFFF"
-                />
+              <View style={styles.completeButtonIcon}>
+                <Ionicons name="checkmark" size={18} color="#FFFFFF" />
               </View>
 
-              <View
-                style={
-                  styles.completeButtonInfo
-                }
-              >
-                <Text
-                  style={
-                    styles.completeButtonTitle
-                  }
-                >
+              <View style={styles.completeButtonInfo}>
+                <Text style={styles.completeButtonTitle}>
                   Mark as Completed
                 </Text>
 
-                <Text
-                  style={
-                    styles.completeButtonText
-                  }
-                >
-                  Confirm that this scheduled
-                  service has been completed.
+                <Text style={styles.completeButtonText}>
+                  Confirm that this scheduled service has been completed.
                 </Text>
               </View>
 
-              <Ionicons
-                name="chevron-forward"
-                size={18}
-                color="#FFFFFF"
-              />
+              <Ionicons name="chevron-forward" size={18} color="#FFFFFF" />
             </Pressable>
           )}
         </>
       )}
 
-
-      <View
-        style={styles.clinicFooter}
-      >
+      <View style={styles.clinicFooter}>
         <View style={styles.clinicIcon}>
-          <Ionicons
-            name="business-outline"
-            size={15}
-            color="#176B3A"
-          />
+          <Ionicons name="business-outline" size={15} color="#176B3A" />
         </View>
 
         <View style={styles.clinicInfo}>
-          <Text
-            style={styles.clinicLabel}
-          >
-            Recorded by
-          </Text>
+          <Text style={styles.clinicLabel}>Recorded by</Text>
 
-          <Text
-            style={styles.clinicName}
-          >
-            {clinic}
-          </Text>
+          <Text style={styles.clinicName}>{clinic}</Text>
         </View>
       </View>
     </View>
   );
 }
-
 
 function DetailRow({
   icon,
   label,
   value,
 }: {
-  icon:
-    keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: string;
 }) {
   return (
-    <View
-      style={styles.detailRow}
-    >
-      <View
-        style={
-          styles.detailIcon
-        }
-      >
-        <Ionicons
-          name={icon}
-          size={17}
-          color="#61766A"
-        />
+    <View style={styles.detailRow}>
+      <View style={styles.detailIcon}>
+        <Ionicons name={icon} size={17} color="#61766A" />
       </View>
 
-      <View
-        style={
-          styles.detailContent
-        }
-      >
-        <Text
-          style={
-            styles.detailLabel
-          }
-        >
-          {label}
-        </Text>
+      <View style={styles.detailContent}>
+        <Text style={styles.detailLabel}>{label}</Text>
 
-        <Text
-          style={
-            styles.detailValue
-          }
-        >
-          {value}
-        </Text>
+        <Text style={styles.detailValue}>{value}</Text>
       </View>
     </View>
   );
 }
 
-
-function DueStatus({
-  value,
-}: {
-  value: string;
-}) {
-  const dueDate =
-    parseDatabaseDate(value);
+function DueStatus({ value }: { value: string }) {
+  const dueDate = parseDatabaseDate(value);
 
   const today = new Date();
 
-  today.setHours(
-    0,
-    0,
-    0,
-    0
-  );
+  today.setHours(0, 0, 0, 0);
 
   if (!dueDate) {
     return null;
   }
 
-  dueDate.setHours(
-    0,
-    0,
-    0,
-    0
-  );
+  dueDate.setHours(0, 0, 0, 0);
 
-  const difference =
-    dueDate.getTime() -
-    today.getTime();
+  const difference = dueDate.getTime() - today.getTime();
 
-  const days =
-    Math.ceil(
-      difference /
-        (1000 * 60 * 60 * 24)
-    );
+  const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
 
   if (days < 0) {
     return (
-      <View
-        style={[
-          styles.dueBadge,
-          styles.overdueBadge,
-        ]}
-      >
-        <Text
-          style={
-            styles.overdueText
-          }
-        >
-          Overdue
-        </Text>
+      <View style={[styles.dueBadge, styles.overdueBadge]}>
+        <Text style={styles.overdueText}>Overdue</Text>
       </View>
     );
   }
 
   if (days === 0) {
     return (
-      <View
-        style={[
-          styles.dueBadge,
-          styles.todayBadge,
-        ]}
-      >
-        <Text
-          style={styles.todayText}
-        >
-          Today
-        </Text>
+      <View style={[styles.dueBadge, styles.todayBadge]}>
+        <Text style={styles.todayText}>Today</Text>
       </View>
     );
   }
 
   if (days <= 30) {
     return (
-      <View
-        style={[
-          styles.dueBadge,
-          styles.soonBadge,
-        ]}
-      >
-        <Text
-          style={styles.soonText}
-        >
-          {days}d
-        </Text>
+      <View style={[styles.dueBadge, styles.soonBadge]}>
+        <Text style={styles.soonText}>{days}d</Text>
       </View>
     );
   }
@@ -1207,10 +715,7 @@ function DueStatus({
   return null;
 }
 
-
-function getServiceIcon(
-  service: string
-): keyof typeof Ionicons.glyphMap {
+function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
   switch (service) {
     case "Checkup":
       return "medical-outline";
@@ -1232,9 +737,7 @@ function getServiceIcon(
   }
 }
 
-function getServiceBackground(
-  service: string
-) {
+function getServiceBackground(service: string) {
   switch (service) {
     case "Vaccination":
       return "#E6F3E8";
@@ -1256,805 +759,724 @@ function getServiceBackground(
   }
 }
 
-
-function parseDatabaseDate(
-  value: string
-) {
+function parseDatabaseDate(value: string) {
   if (!value) {
     return null;
   }
 
-  const dateOnly =
-    value.substring(0, 10);
+  const dateOnly = value.substring(0, 10);
 
-  const parts =
-    dateOnly.split("-");
+  const parts = dateOnly.split("-");
 
   if (parts.length !== 3) {
     return null;
   }
 
-  const year =
-    Number(parts[0]);
+  const year = Number(parts[0]);
 
-  const month =
-    Number(parts[1]);
+  const month = Number(parts[1]);
 
-  const day =
-    Number(parts[2]);
+  const day = Number(parts[2]);
 
-  if (
-    !year ||
-    !month ||
-    !day
-  ) {
+  if (!year || !month || !day) {
     return null;
   }
 
-  return new Date(
-    year,
-    month - 1,
-    day
-  );
+  return new Date(year, month - 1, day);
 }
 
-function formatDate(
-  value: string
-) {
-  const date =
-    parseDatabaseDate(value);
+function formatDate(value: string) {
+  const date = parseDatabaseDate(value);
 
   if (!date) {
     return value;
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function formatDateTime(
-  value: string
-) {
+function formatDateTime(value: string) {
   if (!value) {
     return "";
   }
 
-  const date = new Date(
-    value.replace(" ", "T")
-  );
+  const date = new Date(value.replace(" ", "T"));
 
-  if (
-    Number.isNaN(date.getTime())
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return date.toLocaleString(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }
-  );
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFDF7",
+  },
+
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-const styles =
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor:
-        "#FFFDF7",
-    },
-
-    center: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
-
-    loadingText: {
-      marginTop: 12,
-      fontSize: 11,
-      color: "#76837B",
-    },
-
-    header: {
-      height: 60,
-      paddingHorizontal: 20,
-
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "space-between",
-
-      borderBottomWidth: 1,
-      borderBottomColor:
-        "#EDF0EE",
-    },
-
-    headerButton: {
-      width: 42,
-      height: 42,
-
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 11,
+    color: "#76837B",
+  },
+
+  header: {
+    height: 60,
+    paddingHorizontal: 20,
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    borderBottomWidth: 1,
+    borderBottomColor: "#EDF0EE",
+  },
+
+  headerButton: {
+    width: 42,
+    height: 42,
 
-    headerTitle: {
-      fontSize: 18,
-      fontWeight: "800",
-      color: "#1E2D24",
-    },
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 45,
-    },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1E2D24",
+  },
 
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 45,
+  },
 
-    petCard: {
-      padding: 15,
+  petCard: {
+    padding: 15,
 
-      borderRadius: 19,
+    borderRadius: 19,
 
-      backgroundColor:
-        "#EAF4EB",
+    backgroundColor: "#EAF4EB",
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-    petPhoto: {
-      width: 64,
-      height: 64,
+  petPhoto: {
+    width: 64,
+    height: 64,
 
-      borderRadius: 19,
+    borderRadius: 19,
 
-      backgroundColor:
-        "#DCEBDF",
-    },
+    backgroundColor: "#DCEBDF",
+  },
 
-    petPlaceholder: {
-      width: 64,
-      height: 64,
+  petPlaceholder: {
+    width: 64,
+    height: 64,
 
-      borderRadius: 19,
+    borderRadius: 19,
 
-      backgroundColor:
-        "#DCEBDF",
+    backgroundColor: "#DCEBDF",
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    petInfo: {
-      flex: 1,
-      marginLeft: 13,
-    },
+  petInfo: {
+    flex: 1,
+    marginLeft: 13,
+  },
 
-    petLabel: {
-      fontSize: 8,
-      fontWeight: "700",
-      color: "#6E8174",
-    },
+  petLabel: {
+    fontSize: 8,
+    fontWeight: "700",
+    color: "#6E8174",
+  },
 
-    petName: {
-      marginTop: 2,
+  petName: {
+    marginTop: 2,
 
-      fontSize: 18,
-      fontWeight: "900",
-      color: "#23442F",
-    },
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#23442F",
+  },
 
-    petDetails: {
-      marginTop: 3,
+  petDetails: {
+    marginTop: 3,
 
-      fontSize: 9,
-      color: "#6C7D72",
-    },
+    fontSize: 9,
+    color: "#6C7D72",
+  },
 
-    recordCount: {
-      alignItems: "center",
+  recordCount: {
+    alignItems: "center",
 
-      paddingHorizontal: 10,
-    },
+    paddingHorizontal: 10,
+  },
 
-    recordNumber: {
-      fontSize: 20,
-      fontWeight: "900",
-      color: "#176B3A",
-    },
+  recordNumber: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#176B3A",
+  },
 
-    recordCountLabel: {
-      marginTop: 1,
+  recordCountLabel: {
+    marginTop: 1,
 
-      fontSize: 7,
-      color: "#718078",
-    },
+    fontSize: 7,
+    color: "#718078",
+  },
 
+  addButton: {
+    marginTop: 14,
 
-    addButton: {
-      marginTop: 14,
+    minHeight: 67,
 
-      minHeight: 67,
+    paddingHorizontal: 14,
 
-      paddingHorizontal: 14,
+    borderRadius: 17,
 
-      borderRadius: 17,
+    backgroundColor: "#176B3A",
 
-      backgroundColor:
-        "#176B3A",
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+  addButtonIcon: {
+    width: 40,
+    height: 40,
 
-    addButtonIcon: {
-      width: 40,
-      height: 40,
+    borderRadius: 13,
 
-      borderRadius: 13,
+    backgroundColor: "#FFFFFF",
 
-      backgroundColor:
-        "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  addButtonContent: {
+    flex: 1,
 
-    addButtonContent: {
-      flex: 1,
+    marginLeft: 11,
+    marginRight: 8,
+  },
 
-      marginLeft: 11,
-      marginRight: 8,
-    },
+  addButtonTitle: {
+    fontSize: 12,
+    fontWeight: "900",
+    color: "#FFFFFF",
+  },
 
-    addButtonTitle: {
-      fontSize: 12,
-      fontWeight: "900",
-      color: "#FFFFFF",
-    },
+  addButtonText: {
+    marginTop: 3,
 
-    addButtonText: {
-      marginTop: 3,
+    fontSize: 8,
+    lineHeight: 12,
+    color: "#D9EADF",
+  },
 
-      fontSize: 8,
-      lineHeight: 12,
-      color: "#D9EADF",
-    },
+  sectionHeader: {
+    marginTop: 25,
+    marginBottom: 11,
 
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
 
-    sectionHeader: {
-      marginTop: 25,
-      marginBottom: 11,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: "#26352B",
+  },
 
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "space-between",
-    },
+  totalBadge: {
+    paddingHorizontal: 9,
+    paddingVertical: 5,
 
-    sectionTitle: {
-      fontSize: 16,
-      fontWeight: "900",
-      color: "#26352B",
-    },
+    borderRadius: 12,
 
-    totalBadge: {
-      paddingHorizontal: 9,
-      paddingVertical: 5,
+    backgroundColor: "#E8F2E9",
+  },
 
-      borderRadius: 12,
+  totalBadgeText: {
+    fontSize: 8,
+    fontWeight: "800",
+    color: "#176B3A",
+  },
 
-      backgroundColor:
-        "#E8F2E9",
-    },
+  recordCard: {
+    marginBottom: 13,
 
-    totalBadgeText: {
-      fontSize: 8,
-      fontWeight: "800",
-      color: "#176B3A",
-    },
+    padding: 16,
 
+    borderRadius: 19,
 
-    recordCard: {
-      marginBottom: 13,
+    backgroundColor: "#FFFFFF",
 
-      padding: 16,
+    borderWidth: 1,
+    borderColor: "#E1E7E2",
+  },
 
-      borderRadius: 19,
+  recordHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      backgroundColor:
-        "#FFFFFF",
+  serviceIcon: {
+    width: 48,
+    height: 48,
 
-      borderWidth: 1,
-      borderColor:
-        "#E1E7E2",
-    },
+    borderRadius: 15,
 
-    recordHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    serviceIcon: {
-      width: 48,
-      height: 48,
+  recordHeaderInfo: {
+    flex: 1,
 
-      borderRadius: 15,
+    marginLeft: 11,
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  serviceTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
 
-    recordHeaderInfo: {
-      flex: 1,
+    gap: 7,
+  },
 
-      marginLeft: 11,
-    },
+  serviceTitle: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#2D4035",
+  },
 
-    serviceTitleRow: {
-      flexDirection: "row",
-      alignItems: "center",
+  latestBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 3,
 
-      gap: 7,
-    },
+    borderRadius: 10,
 
-    serviceTitle: {
-      fontSize: 14,
-      fontWeight: "900",
-      color: "#2D4035",
-    },
+    backgroundColor: "#E5F2E7",
+  },
 
-    latestBadge: {
-      paddingHorizontal: 7,
-      paddingVertical: 3,
+  latestText: {
+    fontSize: 7,
+    fontWeight: "800",
+    color: "#176B3A",
+  },
 
-      borderRadius: 10,
+  dateRow: {
+    marginTop: 5,
 
-      backgroundColor:
-        "#E5F2E7",
-    },
+    flexDirection: "row",
+    alignItems: "center",
 
-    latestText: {
-      fontSize: 7,
-      fontWeight: "800",
-      color: "#176B3A",
-    },
+    gap: 4,
+  },
 
-    dateRow: {
-      marginTop: 5,
+  dateText: {
+    fontSize: 9,
+    color: "#7D8981",
+  },
 
-      flexDirection: "row",
-      alignItems: "center",
+  divider: {
+    height: 1,
 
-      gap: 4,
-    },
+    marginVertical: 14,
 
-    dateText: {
-      fontSize: 9,
-      color: "#7D8981",
-    },
+    backgroundColor: "#EDF1EE",
+  },
 
-    divider: {
-      height: 1,
+  detailRow: {
+    marginBottom: 13,
 
-      marginVertical: 14,
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
 
-      backgroundColor:
-        "#EDF1EE",
-    },
+  detailIcon: {
+    width: 31,
+    height: 31,
 
+    borderRadius: 10,
 
-    detailRow: {
-      marginBottom: 13,
+    backgroundColor: "#F0F4F1",
 
-      flexDirection: "row",
-      alignItems: "flex-start",
-    },
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    detailIcon: {
-      width: 31,
-      height: 31,
+  detailContent: {
+    flex: 1,
 
-      borderRadius: 10,
+    marginLeft: 10,
+  },
 
-      backgroundColor:
-        "#F0F4F1",
+  detailLabel: {
+    fontSize: 8,
+    fontWeight: "700",
+    color: "#849088",
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  detailValue: {
+    marginTop: 3,
 
-    detailContent: {
-      flex: 1,
+    fontSize: 10,
+    lineHeight: 15,
 
-      marginLeft: 10,
-    },
+    color: "#394A40",
+  },
 
-    detailLabel: {
-      fontSize: 8,
-      fontWeight: "700",
-      color: "#849088",
-    },
+  nextDueCard: {
+    marginTop: 3,
 
-    detailValue: {
-      marginTop: 3,
+    padding: 11,
 
-      fontSize: 10,
-      lineHeight: 15,
+    borderRadius: 13,
 
-      color: "#394A40",
-    },
+    backgroundColor: "#FFF7DC",
 
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-    nextDueCard: {
-      marginTop: 3,
+  nextDueIcon: {
+    width: 35,
+    height: 35,
 
-      padding: 11,
+    borderRadius: 11,
 
-      borderRadius: 13,
+    backgroundColor: "#FFEDB6",
 
-      backgroundColor:
-        "#FFF7DC",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+  nextDueInfo: {
+    flex: 1,
 
-    nextDueIcon: {
-      width: 35,
-      height: 35,
+    marginLeft: 9,
+  },
 
-      borderRadius: 11,
+  nextDueLabel: {
+    fontSize: 7,
+    fontWeight: "700",
+    color: "#8A743B",
+  },
 
-      backgroundColor:
-        "#FFEDB6",
+  nextDueDate: {
+    marginTop: 2,
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#715819",
+  },
 
-    nextDueInfo: {
-      flex: 1,
+  dueBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 5,
 
-      marginLeft: 9,
-    },
+    borderRadius: 10,
+  },
 
-    nextDueLabel: {
-      fontSize: 7,
-      fontWeight: "700",
-      color: "#8A743B",
-    },
+  overdueBadge: {
+    backgroundColor: "#F7DDDA",
+  },
 
-    nextDueDate: {
-      marginTop: 2,
+  overdueText: {
+    fontSize: 7,
+    fontWeight: "900",
+    color: "#A3453C",
+  },
 
-      fontSize: 10,
-      fontWeight: "800",
-      color: "#715819",
-    },
+  todayBadge: {
+    backgroundColor: "#FFE8A6",
+  },
 
-    dueBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 5,
+  todayText: {
+    fontSize: 7,
+    fontWeight: "900",
+    color: "#876415",
+  },
 
-      borderRadius: 10,
-    },
+  soonBadge: {
+    backgroundColor: "#FFF0C4",
+  },
 
-    overdueBadge: {
-      backgroundColor:
-        "#F7DDDA",
-    },
+  soonText: {
+    fontSize: 7,
+    fontWeight: "900",
+    color: "#876415",
+  },
 
-    overdueText: {
-      fontSize: 7,
-      fontWeight: "900",
-      color: "#A3453C",
-    },
+  clinicFooter: {
+    marginTop: 14,
+    paddingTop: 13,
 
-    todayBadge: {
-      backgroundColor:
-        "#FFE8A6",
-    },
+    borderTopWidth: 1,
+    borderTopColor: "#EDF1EE",
 
-    todayText: {
-      fontSize: 7,
-      fontWeight: "900",
-      color: "#876415",
-    },
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-    soonBadge: {
-      backgroundColor:
-        "#FFF0C4",
-    },
+  clinicIcon: {
+    width: 32,
+    height: 32,
 
-    soonText: {
-      fontSize: 7,
-      fontWeight: "900",
-      color: "#876415",
-    },
+    borderRadius: 10,
 
+    backgroundColor: "#EAF4EB",
 
-    clinicFooter: {
-      marginTop: 14,
-      paddingTop: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      borderTopWidth: 1,
-      borderTopColor:
-        "#EDF1EE",
+  clinicInfo: {
+    flex: 1,
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    marginLeft: 9,
+  },
 
-    clinicIcon: {
-      width: 32,
-      height: 32,
+  clinicLabel: {
+    fontSize: 7,
+    color: "#8A958E",
+  },
 
-      borderRadius: 10,
+  clinicName: {
+    marginTop: 2,
 
-      backgroundColor:
-        "#EAF4EB",
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#415348",
+  },
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+  emptyCard: {
+    padding: 27,
 
-    clinicInfo: {
-      flex: 1,
+    borderRadius: 19,
 
-      marginLeft: 9,
-    },
+    backgroundColor: "#FFFFFF",
 
-    clinicLabel: {
-      fontSize: 7,
-      color: "#8A958E",
-    },
+    borderWidth: 1,
+    borderColor: "#E1E7E2",
 
-    clinicName: {
-      marginTop: 2,
+    alignItems: "center",
+  },
 
-      fontSize: 9,
-      fontWeight: "800",
-      color: "#415348",
-    },
+  emptyIcon: {
+    width: 67,
+    height: 67,
 
+    borderRadius: 22,
 
-    emptyCard: {
-      padding: 27,
+    backgroundColor: "#EDF4EE",
 
-      borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-      backgroundColor:
-        "#FFFFFF",
+  emptyTitle: {
+    marginTop: 13,
 
-      borderWidth: 1,
-      borderColor:
-        "#E1E7E2",
+    fontSize: 15,
+    fontWeight: "900",
+    color: "#31453A",
+  },
 
-      alignItems: "center",
-    },
+  emptyText: {
+    marginTop: 6,
 
-    emptyIcon: {
-      width: 67,
-      height: 67,
+    maxWidth: 270,
 
-      borderRadius: 22,
+    fontSize: 9,
+    lineHeight: 15,
 
-      backgroundColor:
-        "#EDF4EE",
+    textAlign: "center",
 
-      alignItems: "center",
-      justifyContent:
-        "center",
-    },
+    color: "#7D8981",
+  },
 
-    emptyTitle: {
-      marginTop: 13,
+  emptyButton: {
+    marginTop: 17,
 
-      fontSize: 15,
-      fontWeight: "900",
-      color: "#31453A",
-    },
+    height: 43,
 
-    emptyText: {
-      marginTop: 6,
+    paddingHorizontal: 17,
 
-      maxWidth: 270,
+    borderRadius: 13,
 
-      fontSize: 9,
-      lineHeight: 15,
+    backgroundColor: "#176B3A",
 
-      textAlign: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
 
-      color: "#7D8981",
-    },
+    gap: 6,
+  },
 
-    emptyButton: {
-      marginTop: 17,
+  emptyButtonText: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
 
-      height: 43,
+  securityCard: {
+    marginTop: 12,
 
-      paddingHorizontal: 17,
+    padding: 14,
 
-      borderRadius: 13,
+    borderRadius: 15,
 
-      backgroundColor:
-        "#176B3A",
+    backgroundColor: "#EFF6F0",
 
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent:
-        "center",
+    flexDirection: "row",
+    alignItems: "flex-start",
 
-      gap: 6,
-    },
+    gap: 9,
+  },
 
-    emptyButtonText: {
-      fontSize: 10,
-      fontWeight: "800",
-      color: "#FFFFFF",
-    },
+  securityText: {
+    flex: 1,
 
+    fontSize: 9,
+    lineHeight: 15,
 
-    securityCard: {
-      marginTop: 12,
+    color: "#617167",
+  },
 
-      padding: 14,
+  completeButton: {
+    marginTop: 10,
+    minHeight: 58,
+    paddingHorizontal: 13,
+    paddingVertical: 10,
 
-      borderRadius: 15,
+    borderRadius: 14,
 
-      backgroundColor:
-        "#EFF6F0",
+    backgroundColor: "#176B3A",
 
-      flexDirection: "row",
-      alignItems: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-      gap: 9,
-    },
+  completeButtonIcon: {
+    width: 34,
+    height: 34,
 
-    securityText: {
-      flex: 1,
+    borderRadius: 11,
 
-      fontSize: 9,
-      lineHeight: 15,
+    backgroundColor: "rgba(255,255,255,0.16)",
 
-      color: "#617167",
-    },
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
+  completeButtonInfo: {
+    flex: 1,
 
-    completeButton: {
-      marginTop: 10,
-      minHeight: 58,
-      paddingHorizontal: 13,
-      paddingVertical: 10,
+    marginLeft: 10,
+    marginRight: 6,
+  },
 
-      borderRadius: 14,
+  completeButtonTitle: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: "#FFFFFF",
+  },
 
-      backgroundColor: "#176B3A",
+  completeButtonText: {
+    marginTop: 2,
 
-      flexDirection: "row",
-      alignItems: "center",
-    },
+    fontSize: 7,
+    lineHeight: 11,
 
-    completeButtonIcon: {
-      width: 34,
-      height: 34,
+    color: "#D9EADF",
+  },
 
-      borderRadius: 11,
+  completedDueCard: {
+    backgroundColor: "#EAF5EC",
+  },
 
-      backgroundColor:
-        "rgba(255,255,255,0.16)",
+  completedDueIcon: {
+    backgroundColor: "#D5EBD9",
+  },
 
-      alignItems: "center",
-      justifyContent: "center",
-    },
+  completedDueLabel: {
+    color: "#5D8067",
+  },
 
-    completeButtonInfo: {
-      flex: 1,
+  completedDueDate: {
+    color: "#176B3A",
+  },
 
-      marginLeft: 10,
-      marginRight: 6,
-    },
+  completedBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 5,
 
-    completeButtonTitle: {
-      fontSize: 10,
-      fontWeight: "900",
-      color: "#FFFFFF",
-    },
+    borderRadius: 10,
 
-    completeButtonText: {
-      marginTop: 2,
+    backgroundColor: "#D5EBD9",
+  },
 
-      fontSize: 7,
-      lineHeight: 11,
+  completedBadgeText: {
+    fontSize: 7,
+    fontWeight: "900",
+    color: "#176B3A",
+  },
 
-      color: "#D9EADF",
-    },
+  cancelledDueCard: {
+    backgroundColor: "#F8EEEE",
+  },
 
-    completedDueCard: {
-      backgroundColor: "#EAF5EC",
-    },
+  cancelledDueIcon: {
+    backgroundColor: "#EFDADA",
+  },
 
-    completedDueIcon: {
-      backgroundColor: "#D5EBD9",
-    },
+  cancelledDueLabel: {
+    color: "#93645F",
+  },
 
-    completedDueLabel: {
-      color: "#5D8067",
-    },
+  cancelledDueDate: {
+    color: "#8E4E49",
+  },
 
-    completedDueDate: {
-      color: "#176B3A",
-    },
+  cancelledBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 5,
 
-    completedBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 5,
+    borderRadius: 10,
 
-      borderRadius: 10,
+    backgroundColor: "#EFDADA",
+  },
 
-      backgroundColor: "#D5EBD9",
-    },
+  cancelledBadgeText: {
+    fontSize: 7,
+    fontWeight: "900",
+    color: "#8E4E49",
+  },
 
-    completedBadgeText: {
-      fontSize: 7,
-      fontWeight: "900",
-      color: "#176B3A",
-    },
-
-    cancelledDueCard: {
-      backgroundColor: "#F8EEEE",
-    },
-
-    cancelledDueIcon: {
-      backgroundColor: "#EFDADA",
-    },
-
-    cancelledDueLabel: {
-      color: "#93645F",
-    },
-
-    cancelledDueDate: {
-      color: "#8E4E49",
-    },
-
-    cancelledBadge: {
-      paddingHorizontal: 8,
-      paddingVertical: 5,
-
-      borderRadius: 10,
-
-      backgroundColor: "#EFDADA",
-    },
-
-    cancelledBadgeText: {
-      fontSize: 7,
-      fontWeight: "900",
-      color: "#8E4E49",
-    },
-
-    pressed: {
-      opacity: 0.75,
-    },
-  });
+  pressed: {
+    opacity: 0.75,
+  },
+});

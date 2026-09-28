@@ -1,38 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-type OwnerTab =
-  | "home"
-  | "pets"
-  | "notifications"
-  | "profile";
+type OwnerTab = "home" | "pets" | "notifications" | "profile";
 
 type OwnerBottomNavProps = {
   activeTab: OwnerTab;
 };
 
-export default function OwnerBottomNav({
-  activeTab,
-}: OwnerBottomNavProps) {
+export default function OwnerBottomNav({ activeTab }: OwnerBottomNavProps) {
   const navigateTo = (
     tab: OwnerTab,
-    route:
-      | "/dashboard"
-      | "/pets"
-      | "/notifications"
-      | "/profile"
+    route: "/dashboard" | "/pets" | "/notifications" | "/profile",
   ) => {
-
     if (activeTab === tab) {
       return;
     }
-
 
     router.push(route);
   };
@@ -40,29 +23,17 @@ export default function OwnerBottomNav({
   return (
     <View style={styles.bottomNav}>
       <NavItem
-        icon={
-          activeTab === "home"
-            ? "home"
-            : "home-outline"
-        }
+        icon={activeTab === "home" ? "home" : "home-outline"}
         label="Home"
         active={activeTab === "home"}
-        onPress={() =>
-          navigateTo("home", "/dashboard")
-        }
+        onPress={() => navigateTo("home", "/dashboard")}
       />
 
       <NavItem
-        icon={
-          activeTab === "pets"
-            ? "paw"
-            : "paw-outline"
-        }
+        icon={activeTab === "pets" ? "paw" : "paw-outline"}
         label="Pets"
         active={activeTab === "pets"}
-        onPress={() =>
-          navigateTo("pets", "/pets")
-        }
+        onPress={() => navigateTo("pets", "/pets")}
       />
 
       <NavItem
@@ -73,25 +44,14 @@ export default function OwnerBottomNav({
         }
         label="Alerts"
         active={activeTab === "notifications"}
-        onPress={() =>
-          navigateTo(
-            "notifications",
-            "/notifications"
-          )
-        }
+        onPress={() => navigateTo("notifications", "/notifications")}
       />
 
       <NavItem
-        icon={
-          activeTab === "profile"
-            ? "person"
-            : "person-outline"
-        }
+        icon={activeTab === "profile" ? "person" : "person-outline"}
         label="Profile"
         active={activeTab === "profile"}
-        onPress={() =>
-          navigateTo("profile", "/profile")
-        }
+        onPress={() => navigateTo("profile", "/profile")}
       />
     </View>
   );
@@ -110,28 +70,12 @@ function NavItem({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.navItem,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.navItem, pressed && styles.pressed]}
       onPress={onPress}
     >
-      <Ionicons
-        name={icon}
-        size={23}
-        color={
-          active
-            ? "#176B3A"
-            : "#89948E"
-        }
-      />
+      <Ionicons name={icon} size={23} color={active ? "#176B3A" : "#89948E"} />
 
-      <Text
-        style={[
-          styles.navText,
-          active && styles.activeNavText,
-        ]}
-      >
+      <Text style={[styles.navText, active && styles.activeNavText]}>
         {label}
       </Text>
     </Pressable>

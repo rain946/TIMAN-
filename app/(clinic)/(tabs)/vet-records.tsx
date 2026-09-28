@@ -91,7 +91,7 @@ export default function VetRecordsScreen() {
   useFocusEffect(
     useCallback(() => {
       loadRecords();
-    }, [loadRecords])
+    }, [loadRecords]),
   );
 
   const serviceTypes = useMemo(
@@ -99,13 +99,11 @@ export default function VetRecordsScreen() {
       ALL_SERVICES,
       ...Array.from(
         new Set(
-          records
-            .map((record) => record.service_type?.trim())
-            .filter(Boolean)
-        )
+          records.map((record) => record.service_type?.trim()).filter(Boolean),
+        ),
       ).sort((a, b) => a.localeCompare(b)),
     ],
-    [records]
+    [records],
   );
 
   const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -126,12 +124,12 @@ export default function VetRecordsScreen() {
           ].some((value) =>
             String(value || "")
               .toLocaleLowerCase()
-              .includes(normalizedSearch)
+              .includes(normalizedSearch),
           );
 
         return matchesService && matchesSearch;
       }),
-    [normalizedSearch, records, serviceFilter]
+    [normalizedSearch, records, serviceFilter],
   );
 
   const hasActiveFilters =
@@ -148,7 +146,10 @@ export default function VetRecordsScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
-          style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.pressed,
+          ]}
           onPress={() => router.back()}
         >
           <Ionicons name="chevron-back" size={27} color="#173D2A" />
@@ -239,7 +240,8 @@ export default function VetRecordsScreen() {
           <View style={styles.summaryRow}>
             <Text style={styles.summaryTitle}>Veterinary Records</Text>
             <Text style={styles.summaryCount}>
-              {filteredRecords.length} {filteredRecords.length === 1 ? "record" : "records"}
+              {filteredRecords.length}{" "}
+              {filteredRecords.length === 1 ? "record" : "records"}
             </Text>
           </View>
         )}
@@ -247,17 +249,24 @@ export default function VetRecordsScreen() {
         {loading ? (
           <StateCard>
             <ActivityIndicator color="#176B3A" />
-            <Text style={styles.loadingText}>Loading veterinary records...</Text>
+            <Text style={styles.loadingText}>
+              Loading veterinary records...
+            </Text>
           </StateCard>
         ) : error ? (
           <StateCard>
             <View style={styles.errorIcon}>
               <Ionicons name="alert-circle-outline" size={28} color="#A7483E" />
             </View>
-            <Text style={styles.stateTitle}>Unable to load veterinary records.</Text>
+            <Text style={styles.stateTitle}>
+              Unable to load veterinary records.
+            </Text>
             <Pressable
               accessibilityRole="button"
-              style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.retryButton,
+                pressed && styles.pressed,
+              ]}
               onPress={() => loadRecords()}
             >
               <Text style={styles.retryText}>Retry</Text>
@@ -266,7 +275,11 @@ export default function VetRecordsScreen() {
         ) : records.length === 0 ? (
           <StateCard>
             <View style={styles.emptyIcon}>
-              <Ionicons name="document-text-outline" size={29} color="#176B3A" />
+              <Ionicons
+                name="document-text-outline"
+                size={29}
+                color="#176B3A"
+              />
             </View>
             <Text style={styles.stateTitle}>No veterinary records yet</Text>
             <Text style={styles.stateDescription}>
@@ -274,11 +287,16 @@ export default function VetRecordsScreen() {
             </Text>
             <Pressable
               accessibilityRole="button"
-              style={({ pressed }) => [styles.authorizedPetsButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.authorizedPetsButton,
+                pressed && styles.pressed,
+              ]}
               onPress={() => router.push("/authorized-pets")}
             >
               <Ionicons name="paw-outline" size={18} color="#FFFFFF" />
-              <Text style={styles.authorizedPetsButtonText}>View Authorized Pets</Text>
+              <Text style={styles.authorizedPetsButtonText}>
+                View Authorized Pets
+              </Text>
             </Pressable>
           </StateCard>
         ) : filteredRecords.length === 0 ? (
@@ -293,7 +311,10 @@ export default function VetRecordsScreen() {
             {hasActiveFilters && (
               <Pressable
                 accessibilityRole="button"
-                style={({ pressed }) => [styles.resetButton, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.resetButton,
+                  pressed && styles.pressed,
+                ]}
                 onPress={resetFilters}
               >
                 <Text style={styles.resetText}>Reset Filters</Text>
@@ -333,7 +354,10 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
   return (
     <Pressable
       accessibilityRole="button"
-      style={({ pressed }) => [styles.recordCard, pressed && styles.cardPressed]}
+      style={({ pressed }) => [
+        styles.recordCard,
+        pressed && styles.cardPressed,
+      ]}
       onPress={openRecordContext}
     >
       <View style={styles.photoContainer}>
@@ -346,7 +370,9 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
 
       <View style={styles.recordContent}>
         <View style={styles.recordTopRow}>
-          <Text style={styles.petName} numberOfLines={1}>{record.pet_name}</Text>
+          <Text style={styles.petName} numberOfLines={1}>
+            {record.pet_name}
+          </Text>
           <View style={styles.serviceBadge}>
             <Text style={styles.serviceBadgeText}>{record.service_type}</Text>
           </View>
@@ -355,12 +381,16 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
           {[record.breed, record.species].filter(Boolean).join(" • ")}
         </Text>
         {record.diagnosis && (
-          <Text style={styles.diagnosis} numberOfLines={1}>{record.diagnosis}</Text>
+          <Text style={styles.diagnosis} numberOfLines={1}>
+            {record.diagnosis}
+          </Text>
         )}
         <View style={styles.recordBottomRow}>
           <View style={styles.dateRow}>
             <Ionicons name="calendar-outline" size={14} color="#7C8981" />
-            <Text style={styles.visitDate}>{formatDate(record.visit_date)}</Text>
+            <Text style={styles.visitDate}>
+              {formatDate(record.visit_date)}
+            </Text>
           </View>
           {!record.can_open && (
             <Text style={styles.accessChanged}>Access changed</Text>
@@ -389,50 +419,207 @@ function formatDate(value: string) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFDF7" },
-  header: { height: 60, paddingHorizontal: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#E9EDE9" },
-  backButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  header: {
+    height: 60,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9EDE9",
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
   headerSpacer: { width: 44, height: 44 },
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
   subtitle: { fontSize: 12, color: "#77847C" },
-  searchContainer: { minHeight: 50, marginTop: 17, borderRadius: 15, paddingHorizontal: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#DDE5DF", flexDirection: "row", alignItems: "center" },
-  searchInput: { flex: 1, minHeight: 48, marginHorizontal: 10, paddingVertical: 0, fontSize: 13, color: "#26372C" },
+  searchContainer: {
+    minHeight: 50,
+    marginTop: 17,
+    borderRadius: 15,
+    paddingHorizontal: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DDE5DF",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    minHeight: 48,
+    marginHorizontal: 10,
+    paddingVertical: 0,
+    fontSize: 13,
+    color: "#26372C",
+  },
   filterRow: { gap: 8, paddingTop: 17, paddingBottom: 4 },
-  filterButton: { minHeight: 40, borderRadius: 13, paddingHorizontal: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#DDE5DF" },
+  filterButton: {
+    minHeight: 40,
+    borderRadius: 13,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DDE5DF",
+  },
   filterButtonSelected: { backgroundColor: "#176B3A", borderColor: "#176B3A" },
   filterText: { fontSize: 10, fontWeight: "800", color: "#66746B" },
   filterTextSelected: { color: "#FFFFFF" },
-  summaryRow: { marginTop: 22, marginBottom: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  summaryRow: {
+    marginTop: 22,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   summaryTitle: { fontSize: 17, fontWeight: "900", color: "#1E2D24" },
   summaryCount: { fontSize: 10, fontWeight: "700", color: "#718078" },
   recordList: { gap: 10 },
-  recordCard: { minHeight: 132, borderRadius: 19, padding: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", flexDirection: "row", alignItems: "center" },
+  recordCard: {
+    minHeight: 132,
+    borderRadius: 19,
+    padding: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    flexDirection: "row",
+    alignItems: "center",
+  },
   cardPressed: { opacity: 0.74, transform: [{ scale: 0.99 }] },
-  photoContainer: { width: 64, height: 64, borderRadius: 20, overflow: "hidden", backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  photoContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    overflow: "hidden",
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   petPhoto: { width: "100%", height: "100%" },
   recordContent: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 6 },
   recordTopRow: { flexDirection: "row", alignItems: "center", gap: 7 },
   petName: { flex: 1, fontSize: 15, fontWeight: "900", color: "#27372D" },
-  serviceBadge: { maxWidth: "48%", minHeight: 24, borderRadius: 9, paddingHorizontal: 8, alignItems: "center", justifyContent: "center", backgroundColor: "#E5F3E8" },
+  serviceBadge: {
+    maxWidth: "48%",
+    minHeight: 24,
+    borderRadius: 9,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#E5F3E8",
+  },
   serviceBadgeText: { fontSize: 8, fontWeight: "900", color: "#176B3A" },
   petContext: { marginTop: 4, fontSize: 10, color: "#7B877F" },
-  diagnosis: { marginTop: 7, fontSize: 10, fontWeight: "700", color: "#526158" },
-  recordBottomRow: { marginTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  diagnosis: {
+    marginTop: 7,
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#526158",
+  },
+  recordBottomRow: {
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
   dateRow: { flexDirection: "row", alignItems: "center", gap: 5 },
   visitDate: { fontSize: 9, color: "#7C8981" },
   accessChanged: { fontSize: 8, fontWeight: "800", color: "#A66A15" },
-  stateCard: { minHeight: 245, marginTop: 24, borderRadius: 19, padding: 25, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", alignItems: "center", justifyContent: "center" },
+  stateCard: {
+    minHeight: 245,
+    marginTop: 24,
+    borderRadius: 19,
+    padding: 25,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   loadingText: { marginTop: 12, fontSize: 11, color: "#77847C" },
-  emptyIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#E8F4EA", alignItems: "center", justifyContent: "center" },
-  emptyIconMuted: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#EEF2EF", alignItems: "center", justifyContent: "center" },
-  errorIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: "#FDEDEA", alignItems: "center", justifyContent: "center" },
-  stateTitle: { marginTop: 13, fontSize: 14, fontWeight: "900", color: "#34453B", textAlign: "center" },
-  stateDescription: { maxWidth: 270, marginTop: 6, fontSize: 10, lineHeight: 16, color: "#77847C", textAlign: "center" },
-  retryButton: { minWidth: 102, minHeight: 44, marginTop: 17, borderRadius: 12, paddingHorizontal: 18, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  emptyIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#E8F4EA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyIconMuted: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#EEF2EF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: "#FDEDEA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stateTitle: {
+    marginTop: 13,
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#34453B",
+    textAlign: "center",
+  },
+  stateDescription: {
+    maxWidth: 270,
+    marginTop: 6,
+    fontSize: 10,
+    lineHeight: 16,
+    color: "#77847C",
+    textAlign: "center",
+  },
+  retryButton: {
+    minWidth: 102,
+    minHeight: 44,
+    marginTop: 17,
+    borderRadius: 12,
+    paddingHorizontal: 18,
+    backgroundColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   retryText: { fontSize: 11, fontWeight: "800", color: "#FFFFFF" },
-  authorizedPetsButton: { minHeight: 46, marginTop: 18, borderRadius: 13, paddingHorizontal: 18, backgroundColor: "#176B3A", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 },
-  authorizedPetsButtonText: { fontSize: 11, fontWeight: "800", color: "#FFFFFF" },
-  resetButton: { minHeight: 43, marginTop: 16, borderRadius: 12, borderWidth: 1, borderColor: "#BFD2C4", paddingHorizontal: 17, alignItems: "center", justifyContent: "center" },
+  authorizedPetsButton: {
+    minHeight: 46,
+    marginTop: 18,
+    borderRadius: 13,
+    paddingHorizontal: 18,
+    backgroundColor: "#176B3A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+  },
+  authorizedPetsButtonText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
+  resetButton: {
+    minHeight: 43,
+    marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#BFD2C4",
+    paddingHorizontal: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   resetText: { fontSize: 10, fontWeight: "800", color: "#176B3A" },
   pressed: { opacity: 0.7 },
 });

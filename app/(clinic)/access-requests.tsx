@@ -46,8 +46,8 @@ const EMPTY_MESSAGES: Record<AuthorizationStatus, string> = {
 
 export default function AccessRequestsScreen() {
   const params = useLocalSearchParams<{ initialStatus?: string }>();
-  const [selectedStatus, setSelectedStatus] = useState<AuthorizationStatus>(() =>
-    normalizeStatus(params.initialStatus)
+  const [selectedStatus, setSelectedStatus] = useState<AuthorizationStatus>(
+    () => normalizeStatus(params.initialStatus),
   );
   const [requests, setRequests] = useState<AuthorizationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,7 +92,7 @@ export default function AccessRequestsScreen() {
       }
 
       setRequests(
-        Array.isArray(data.authorizations) ? data.authorizations : []
+        Array.isArray(data.authorizations) ? data.authorizations : [],
       );
     } catch (loadError) {
       console.log("CLINIC ACCESS REQUESTS ERROR:", loadError);
@@ -106,7 +106,7 @@ export default function AccessRequestsScreen() {
   useFocusEffect(
     useCallback(() => {
       loadRequests();
-    }, [loadRequests])
+    }, [loadRequests]),
   );
 
   const counts = useMemo(
@@ -114,18 +114,18 @@ export default function AccessRequestsScreen() {
       FILTERS.reduce<Record<AuthorizationStatus, number>>(
         (result, status) => {
           result[status] = requests.filter(
-            (request) => request.status === status
+            (request) => request.status === status,
           ).length;
           return result;
         },
-        { Pending: 0, Approved: 0, Declined: 0, Revoked: 0 }
+        { Pending: 0, Approved: 0, Declined: 0, Revoked: 0 },
       ),
-    [requests]
+    [requests],
   );
 
   const filteredRequests = useMemo(
     () => requests.filter((request) => request.status === selectedStatus),
-    [requests, selectedStatus]
+    [requests, selectedStatus],
   );
 
   return (
@@ -134,7 +134,10 @@ export default function AccessRequestsScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
-          style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.pressed,
+          ]}
           onPress={() => router.back()}
         >
           <Ionicons name="chevron-back" size={27} color="#173D2A" />
@@ -205,10 +208,15 @@ export default function AccessRequestsScreen() {
             <View style={styles.errorIcon}>
               <Ionicons name="alert-circle-outline" size={27} color="#A7483E" />
             </View>
-            <Text style={styles.stateTitle}>Unable to load access requests.</Text>
+            <Text style={styles.stateTitle}>
+              Unable to load access requests.
+            </Text>
             <Pressable
               accessibilityRole="button"
-              style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.retryButton,
+                pressed && styles.pressed,
+              ]}
               onPress={() => loadRequests()}
             >
               <Text style={styles.retryText}>Retry</Text>
@@ -217,9 +225,15 @@ export default function AccessRequestsScreen() {
         ) : filteredRequests.length === 0 ? (
           <View style={styles.stateCard}>
             <View style={styles.emptyIcon}>
-              <Ionicons name={emptyIcon(selectedStatus)} size={28} color="#647269" />
+              <Ionicons
+                name={emptyIcon(selectedStatus)}
+                size={28}
+                color="#647269"
+              />
             </View>
-            <Text style={styles.stateTitle}>{EMPTY_MESSAGES[selectedStatus]}</Text>
+            <Text style={styles.stateTitle}>
+              {EMPTY_MESSAGES[selectedStatus]}
+            </Text>
           </View>
         ) : (
           <View style={styles.list}>
@@ -321,7 +335,9 @@ function actionLabel(status: AuthorizationStatus) {
   return "View Pet";
 }
 
-function emptyIcon(status: AuthorizationStatus): keyof typeof Ionicons.glyphMap {
+function emptyIcon(
+  status: AuthorizationStatus,
+): keyof typeof Ionicons.glyphMap {
   if (status === "Approved") return "shield-checkmark-outline";
   if (status === "Pending") return "time-outline";
   return "close-circle-outline";
@@ -339,30 +355,80 @@ function formatDate(value: string) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFDF7" },
-  header: { height: 60, paddingHorizontal: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#E9EDE9", backgroundColor: "#FFFDF7" },
-  backButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  header: {
+    height: 60,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9EDE9",
+    backgroundColor: "#FFFDF7",
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
   headerSpacer: { width: 44, height: 44 },
   content: { paddingHorizontal: 20, paddingTop: 21, paddingBottom: 45 },
   introTitle: { fontSize: 20, fontWeight: "900", color: "#203027" },
   introText: { marginTop: 4, fontSize: 11, lineHeight: 17, color: "#77847C" },
   filterRow: { gap: 8, paddingVertical: 19 },
-  filterButton: { minHeight: 42, borderRadius: 13, paddingHorizontal: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#DDE5DF" },
+  filterButton: {
+    minHeight: 42,
+    borderRadius: 13,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DDE5DF",
+  },
   filterButtonSelected: { backgroundColor: "#176B3A", borderColor: "#176B3A" },
   filterText: { fontSize: 11, fontWeight: "800", color: "#66746B" },
   filterTextSelected: { color: "#FFFFFF" },
   list: { gap: 10 },
-  card: { minHeight: 122, borderRadius: 18, padding: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", flexDirection: "row", alignItems: "center" },
+  card: {
+    minHeight: 122,
+    borderRadius: 18,
+    padding: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    flexDirection: "row",
+    alignItems: "center",
+  },
   cardPressed: { opacity: 0.75, transform: [{ scale: 0.99 }] },
-  petPhotoContainer: { width: 66, height: 66, borderRadius: 20, overflow: "hidden", backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  petPhotoContainer: {
+    width: 66,
+    height: 66,
+    borderRadius: 20,
+    overflow: "hidden",
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   petPhoto: { width: "100%", height: "100%" },
   cardContent: { flex: 1, marginLeft: 13 },
   cardTopRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   petName: { flex: 1, fontSize: 15, fontWeight: "900", color: "#27372D" },
   petDetails: { marginTop: 3, fontSize: 10, color: "#7B877F" },
   requestDate: { marginTop: 7, fontSize: 9, color: "#929C96" },
-  cardActionRow: { marginTop: 10, flexDirection: "row", alignItems: "center", alignSelf: "flex-start" },
-  cardAction: { fontSize: 10, fontWeight: "800", color: "#176B3A", marginRight: 2 },
+  cardActionRow: {
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+  },
+  cardAction: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#176B3A",
+    marginRight: 2,
+  },
   statusBadge: { borderRadius: 9, paddingHorizontal: 8, paddingVertical: 5 },
   statusText: { fontSize: 8, fontWeight: "900" },
   pendingBadge: { backgroundColor: "#FFF1DA" },
@@ -373,12 +439,51 @@ const styles = StyleSheet.create({
   declinedText: { color: "#A7483E" },
   revokedBadge: { backgroundColor: "#F4E8E6" },
   revokedText: { color: "#8F4A42" },
-  stateCard: { minHeight: 220, borderRadius: 19, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", padding: 24, alignItems: "center", justifyContent: "center" },
+  stateCard: {
+    minHeight: 220,
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E1E8E3",
+    padding: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   loadingText: { marginTop: 12, fontSize: 11, color: "#77847C" },
-  stateTitle: { marginTop: 12, fontSize: 12, lineHeight: 18, fontWeight: "700", color: "#526158", textAlign: "center" },
-  emptyIcon: { width: 52, height: 52, borderRadius: 17, backgroundColor: "#EEF3EF", alignItems: "center", justifyContent: "center" },
-  errorIcon: { width: 52, height: 52, borderRadius: 17, backgroundColor: "#FDEDEA", alignItems: "center", justifyContent: "center" },
-  retryButton: { minWidth: 102, minHeight: 44, marginTop: 17, borderRadius: 12, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center", paddingHorizontal: 18 },
+  stateTitle: {
+    marginTop: 12,
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: "700",
+    color: "#526158",
+    textAlign: "center",
+  },
+  emptyIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 17,
+    backgroundColor: "#EEF3EF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 17,
+    backgroundColor: "#FDEDEA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  retryButton: {
+    minWidth: 102,
+    minHeight: 44,
+    marginTop: 17,
+    borderRadius: 12,
+    backgroundColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 18,
+  },
   retryText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800" },
   pressed: { opacity: 0.7 },
 });

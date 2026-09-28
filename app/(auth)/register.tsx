@@ -18,7 +18,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
 
-
 type UserRole = "owner" | "clinic";
 
 export default function RegisterScreen() {
@@ -31,45 +30,25 @@ export default function RegisterScreen() {
   } = useKeyboardAwareScroll(40);
   const [role, setRole] = useState<UserRole>("owner");
 
-  const [fullName, setFullName] =
-    useState("");
+  const [fullName, setFullName] = useState("");
 
-  const [clinicName, setClinicName] =
-    useState("");
+  const [clinicName, setClinicName] = useState("");
 
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
 
-  const [contactNumber, setContactNumber] =
-    useState("");
+  const [contactNumber, setContactNumber] = useState("");
 
-  const [address, setAddress] =
-    useState("");
+  const [address, setAddress] = useState("");
 
-  const [password, setPassword] =
-    useState("");
+  const [password, setPassword] = useState("");
 
-  const [
-    confirmPassword,
-    setConfirmPassword,
-  ] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [
-    showPassword,
-    setShowPassword,
-  ] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [
-    showConfirmPassword,
-    setShowConfirmPassword,
-  ] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [loading, setLoading] =
-    useState(false);
-
-
-
-
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
     if (
@@ -82,34 +61,31 @@ export default function RegisterScreen() {
     ) {
       Alert.alert(
         "Incomplete Information",
-        "Please fill in all required fields."
+        "Please fill in all required fields.",
       );
       return;
     }
-
 
     if (role === "clinic" && !clinicName.trim()) {
       Alert.alert(
         "Clinic Name Required",
-        "Please enter the name of your veterinary clinic."
+        "Please enter the name of your veterinary clinic.",
       );
       return;
     }
-
 
     if (password.length < 8) {
       Alert.alert(
         "Invalid Password",
-        "Password must be at least 8 characters."
+        "Password must be at least 8 characters.",
       );
       return;
     }
 
-
     if (password !== confirmPassword) {
       Alert.alert(
         "Password Mismatch",
-        "Password and confirm password do not match."
+        "Password and confirm password do not match.",
       );
       return;
     }
@@ -133,10 +109,7 @@ export default function RegisterScreen() {
 
           role: role,
 
-          clinicName:
-            role === "clinic"
-              ? clinicName.trim()
-              : null,
+          clinicName: role === "clinic" ? clinicName.trim() : null,
         }),
       });
 
@@ -148,7 +121,7 @@ export default function RegisterScreen() {
       if (!response.ok) {
         Alert.alert(
           "Registration Failed",
-          data.message || "Unable to create account."
+          data.message || "Unable to create account.",
         );
         return;
       }
@@ -163,30 +136,22 @@ export default function RegisterScreen() {
             text: "Log In",
             onPress: () => router.replace("/login"),
           },
-        ]
+        ],
       );
     } catch (error) {
       console.log("REGISTER ERROR:", error);
 
-      Alert.alert(
-        "Connection Error",
-        "Unable to connect to the TIMAN server."
-      );
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     } finally {
       setLoading(false);
     }
   };
 
-
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={
-          Platform.OS === "ios"
-            ? "padding"
-            : "height"
-        }
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -196,133 +161,81 @@ export default function RegisterScreen() {
             styles.content,
             keyboardContentContainerStyle,
           ]}
-          showsVerticalScrollIndicator={
-            false
-          }
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
-
           <Pressable
             style={({ pressed }) => [
               styles.backButton,
               pressed && styles.buttonPressed,
             ]}
-            onPress={() =>
-              router.back()
-            }
+            onPress={() => router.back()}
           >
-            <Ionicons
-              name="chevron-back"
-              size={28}
-              color="#173D2A"
-            />
+            <Ionicons name="chevron-back" size={28} color="#173D2A" />
           </Pressable>
 
+          <View style={styles.logoContainer}>
+            <Text style={styles.paw}>🐾</Text>
 
-          <View
-            style={
-              styles.logoContainer
-            }
-          >
-            <Text style={styles.paw}>
-              🐾
-            </Text>
-
-            <Text style={styles.logo}>
-              TIMAN
-            </Text>
+            <Text style={styles.logo}>TIMAN</Text>
           </View>
-
 
           <View style={styles.header}>
-            <Text style={styles.title}>
-              Create Account
-            </Text>
+            <Text style={styles.title}>Create Account</Text>
 
-            <Text
-              style={styles.subtitle}
-            >
-              Join TIMAN and keep your
-              pet&apos;s records in one
-              place.
+            <Text style={styles.subtitle}>
+              Join TIMAN and keep your pet&apos;s records in one place.
             </Text>
           </View>
 
+          <Text style={styles.label}>I am a</Text>
 
-          <Text style={styles.label}>
-            I am a
-          </Text>
-
-          <View
-            style={
-              styles.roleContainer
-            }
-          >
-
+          <View style={styles.roleContainer}>
             <Pressable
               style={({ pressed }) => [
                 styles.roleButton,
-                role === "owner" &&
-                  styles.selectedRole,
-                pressed &&
-                  styles.buttonPressed,
+                role === "owner" && styles.selectedRole,
+                pressed && styles.buttonPressed,
               ]}
-              onPress={() =>
-                setRole("owner")
-              }
+              onPress={() => setRole("owner")}
             >
               <Ionicons
                 name="paw-outline"
                 size={22}
-                color={
-                  role === "owner"
-                    ? "#FFFFFF"
-                    : "#176B3A"
-                }
+                color={role === "owner" ? "#FFFFFF" : "#176B3A"}
               />
 
               <Text
                 style={[
                   styles.roleText,
 
-                  role === "owner" &&
-                    styles.selectedRoleText,
+                  role === "owner" && styles.selectedRoleText,
                 ]}
               >
                 Pet Owner
               </Text>
             </Pressable>
 
-
             <Pressable
               style={({ pressed }) => [
                 styles.roleButton,
-                role === "clinic" &&
-                  styles.selectedRole,
-                pressed &&
-                  styles.buttonPressed,
+                role === "clinic" && styles.selectedRole,
+                pressed && styles.buttonPressed,
               ]}
-              onPress={() =>
-                setRole("clinic")
-              }
+              onPress={() => setRole("clinic")}
             >
               <Ionicons
                 name="medical-outline"
                 size={22}
-                color={
-                  role === "clinic"
-                    ? "#FFFFFF"
-                    : "#176B3A"
-                }
+                color={role === "clinic" ? "#FFFFFF" : "#176B3A"}
               />
 
               <Text
                 style={[
                   styles.roleText,
 
-                  role === "clinic" &&
-                    styles.selectedRoleText,
+                  role === "clinic" && styles.selectedRoleText,
                 ]}
               >
                 Clinic Staff
@@ -330,50 +243,37 @@ export default function RegisterScreen() {
             </Pressable>
           </View>
 
-
           <InputBox
             inputRef={(input) => {
               inputRefs.current.fullName = input;
             }}
-            onFocus={() =>
-              handleInputFocus(inputRefs.current.fullName)
-            }
+            onFocus={() => handleInputFocus(inputRefs.current.fullName)}
             icon="person-outline"
             placeholder="Full Name"
             value={fullName}
-            onChangeText={
-              setFullName
-            }
+            onChangeText={setFullName}
             autoCapitalize="words"
           />
-
 
           {role === "clinic" && (
             <InputBox
               inputRef={(input) => {
                 inputRefs.current.clinicName = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.clinicName)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.clinicName)}
               icon="business-outline"
               placeholder="Clinic Name"
               value={clinicName}
-              onChangeText={
-                setClinicName
-              }
+              onChangeText={setClinicName}
               autoCapitalize="words"
             />
           )}
-
 
           <InputBox
             inputRef={(input) => {
               inputRefs.current.email = input;
             }}
-            onFocus={() =>
-              handleInputFocus(inputRefs.current.email)
-            }
+            onFocus={() => handleInputFocus(inputRefs.current.email)}
             icon="mail-outline"
             placeholder="Email"
             value={email}
@@ -383,31 +283,23 @@ export default function RegisterScreen() {
             autoCorrect={false}
           />
 
-
           <InputBox
             inputRef={(input) => {
               inputRefs.current.contactNumber = input;
             }}
-            onFocus={() =>
-              handleInputFocus(inputRefs.current.contactNumber)
-            }
+            onFocus={() => handleInputFocus(inputRefs.current.contactNumber)}
             icon="call-outline"
             placeholder="Contact Number"
             value={contactNumber}
-            onChangeText={
-              setContactNumber
-            }
+            onChangeText={setContactNumber}
             keyboardType="phone-pad"
           />
-
 
           <InputBox
             inputRef={(input) => {
               inputRefs.current.address = input;
             }}
-            onFocus={() =>
-              handleInputFocus(inputRefs.current.address)
-            }
+            onFocus={() => handleInputFocus(inputRefs.current.address)}
             icon="location-outline"
             placeholder="Address"
             value={address}
@@ -415,35 +307,20 @@ export default function RegisterScreen() {
             autoCapitalize="words"
           />
 
-
-          <View
-            style={
-              styles.inputContainer
-            }
-          >
-            <Ionicons
-              name="lock-closed-outline"
-              size={21}
-              color="#65736B"
-            />
+          <View style={styles.inputContainer}>
+            <Ionicons name="lock-closed-outline" size={21} color="#65736B" />
 
             <TextInput
               ref={(input) => {
                 inputRefs.current.password = input;
               }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.password)
-              }
+              onFocus={() => handleInputFocus(inputRefs.current.password)}
               style={styles.input}
               placeholder="Password"
               placeholderTextColor="#8A948E"
               value={password}
-              onChangeText={
-                setPassword
-              }
-              secureTextEntry={
-                !showPassword
-              }
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
               autoCapitalize="none"
             />
 
@@ -452,30 +329,17 @@ export default function RegisterScreen() {
                 styles.eyeButton,
                 pressed && styles.buttonPressed,
               ]}
-              onPress={() =>
-                setShowPassword(
-                  !showPassword
-                )
-              }
+              onPress={() => setShowPassword(!showPassword)}
             >
               <Ionicons
-                name={
-                  showPassword
-                    ? "eye-off-outline"
-                    : "eye-outline"
-                }
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={21}
                 color="#65736B"
               />
             </Pressable>
           </View>
 
-
-          <View
-            style={
-              styles.inputContainer
-            }
-          >
+          <View style={styles.inputContainer}>
             <Ionicons
               name="shield-checkmark-outline"
               size={21}
@@ -492,15 +356,9 @@ export default function RegisterScreen() {
               style={styles.input}
               placeholder="Confirm Password"
               placeholderTextColor="#8A948E"
-              value={
-                confirmPassword
-              }
-              onChangeText={
-                setConfirmPassword
-              }
-              secureTextEntry={
-                !showConfirmPassword
-              }
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
               autoCapitalize="none"
             />
 
@@ -509,66 +367,34 @@ export default function RegisterScreen() {
                 styles.eyeButton,
                 pressed && styles.buttonPressed,
               ]}
-              onPress={() =>
-                setShowConfirmPassword(
-                  !showConfirmPassword
-                )
-              }
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               <Ionicons
-                name={
-                  showConfirmPassword
-                    ? "eye-off-outline"
-                    : "eye-outline"
-                }
+                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
                 size={21}
                 color="#65736B"
               />
             </Pressable>
           </View>
 
-
           <Pressable
             style={({ pressed }) => [
               styles.signUpButton,
 
-              pressed &&
-                !loading &&
-                styles.buttonPressed,
+              pressed && !loading && styles.buttonPressed,
 
-              loading &&
-                styles.disabledButton,
+              loading && styles.disabledButton,
             ]}
-            onPress={
-              handleRegister
-            }
+            onPress={handleRegister}
             disabled={loading}
           >
-            <Text
-              style={
-                styles.signUpText
-              }
-            >
-              {loading
-                ? "Creating Account..."
-                : "Create Account"}
+            <Text style={styles.signUpText}>
+              {loading ? "Creating Account..." : "Create Account"}
             </Text>
           </Pressable>
 
-
-          <View
-            style={
-              styles.loginContainer
-            }
-          >
-            <Text
-              style={
-                styles.loginText
-              }
-            >
-              Already have an
-              account?{" "}
-            </Text>
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Already have an account? </Text>
 
             <Pressable
               disabled={loading}
@@ -576,19 +402,9 @@ export default function RegisterScreen() {
                 styles.loginAction,
                 pressed && styles.buttonPressed,
               ]}
-              onPress={() =>
-                router.replace(
-                  "/login"
-                )
-              }
+              onPress={() => router.replace("/login")}
             >
-              <Text
-                style={
-                  styles.loginLink
-                }
-              >
-                Log In
-              </Text>
+              <Text style={styles.loginLink}>Log In</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -597,7 +413,6 @@ export default function RegisterScreen() {
   );
 }
 
-
 function InputBox({
   icon,
   inputRef,
@@ -605,20 +420,10 @@ function InputBox({
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   inputRef?: (input: TextInput | null) => void;
-} & React.ComponentProps<
-  typeof TextInput
->) {
+} & React.ComponentProps<typeof TextInput>) {
   return (
-    <View
-      style={
-        styles.inputContainer
-      }
-    >
-      <Ionicons
-        name={icon}
-        size={21}
-        color="#65736B"
-      />
+    <View style={styles.inputContainer}>
+      <Ionicons name={icon} size={21} color="#65736B" />
 
       <TextInput
         ref={inputRef}
@@ -629,7 +434,6 @@ function InputBox({
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -791,8 +595,7 @@ const styles = StyleSheet.create({
     color: "#176B3A",
     fontSize: 16,
     fontWeight: "700",
-    textDecorationLine:
-      "underline",
+    textDecorationLine: "underline",
   },
 
   eyeButton: {

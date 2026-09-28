@@ -1,10 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 
 import {
@@ -21,11 +17,7 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  API_URL,
-  getImageUrl,
-} from "../../config/api";
-
+import { API_URL, getImageUrl } from "../../config/api";
 
 type Pet = {
   pet_id: number;
@@ -48,11 +40,7 @@ type VetRecord = {
   notes: string | null;
 
   next_due_date: string | null;
-  schedule_status:
-    | "Pending"
-    | "Completed"
-    | "Cancelled"
-    | null;
+  schedule_status: "Pending" | "Completed" | "Cancelled" | null;
   completed_at: string | null;
   created_at: string;
 
@@ -60,42 +48,27 @@ type VetRecord = {
   clinic_name: string | null;
 };
 
-
-
-
-
 export default function VetRecordsScreen() {
-  const params =
-    useLocalSearchParams<{
-      petId?: string;
-    }>();
+  const params = useLocalSearchParams<{
+    petId?: string;
+  }>();
 
   const petId = params.petId;
 
-  const [pet, setPet] =
-    useState<Pet | null>(null);
+  const [pet, setPet] = useState<Pet | null>(null);
 
-  const [records, setRecords] =
-    useState<VetRecord[]>([]);
+  const [records, setRecords] = useState<VetRecord[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [refreshing, setRefreshing] =
-    useState(false);
-
-
-
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadRecords = useCallback(
     async (showLoading = true) => {
       if (!petId) {
         setLoading(false);
 
-        Alert.alert(
-          "Pet Error",
-          "No pet was selected."
-        );
+        Alert.alert("Pet Error", "No pet was selected.");
 
         return;
       }
@@ -105,68 +78,46 @@ export default function VetRecordsScreen() {
           setLoading(true);
         }
 
-        const token =
-          await AsyncStorage.getItem(
-            "token"
-          );
+        const token = await AsyncStorage.getItem("token");
 
         if (!token) {
-          Alert.alert(
-            "Session Expired",
-            "Please log in again."
-          );
+          Alert.alert("Session Expired", "Please log in again.");
 
           router.replace("/login");
 
           return;
         }
 
-        const response =
-          await fetch(
-            `${API_URL}/vet-records/owner/${petId}`,
-            {
-              method: "GET",
+        const response = await fetch(`${API_URL}/vet-records/owner/${petId}`, {
+          method: "GET",
 
-              headers: {
-                Accept:
-                  "application/json",
+          headers: {
+            Accept: "application/json",
 
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          );
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        const text =
-          await response.text();
+        const text = await response.text();
 
         let data: any = {};
 
         try {
-          data = text
-            ? JSON.parse(text)
-            : {};
+          data = text ? JSON.parse(text) : {};
         } catch {
           data = {
             message: text,
           };
         }
 
-        console.log(
-          "OWNER VET RECORDS STATUS:",
-          response.status
-        );
+        console.log("OWNER VET RECORDS STATUS:", response.status);
 
-        console.log(
-          "OWNER VET RECORDS RESPONSE:",
-          data
-        );
+        console.log("OWNER VET RECORDS RESPONSE:", data);
 
         if (!response.ok) {
           Alert.alert(
             "Unable to Load",
-            data.message ||
-              "Unable to load veterinary records."
+            data.message || "Unable to load veterinary records.",
           );
 
           return;
@@ -174,38 +125,29 @@ export default function VetRecordsScreen() {
 
         setPet(data.pet || null);
 
-        setRecords(
-          Array.isArray(data.records)
-            ? data.records
-            : []
-        );
+        setRecords(Array.isArray(data.records) ? data.records : []);
       } catch (error) {
-        console.log(
-          "LOAD OWNER VET RECORDS ERROR:",
-          error
-        );
+        console.log("LOAD OWNER VET RECORDS ERROR:", error);
 
         Alert.alert(
           "Connection Error",
-          "Unable to connect to the TIMAN server."
+          "Unable to connect to the TIMAN server.",
         );
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [petId]
+    [petId],
   );
-
 
   useFocusEffect(
     useCallback(() => {
       loadRecords();
 
       return () => {};
-    }, [loadRecords])
+    }, [loadRecords]),
   );
-
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -213,140 +155,77 @@ export default function VetRecordsScreen() {
     loadRecords(false);
   };
 
+  const upcomingCount = records.filter((record) => {
+    if (!record.next_due_date || record.schedule_status !== "Pending") {
+      return false;
+    }
 
-  const upcomingCount =
-    records.filter((record) => {
-      if (
-        !record.next_due_date ||
-        record.schedule_status !== "Pending"
-      ) {
-        return false;
-      }
+    const date = parseDatabaseDate(record.next_due_date);
 
-      const date =
-        parseDatabaseDate(
-          record.next_due_date
-        );
+    if (!date) {
+      return false;
+    }
 
-      if (!date) {
-        return false;
-      }
+    const today = new Date();
 
-      const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      today.setHours(
-        0,
-        0,
-        0,
-        0
-      );
+    date.setHours(0, 0, 0, 0);
 
-      date.setHours(
-        0,
-        0,
-        0,
-        0
-      );
-
-      return (
-        date.getTime() >=
-        today.getTime()
-      );
-    }).length;
-
-
+    return date.getTime() >= today.getTime();
+  }).length;
 
   if (loading) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
+      <SafeAreaView style={styles.container}>
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text
-            style={styles.loadingText}
-          >
-            Loading pet health
-            records...
-          </Text>
+          <Text style={styles.loadingText}>Loading pet health records...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
+    <SafeAreaView style={styles.container}>
       <Header />
 
       <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={
-          styles.content
-        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-
         {pet && (
           <View style={styles.petCard}>
-            {getImageUrl(
-              pet.photo_url
-            ) ? (
+            {getImageUrl(pet.photo_url) ? (
               <Image
                 source={{
-                  uri:
-                    getImageUrl(
-                      pet.photo_url
-                    ) || "",
+                  uri: getImageUrl(pet.photo_url) || "",
                 }}
                 style={styles.petPhoto}
               />
             ) : (
               <View style={styles.petPlaceholder}>
-                <Ionicons
-                  name="paw"
-                  size={31}
-                  color="#6E9179"
-                />
+                <Ionicons name="paw" size={31} color="#6E9179" />
               </View>
             )}
 
             <View style={styles.petInfo}>
-              <Text style={styles.petName}>
-                {pet.pet_name}
-              </Text>
+              <Text style={styles.petName}>{pet.pet_name}</Text>
 
-              <Text style={styles.petDetails}>
-                {pet.breed ||
-                  pet.species}
-              </Text>
+              <Text style={styles.petDetails}>{pet.breed || pet.species}</Text>
             </View>
 
             <View style={styles.verifiedIcon}>
-              <Ionicons
-                name="shield-checkmark"
-                size={23}
-                color="#176B3A"
-              />
+              <Ionicons name="shield-checkmark" size={23} color="#176B3A" />
             </View>
           </View>
         )}
-
 
         <View style={styles.summaryRow}>
           <View style={styles.summaryCard}>
@@ -354,8 +233,7 @@ export default function VetRecordsScreen() {
               style={[
                 styles.summaryIcon,
                 {
-                  backgroundColor:
-                    "#E7F2E8",
+                  backgroundColor: "#E7F2E8",
                 },
               ]}
             >
@@ -367,115 +245,72 @@ export default function VetRecordsScreen() {
             </View>
 
             <View>
-              <Text style={styles.summaryNumber}>
-                {records.length}
-              </Text>
+              <Text style={styles.summaryNumber}>{records.length}</Text>
 
-              <Text style={styles.summaryLabel}>
-                Total Records
-              </Text>
+              <Text style={styles.summaryLabel}>Total Records</Text>
             </View>
           </View>
 
-          <View
-            style={styles.summaryCard}
-          >
+          <View style={styles.summaryCard}>
             <View
               style={[
                 styles.summaryIcon,
                 {
-                  backgroundColor:
-                    "#FFF0C7",
+                  backgroundColor: "#FFF0C7",
                 },
               ]}
             >
-              <Ionicons
-                name="calendar-outline"
-                size={20}
-                color="#8A6818"
-              />
+              <Ionicons name="calendar-outline" size={20} color="#8A6818" />
             </View>
 
             <View>
-              <Text style={styles.summaryNumber}>
-                {upcomingCount}
-              </Text>
+              <Text style={styles.summaryNumber}>{upcomingCount}</Text>
 
-              <Text style={styles.summaryLabel}>
-                Upcoming
-              </Text>
+              <Text style={styles.summaryLabel}>Upcoming</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            Veterinary History
-          </Text>
+          <Text style={styles.sectionTitle}>Veterinary History</Text>
 
           {records.length > 0 && (
             <Text style={styles.recordCountText}>
-              {records.length}{" "}
-              {records.length === 1
-                ? "record"
-                : "records"}
+              {records.length} {records.length === 1 ? "record" : "records"}
             </Text>
           )}
         </View>
 
-
         {records.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
-              <Ionicons
-                name="medical-outline"
-                size={35}
-                color="#779080"
-              />
+              <Ionicons name="medical-outline" size={35} color="#779080" />
             </View>
 
-            <Text style={styles.emptyTitle}>
-              No Health Records Yet
-            </Text>
-
-
+            <Text style={styles.emptyTitle}>No Health Records Yet</Text>
           </View>
         ) : (
           records.map((record, index) => (
-              <OwnerRecordCard
-                key={
-                  record.record_id
-                }
-                record={record}
-                latest={
-                  index === 0
-                }
-              />
-            )
-          )
+            <OwnerRecordCard
+              key={record.record_id}
+              record={record}
+              latest={index === 0}
+            />
+          ))
         )}
 
-
         <View style={styles.privacyCard}>
-          <Ionicons
-            name="lock-closed-outline"
-            size={19}
-            color="#176B3A"
-          />
+          <Ionicons name="lock-closed-outline" size={19} color="#176B3A" />
 
-          <Text style={styles.privacyText}  >
-            Only you and veterinary
-            clinics with approved
-            access can view protected
-            veterinary information
-            for this pet.
+          <Text style={styles.privacyText}>
+            Only you and veterinary clinics with approved access can view
+            protected veterinary information for this pet.
           </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
 
 function Header() {
   return (
@@ -485,28 +320,17 @@ function Header() {
           styles.headerButton,
           pressed && styles.headerPressed,
         ]}
-        onPress={() =>
-          router.back()
-        }>
-        <Ionicons
-          name="chevron-back"
-          size={27}
-          color="#173D2A"
-        />
+        onPress={() => router.back()}
+      >
+        <Ionicons name="chevron-back" size={27} color="#173D2A" />
       </Pressable>
 
-      <Text style={styles.headerTitle}>
-        Health Records
-      </Text>
+      <Text style={styles.headerTitle}>Health Records</Text>
 
-      <View
-        style={styles.headerButton}
-      />
+      <View style={styles.headerButton} />
     </View>
   );
 }
-
-
 
 function OwnerRecordCard({
   record,
@@ -516,23 +340,16 @@ function OwnerRecordCard({
   latest: boolean;
 }) {
   const clinic =
-    record.clinic_name ||
-    record.clinic_contact_name ||
-    "Veterinary Clinic";
+    record.clinic_name || record.clinic_contact_name || "Veterinary Clinic";
 
-  const isCompleted =
-    record.schedule_status === "Completed";
+  const isCompleted = record.schedule_status === "Completed";
 
   return (
-    <View
-      style={styles.recordCard}
-    >
+    <View style={styles.recordCard}>
       <View style={styles.recordHeader}>
         <View style={styles.serviceIcon}>
           <Ionicons
-            name={getServiceIcon(
-              record.service_type
-            )}
+            name={getServiceIcon(record.service_type)}
             size={22}
             color="#176B3A"
           />
@@ -540,39 +357,25 @@ function OwnerRecordCard({
 
         <View style={styles.recordHeaderInfo}>
           <View style={styles.titleRow}>
-            <Text style={styles.serviceTitle}>
-              {record.service_type}
-            </Text>
+            <Text style={styles.serviceTitle}>{record.service_type}</Text>
 
             {latest && (
               <View style={styles.latestBadge}>
-                <Text style={styles.latestText}>
-                  Latest
-                </Text>
+                <Text style={styles.latestText}>Latest</Text>
               </View>
             )}
 
             {isCompleted && (
               <View style={styles.completedBadge}>
-                <Text style={styles.completedBadgeText}>
-                  Completed
-                </Text>
+                <Text style={styles.completedBadgeText}>Completed</Text>
               </View>
             )}
           </View>
 
           <View style={styles.dateRow}>
-            <Ionicons
-              name="calendar-outline"
-              size={13}
-              color="#7D8981"
-            />
+            <Ionicons name="calendar-outline" size={13} color="#7D8981" />
 
-            <Text style={styles.dateText}>
-              {formatDate(
-                record.visit_date
-              )}
-            </Text>
+            <Text style={styles.dateText}>{formatDate(record.visit_date)}</Text>
           </View>
         </View>
       </View>
@@ -583,9 +386,7 @@ function OwnerRecordCard({
         <RecordDetail
           icon="medkit-outline"
           label="Diagnosis"
-          value={
-            record.diagnosis
-          }
+          value={record.diagnosis}
         />
       )}
 
@@ -593,9 +394,7 @@ function OwnerRecordCard({
         <RecordDetail
           icon="medical-outline"
           label="Treatment / Procedure"
-          value={
-            record.treatment
-          }
+          value={record.treatment}
         />
       )}
 
@@ -603,9 +402,7 @@ function OwnerRecordCard({
         <RecordDetail
           icon="bandage-outline"
           label="Medication"
-          value={
-            record.medication
-          }
+          value={record.medication}
         />
       )}
 
@@ -621,29 +418,21 @@ function OwnerRecordCard({
         <View
           style={[
             styles.scheduleCard,
-            isCompleted &&
-              styles.completedScheduleCard,
+            isCompleted && styles.completedScheduleCard,
           ]}
         >
           <View
             style={[
               styles.scheduleIcon,
-              isCompleted &&
-                styles.completedScheduleIcon,
+              isCompleted && styles.completedScheduleIcon,
             ]}
           >
             <Ionicons
               name={
-                isCompleted
-                  ? "checkmark-done-outline"
-                  : "notifications-outline"
+                isCompleted ? "checkmark-done-outline" : "notifications-outline"
               }
               size={19}
-              color={
-                isCompleted
-                  ? "#176B3A"
-                  : "#876518"
-              }
+              color={isCompleted ? "#176B3A" : "#876518"}
             />
           </View>
 
@@ -651,77 +440,46 @@ function OwnerRecordCard({
             <Text
               style={[
                 styles.scheduleLabel,
-                isCompleted &&
-                  styles.completedScheduleLabel,
+                isCompleted && styles.completedScheduleLabel,
               ]}
             >
-              {isCompleted
-                ? "Completed on"
-                : "Next Due Date"}
+              {isCompleted ? "Completed on" : "Next Due Date"}
             </Text>
 
             <Text
               style={[
                 styles.scheduleDate,
-                isCompleted &&
-                  styles.completedScheduleDate,
+                isCompleted && styles.completedScheduleDate,
               ]}
             >
-              {isCompleted &&
-              record.completed_at
-                ? formatDateTime(
-                    record.completed_at
-                  )
-                : formatDate(
-                    record.next_due_date
-                  )}
+              {isCompleted && record.completed_at
+                ? formatDateTime(record.completed_at)
+                : formatDate(record.next_due_date)}
             </Text>
           </View>
 
-          {!isCompleted && (
-            <DueBadge
-              date={
-                record.next_due_date
-              }
-            />
-          )}
+          {!isCompleted && <DueBadge date={record.next_due_date} />}
         </View>
       )}
 
       <View style={styles.clinicFooter}>
         <View style={styles.clinicIcon}>
-          <Ionicons
-            name="business-outline"
-            size={16}
-            color="#176B3A"
-          />
+          <Ionicons name="business-outline" size={16} color="#176B3A" />
         </View>
 
         <View style={styles.clinicInfo}>
-          <Text style={styles.clinicLabel}>
-            Veterinary Clinic
-          </Text>
+          <Text style={styles.clinicLabel}>Veterinary Clinic</Text>
 
-          <Text style={styles.clinicName}>
-            {clinic}
-          </Text>
+          <Text style={styles.clinicName}>{clinic}</Text>
 
-          {record.clinic_name &&
-            record.clinic_contact_name && (
-              <Text style={styles.recordedBy}>
-                Recorded by{" "}
-                {
-                  record.clinic_contact_name
-                }
-              </Text>
-            )}
+          {record.clinic_name && record.clinic_contact_name && (
+            <Text style={styles.recordedBy}>
+              Recorded by {record.clinic_contact_name}
+            </Text>
+          )}
         </View>
 
-        <Ionicons
-          name="checkmark-circle"
-          size={19}
-          color="#176B3A"
-        />
+        <Ionicons name="checkmark-circle" size={19} color="#176B3A" />
       </View>
     </View>
   );
@@ -732,43 +490,27 @@ function RecordDetail({
   label,
   value,
 }: {
-  icon:
-    keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: string;
 }) {
   return (
     <View style={styles.detailRow}>
       <View style={styles.detailIcon}>
-        <Ionicons
-          name={icon}
-          size={17}
-          color="#62756A"
-        />
+        <Ionicons name={icon} size={17} color="#62756A" />
       </View>
 
       <View style={styles.detailContent}>
-        <Text style={styles.detailLabel}>
-          {label}
-        </Text>
+        <Text style={styles.detailLabel}>{label}</Text>
 
-        <Text style={styles.detailValue}>
-          {value}
-        </Text>
+        <Text style={styles.detailValue}>{value}</Text>
       </View>
     </View>
   );
 }
 
-
-
-function DueBadge({
-  date,
-}: {
-  date: string;
-}) {
-  const dueDate =
-    parseDatabaseDate(date);
+function DueBadge({ date }: { date: string }) {
+  const dueDate = parseDatabaseDate(date);
 
   if (!dueDate) {
     return null;
@@ -776,92 +518,46 @@ function DueBadge({
 
   const today = new Date();
 
-  today.setHours(
-    0,
-    0,
-    0,
-    0
-  );
+  today.setHours(0, 0, 0, 0);
 
-  dueDate.setHours(
-    0,
-    0,
-    0,
-    0
-  );
+  dueDate.setHours(0, 0, 0, 0);
 
-  const milliseconds =
-    dueDate.getTime() -
-    today.getTime();
+  const milliseconds = dueDate.getTime() - today.getTime();
 
-  const days =
-    Math.ceil(
-      milliseconds /
-        (1000 * 60 * 60 * 24)
-    );
+  const days = Math.ceil(milliseconds / (1000 * 60 * 60 * 24));
 
   if (days < 0) {
     return (
-      <View style={[
-          styles.dueBadge,
-          styles.overdueBadge,
-        ]}
-      >
-        <Text style={styles.overdueText}>
-          Overdue
-        </Text>
+      <View style={[styles.dueBadge, styles.overdueBadge]}>
+        <Text style={styles.overdueText}>Overdue</Text>
       </View>
     );
   }
 
   if (days === 0) {
     return (
-      <View
-        style={[
-          styles.dueBadge,
-          styles.todayBadge,
-        ]}
-      >
-        <Text style={styles.todayText}>
-          Due Today
-        </Text>
+      <View style={[styles.dueBadge, styles.todayBadge]}>
+        <Text style={styles.todayText}>Due Today</Text>
       </View>
     );
   }
 
   if (days <= 30) {
     return (
-      <View
-        style={[
-          styles.dueBadge,
-          styles.upcomingBadge,
-        ]}
-      >
-        <Text style={styles.upcomingText}>
-          {days}d left
-        </Text>
+      <View style={[styles.dueBadge, styles.upcomingBadge]}>
+        <Text style={styles.upcomingText}>{days}d left</Text>
       </View>
     );
   }
 
   return (
-    <View
-      style={[
-        styles.dueBadge,
-        styles.scheduledBadge,
-      ]}
-    >
-      <Text style={styles.scheduledText}>
-        Scheduled
-      </Text>
+    <View style={[styles.dueBadge, styles.scheduledBadge]}>
+      <Text style={styles.scheduledText}>Scheduled</Text>
     </View>
   );
 }
 
-
-function getServiceIcon(
-  service: string
-): keyof typeof Ionicons.glyphMap {
+function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
   switch (service) {
     case "Checkup":
       return "medical-outline";
@@ -883,74 +579,48 @@ function getServiceIcon(
   }
 }
 
-
-
-
-function parseDatabaseDate(
-  value: string
-) {
+function parseDatabaseDate(value: string) {
   if (!value) {
     return null;
   }
 
-  const dateOnly =
-    value.substring(0, 10);
+  const dateOnly = value.substring(0, 10);
 
-  const parts =
-    dateOnly.split("-");
+  const parts = dateOnly.split("-");
 
   if (parts.length !== 3) {
     return null;
   }
 
-  const year =
-    Number(parts[0]);
+  const year = Number(parts[0]);
 
-  const month =
-    Number(parts[1]);
+  const month = Number(parts[1]);
 
-  const day =
-    Number(parts[2]);
+  const day = Number(parts[2]);
 
-  if (
-    !year ||
-    !month ||
-    !day
-  ) {
+  if (!year || !month || !day) {
     return null;
   }
 
-  return new Date(
-    year,
-    month - 1,
-    day
-  );
+  return new Date(year, month - 1, day);
 }
 
-function formatDate(
-  value: string
-) {
-  const date =
-    parseDatabaseDate(value);
+function formatDate(value: string) {
+  const date = parseDatabaseDate(value);
 
   if (!date) {
     return value;
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function formatDateTime(value: string) {
-  const normalized = value.includes("T")
-    ? value
-    : value.replace(" ", "T");
+  const normalized = value.includes("T") ? value : value.replace(" ", "T");
   const date = new Date(normalized);
 
   if (Number.isNaN(date.getTime())) {
@@ -965,8 +635,6 @@ function formatDateTime(value: string) {
     minute: "2-digit",
   });
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -1018,7 +686,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 50,
   },
-
 
   petCard: {
     padding: 16,
@@ -1078,7 +745,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-
   summaryRow: {
     marginTop: 15,
     flexDirection: "row",
@@ -1119,7 +785,6 @@ const styles = StyleSheet.create({
     color: "#7E8982",
   },
 
-
   infoCard: {
     marginTop: 15,
     padding: 14,
@@ -1136,7 +801,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: "#617167",
   },
-
 
   sectionHeader: {
     marginTop: 27,
@@ -1157,7 +821,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#738078",
   },
-
 
   recordCard: {
     marginBottom: 14,
@@ -1244,7 +907,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#EDF1EE",
   },
 
-
   detailRow: {
     marginBottom: 14,
     flexDirection: "row",
@@ -1277,7 +939,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     color: "#394A40",
   },
-
 
   scheduleCard: {
     marginTop: 3,
@@ -1378,7 +1039,6 @@ const styles = StyleSheet.create({
     color: "#176B3A",
   },
 
-
   clinicFooter: {
     marginTop: 15,
     paddingTop: 14,
@@ -1422,7 +1082,6 @@ const styles = StyleSheet.create({
     color: "#8A958E",
   },
 
-
   emptyCard: {
     padding: 29,
     borderRadius: 19,
@@ -1456,7 +1115,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#7D8981",
   },
-
 
   privacyCard: {
     marginTop: 13,

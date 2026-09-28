@@ -1,10 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 
 import {
@@ -21,7 +17,6 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../config/api";
-
 
 type PetStatus = "Safe" | "Missing" | "Found";
 
@@ -40,132 +35,96 @@ type Pet = {
   created_at: string;
 };
 
-
-
 export default function PetsScreen() {
   const params = useLocalSearchParams<{
     mode?: string;
   }>();
 
-  const isScheduleMode =
-    params.mode === "schedule";
+  const isScheduleMode = params.mode === "schedule";
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-
-
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
-
-
 
   const getPhotoUrl = (photoUrl: string | null) => {
     if (!photoUrl) {
       return null;
     }
 
-    if (
-      photoUrl.startsWith("http://") ||
-      photoUrl.startsWith("https://")
-    ) {
+    if (photoUrl.startsWith("http://") || photoUrl.startsWith("https://")) {
       return photoUrl;
     }
 
     return `${SERVER_URL}${photoUrl}`;
   };
 
-
-
-  const loadPets = useCallback(
-    async (showLoader = true) => {
-      try {
-        if (showLoader) {
-          setLoading(true);
-        }
-
-        const token =
-          await AsyncStorage.getItem("token");
-
-        if (!token) {
-          Alert.alert(
-            "Session Expired",
-            "Please log in again."
-          );
-
-          router.replace("/login");
-          return;
-        }
-
-        const response = await fetch(
-          `${API_URL}/pets`,
-          {
-            method: "GET",
-
-            headers: {
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await response.json();
-
-        console.log(
-          "GET PETS STATUS:",
-          response.status
-        );
-
-        console.log(
-          "GET PETS RESPONSE:",
-          data
-        );
-
-        if (!response.ok) {
-          Alert.alert(
-            "Unable to Load Pets",
-            data.message ||
-              "Unable to load your pets."
-          );
-
-          return;
-        }
-
-        setPets(data.pets || []);
-      } catch (error) {
-        console.log(
-          "LOAD PETS ERROR:",
-          error
-        );
-
-        Alert.alert(
-          "Connection Error",
-          "Unable to connect to the TIMAN server."
-        );
-      } finally {
-        if (showLoader) {
-          setLoading(false);
-        }
-
-        setRefreshing(false);
+  const loadPets = useCallback(async (showLoader = true) => {
+    try {
+      if (showLoader) {
+        setLoading(true);
       }
-    },
-    []
-  );
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        Alert.alert("Session Expired", "Please log in again.");
+
+        router.replace("/login");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/pets`, {
+        method: "GET",
+
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      console.log("GET PETS STATUS:", response.status);
+
+      console.log("GET PETS RESPONSE:", data);
+
+      if (!response.ok) {
+        Alert.alert(
+          "Unable to Load Pets",
+          data.message || "Unable to load your pets.",
+        );
+
+        return;
+      }
+
+      setPets(data.pets || []);
+    } catch (error) {
+      console.log("LOAD PETS ERROR:", error);
+
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
+    } finally {
+      if (showLoader) {
+        setLoading(false);
+      }
+
+      setRefreshing(false);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
       loadPets();
 
       return () => {};
-    }, [loadPets])
+    }, [loadPets]),
   );
 
   const handleRefresh = () => {
     setRefreshing(true);
     loadPets(false);
   };
-
 
   const openPet = (pet: Pet) => {
     router.push({
@@ -194,7 +153,6 @@ export default function PetsScreen() {
     });
   };
 
-
   const openSchedule = (pet: Pet) => {
     router.push({
       pathname: "/schedules",
@@ -204,10 +162,8 @@ export default function PetsScreen() {
     });
   };
 
-
   return (
     <SafeAreaView style={styles.container}>
-
       <View style={styles.header}>
         <Pressable
           style={({ pressed }) => [
@@ -216,17 +172,11 @@ export default function PetsScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons
-            name="chevron-back"
-            size={27}
-            color="#173D2A"
-          />
+          <Ionicons name="chevron-back" size={27} color="#173D2A" />
         </Pressable>
 
         <Text style={styles.headerTitle}>
-          {isScheduleMode
-            ? "Select Pet"
-            : "My Pets"}
+          {isScheduleMode ? "Select Pet" : "My Pets"}
         </Text>
 
         <Pressable
@@ -236,43 +186,27 @@ export default function PetsScreen() {
           ]}
           onPress={() => router.push("/add-pet")}
         >
-          <Ionicons
-            name="add"
-            size={29}
-            color="#176B3A"
-          />
+          <Ionicons name="add" size={29} color="#176B3A" />
         </Pressable>
       </View>
 
-
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text style={styles.loadingText}>
-            Loading your pets...
-          </Text>
+          <Text style={styles.loadingText}>Loading your pets...</Text>
         </View>
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.content}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-
           <View style={styles.introSection}>
             <Text style={styles.introTitle}>
-              {isScheduleMode
-                ? "Choose a Pet"
-                : "Your Pets"}
+              {isScheduleMode ? "Choose a Pet" : "Your Pets"}
             </Text>
 
             <Text style={styles.introDescription}>
@@ -282,25 +216,17 @@ export default function PetsScreen() {
             </Text>
           </View>
 
-
-
           {pets.length === 0 ? (
             <View style={styles.emptyContainer}>
               <View style={styles.emptyIcon}>
-                <Ionicons
-                  name="paw"
-                  size={48}
-                  color="#7EA48A"
-                />
+                <Ionicons name="paw" size={48} color="#7EA48A" />
               </View>
 
-              <Text style={styles.emptyTitle}>
-                No pets registered yet
-              </Text>
+              <Text style={styles.emptyTitle}>No pets registered yet</Text>
 
               <Text style={styles.emptyDescription}>
-                Add your first pet to create a
-                permanent TIMAN QR identification.
+                Add your first pet to create a permanent TIMAN QR
+                identification.
               </Text>
 
               <Pressable
@@ -308,82 +234,52 @@ export default function PetsScreen() {
                   styles.addFirstPetButton,
                   pressed && styles.pressed,
                 ]}
-                onPress={() =>
-                  router.push("/add-pet")
-                }
+                onPress={() => router.push("/add-pet")}
               >
-                <Ionicons
-                  name="add-circle-outline"
-                  size={21}
-                  color="#FFFFFF"
-                />
+                <Ionicons name="add-circle-outline" size={21} color="#FFFFFF" />
 
-                <Text
-                  style={styles.addFirstPetText}
-                >
-                  Register Pet
-                </Text>
+                <Text style={styles.addFirstPetText}>Register Pet</Text>
               </Pressable>
             </View>
           ) : (
             <>
-
-
               <View style={styles.countRow}>
                 <Text style={styles.countText}>
-                  {pets.length}{" "}
-                  {pets.length === 1
-                    ? "Pet"
-                    : "Pets"}
+                  {pets.length} {pets.length === 1 ? "Pet" : "Pets"}
                 </Text>
 
-                <Text style={styles.refreshHint}>
-                  Pull down to refresh
-                </Text>
+                <Text style={styles.refreshHint}>Pull down to refresh</Text>
               </View>
 
               {pets.map((pet) => {
-                const photoUrl =
-                  getPhotoUrl(pet.photo_url);
+                const photoUrl = getPhotoUrl(pet.photo_url);
 
-                const isMissing =
-                  pet.pet_status === "Missing";
+                const isMissing = pet.pet_status === "Missing";
 
-                const isFound =
-                  pet.pet_status === "Found";
+                const isFound = pet.pet_status === "Found";
 
-                let statusBackground =
-                  "#E5F4E8";
+                let statusBackground = "#E5F4E8";
 
-                let statusColor =
-                  "#267542";
+                let statusColor = "#267542";
 
                 if (isMissing) {
-                  statusBackground =
-                    "#FFF0F0";
+                  statusBackground = "#FFF0F0";
 
-                  statusColor =
-                    "#B54545";
+                  statusColor = "#B54545";
                 }
 
                 if (isFound) {
-                  statusBackground =
-                    "#FFF5DC";
+                  statusBackground = "#FFF5DC";
 
-                  statusColor =
-                    "#A36C18";
+                  statusColor = "#A36C18";
                 }
 
                 return (
-                  <View
-                    key={pet.pet_id}
-                    style={styles.petCard}
-                  >
-
-                    <Pressable style={({ pressed }) => [
+                  <View key={pet.pet_id} style={styles.petCard}>
+                    <Pressable
+                      style={({ pressed }) => [
                         styles.petMainArea,
-                        pressed &&
-                          styles.pressedLight,
+                        pressed && styles.pressedLight,
                       ]}
                       onPress={() => {
                         if (isScheduleMode) {
@@ -393,50 +289,48 @@ export default function PetsScreen() {
                         }
                       }}
                     >
-
-                      <View style={styles.petImageContainer }>
+                      <View style={styles.petImageContainer}>
                         {photoUrl ? (
-                          <Image source={{uri: photoUrl,}}
-                            style={styles.petImage }
-                            resizeMode="cover"/>
+                          <Image
+                            source={{ uri: photoUrl }}
+                            style={styles.petImage}
+                            resizeMode="cover"
+                          />
                         ) : (
-                          <View style={styles.petPlaceholder} >
-                            <Ionicons
-                              name="paw"
-                              size={36}
-                              color="#7EA48A"
-                            />
+                          <View style={styles.petPlaceholder}>
+                            <Ionicons name="paw" size={36} color="#7EA48A" />
                           </View>
                         )}
                       </View>
 
-
                       <View style={styles.petInformation}>
                         <View style={styles.nameStatusRow}>
-                          <Text style={styles.petName}
-                            numberOfLines={2}>
+                          <Text style={styles.petName} numberOfLines={2}>
                             {pet.pet_name}
                           </Text>
 
-                          <View style={[styles.statusBadge,
+                          <View
+                            style={[
+                              styles.statusBadge,
                               {
-                                backgroundColor:
-                                  statusBackground,
+                                backgroundColor: statusBackground,
                               },
                             ]}
                           >
-                            <View style={[styles.statusDot,
+                            <View
+                              style={[
+                                styles.statusDot,
                                 {
-                                  backgroundColor:
-                                    statusColor,
+                                  backgroundColor: statusColor,
                                 },
                               ]}
                             />
 
-                            <Text style={[styles.statusText,
+                            <Text
+                              style={[
+                                styles.statusText,
                                 {
-                                  color:
-                                    statusColor,
+                                  color: statusColor,
                                 },
                               ]}
                             >
@@ -446,11 +340,8 @@ export default function PetsScreen() {
                         </View>
 
                         <View style={styles.petDetailsRow}>
-                          <Text
-                            style={styles.petDetail}
-                            numberOfLines={1}
-                          >
-                            {pet.species}  •  {pet.sex}
+                          <Text style={styles.petDetail} numberOfLines={1}>
+                            {pet.species} • {pet.sex}
                           </Text>
                         </View>
 
@@ -472,25 +363,19 @@ export default function PetsScreen() {
                       <PetAction
                         icon="qr-code-outline"
                         label="QR Code"
-                        onPress={() =>
-                          openQR(pet)
-                        }
+                        onPress={() => openQR(pet)}
                       />
 
                       <PetAction
                         icon="medical-outline"
                         label="Records"
-                        onPress={() =>
-                          openRecords(pet)
-                        }
+                        onPress={() => openRecords(pet)}
                       />
 
                       <PetAction
                         icon="calendar-outline"
                         label="Schedule"
-                        onPress={() =>
-                          openSchedule(pet)
-                        }
+                        onPress={() => openSchedule(pet)}
                       />
                     </View>
                   </View>
@@ -503,9 +388,6 @@ export default function PetsScreen() {
     </SafeAreaView>
   );
 }
-
-
-
 
 function PetAction({
   icon,
@@ -524,15 +406,9 @@ function PetAction({
       ]}
       onPress={onPress}
     >
-      <Ionicons
-        name={icon}
-        size={19}
-        color="#176B3A"
-      />
+      <Ionicons name={icon} size={19} color="#176B3A" />
 
-      <Text style={styles.petActionText}>
-        {label}
-      </Text>
+      <Text style={styles.petActionText}>{label}</Text>
     </Pressable>
   );
 }
@@ -621,7 +497,6 @@ const styles = StyleSheet.create({
     color: "#9AA49E",
   },
 
-
   emptyContainer: {
     marginTop: 35,
     alignItems: "center",
@@ -671,7 +546,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "800",
   },
-
 
   petCard: {
     backgroundColor: "#FFFFFF",
@@ -776,7 +650,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "900",
   },
-
 
   quickActions: {
     minHeight: 56,

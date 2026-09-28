@@ -54,30 +54,19 @@ export default function EditProfileModal({
 
   const [fullName, setFullName] = useState("");
   const [clinicName, setClinicName] = useState("");
-  const [contactNumber, setContactNumber] =
-    useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [address, setAddress] = useState("");
 
   const [saving, setSaving] = useState(false);
-
-
-
-
 
   useEffect(() => {
     if (visible && profile) {
       setFullName(profile.full_name || "");
       setClinicName(profile.clinic_name || "");
-      setContactNumber(
-        profile.contact_number || ""
-      );
+      setContactNumber(profile.contact_number || "");
       setAddress(profile.address || "");
     }
   }, [visible, profile]);
-
-
-
-
 
   const handleClose = () => {
     if (saving) {
@@ -87,15 +76,10 @@ export default function EditProfileModal({
     onClose();
   };
 
-
-
-
-
   const handleSave = async () => {
     const cleanFullName = fullName.trim();
     const cleanClinicName = clinicName.trim();
-    const cleanContactNumber =
-      contactNumber.trim();
+    const cleanContactNumber = contactNumber.trim();
     const cleanAddress = address.trim();
 
     if (
@@ -106,121 +90,85 @@ export default function EditProfileModal({
     ) {
       Alert.alert(
         "Missing Information",
-        "Please complete all required fields."
+        "Please complete all required fields.",
       );
       return;
     }
 
     if (cleanFullName.length > 100) {
-      Alert.alert(
-        "Invalid Full Name",
-        "Full name is too long."
-      );
+      Alert.alert("Invalid Full Name", "Full name is too long.");
       return;
     }
 
-    if (
-      profile?.role === "clinic" &&
-      cleanClinicName.length > 150
-    ) {
-      Alert.alert(
-        "Invalid Clinic Name",
-        "Clinic name is too long."
-      );
+    if (profile?.role === "clinic" && cleanClinicName.length > 150) {
+      Alert.alert("Invalid Clinic Name", "Clinic name is too long.");
       return;
     }
 
     if (cleanContactNumber.length > 20) {
-      Alert.alert(
-        "Invalid Contact Number",
-        "Contact number is too long."
-      );
+      Alert.alert("Invalid Contact Number", "Contact number is too long.");
       return;
     }
 
     if (cleanAddress.length > 255) {
-      Alert.alert(
-        "Invalid Address",
-        "Address is too long."
-      );
+      Alert.alert("Invalid Address", "Address is too long.");
       return;
     }
 
     try {
       setSaving(true);
 
-      const token =
-        await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        Alert.alert(
-          "Session Expired",
-          "Please log in again."
-        );
+        Alert.alert("Session Expired", "Please log in again.");
         return;
       }
 
-      const response = await fetch(
-        `${API_URL}/profile`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            full_name: cleanFullName,
-            ...(profile?.role === "clinic"
-              ? { clinic_name: cleanClinicName }
-              : {}),
-            contact_number:
-              cleanContactNumber,
-            address: cleanAddress,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          full_name: cleanFullName,
+          ...(profile?.role === "clinic"
+            ? { clinic_name: cleanClinicName }
+            : {}),
+          contact_number: cleanContactNumber,
+          address: cleanAddress,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(
-          data.message ||
-            "Unable to update profile."
-        );
+        throw new Error(data.message || "Unable to update profile.");
       }
 
-
-      const storedUser =
-        await AsyncStorage.getItem("user");
+      const storedUser = await AsyncStorage.getItem("user");
 
       let updatedStoredUser = data.user;
 
       if (storedUser) {
         try {
-          const parsedUser =
-            JSON.parse(storedUser);
+          const parsedUser = JSON.parse(storedUser);
 
           updatedStoredUser = {
             ...parsedUser,
             ...data.user,
             full_name: data.user.full_name,
             clinic_name: data.user.clinic_name,
-            contact_number:
-              data.user.contact_number,
+            contact_number: data.user.contact_number,
             address: data.user.address,
           };
         } catch (error) {
-          console.log(
-            "PARSE STORED USER ERROR:",
-            error
-          );
+          console.log("PARSE STORED USER ERROR:", error);
         }
       }
 
-      await AsyncStorage.setItem(
-        "user",
-        JSON.stringify(updatedStoredUser)
-      );
+      await AsyncStorage.setItem("user", JSON.stringify(updatedStoredUser));
 
       onUpdated(data.user);
 
@@ -228,19 +176,14 @@ export default function EditProfileModal({
 
       Alert.alert(
         "Profile Updated",
-        "Your profile information has been updated successfully."
+        "Your profile information has been updated successfully.",
       );
     } catch (error) {
-      console.error(
-        "UPDATE PROFILE ERROR:",
-        error
-      );
+      console.error("UPDATE PROFILE ERROR:", error);
 
       Alert.alert(
         "Update Failed",
-        error instanceof Error
-          ? error.message
-          : "Unable to update profile."
+        error instanceof Error ? error.message : "Unable to update profile.",
       );
     } finally {
       setSaving(false);
@@ -256,26 +199,16 @@ export default function EditProfileModal({
     >
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={
-          Platform.OS === "ios"
-            ? "padding"
-            : undefined
-        }
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Pressable
-          style={styles.backdrop}
-          onPress={handleClose}
-        />
+        <Pressable style={styles.backdrop} onPress={handleClose} />
 
         <View style={styles.modalContainer}>
           <View style={styles.handle} />
 
-
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>
-                Edit Profile
-              </Text>
+              <Text style={styles.title}>Edit Profile</Text>
 
               <Text style={styles.subtitle}>
                 Update your personal information
@@ -290,11 +223,7 @@ export default function EditProfileModal({
               onPress={handleClose}
               disabled={saving}
             >
-              <Ionicons
-                name="close"
-                size={22}
-                color="#4D5B52"
-              />
+              <Ionicons name="close" size={22} color="#4D5B52" />
             </Pressable>
           </View>
 
@@ -311,27 +240,16 @@ export default function EditProfileModal({
               keyboardContentContainerStyle,
             ]}
           >
-
             {profile?.role === "clinic" && (
               <>
-                <Text style={styles.label}>
-                  Clinic Name
-                </Text>
+                <Text style={styles.label}>Clinic Name</Text>
 
                 <View style={styles.inputContainer}>
-                  <Ionicons
-                    name="medkit-outline"
-                    size={19}
-                    color="#176B3A"
-                  />
+                  <Ionicons name="medkit-outline" size={19} color="#176B3A" />
 
                   <TextInput
                     ref={clinicNameInputRef}
-                    onFocus={() =>
-                      handleInputFocus(
-                        clinicNameInputRef.current
-                      )
-                    }
+                    onFocus={() => handleInputFocus(clinicNameInputRef.current)}
                     style={styles.input}
                     value={clinicName}
                     onChangeText={setClinicName}
@@ -345,24 +263,14 @@ export default function EditProfileModal({
               </>
             )}
 
-            <Text style={styles.label}>
-              Full Name
-            </Text>
+            <Text style={styles.label}>Full Name</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons
-                name="person-outline"
-                size={19}
-                color="#176B3A"
-              />
+              <Ionicons name="person-outline" size={19} color="#176B3A" />
 
               <TextInput
                 ref={fullNameInputRef}
-                onFocus={() =>
-                  handleInputFocus(
-                    fullNameInputRef.current
-                  )
-                }
+                onFocus={() => handleInputFocus(fullNameInputRef.current)}
                 style={styles.input}
                 value={fullName}
                 onChangeText={setFullName}
@@ -373,63 +281,32 @@ export default function EditProfileModal({
               />
             </View>
 
+            <Text style={styles.label}>Email Address</Text>
 
-            <Text style={styles.label}>
-              Email Address
-            </Text>
-
-            <View
-              style={[
-                styles.inputContainer,
-                styles.disabledInput,
-              ]}
-            >
-              <Ionicons
-                name="mail-outline"
-                size={19}
-                color="#89948E"
-              />
+            <View style={[styles.inputContainer, styles.disabledInput]}>
+              <Ionicons name="mail-outline" size={19} color="#89948E" />
 
               <TextInput
-                style={[
-                  styles.input,
-                  styles.disabledInputText,
-                ]}
+                style={[styles.input, styles.disabledInputText]}
                 value={profile?.email || ""}
                 editable={false}
               />
 
-              <Ionicons
-                name="lock-closed-outline"
-                size={15}
-                color="#A1AAA5"
-              />
+              <Ionicons name="lock-closed-outline" size={15} color="#A1AAA5" />
             </View>
 
             <Text style={styles.helperText}>
-              Email address cannot be changed
-              here.
+              Email address cannot be changed here.
             </Text>
 
-
-            <Text style={styles.label}>
-              Contact Number
-            </Text>
+            <Text style={styles.label}>Contact Number</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons
-                name="call-outline"
-                size={19}
-                color="#176B3A"
-              />
+              <Ionicons name="call-outline" size={19} color="#176B3A" />
 
               <TextInput
                 ref={contactInputRef}
-                onFocus={() =>
-                  handleInputFocus(
-                    contactInputRef.current
-                  )
-                }
+                onFocus={() => handleInputFocus(contactInputRef.current)}
                 style={styles.input}
                 value={contactNumber}
                 onChangeText={setContactNumber}
@@ -441,17 +318,9 @@ export default function EditProfileModal({
               />
             </View>
 
+            <Text style={styles.label}>Address</Text>
 
-            <Text style={styles.label}>
-              Address
-            </Text>
-
-            <View
-              style={[
-                styles.inputContainer,
-                styles.addressContainer,
-              ]}
-            >
+            <View style={[styles.inputContainer, styles.addressContainer]}>
               <Ionicons
                 name="location-outline"
                 size={19}
@@ -461,15 +330,8 @@ export default function EditProfileModal({
 
               <TextInput
                 ref={addressInputRef}
-                onFocus={() =>
-                  handleInputFocus(
-                    addressInputRef.current
-                  )
-                }
-                style={[
-                  styles.input,
-                  styles.addressInput,
-                ]}
+                onFocus={() => handleInputFocus(addressInputRef.current)}
+                style={[styles.input, styles.addressInput]}
                 value={address}
                 onChangeText={setAddress}
                 placeholder="Enter address"
@@ -482,7 +344,6 @@ export default function EditProfileModal({
               />
             </View>
 
-
             <View style={styles.buttonRow}>
               <Pressable
                 style={({ pressed }) => [
@@ -492,45 +353,25 @@ export default function EditProfileModal({
                 onPress={handleClose}
                 disabled={saving}
               >
-                <Text
-                  style={styles.cancelButtonText}
-                >
-                  Cancel
-                </Text>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </Pressable>
 
               <Pressable
                 style={({ pressed }) => [
                   styles.saveButton,
-                  saving &&
-                    styles.disabledButton,
-                  pressed &&
-                    !saving &&
-                    styles.pressed,
+                  saving && styles.disabledButton,
+                  pressed && !saving && styles.pressed,
                 ]}
                 onPress={handleSave}
                 disabled={saving}
               >
                 {saving ? (
-                  <ActivityIndicator
-                    size="small"
-                    color="#FFFFFF"
-                  />
+                  <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
                   <>
-                    <Ionicons
-                      name="checkmark"
-                      size={19}
-                      color="#FFFFFF"
-                    />
+                    <Ionicons name="checkmark" size={19} color="#FFFFFF" />
 
-                    <Text
-                      style={
-                        styles.saveButtonText
-                      }
-                    >
-                      Save Changes
-                    </Text>
+                    <Text style={styles.saveButtonText}>Save Changes</Text>
                   </>
                 )}
               </Pressable>

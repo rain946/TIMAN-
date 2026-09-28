@@ -1,15 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
+  default as DateTimePicker,
+  DateTimePickerAndroid,
+  type DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -20,10 +23,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { API_URL, getImageUrl } from "../../config/api";
-
-
-
-
 
 type Pet = {
   pet_id: number;
@@ -44,10 +43,7 @@ type VetRecord = {
   notes: string | null;
   next_due_date: string | null;
 
-  schedule_status:
-    | "Pending"
-    | "Completed"
-    | "Cancelled";
+  schedule_status: "Pending" | "Completed" | "Cancelled";
 
   completed_at: string | null;
   created_at: string;
@@ -60,48 +56,40 @@ type ScheduleItem = VetRecord & {
   daysRemaining: number;
 };
 
-type ScheduleStatus =
-  | "Overdue"
-  | "Due Soon"
-  | "Upcoming";
-
-
-
-
+type ScheduleStatus = "Overdue" | "Due Soon" | "Upcoming";
 
 export default function SchedulesScreen() {
-  const params =
-    useLocalSearchParams<{
-      petId?: string;
-    }>();
+  const params = useLocalSearchParams<{
+    petId?: string;
+  }>();
 
   const petId = params.petId;
 
-  const [pet, setPet] =
-    useState<Pet | null>(null);
+  const [pet, setPet] = useState<Pet | null>(null);
 
-  const [records, setRecords] =
-    useState<VetRecord[]>([]);
+  const [records, setRecords] = useState<VetRecord[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [refreshing, setRefreshing] =
-    useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
+  const [updatingScheduleId, setUpdatingScheduleId] = useState<number | null>(
+    null,
+  );
 
+  const [iosRescheduleSchedule, setIosRescheduleSchedule] =
+    useState<ScheduleItem | null>(null);
 
-
+  const [iosRescheduleDate, setIosRescheduleDate] = useState<Date>(() =>
+    getTomorrowStart(),
+  );
 
   const loadSchedules = useCallback(
     async (showLoading = true) => {
       if (!petId) {
         setLoading(false);
 
-        Alert.alert(
-          "Pet Error",
-          "No pet was selected."
-        );
+        Alert.alert("Pet Error", "No pet was selected.");
 
         return;
       }
@@ -111,64 +99,44 @@ export default function SchedulesScreen() {
           setLoading(true);
         }
 
-        const token =
-          await AsyncStorage.getItem(
-            "token"
-          );
+        const token = await AsyncStorage.getItem("token");
 
         if (!token) {
-          Alert.alert(
-            "Session Expired",
-            "Please log in again."
-          );
+          Alert.alert("Session Expired", "Please log in again.");
 
           router.replace("/login");
 
           return;
         }
 
-        const response = await fetch(
-          `${API_URL}/vet-records/owner/${petId}`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${API_URL}/vet-records/owner/${petId}`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        const text =
-          await response.text();
+        const text = await response.text();
 
         let data: any = {};
 
         try {
-          data = text
-            ? JSON.parse(text)
-            : {};
+          data = text ? JSON.parse(text) : {};
         } catch {
           data = {
             message: text,
           };
         }
 
-        console.log(
-          "OWNER SCHEDULE STATUS:",
-          response.status
-        );
+        console.log("OWNER SCHEDULE STATUS:", response.status);
 
-        console.log(
-          "OWNER SCHEDULE RESPONSE:",
-          data
-        );
+        console.log("OWNER SCHEDULE RESPONSE:", data);
 
         if (!response.ok) {
           Alert.alert(
             "Unable to Load",
-            data.message ||
-              "Unable to load pet schedules."
+            data.message || "Unable to load pet schedules.",
           );
 
           return;
@@ -176,401 +144,332 @@ export default function SchedulesScreen() {
 
         setPet(data.pet || null);
 
-        setRecords(
-          Array.isArray(data.records)
-            ? data.records
-            : []
-        );
+        setRecords(Array.isArray(data.records) ? data.records : []);
       } catch (error) {
-        console.log(
-          "LOAD SCHEDULE ERROR:",
-          error
-        );
+        console.log("LOAD SCHEDULE ERROR:", error);
 
         Alert.alert(
           "Connection Error",
-          "Unable to connect to the TIMAN server."
+          "Unable to connect to the TIMAN server.",
         );
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [petId]
+    [petId],
   );
-
 
   useFocusEffect(
     useCallback(() => {
       loadSchedules();
 
       return () => {};
-    }, [loadSchedules])
+    }, [loadSchedules]),
   );
-
 
   const onRefresh = () => {
     setRefreshing(true);
     loadSchedules(false);
   };
 
+  const updateSchedule = useCallback(
+    async (
+      schedule: ScheduleItem,
+      action: "cancel" | "reschedule",
+      nextDueDate?: string,
+    ) => {
+      if (updatingScheduleId !== null) return;
+      setUpdatingScheduleId(schedule.record_id);
 
-  const schedules =
-    useMemo<ScheduleItem[]>(() => {
-      const today =
-        getTodayStart();
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+          router.replace("/login");
+          return;
+        }
 
-      return records
-        .filter(
-          (
-            record
-          ): record is VetRecord & {
-            next_due_date: string;
-          } =>
-            Boolean(
-              record.next_due_date
-            ) &&
-            record.schedule_status ===
-              "Pending"
-        )
-        .map((record) => {
-          const dueDate =
-            parseDatabaseDate(
-              record.next_due_date
-            );
+        const response = await fetch(
+          `${API_URL}/vet-records/${schedule.record_id}/${action}`,
+          {
+            method: "PATCH",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body:
+              action === "reschedule"
+                ? JSON.stringify({ next_due_date: nextDueDate })
+                : undefined,
+          },
+        );
+        const responseText = await response.text();
+        let data: any = {};
+        try {
+          data = responseText ? JSON.parse(responseText) : {};
+        } catch {
+          data = { message: responseText };
+        }
 
-          if (!dueDate) {
-            return null;
+        if (response.status === 401) {
+          router.replace("/login");
+          return;
+        }
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || `Unable to ${action} the schedule.`);
+        }
+
+        await loadSchedules(false);
+        Alert.alert(
+          action === "cancel" ? "Schedule Cancelled" : "Treatment Rescheduled",
+          data.message,
+        );
+      } catch (error) {
+        Alert.alert(
+          action === "cancel" ? "Unable to Cancel" : "Unable to Reschedule",
+          error instanceof Error ? error.message : "Please try again.",
+        );
+      } finally {
+        setUpdatingScheduleId(null);
+      }
+    },
+    [loadSchedules, updatingScheduleId],
+  );
+
+  const confirmCancel = useCallback(
+    (schedule: ScheduleItem) => {
+      Alert.alert(
+        "Cancel Schedule?",
+        "Are you sure you want to cancel this scheduled treatment?",
+        [
+          { text: "Keep Schedule", style: "cancel" },
+          {
+            text: "Cancel Schedule",
+            style: "destructive",
+            onPress: () => void updateSchedule(schedule, "cancel"),
+          },
+        ],
+      );
+    },
+    [updateSchedule],
+  );
+
+  const confirmReschedule = useCallback(
+    (schedule: ScheduleItem, selectedDate: Date) => {
+      const nextDueDate = formatDateValue(selectedDate);
+      Alert.alert(
+        "Reschedule Treatment",
+        `Current: ${formatDate(schedule.next_due_date)}\n\nNew Date: ${formatDate(nextDueDate)}`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Confirm Reschedule",
+            onPress: () =>
+              void updateSchedule(schedule, "reschedule", nextDueDate),
+          },
+        ],
+      );
+    },
+    [updateSchedule],
+  );
+
+  const openReschedulePicker = useCallback(
+    (schedule: ScheduleItem) => {
+      if (Platform.OS !== "android") {
+        setIosRescheduleDate(getInitialRescheduleDate(schedule.next_due_date));
+        setIosRescheduleSchedule(schedule);
+        return;
+      }
+
+      const tomorrow = getTomorrowStart();
+      const initialDate = getInitialRescheduleDate(schedule.next_due_date);
+
+      DateTimePickerAndroid.open({
+        value: initialDate,
+        mode: "date",
+        minimumDate: tomorrow,
+        onChange: (event: DateTimePickerEvent, selectedDate?: Date) => {
+          if (event.type === "set" && selectedDate) {
+            confirmReschedule(schedule, selectedDate);
           }
+        },
+      });
+    },
+    [confirmReschedule],
+  );
 
-          dueDate.setHours(
-            0,
-            0,
-            0,
-            0
-          );
+  const schedules = useMemo<ScheduleItem[]>(() => {
+    const today = getTodayStart();
 
-          const difference =
-            dueDate.getTime() -
-            today.getTime();
+    return records
+      .filter(
+        (
+          record,
+        ): record is VetRecord & {
+          next_due_date: string;
+        } =>
+          Boolean(record.next_due_date) && record.schedule_status === "Pending",
+      )
+      .map((record) => {
+        const dueDate = parseDatabaseDate(record.next_due_date);
 
-          const daysRemaining =
-            Math.round(
-              difference /
-                (1000 *
-                  60 *
-                  60 *
-                  24)
-            );
+        if (!dueDate) {
+          return null;
+        }
 
-          return {
-            ...record,
-            daysRemaining,
-          };
-        })
+        dueDate.setHours(0, 0, 0, 0);
+
+        const difference = dueDate.getTime() - today.getTime();
+
+        const daysRemaining = Math.round(difference / (1000 * 60 * 60 * 24));
+
+        return {
+          ...record,
+          daysRemaining,
+        };
+      })
+      .filter((item): item is ScheduleItem => item !== null)
+      .sort((a, b) => {
+        const dateA = parseDatabaseDate(a.next_due_date);
+
+        const dateB = parseDatabaseDate(b.next_due_date);
+
+        if (!dateA || !dateB) {
+          return 0;
+        }
+
+        return dateA.getTime() - dateB.getTime();
+      });
+  }, [records]);
+
+  const overdue = schedules.filter((item) => item.daysRemaining < 0);
+
+  const dueSoon = schedules.filter(
+    (item) => item.daysRemaining >= 0 && item.daysRemaining <= 30,
+  );
+
+  const upcoming = schedules.filter((item) => item.daysRemaining > 30);
+
+  const cancelledSchedules = useMemo<ScheduleItem[]>(
+    () =>
+      records
         .filter(
-          (
-            item
-          ): item is ScheduleItem =>
-            item !== null
+          (record): record is VetRecord & { next_due_date: string } =>
+            Boolean(record.next_due_date) &&
+            record.schedule_status === "Cancelled",
         )
-        .sort((a, b) => {
-          const dateA =
-            parseDatabaseDate(
-              a.next_due_date
-            );
-
-          const dateB =
-            parseDatabaseDate(
-              b.next_due_date
-            );
-
-          if (!dateA || !dateB) {
-            return 0;
-          }
-
-          return (
-            dateA.getTime() -
-            dateB.getTime()
-          );
-        });
-    }, [records]);
-
-
-  const overdue =
-    schedules.filter(
-      (item) =>
-        item.daysRemaining < 0
-    );
-
-  const dueSoon =
-    schedules.filter(
-      (item) =>
-        item.daysRemaining >= 0 &&
-        item.daysRemaining <= 30
-    );
-
-  const upcoming =
-    schedules.filter(
-      (item) =>
-        item.daysRemaining > 30
-    );
-
+        .map((record) => ({ ...record, daysRemaining: 0 }))
+        .sort((a, b) => b.record_id - a.record_id),
+    [records],
+  );
 
   const nextSchedule =
-    schedules.find(
-      (item) =>
-        item.daysRemaining >= 0
-    ) || null;
-
+    schedules.find((item) => item.daysRemaining >= 0) || null;
 
   if (loading) {
     return (
-      <SafeAreaView
-        style={styles.container}
-      >
+      <SafeAreaView style={styles.container}>
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator
-            size="large"
-            color="#176B3A"
-          />
+          <ActivityIndicator size="large" color="#176B3A" />
 
-          <Text
-            style={styles.loadingText}
-          >
-            Loading pet schedules...
-          </Text>
+          <Text style={styles.loadingText}>Loading pet schedules...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-
   return (
-    <SafeAreaView
-      style={styles.container}
-    >
+    <SafeAreaView style={styles.container}>
       <Header />
 
       <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={
-          styles.content
-        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-
         {pet && (
-          <View
-            style={styles.petCard}
-          >
-            {getImageUrl(
-              pet.photo_url
-            ) ? (
+          <View style={styles.petCard}>
+            {getImageUrl(pet.photo_url) ? (
               <Image
                 source={{
-                  uri:
-                    getImageUrl(
-                      pet.photo_url
-                    ) || "",
+                  uri: getImageUrl(pet.photo_url) || "",
                 }}
-                style={
-                  styles.petPhoto
-                }
+                style={styles.petPhoto}
               />
             ) : (
-              <View
-                style={
-                  styles.petPlaceholder
-                }
-              >
-                <Ionicons
-                  name="paw"
-                  size={31}
-                  color="#6E9179"
-                />
+              <View style={styles.petPlaceholder}>
+                <Ionicons name="paw" size={31} color="#6E9179" />
               </View>
             )}
 
-            <View
-              style={styles.petInfo}
-            >
-              <Text
-                style={
-                  styles.petLabel
-                }
-              >
-                Health Schedule
-              </Text>
+            <View style={styles.petInfo}>
+              <Text style={styles.petLabel}>Health Schedule</Text>
 
-              <Text
-                style={
-                  styles.petName
-                }
-              >
-                {pet.pet_name}
-              </Text>
+              <Text style={styles.petName}>{pet.pet_name}</Text>
 
-              <Text
-                style={
-                  styles.petDetails
-                }
-              >
-                {pet.breed ||
-                  pet.species}
-              </Text>
+              <Text style={styles.petDetails}>{pet.breed || pet.species}</Text>
             </View>
 
-            <View
-              style={
-                styles.calendarIcon
-              }
-            >
-              <Ionicons
-                name="calendar"
-                size={23}
-                color="#176B3A"
-              />
+            <View style={styles.calendarIcon}>
+              <Ionicons name="calendar" size={23} color="#176B3A" />
             </View>
           </View>
         )}
 
-
         {nextSchedule && (
-          <View
-            style={styles.nextCard}
-          >
-            <View
-              style={styles.nextTop}
-            >
-              <View
-                style={
-                  styles.nextIcon
-                }
-              >
-                <Ionicons
-                  name="notifications"
-                  size={21}
-                  color="#876518"
-                />
+          <View style={styles.nextCard}>
+            <View style={styles.nextTop}>
+              <View style={styles.nextIcon}>
+                <Ionicons name="notifications" size={21} color="#876518" />
               </View>
 
-              <View
-                style={
-                  styles.nextInfo
-                }
-              >
-                <Text
-                  style={
-                    styles.nextLabel
-                  }
-                >
-                  NEXT SCHEDULE
-                </Text>
+              <View style={styles.nextInfo}>
+                <Text style={styles.nextLabel}>NEXT SCHEDULE</Text>
 
-                <Text
-                  style={
-                    styles.nextService
-                  }
-                >
-                  {
-                    nextSchedule.service_type
-                  }
+                <Text style={styles.nextService}>
+                  {nextSchedule.service_type}
                 </Text>
               </View>
 
-              <View
-                style={
-                  styles.nextDays
-                }
-              >
-                <Text
-                  style={
-                    styles.nextDaysNumber
-                  }
-                >
-                  {nextSchedule.daysRemaining ===
-                  0
+              <View style={styles.nextDays}>
+                <Text style={styles.nextDaysNumber}>
+                  {nextSchedule.daysRemaining === 0
                     ? "Today"
                     : nextSchedule.daysRemaining}
                 </Text>
 
-                {nextSchedule.daysRemaining >
-                  0 && (
-                  <Text
-                    style={
-                      styles.nextDaysLabel
-                    }
-                  >
-                    days
-                  </Text>
+                {nextSchedule.daysRemaining > 0 && (
+                  <Text style={styles.nextDaysLabel}>days</Text>
                 )}
               </View>
             </View>
 
-            <View
-              style={
-                styles.nextDivider
-              }
-            />
+            <View style={styles.nextDivider} />
 
-            <View
-              style={
-                styles.nextDateRow
-              }
-            >
-              <Ionicons
-                name="calendar-outline"
-                size={17}
-                color="#765D21"
-              />
+            <View style={styles.nextDateRow}>
+              <Ionicons name="calendar-outline" size={17} color="#765D21" />
 
-              <Text
-                style={
-                  styles.nextDate
-                }
-              >
-                {formatDate(
-                  nextSchedule.next_due_date
-                )}
+              <Text style={styles.nextDate}>
+                {formatDate(nextSchedule.next_due_date)}
               </Text>
             </View>
 
-            <Text
-              style={
-                styles.nextClinic
-              }
-            >
-              Scheduled from a{" "}
-              {
-                nextSchedule.service_type
-              }{" "}
-              veterinary record
-              {getClinicName(
-                nextSchedule
-              )
-                ? ` by ${getClinicName(
-                    nextSchedule
-                  )}`
+            <Text style={styles.nextClinic}>
+              Scheduled from a {nextSchedule.service_type} veterinary record
+              {getClinicName(nextSchedule)
+                ? ` by ${getClinicName(nextSchedule)}`
                 : ""}
               .
             </Text>
           </View>
         )}
 
-
-        <View
-          style={styles.summaryRow}
-        >
+        <View style={styles.summaryRow}>
           <SummaryCard
             icon="alert-circle-outline"
             number={overdue.length}
@@ -596,74 +495,37 @@ export default function SchedulesScreen() {
           />
         </View>
 
-
-        <View
-          style={styles.infoCard}
-        >
+        <View style={styles.infoCard}>
           <Ionicons
             name="information-circle-outline"
             size={20}
             color="#176B3A"
           />
 
-          <Text
-            style={styles.infoText}
-          >
-            Active schedules are based
-            on next due dates recorded
-            by authorized veterinary
-            clinics. Completed schedules
-            are available in Health
+          <Text style={styles.infoText}>
+            Active schedules are based on next due dates recorded by authorized
+            veterinary clinics. Completed schedules are available in Health
             Records.
           </Text>
         </View>
 
-
         {schedules.length === 0 && (
-          <View
-            style={
-              styles.emptyCard
-            }
-          >
-            <View
-              style={
-                styles.emptyIcon
-              }
-            >
-              <Ionicons
-                name="calendar-outline"
-                size={36}
-                color="#779080"
-              />
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIcon}>
+              <Ionicons name="calendar-outline" size={36} color="#779080" />
             </View>
 
-            <Text
-              style={
-                styles.emptyTitle
-              }
-            >
-              No Active Schedules
-            </Text>
+            <Text style={styles.emptyTitle}>No Active Schedules</Text>
 
-            <Text
-              style={
-                styles.emptyText
-              }
-            >
-              There are currently no
-              pending health schedules
-              for this pet. Completed
-              schedules can be viewed in
-              Health Records.
+            <Text style={styles.emptyText}>
+              There are currently no pending health schedules for this pet.
+              Completed schedules can be viewed in Health Records.
             </Text>
 
             <Pressable
-              style={({
-                pressed,
-              }) => [
+              style={({ pressed }) => [
                 styles.recordsButton,
-                pressed &&
-                  styles.pressed,
+                pressed && styles.pressed,
               ]}
               onPress={() => {
                 if (!petId) {
@@ -671,11 +533,9 @@ export default function SchedulesScreen() {
                 }
 
                 router.push({
-                  pathname:
-                    "/(veterinary)/pet-health-records",
+                  pathname: "/(veterinary)/pet-health-records",
                   params: {
-                    petId:
-                      String(petId),
+                    petId: String(petId),
                   },
                 });
               }}
@@ -686,17 +546,10 @@ export default function SchedulesScreen() {
                 color="#FFFFFF"
               />
 
-              <Text
-                style={
-                  styles.recordsButtonText
-                }
-              >
-                View Health Records
-              </Text>
+              <Text style={styles.recordsButtonText}>View Health Records</Text>
             </Pressable>
           </View>
         )}
-
 
         {overdue.length > 0 && (
           <ScheduleSection
@@ -705,9 +558,11 @@ export default function SchedulesScreen() {
             icon="alert-circle"
             items={overdue}
             status="Overdue"
+            updatingScheduleId={updatingScheduleId}
+            onReschedule={openReschedulePicker}
+            onCancel={confirmCancel}
           />
         )}
-
 
         {dueSoon.length > 0 && (
           <ScheduleSection
@@ -716,9 +571,11 @@ export default function SchedulesScreen() {
             icon="time"
             items={dueSoon}
             status="Due Soon"
+            updatingScheduleId={updatingScheduleId}
+            onReschedule={openReschedulePicker}
+            onCancel={confirmCancel}
           />
         )}
-
 
         {upcoming.length > 0 && (
           <ScheduleSection
@@ -727,21 +584,43 @@ export default function SchedulesScreen() {
             icon="calendar"
             items={upcoming}
             status="Upcoming"
+            updatingScheduleId={updatingScheduleId}
+            onReschedule={openReschedulePicker}
+            onCancel={confirmCancel}
           />
         )}
 
+        {cancelledSchedules.length > 0 && (
+          <View style={styles.scheduleSection}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleRow}>
+                <Ionicons
+                  name="close-circle-outline"
+                  size={19}
+                  color="#A7483E"
+                />
+                <Text style={styles.sectionTitle}>Cancelled</Text>
+                <View style={[styles.countBadge, styles.cancelledCountBadge]}>
+                  <Text
+                    style={[styles.countBadgeText, styles.cancelledCountText]}
+                  >
+                    {cancelledSchedules.length}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.sectionSubtitle}>
+                Cancelled treatments remain here for reference.
+              </Text>
+            </View>
+            {cancelledSchedules.map((item) => (
+              <CancelledScheduleCard key={item.record_id} item={item} />
+            ))}
+          </View>
+        )}
 
         {schedules.length > 0 && (
-          <View
-            style={
-              styles.reminderCard
-            }
-          >
-            <View
-              style={
-                styles.reminderIcon
-              }
-            >
+          <View style={styles.reminderCard}>
+            <View style={styles.reminderIcon}>
               <Ionicons
                 name="notifications-outline"
                 size={21}
@@ -749,38 +628,85 @@ export default function SchedulesScreen() {
               />
             </View>
 
-            <View
-              style={
-                styles.reminderInfo
-              }
-            >
-              <Text
-                style={
-                  styles.reminderTitle
-                }
-              >
-                Health Reminders
-              </Text>
+            <View style={styles.reminderInfo}>
+              <Text style={styles.reminderTitle}>Health Reminders</Text>
 
-              <Text
-                style={
-                  styles.reminderText
-                }
-              >
-                TIMAN uses pending
-                schedules to track
-                vaccination, deworming,
-                follow-up, and other
-                veterinary due dates.
+              <Text style={styles.reminderText}>
+                TIMAN uses pending schedules to track vaccination, deworming,
+                follow-up, and other veterinary due dates.
               </Text>
             </View>
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={iosRescheduleSchedule !== null}
+        onRequestClose={() => setIosRescheduleSchedule(null)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.rescheduleModal}>
+            <Text style={styles.rescheduleModalTitle}>
+              Reschedule Treatment
+            </Text>
+            <Text style={styles.rescheduleDateLabel}>Current</Text>
+            <Text style={styles.rescheduleDateValue}>
+              {iosRescheduleSchedule
+                ? formatDate(iosRescheduleSchedule.next_due_date)
+                : ""}
+            </Text>
+            <Text style={styles.rescheduleDateLabel}>New Date</Text>
+            <Text style={styles.rescheduleDateValue}>
+              {formatDate(formatDateValue(iosRescheduleDate))}
+            </Text>
+            {Platform.OS === "ios" && (
+              <DateTimePicker
+                value={iosRescheduleDate}
+                mode="date"
+                display="spinner"
+                minimumDate={getTomorrowStart()}
+                onChange={(_, date) => date && setIosRescheduleDate(date)}
+              />
+            )}
+            <View style={styles.modalActions}>
+              <Pressable
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.modalCancelButton,
+                  pressed && styles.pressed,
+                ]}
+                onPress={() => setIosRescheduleSchedule(null)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.modalConfirmButton,
+                  pressed && styles.pressed,
+                ]}
+                onPress={() => {
+                  if (!iosRescheduleSchedule) return;
+                  const schedule = iosRescheduleSchedule;
+                  setIosRescheduleSchedule(null);
+                  void updateSchedule(
+                    schedule,
+                    "reschedule",
+                    formatDateValue(iosRescheduleDate),
+                  );
+                }}
+              >
+                <Text style={styles.modalConfirmText}>Confirm Reschedule</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
-
 
 function Header() {
   return (
@@ -790,30 +716,17 @@ function Header() {
           styles.headerButton,
           pressed && styles.pressed,
         ]}
-        onPress={() =>
-          router.back()
-        }
+        onPress={() => router.back()}
       >
-        <Ionicons
-          name="chevron-back"
-          size={27}
-          color="#173D2A"
-        />
+        <Ionicons name="chevron-back" size={27} color="#173D2A" />
       </Pressable>
 
-      <Text
-        style={styles.headerTitle}
-      >
-        Health Schedule
-      </Text>
+      <Text style={styles.headerTitle}>Health Schedule</Text>
 
-      <View
-        style={styles.headerButton}
-      />
+      <View style={styles.headerButton} />
     </View>
   );
 }
-
 
 function SummaryCard({
   icon,
@@ -822,52 +735,31 @@ function SummaryCard({
   background,
   iconColor,
 }: {
-  icon:
-    keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap;
   number: number;
   label: string;
   background: string;
   iconColor: string;
 }) {
   return (
-    <View
-      style={styles.summaryCard}
-    >
+    <View style={styles.summaryCard}>
       <View
         style={[
           styles.summaryIcon,
           {
-            backgroundColor:
-              background,
+            backgroundColor: background,
           },
         ]}
       >
-        <Ionicons
-          name={icon}
-          size={18}
-          color={iconColor}
-        />
+        <Ionicons name={icon} size={18} color={iconColor} />
       </View>
 
-      <Text
-        style={
-          styles.summaryNumber
-        }
-      >
-        {number}
-      </Text>
+      <Text style={styles.summaryNumber}>{number}</Text>
 
-      <Text
-        style={
-          styles.summaryLabel
-        }
-      >
-        {label}
-      </Text>
+      <Text style={styles.summaryLabel}>{label}</Text>
     </View>
   );
 }
-
 
 function ScheduleSection({
   title,
@@ -875,54 +767,32 @@ function ScheduleSection({
   icon,
   items,
   status,
+  updatingScheduleId,
+  onReschedule,
+  onCancel,
 }: {
   title: string;
   subtitle: string;
-  icon:
-    keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap;
   items: ScheduleItem[];
   status: ScheduleStatus;
+  updatingScheduleId: number | null;
+  onReschedule: (item: ScheduleItem) => void;
+  onCancel: (item: ScheduleItem) => void;
 }) {
   return (
-    <View
-      style={
-        styles.scheduleSection
-      }
-    >
-      <View
-        style={
-          styles.sectionHeader
-        }
-      >
-        <View
-          style={
-            styles.sectionTitleRow
-          }
-        >
-          <Ionicons
-            name={icon}
-            size={19}
-            color={getStatusColor(
-              status
-            )}
-          />
+    <View style={styles.scheduleSection}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionTitleRow}>
+          <Ionicons name={icon} size={19} color={getStatusColor(status)} />
 
-          <Text
-            style={
-              styles.sectionTitle
-            }
-          >
-            {title}
-          </Text>
+          <Text style={styles.sectionTitle}>{title}</Text>
 
           <View
             style={[
               styles.countBadge,
               {
-                backgroundColor:
-                  getStatusBackground(
-                    status
-                  ),
+                backgroundColor: getStatusBackground(status),
               },
             ]}
           >
@@ -930,10 +800,7 @@ function ScheduleSection({
               style={[
                 styles.countBadgeText,
                 {
-                  color:
-                    getStatusColor(
-                      status
-                    ),
+                  color: getStatusColor(status),
                 },
               ]}
             >
@@ -942,13 +809,7 @@ function ScheduleSection({
           </View>
         </View>
 
-        <Text
-          style={
-            styles.sectionSubtitle
-          }
-        >
-          {subtitle}
-        </Text>
+        <Text style={styles.sectionSubtitle}>{subtitle}</Text>
       </View>
 
       {items.map((item) => (
@@ -956,144 +817,152 @@ function ScheduleSection({
           key={item.record_id}
           item={item}
           status={status}
+          updating={updatingScheduleId === item.record_id}
+          actionsDisabled={updatingScheduleId !== null}
+          onReschedule={() => onReschedule(item)}
+          onCancel={() => onCancel(item)}
         />
       ))}
     </View>
   );
 }
 
-
 function ScheduleCard({
   item,
   status,
+  updating,
+  actionsDisabled,
+  onReschedule,
+  onCancel,
 }: {
   item: ScheduleItem;
   status: ScheduleStatus;
+  updating: boolean;
+  actionsDisabled: boolean;
+  onReschedule: () => void;
+  onCancel: () => void;
 }) {
   return (
-    <View
-      style={styles.scheduleCard}
-    >
-      <View
-        style={
-          styles.scheduleTop
-        }
-      >
+    <View style={styles.scheduleCard}>
+      <View style={styles.scheduleTop}>
         <View
           style={[
             styles.serviceIcon,
             {
-              backgroundColor:
-                getStatusBackground(
-                  status
-                ),
+              backgroundColor: getStatusBackground(status),
             },
           ]}
         >
           <Ionicons
-            name={getServiceIcon(
-              item.service_type
-            )}
+            name={getServiceIcon(item.service_type)}
             size={22}
-            color={getStatusColor(
-              status
-            )}
+            color={getStatusColor(status)}
           />
         </View>
 
-        <View
-          style={
-            styles.scheduleInfo
-          }
-        >
-          <Text
-            style={
-              styles.serviceTitle
-            }
-          >
-            {item.service_type}
-          </Text>
+        <View style={styles.scheduleInfo}>
+          <Text style={styles.serviceTitle}>{item.service_type}</Text>
 
-          <View
-            style={
-              styles.scheduleDateRow
-            }
-          >
-            <Ionicons
-              name="calendar-outline"
-              size={13}
-              color="#7B8880"
-            />
+          <View style={styles.scheduleDateRow}>
+            <Ionicons name="calendar-outline" size={13} color="#7B8880" />
 
-            <Text
-              style={
-                styles.scheduleDate
-              }
-            >
-              {formatDate(
-                item.next_due_date
-              )}
+            <Text style={styles.scheduleDate}>
+              {formatDate(item.next_due_date)}
             </Text>
           </View>
         </View>
 
-        <StatusBadge
-          item={item}
-          status={status}
-        />
+        <StatusBadge item={item} status={status} />
       </View>
 
-      <View
-        style={
-          styles.scheduleDivider
-        }
-      />
+      <View style={styles.scheduleDivider} />
 
-      <View
-        style={styles.sourceRow}
-      >
-        <View
-          style={styles.sourceIcon}
-        >
-          <Ionicons
-            name="medical-outline"
-            size={15}
-            color="#176B3A"
-          />
+      <View style={styles.sourceRow}>
+        <View style={styles.sourceIcon}>
+          <Ionicons name="medical-outline" size={15} color="#176B3A" />
         </View>
 
-        <View
-          style={styles.sourceInfo}
-        >
-          <Text
-            style={
-              styles.sourceLabel
-            }
-          >
-            Based on veterinary record
-          </Text>
+        <View style={styles.sourceInfo}>
+          <Text style={styles.sourceLabel}>Based on veterinary record</Text>
 
-          <Text
-            style={
-              styles.sourceText
-            }
-          >
-            Visit:{" "}
-            {formatDate(
-              item.visit_date
-            )}
-            {getClinicName(item)
-              ? ` • ${getClinicName(
-                  item
-                )}`
-              : ""}
+          <Text style={styles.sourceText}>
+            Visit: {formatDate(item.visit_date)}
+            {getClinicName(item) ? ` • ${getClinicName(item)}` : ""}
           </Text>
         </View>
+      </View>
+
+      <View style={styles.scheduleActions}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: actionsDisabled }}
+          disabled={actionsDisabled}
+          style={({ pressed }) => [
+            styles.rescheduleButton,
+            actionsDisabled && styles.actionDisabled,
+            pressed && styles.pressed,
+          ]}
+          onPress={onReschedule}
+        >
+          <Ionicons name="calendar-outline" size={16} color="#176B3A" />
+          <Text style={styles.rescheduleButtonText}>Reschedule</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: actionsDisabled }}
+          disabled={actionsDisabled}
+          style={({ pressed }) => [
+            styles.cancelButton,
+            actionsDisabled && styles.actionDisabled,
+            pressed && styles.pressed,
+          ]}
+          onPress={onCancel}
+        >
+          {updating ? (
+            <ActivityIndicator size="small" color="#A7483E" />
+          ) : (
+            <Ionicons name="close-circle-outline" size={16} color="#A7483E" />
+          )}
+          <Text style={styles.cancelButtonText}>Cancel</Text>
+        </Pressable>
       </View>
     </View>
   );
 }
 
+function CancelledScheduleCard({ item }: { item: ScheduleItem }) {
+  return (
+    <View style={styles.scheduleCard}>
+      <View style={styles.scheduleTop}>
+        <View style={[styles.serviceIcon, styles.cancelledIcon]}>
+          <Ionicons
+            name={getServiceIcon(item.service_type)}
+            size={22}
+            color="#A7483E"
+          />
+        </View>
+        <View style={styles.scheduleInfo}>
+          <Text style={styles.serviceTitle}>{item.service_type}</Text>
+          <View style={styles.scheduleDateRow}>
+            <Ionicons name="calendar-outline" size={13} color="#7B8880" />
+            <Text style={styles.scheduleDate}>
+              {formatDate(item.next_due_date)}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.statusBadge, styles.cancelledCountBadge]}>
+          <Text style={[styles.statusText, styles.cancelledCountText]}>
+            Cancelled
+          </Text>
+        </View>
+      </View>
+      <View style={styles.scheduleDivider} />
+      <Text style={styles.cancelledHistoryText}>
+        This scheduled treatment was cancelled and cannot be changed.
+      </Text>
+    </View>
+  );
+}
 
 function StatusBadge({
   item,
@@ -1105,29 +974,18 @@ function StatusBadge({
   let text = "";
 
   if (status === "Overdue") {
-    const days =
-      Math.abs(
-        item.daysRemaining
-      );
+    const days = Math.abs(item.daysRemaining);
 
-    text =
-      days === 1
-        ? "1 day late"
-        : `${days} days late`;
+    text = days === 1 ? "1 day late" : `${days} days late`;
   }
 
   if (status === "Due Soon") {
-    if (
-      item.daysRemaining === 0
-    ) {
+    if (item.daysRemaining === 0) {
       text = "Today";
-    } else if (
-      item.daysRemaining === 1
-    ) {
+    } else if (item.daysRemaining === 1) {
       text = "Tomorrow";
     } else {
-      text =
-        `${item.daysRemaining} days`;
+      text = `${item.daysRemaining} days`;
     }
   }
 
@@ -1140,10 +998,7 @@ function StatusBadge({
       style={[
         styles.statusBadge,
         {
-          backgroundColor:
-            getStatusBackground(
-              status
-            ),
+          backgroundColor: getStatusBackground(status),
         },
       ]}
     >
@@ -1151,10 +1006,7 @@ function StatusBadge({
         style={[
           styles.statusText,
           {
-            color:
-              getStatusColor(
-                status
-              ),
+            color: getStatusColor(status),
           },
         ]}
       >
@@ -1164,66 +1016,54 @@ function StatusBadge({
   );
 }
 
-
 function getTodayStart() {
   const today = new Date();
 
-  today.setHours(
-    0,
-    0,
-    0,
-    0
-  );
+  today.setHours(0, 0, 0, 0);
 
   return today;
 }
 
-function parseDatabaseDate(
-  value: string
-) {
+function getTomorrowStart() {
+  const tomorrow = getTodayStart();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow;
+}
+
+function getInitialRescheduleDate(currentValue: string) {
+  const tomorrow = getTomorrowStart();
+  const currentDate = parseDatabaseDate(currentValue);
+  return currentDate && currentDate > tomorrow ? currentDate : tomorrow;
+}
+
+function parseDatabaseDate(value: string) {
   if (!value) {
     return null;
   }
 
-  const dateOnly =
-    value.substring(0, 10);
+  const dateOnly = value.substring(0, 10);
 
-  const parts =
-    dateOnly.split("-");
+  const parts = dateOnly.split("-");
 
   if (parts.length !== 3) {
     return null;
   }
 
-  const year =
-    Number(parts[0]);
+  const year = Number(parts[0]);
 
-  const month =
-    Number(parts[1]);
+  const month = Number(parts[1]);
 
-  const day =
-    Number(parts[2]);
+  const day = Number(parts[2]);
 
-  if (
-    !year ||
-    !month ||
-    !day
-  ) {
+  if (!year || !month || !day) {
     return null;
   }
 
-  const date =
-    new Date(
-      year,
-      month - 1,
-      day
-    );
+  const date = new Date(year, month - 1, day);
 
   if (
-    date.getFullYear() !==
-      year ||
-    date.getMonth() !==
-      month - 1 ||
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
     date.getDate() !== day
   ) {
     return null;
@@ -1232,39 +1072,32 @@ function parseDatabaseDate(
   return date;
 }
 
-function formatDate(
-  value: string
-) {
-  const date =
-    parseDatabaseDate(value);
+function formatDate(value: string) {
+  const date = parseDatabaseDate(value);
 
   if (!date) {
     return value;
   }
 
-  return date.toLocaleDateString(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }
-  );
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function getClinicName(
-  record: VetRecord
-) {
-  return (
-    record.clinic_name ||
-    record.clinic_contact_name ||
-    ""
-  );
+function formatDateValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-function getServiceIcon(
-  service: string
-): keyof typeof Ionicons.glyphMap {
+function getClinicName(record: VetRecord) {
+  return record.clinic_name || record.clinic_contact_name || "";
+}
+
+function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
   switch (service) {
     case "Checkup":
       return "medical-outline";
@@ -1286,9 +1119,7 @@ function getServiceIcon(
   }
 }
 
-function getStatusColor(
-  status: ScheduleStatus
-) {
+function getStatusColor(status: ScheduleStatus) {
   switch (status) {
     case "Overdue":
       return "#A64B42";
@@ -1301,9 +1132,7 @@ function getStatusColor(
   }
 }
 
-function getStatusBackground(
-  status: ScheduleStatus
-) {
+function getStatusBackground(status: ScheduleStatus) {
   switch (status) {
     case "Overdue":
       return "#F8E5E2";
@@ -1334,8 +1163,6 @@ const styles = StyleSheet.create({
     color: "#758279",
   },
 
-
-
   header: {
     height: 64,
     paddingHorizontal: 20,
@@ -1364,7 +1191,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 50,
   },
-
 
   petCard: {
     padding: 16,
@@ -1423,7 +1249,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
 
   nextCard: {
     marginTop: 15,
@@ -1508,7 +1333,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: "#8A784A",
   },
-
 
   summaryRow: {
     marginTop: 15,
@@ -1705,6 +1529,147 @@ const styles = StyleSheet.create({
     color: "#53645A",
   },
 
+  scheduleActions: {
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 14,
+  },
+
+  rescheduleButton: {
+    flex: 1,
+    minHeight: 42,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#176B3A",
+    backgroundColor: "#F4FAF5",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+
+  rescheduleButtonText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#176B3A",
+  },
+
+  cancelButton: {
+    flex: 1,
+    minHeight: 42,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#D9AAA4",
+    backgroundColor: "#FFF8F7",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+
+  cancelButtonText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#A7483E",
+  },
+
+  actionDisabled: {
+    opacity: 0.55,
+  },
+
+  cancelledCountBadge: {
+    backgroundColor: "#FBE9E6",
+  },
+
+  cancelledCountText: {
+    color: "#A7483E",
+  },
+
+  cancelledIcon: {
+    backgroundColor: "#FBE9E6",
+  },
+
+  cancelledHistoryText: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: "#7C6966",
+  },
+
+  modalBackdrop: {
+    flex: 1,
+    paddingHorizontal: 22,
+    backgroundColor: "rgba(20, 38, 27, 0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  rescheduleModal: {
+    width: "100%",
+    maxWidth: 420,
+    borderRadius: 20,
+    padding: 20,
+    backgroundColor: "#FFFDF7",
+  },
+
+  rescheduleModalTitle: {
+    fontSize: 21,
+    fontWeight: "900",
+    color: "#24352B",
+    marginBottom: 15,
+  },
+
+  rescheduleDateLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#7A877F",
+    textTransform: "uppercase",
+    marginTop: 8,
+  },
+
+  rescheduleDateValue: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#2E4036",
+    marginTop: 3,
+  },
+
+  modalActions: {
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 16,
+  },
+
+  modalCancelButton: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#CCD8D0",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  modalCancelText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#627168",
+  },
+
+  modalConfirmButton: {
+    flex: 1.5,
+    minHeight: 44,
+    borderRadius: 12,
+    backgroundColor: "#176B3A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  modalConfirmText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
+
   completedSection: {
     marginTop: 28,
   },
@@ -1898,8 +1863,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#FFFFFF",
   },
-
-
 
   reminderCard: {
     marginTop: 16,
