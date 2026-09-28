@@ -187,7 +187,7 @@ export default function PetsScreen() {
 
   const openRecords = (pet: Pet) => {
     router.push({
-      pathname: "/vet-records",
+      pathname: "/(veterinary)/pet-health-records",
       params: {
         petId: pet.pet_id.toString(),
       },

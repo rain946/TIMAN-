@@ -18,6 +18,7 @@ import EditProfileModal from "../../components/modals/EditProfileModal";
 import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
 
 import { API_URL } from "../../config/api";
+import { unregisterDevicePushToken } from "../../services/notificationService";
 
 
 type OwnerProfile = {
@@ -231,9 +232,12 @@ export default function ProfileScreen() {
           style: "destructive",
           onPress: async () => {
             try {
+              await unregisterDevicePushToken();
+
               await AsyncStorage.multiRemove([
                 "token",
                 "user",
+                "timan_expo_push_token",
               ]);
 
               router.replace("/login");

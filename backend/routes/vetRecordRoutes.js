@@ -401,6 +401,140 @@ router.post(
 );
 
 router.get(
+  "/clinic",
+  authMiddleware,
+  requireRole("clinic"),
+  async (req, res) => {
+    try {
+      const clinicUserId = req.user.userId;
+
+      const [records] = await db.query(
+        `
+        SELECT
+          vr.record_id,
+          vr.pet_id,
+          vr.visit_date,
+          vr.service_type,
+          vr.diagnosis,
+          vr.created_at,
+          p.pet_name,
+          p.species,
+          p.breed,
+          p.photo_url,
+          EXISTS (
+            SELECT 1
+            FROM clinic_authorizations ca
+            WHERE ca.pet_id = vr.pet_id
+              AND ca.clinic_user_id = ?
+              AND ca.status = 'Approved'
+          ) AS can_open
+        FROM vet_records vr
+        INNER JOIN pets p
+          ON p.pet_id = vr.pet_id
+        WHERE vr.clinic_user_id = ?
+        ORDER BY
+          vr.visit_date DESC,
+          vr.created_at DESC,
+          vr.record_id DESC
+        `,
+        [clinicUserId, clinicUserId]
+      );
+
+      return res.json({
+        success: true,
+        records: records.map((record) => ({
+          ...record,
+          can_open: Boolean(record.can_open),
+        })),
+      });
+    } catch (error) {
+      console.error("GET CLINIC VET RECORDS HISTORY ERROR:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Unable to load veterinary records.",
+      });
+    }
+  }
+);
+
+router.get(
+  "/clinic-schedules",
+  authMiddleware,
+  requireRole("clinic"),
+  async (req, res) => {
+    try {
+      const clinicUserId = req.user.userId;
+
+      const [schedules] = await db.query(
+        `
+        SELECT
+          vr.record_id,
+          vr.pet_id,
+          vr.visit_date,
+          vr.service_type,
+          vr.diagnosis,
+          vr.treatment,
+          vr.medication,
+          vr.notes,
+          vr.next_due_date,
+          vr.schedule_status,
+          vr.completed_at,
+          vr.created_at,
+          p.pet_name,
+          p.species,
+          p.breed,
+          p.photo_url,
+          EXISTS (
+            SELECT 1
+            FROM clinic_authorizations ca
+            WHERE ca.pet_id = vr.pet_id
+              AND ca.clinic_user_id = ?
+              AND ca.status = 'Approved'
+          ) AS can_open
+        FROM vet_records vr
+        INNER JOIN pets p
+          ON p.pet_id = vr.pet_id
+        WHERE vr.clinic_user_id = ?
+          AND vr.next_due_date IS NOT NULL
+        ORDER BY
+          CASE
+            WHEN vr.schedule_status = 'Pending' THEN 0
+            WHEN vr.schedule_status = 'Completed' THEN 1
+            ELSE 2
+          END,
+          CASE
+            WHEN vr.schedule_status = 'Pending' THEN vr.next_due_date
+          END ASC,
+          CASE
+            WHEN vr.schedule_status <> 'Pending'
+              THEN COALESCE(vr.completed_at, vr.created_at)
+          END DESC,
+          vr.record_id DESC
+        `,
+        [clinicUserId, clinicUserId]
+      );
+
+      return res.json({
+        success: true,
+        schedules: schedules.map((schedule) => ({
+          ...schedule,
+          can_open: Boolean(schedule.can_open),
+        })),
+      });
+    } catch (error) {
+      console.error("GET CLINIC SCHEDULES ERROR:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Unable to load schedules.",
+      });
+    }
+  }
+);
+
+
+router.get(
   "/clinic/:petId",
   authMiddleware,
   requireRole("clinic"),
@@ -817,6 +951,18 @@ router.patch(
         recordRows[0];
 
 
+      if (
+        Number(record.clinic_user_id) !==
+        Number(clinicUserId)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "This schedule was not created by your clinic.",
+        });
+      }
+
+
       if (!record.next_due_date) {
         return res.status(400).json({
           success: false,
@@ -881,10 +1027,11 @@ router.patch(
               )
 
           WHERE record_id = ?
+            AND clinic_user_id = ?
             AND schedule_status =
                 'Pending'
           `,
-          [recordId]
+          [recordId, clinicUserId]
         );
 
       if (

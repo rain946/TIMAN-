@@ -18,9 +18,9 @@ function getReminderDetails(daysDifference) {
         notificationType:
           "health_reminder",
         title:
-          "Upcoming Pet Health Schedule",
+          "TIMAN Health Reminder",
         message:
-          "has a veterinary schedule due tomorrow.",
+          "is due tomorrow.",
       };
 
     case 0:
@@ -31,7 +31,7 @@ function getReminderDetails(daysDifference) {
         title:
           "Pet Health Schedule Due Today",
         message:
-          "has a veterinary schedule due today.",
+          "is due today.",
       };
 
     case 1:
@@ -42,7 +42,7 @@ function getReminderDetails(daysDifference) {
         title:
           "Pet Health Schedule Overdue",
         message:
-          "has a veterinary schedule that is 1 day overdue.",
+          "is 1 day overdue.",
       };
 
     case 3:
@@ -53,7 +53,7 @@ function getReminderDetails(daysDifference) {
         title:
           "Pet Health Reminder",
         message:
-          "has a veterinary schedule that is 3 days overdue.",
+          "is 3 days overdue.",
       };
 
     case 7:
@@ -64,7 +64,7 @@ function getReminderDetails(daysDifference) {
         title:
           "Important Pet Health Reminder",
         message:
-          "has a veterinary schedule that is 7 days overdue.",
+          "is 7 days overdue.",
       };
 
     default:
@@ -228,6 +228,8 @@ async function getSchedulesForReminder() {
     WHERE
       vr.next_due_date IS NOT NULL
 
+      AND vr.schedule_status = 'Pending'
+
       AND DATEDIFF(
         DATE(
           CONVERT_TZ(
@@ -330,8 +332,8 @@ async function processHealthReminders() {
 
 
         const body =
-          `${schedule.pet_name} ${reminder.message} ` +
-          `Service: ${schedule.service_type}.`;
+          `${schedule.pet_name}'s ${schedule.service_type} ` +
+          reminder.message;
 
 
         const tokens =
@@ -356,6 +358,12 @@ async function processHealthReminders() {
             await sendExpoPushNotification({
               to:
                 token.expo_push_token,
+
+              pushTokenId:
+                token.push_token_id,
+
+              userId:
+                schedule.owner_id,
 
               title:
                 reminder.title,

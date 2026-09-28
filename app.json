@@ -53,6 +53,13 @@
           "savePhotosPermission": "Allow TIMAN to save QR codes to your photos."
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "pet-health-reminders",
+          "color": "#176B3A"
+        }
+      ],
       "@react-native-community/datetimepicker"
     ],
     "experiments": {

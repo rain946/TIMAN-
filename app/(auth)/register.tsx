@@ -778,6 +778,7 @@ const styles = StyleSheet.create({
   loginContainer: {
     flexDirection: "row",
     justifyContent: "center",
+    alignItems: "center",
     marginTop: 22,
   },
 
@@ -803,6 +804,7 @@ const styles = StyleSheet.create({
 
   loginAction: {
     minHeight: 44,
+    alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 4,
   },

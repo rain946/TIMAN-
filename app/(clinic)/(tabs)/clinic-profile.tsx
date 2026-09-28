@@ -1,0 +1,367 @@
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import ChangePasswordModal from "../../../components/modals/ChangePasswordModal";
+import EditProfileModal from "../../../components/modals/EditProfileModal";
+import { API_URL } from "../../../config/api";
+import { unregisterDevicePushToken } from "../../../services/notificationService";
+
+type ClinicProfile = {
+  user_id: number;
+  full_name: string;
+  email: string;
+  contact_number: string;
+  address: string;
+  role: string;
+  clinic_name?: string | null;
+};
+
+export default function ClinicProfileScreen() {
+  const [profile, setProfile] = useState<ClinicProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
+  const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const requestInFlight = useRef(false);
+
+  const loadProfile = useCallback(async (showLoading = true) => {
+    if (requestInFlight.current) {
+      setRefreshing(false);
+      return;
+    }
+    requestInFlight.current = true;
+
+    try {
+      if (showLoading) setLoading(true);
+      setError(false);
+
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/profile`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const responseText = await response.text();
+      let data: any = {};
+
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        data = { message: responseText };
+      }
+
+      if (response.status === 401) {
+        router.replace("/login");
+        return;
+      }
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Unable to load profile.");
+      }
+
+      setProfile(data.user);
+    } catch (loadError) {
+      console.log("CLINIC PROFILE LOAD ERROR:", loadError);
+      setError(true);
+    } finally {
+      requestInFlight.current = false;
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProfile();
+    }, [loadProfile])
+  );
+
+  const handleProfileUpdated = (updatedProfile: ClinicProfile) => {
+    setProfile(updatedProfile);
+    void loadProfile(false);
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Log Out?",
+      "Are you sure you want to log out of TIMAN?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Log Out",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await unregisterDevicePushToken();
+              await AsyncStorage.multiRemove([
+                "token",
+                "user",
+                "timan_expo_push_token",
+              ]);
+              router.replace("/login");
+            } catch (logoutError) {
+              console.error("CLINIC LOGOUT ERROR:", logoutError);
+              Alert.alert("Log Out Failed", "Unable to log out. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    void loadProfile(false);
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Clinic Profile</Text>
+      </View>
+
+      {loading && !profile ? (
+        <View style={styles.stateContainer}>
+          <ActivityIndicator size="large" color="#176B3A" />
+          <Text style={styles.loadingText}>Loading profile...</Text>
+        </View>
+      ) : error && !profile ? (
+        <View style={styles.stateContainer}>
+          <View style={styles.errorIcon}>
+            <Ionicons name="alert-circle-outline" size={30} color="#A7483E" />
+          </View>
+          <Text style={styles.stateTitle}>Unable to load profile.</Text>
+          <Pressable
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+            onPress={() => loadProfile()}
+          >
+            <Text style={styles.retryText}>Retry</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#176B3A"
+              colors={["#176B3A"]}
+            />
+          }
+        >
+          {error && (
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.inlineError, pressed && styles.pressed]}
+              onPress={() => loadProfile(false)}
+            >
+              <Ionicons name="alert-circle-outline" size={19} color="#A7483E" />
+              <Text style={styles.inlineErrorText}>Unable to refresh profile. Tap to retry.</Text>
+            </Pressable>
+          )}
+
+          <View style={styles.identityCard}>
+            <View style={styles.clinicIconOuter}>
+              <View style={styles.clinicIconInner}>
+                <Ionicons name="medkit" size={38} color="#FFFFFF" />
+              </View>
+            </View>
+            <Text style={styles.clinicName} numberOfLines={2}>
+              {profile?.clinic_name || profile?.full_name || "Veterinary Clinic"}
+            </Text>
+            <View style={styles.roleBadge}>
+              <Ionicons name="medical" size={13} color="#176B3A" />
+              <Text style={styles.roleBadgeText}>Veterinary Clinic</Text>
+            </View>
+            {profile?.email ? <Text style={styles.summaryEmail}>{profile.email}</Text> : null}
+          </View>
+
+          <Text style={styles.sectionTitle}>Clinic Information</Text>
+          <View style={styles.infoCard}>
+            <InfoRow
+              icon="business-outline"
+              label="Clinic Name"
+              value={profile?.clinic_name || "Not provided"}
+            />
+            <Divider />
+            <InfoRow
+              icon="person-outline"
+              label="Representative / Full Name"
+              value={profile?.full_name || "Not provided"}
+            />
+            <Divider />
+            <InfoRow icon="mail-outline" label="Email" value={profile?.email || "Not provided"} />
+            <Divider />
+            <InfoRow
+              icon="call-outline"
+              label="Contact Number"
+              value={profile?.contact_number || "Not provided"}
+            />
+            <Divider />
+            <InfoRow
+              icon="location-outline"
+              label="Address"
+              value={profile?.address || "Not provided"}
+            />
+          </View>
+
+          <Text style={styles.sectionTitle}>Account</Text>
+          <View style={styles.actionCard}>
+            <ActionRow
+              icon="create-outline"
+              title="Edit Profile"
+              description="Update clinic and contact information"
+              onPress={() => setEditProfileVisible(true)}
+            />
+            <Divider inset />
+            <ActionRow
+              icon="lock-closed-outline"
+              title="Change Password"
+              description="Update your account password"
+              onPress={() => setChangePasswordVisible(true)}
+            />
+          </View>
+
+          <Pressable
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}
+            onPress={handleLogout}
+          >
+            <Ionicons name="log-out-outline" size={21} color="#A14343" />
+            <Text style={styles.logoutText}>Log Out</Text>
+          </Pressable>
+        </ScrollView>
+      )}
+
+      <EditProfileModal
+        visible={editProfileVisible}
+        profile={profile}
+        onClose={() => setEditProfileVisible(false)}
+        onUpdated={handleProfileUpdated}
+      />
+      <ChangePasswordModal
+        visible={changePasswordVisible}
+        onClose={() => setChangePasswordVisible(false)}
+      />
+    </SafeAreaView>
+  );
+}
+
+function InfoRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+}) {
+  return (
+    <View style={styles.infoRow}>
+      <View style={styles.infoIcon}>
+        <Ionicons name={icon} size={18} color="#176B3A" />
+      </View>
+      <View style={styles.infoContent}>
+        <Text style={styles.infoLabel}>{label}</Text>
+        <Text style={styles.infoValue}>{value}</Text>
+      </View>
+    </View>
+  );
+}
+
+function ActionRow({
+  icon,
+  title,
+  description,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  description: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      style={({ pressed }) => [styles.actionRow, pressed && styles.actionPressed]}
+      onPress={onPress}
+    >
+      <View style={styles.actionIcon}>
+        <Ionicons name={icon} size={20} color="#176B3A" />
+      </View>
+      <View style={styles.actionContent}>
+        <Text style={styles.actionTitle}>{title}</Text>
+        <Text style={styles.actionDescription}>{description}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={19} color="#97A199" />
+    </Pressable>
+  );
+}
+
+function Divider({ inset = false }: { inset?: boolean }) {
+  return <View style={[styles.divider, inset && styles.dividerInset]} />;
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FFFDF7" },
+  header: { minHeight: 60, paddingHorizontal: 20, justifyContent: "center", borderBottomWidth: 1, borderBottomColor: "#E9EDE9" },
+  headerTitle: { fontSize: 20, fontWeight: "900", color: "#1E2D24" },
+  content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
+  stateContainer: { flex: 1, paddingHorizontal: 24, alignItems: "center", justifyContent: "center" },
+  loadingText: { marginTop: 12, fontSize: 12, color: "#77847C" },
+  errorIcon: { width: 58, height: 58, borderRadius: 18, backgroundColor: "#FDEDEA", alignItems: "center", justifyContent: "center" },
+  stateTitle: { marginTop: 14, fontSize: 15, fontWeight: "900", color: "#34453B" },
+  retryButton: { minWidth: 112, minHeight: 44, marginTop: 17, borderRadius: 13, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  retryText: { fontSize: 11, fontWeight: "900", color: "#FFFFFF" },
+  inlineError: { minHeight: 48, marginBottom: 14, borderRadius: 13, paddingHorizontal: 13, backgroundColor: "#FFF1EF", borderWidth: 1, borderColor: "#F1CBC6", flexDirection: "row", alignItems: "center" },
+  inlineErrorText: { flex: 1, marginLeft: 9, fontSize: 10, color: "#843C34" },
+  identityCard: { minHeight: 232, borderRadius: 22, padding: 22, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", alignItems: "center" },
+  clinicIconOuter: { width: 92, height: 92, borderRadius: 29, backgroundColor: "#E5F3E8", alignItems: "center", justifyContent: "center" },
+  clinicIconInner: { width: 70, height: 70, borderRadius: 23, backgroundColor: "#176B3A", alignItems: "center", justifyContent: "center" },
+  clinicName: { maxWidth: 290, marginTop: 14, fontSize: 20, lineHeight: 26, fontWeight: "900", color: "#24352B", textAlign: "center" },
+  roleBadge: { minHeight: 29, marginTop: 9, borderRadius: 10, paddingHorizontal: 10, backgroundColor: "#E5F3E8", flexDirection: "row", alignItems: "center", gap: 5 },
+  roleBadgeText: { fontSize: 9, fontWeight: "900", color: "#176B3A" },
+  summaryEmail: { marginTop: 9, fontSize: 10, color: "#7A877F" },
+  sectionTitle: { marginTop: 27, marginBottom: 12, fontSize: 17, fontWeight: "900", color: "#1E2D24" },
+  infoCard: { borderRadius: 19, paddingHorizontal: 15, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3" },
+  infoRow: { minHeight: 72, paddingVertical: 12, flexDirection: "row", alignItems: "center" },
+  infoIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  infoContent: { flex: 1, minWidth: 0, marginLeft: 12 },
+  infoLabel: { fontSize: 9, fontWeight: "800", color: "#839087", textTransform: "uppercase", letterSpacing: 0.35 },
+  infoValue: { marginTop: 4, fontSize: 12, lineHeight: 18, fontWeight: "700", color: "#34453B" },
+  divider: { height: 1, backgroundColor: "#EDF0ED" },
+  dividerInset: { marginLeft: 65 },
+  actionCard: { borderRadius: 19, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E1E8E3", overflow: "hidden" },
+  actionRow: { minHeight: 76, paddingHorizontal: 15, flexDirection: "row", alignItems: "center" },
+  actionPressed: { backgroundColor: "#F3F8F4" },
+  actionIcon: { width: 42, height: 42, borderRadius: 13, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  actionContent: { flex: 1, marginLeft: 12 },
+  actionTitle: { fontSize: 13, fontWeight: "900", color: "#2B3B31" },
+  actionDescription: { marginTop: 3, fontSize: 9, color: "#849088" },
+  logoutButton: { minHeight: 54, marginTop: 28, borderRadius: 15, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#ECCFCD", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  logoutText: { fontSize: 12, fontWeight: "900", color: "#A14343" },
+  pressed: { opacity: 0.72 },
+});

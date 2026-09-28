@@ -2,6 +2,10 @@ const express = require("express");
 
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
+const {
+  isExpoPushToken,
+  maskPushToken,
+} = require("../services/pushService");
 
 const router = express.Router();
 
@@ -36,11 +40,7 @@ router.post("/register", authMiddleware, async (req, res) => {
     const token = expo_push_token.trim();
 
     
-    const isValidExpoToken =
-      token.startsWith("ExponentPushToken[") ||
-      token.startsWith("ExpoPushToken[");
-
-    if (!isValidExpoToken) {
+    if (!isExpoPushToken(token)) {
       return res.status(400).json({
         success: false,
         message: "Invalid Expo push token.",
@@ -78,6 +78,12 @@ router.post("/register", authMiddleware, async (req, res) => {
         platform,
       ]
     );
+
+    console.log("TIMAN PUSH TOKEN REGISTERED:", {
+      userId,
+      platform,
+      token: maskPushToken(token),
+    });
 
     return res.status(200).json({
       success: true,

@@ -672,7 +672,7 @@ export default function SchedulesScreen() {
 
                 router.push({
                   pathname:
-                    "/vet-records",
+                    "/(veterinary)/pet-health-records",
                   params: {
                     petId:
                       String(petId),

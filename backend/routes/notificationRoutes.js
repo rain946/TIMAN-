@@ -6,6 +6,7 @@ const authMiddleware = require(
 
 const {
   sendExpoPushNotification,
+  waitForExpoPushReceipt,
 } = require("../services/pushService");
 
 const router = express.Router();
@@ -426,6 +427,16 @@ router.post(
   authMiddleware,
   async (req, res) => {
     try {
+      if (
+        process.env.NODE_ENV === "production" &&
+        process.env.ENABLE_TEST_PUSH !== "true"
+      ) {
+        return res.status(404).json({
+          success: false,
+          message: "Test push is disabled.",
+        });
+      }
+
       const userId =
         req.user.userId;
 
@@ -461,11 +472,16 @@ router.post(
               to:
                 tokenRow.expo_push_token,
 
+              pushTokenId:
+                tokenRow.push_token_id,
+
+              userId,
+
               title:
-                "TIMAN Server Test",
+                "TIMAN Test Notification",
 
               body:
-                "Success! This notification was sent from the TIMAN server.",
+                "Push notifications are working.",
 
               data: {
                 type:
@@ -476,6 +492,31 @@ router.post(
               },
             }
           );
+
+        let receipt = null;
+        let receiptError = null;
+
+        if (result.success && result.ticket?.id) {
+          try {
+            receipt = await waitForExpoPushReceipt(
+              {
+                ticketId: result.ticket.id,
+                pushTokenId: tokenRow.push_token_id,
+                token: tokenRow.expo_push_token,
+                userId,
+              },
+              { attempts: 5, delayMs: 2000 }
+            );
+          } catch (error) {
+            receiptError = error.message;
+            console.error("TEST PUSH RECEIPT ERROR:", {
+              userId,
+              pushTokenId: tokenRow.push_token_id,
+              ticketId: result.ticket.id,
+              message: error.message,
+            });
+          }
+        }
 
         results.push({
           push_token_id:
@@ -492,6 +533,11 @@ router.post(
 
           ticket:
             result.ticket || null,
+
+          receipt,
+
+          receipt_error:
+            receiptError,
         });
       }
 

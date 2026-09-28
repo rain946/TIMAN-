@@ -1,6 +1,9 @@
 import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
 import { useEffect, useRef } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { registerDeviceForPushNotifications } from "../services/notificationService";
 
 
 
@@ -168,7 +171,7 @@ function handleNotificationNavigation(
     );
 
     router.push(
-      "/clinic-dashboard"
+      "/(clinic)/(tabs)/clinic-dashboard"
     );
 
     return;
@@ -188,7 +191,7 @@ function handleNotificationNavigation(
     }
 
     router.push({
-      pathname: "/vet-records",
+      pathname: "/(veterinary)/pet-health-records",
       params: {
         petId,
       },
@@ -248,6 +251,27 @@ export default function RootLayout() {
 
   useEffect(() => {
     let isMounted = true;
+
+    const refreshAuthenticatedPushRegistration = async () => {
+      const authToken = await AsyncStorage.getItem("token");
+
+      if (!authToken || !isMounted) {
+        return;
+      }
+
+      const result = await registerDeviceForPushNotifications();
+
+      if (!result.success) {
+        console.log(
+          "TIMAN: Startup push registration was not completed:",
+          result.message
+        );
+      }
+    };
+
+    refreshAuthenticatedPushRegistration().catch((error) => {
+      console.log("TIMAN STARTUP PUSH REGISTRATION ERROR:", error);
+    });
 
 
 
@@ -429,19 +453,15 @@ export default function RootLayout() {
       />
 
       <Stack.Screen
-        name="(veterinary)/vet-records"
+        name="(veterinary)/pet-health-records"
       />
 
       <Stack.Screen
-        name="(clinic)/clinic-dashboard"
+        name="(clinic)"
       />
 
       <Stack.Screen
         name="(scanner)/qr-scanner"
-      />
-
-      <Stack.Screen
-        name="(clinic)/clinic-pet"
       />
 
       <Stack.Screen

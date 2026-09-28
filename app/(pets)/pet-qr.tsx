@@ -300,7 +300,7 @@ export default function PetQRScreen() {
     )}`;
 
   const PUBLIC_WEB_URL =
-    "https://bundle-inn-varies-colin.trycloudflare.com";
+    "https://invoice-producer-seniors-usc.trycloudflare.com";
 
   const publicProfileUrl = pet.qr_code
     ? `${PUBLIC_WEB_URL}/public/pet/${encodeURIComponent(

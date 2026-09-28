@@ -6,6 +6,17 @@ import { Platform } from "react-native";
 import { API_URL } from "../config/api";
 
 const STORAGE_KEY = "timan_health_reminders";
+const PUSH_TOKEN_STORAGE_KEY = "timan_expo_push_token";
+export const HEALTH_REMINDERS_CHANNEL_ID =
+  "pet-health-reminders";
+
+function maskPushToken(token: string) {
+  if (token.length <= 16) {
+    return "***";
+  }
+
+  return `${token.slice(0, 10)}...${token.slice(-6)}`;
+}
 
 
 
@@ -52,9 +63,9 @@ export async function requestNotificationPermission() {
     
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync(
-        "pet-health-reminders",
+        HEALTH_REMINDERS_CHANNEL_ID,
         {
-          name: "Pet Health Reminders",
+          name: "Health Reminders",
           importance: Notifications.AndroidImportance.HIGH,
           vibrationPattern: [0, 250, 250, 250],
           sound: "default",
@@ -143,7 +154,7 @@ export async function registerDeviceForPushNotifications() {
 
     console.log(
       "TIMAN EXPO PUSH TOKEN:",
-      expoPushToken
+      maskPushToken(expoPushToken)
     );
 
     if (!expoPushToken) {
@@ -224,9 +235,13 @@ export async function registerDeviceForPushNotifications() {
       };
     }
 
+    await AsyncStorage.setItem(
+      PUSH_TOKEN_STORAGE_KEY,
+      expoPushToken
+    );
+
     return {
       success: true,
-      pushToken: expoPushToken,
       message: "Device registered for server push notifications.",
     };
   } catch (error: any) {
@@ -241,6 +256,49 @@ export async function registerDeviceForPushNotifications() {
         error?.message ||
         "Unable to register device for push notifications.",
     };
+  }
+}
+
+export async function unregisterDevicePushToken() {
+  try {
+    const [authToken, expoPushToken] =
+      await Promise.all([
+        AsyncStorage.getItem("token"),
+        AsyncStorage.getItem(PUSH_TOKEN_STORAGE_KEY),
+      ]);
+
+    if (!authToken || !expoPushToken) {
+      return true;
+    }
+
+    const response = await fetch(
+      `${API_URL}/push-tokens/unregister`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          expo_push_token: expoPushToken,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      console.log(
+        "TIMAN: Push token unregister failed with status",
+        response.status
+      );
+      return false;
+    }
+
+    await AsyncStorage.removeItem(PUSH_TOKEN_STORAGE_KEY);
+    return true;
+  } catch (error) {
+    console.log("UNREGISTER DEVICE PUSH ERROR:", error);
+    return false;
   }
 }
 
@@ -350,7 +408,7 @@ export async function syncPetHealthReminders(
 
             ...(Platform.OS === "android"
               ? {
-                  channelId: "pet-health-reminders",
+                  channelId: HEALTH_REMINDERS_CHANNEL_ID,
                 }
               : {}),
           },

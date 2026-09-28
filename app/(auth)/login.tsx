@@ -229,7 +229,7 @@ export default function LoginScreen() {
         "clinic"
       ) {
         router.replace(
-          "/clinic-dashboard"
+          "/(clinic)/(tabs)/clinic-dashboard"
         );
 
         return;

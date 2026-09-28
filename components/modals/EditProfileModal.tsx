@@ -48,10 +48,12 @@ export default function EditProfileModal({
     keyboardContentContainerStyle,
   } = useKeyboardAwareScroll(35);
   const fullNameInputRef = useRef<TextInput>(null);
+  const clinicNameInputRef = useRef<TextInput>(null);
   const contactInputRef = useRef<TextInput>(null);
   const addressInputRef = useRef<TextInput>(null);
 
   const [fullName, setFullName] = useState("");
+  const [clinicName, setClinicName] = useState("");
   const [contactNumber, setContactNumber] =
     useState("");
   const [address, setAddress] = useState("");
@@ -65,6 +67,7 @@ export default function EditProfileModal({
   useEffect(() => {
     if (visible && profile) {
       setFullName(profile.full_name || "");
+      setClinicName(profile.clinic_name || "");
       setContactNumber(
         profile.contact_number || ""
       );
@@ -90,12 +93,14 @@ export default function EditProfileModal({
 
   const handleSave = async () => {
     const cleanFullName = fullName.trim();
+    const cleanClinicName = clinicName.trim();
     const cleanContactNumber =
       contactNumber.trim();
     const cleanAddress = address.trim();
 
     if (
       !cleanFullName ||
+      (profile?.role === "clinic" && !cleanClinicName) ||
       !cleanContactNumber ||
       !cleanAddress
     ) {
@@ -110,6 +115,17 @@ export default function EditProfileModal({
       Alert.alert(
         "Invalid Full Name",
         "Full name is too long."
+      );
+      return;
+    }
+
+    if (
+      profile?.role === "clinic" &&
+      cleanClinicName.length > 150
+    ) {
+      Alert.alert(
+        "Invalid Clinic Name",
+        "Clinic name is too long."
       );
       return;
     }
@@ -154,6 +170,9 @@ export default function EditProfileModal({
           },
           body: JSON.stringify({
             full_name: cleanFullName,
+            ...(profile?.role === "clinic"
+              ? { clinic_name: cleanClinicName }
+              : {}),
             contact_number:
               cleanContactNumber,
             address: cleanAddress,
@@ -185,6 +204,7 @@ export default function EditProfileModal({
             ...parsedUser,
             ...data.user,
             full_name: data.user.full_name,
+            clinic_name: data.user.clinic_name,
             contact_number:
               data.user.contact_number,
             address: data.user.address,
@@ -291,6 +311,39 @@ export default function EditProfileModal({
               keyboardContentContainerStyle,
             ]}
           >
+
+            {profile?.role === "clinic" && (
+              <>
+                <Text style={styles.label}>
+                  Clinic Name
+                </Text>
+
+                <View style={styles.inputContainer}>
+                  <Ionicons
+                    name="medkit-outline"
+                    size={19}
+                    color="#176B3A"
+                  />
+
+                  <TextInput
+                    ref={clinicNameInputRef}
+                    onFocus={() =>
+                      handleInputFocus(
+                        clinicNameInputRef.current
+                      )
+                    }
+                    style={styles.input}
+                    value={clinicName}
+                    onChangeText={setClinicName}
+                    placeholder="Enter clinic name"
+                    placeholderTextColor="#A3ADA7"
+                    autoCapitalize="words"
+                    editable={!saving}
+                    maxLength={150}
+                  />
+                </View>
+              </>
+            )}
 
             <Text style={styles.label}>
               Full Name

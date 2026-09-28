@@ -67,6 +67,7 @@ router.put("/", authMiddleware, async (req, res) => {
       full_name,
       contact_number,
       address,
+      clinic_name,
     } = req.body;
 
     const cleanFullName = String(
@@ -79,6 +80,10 @@ router.put("/", authMiddleware, async (req, res) => {
 
     const cleanAddress = String(
       address || ""
+    ).trim();
+
+    const cleanClinicName = String(
+      clinic_name || ""
     ).trim();
 
     
@@ -127,7 +132,10 @@ router.put("/", authMiddleware, async (req, res) => {
 
     const [existingUsers] = await db.query(
       `
-        SELECT user_id
+        SELECT
+          user_id,
+          role,
+          clinic_name
         FROM users
         WHERE user_id = ?
         LIMIT 1
@@ -142,6 +150,23 @@ router.put("/", authMiddleware, async (req, res) => {
       });
     }
 
+    const existingUser = existingUsers[0];
+    const isClinic = existingUser.role === "clinic";
+
+    if (isClinic && !cleanClinicName) {
+      return res.status(400).json({
+        success: false,
+        message: "Clinic name is required.",
+      });
+    }
+
+    if (isClinic && cleanClinicName.length > 150) {
+      return res.status(400).json({
+        success: false,
+        message: "Clinic name is too long.",
+      });
+    }
+
     
     
     
@@ -152,13 +177,17 @@ router.put("/", authMiddleware, async (req, res) => {
         SET
           full_name = ?,
           contact_number = ?,
-          address = ?
+          address = ?,
+          clinic_name = ?
         WHERE user_id = ?
       `,
       [
         cleanFullName,
         cleanContactNumber,
         cleanAddress,
+        isClinic
+          ? cleanClinicName
+          : existingUser.clinic_name,
         userId,
       ]
     );

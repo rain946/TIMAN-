@@ -627,6 +627,59 @@ router.get(
 
 
 router.get(
+  "/clinic",
+  authMiddleware,
+  requireRole("clinic"),
+  async (req, res) => {
+    try {
+      const clinicUserId = req.user.userId;
+
+      const [rows] = await db.query(
+        `
+        SELECT
+          ca.authorization_id,
+          ca.pet_id,
+          ca.status,
+          ca.requested_at,
+          ca.responded_at,
+          p.pet_name,
+          p.species,
+          p.breed,
+          p.photo_url
+        FROM clinic_authorizations ca
+        INNER JOIN pets p
+          ON p.pet_id = ca.pet_id
+        WHERE ca.clinic_user_id = ?
+        ORDER BY
+          CASE ca.status
+            WHEN 'Pending' THEN 0
+            WHEN 'Approved' THEN 1
+            WHEN 'Declined' THEN 2
+            WHEN 'Revoked' THEN 3
+          END,
+          ca.requested_at DESC,
+          ca.authorization_id DESC
+        `,
+        [clinicUserId]
+      );
+
+      return res.json({
+        success: true,
+        authorizations: rows,
+      });
+    } catch (error) {
+      console.error("CLINIC AUTHORIZATION LIST ERROR:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Unable to load access requests.",
+      });
+    }
+  }
+);
+
+
+router.get(
   "/owner",
   authMiddleware,
   requireRole("owner"),

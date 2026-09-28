@@ -497,7 +497,7 @@ export default function NotificationsScreen() {
         }
 
         router.push({
-          pathname: "/vet-records",
+          pathname: "/(veterinary)/pet-health-records",
           params: {
             petId: String(notification.pet_id),
           },

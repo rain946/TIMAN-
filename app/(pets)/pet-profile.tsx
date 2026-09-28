@@ -968,7 +968,7 @@ export default function PetProfileScreen() {
             title="Records"
             onPress={() =>
               router.push({
-                pathname: "/vet-records",
+                pathname: "/(veterinary)/pet-health-records",
                 params: {
                   petId:
                     pet.pet_id.toString(),
