@@ -40,9 +40,11 @@ const checkClinicAuthorization = async (
     SELECT
       authorization_id,
       status
-    FROM clinic_authorizations
-    WHERE pet_id = ?
-      AND clinic_user_id = ?
+    FROM clinic_authorizations ca
+    INNER JOIN pets p ON p.pet_id = ca.pet_id
+    WHERE ca.pet_id = ?
+      AND ca.clinic_user_id = ?
+      AND p.archived_at IS NULL
     LIMIT 1
     `,
     [petId, clinicUserId]
@@ -112,6 +114,38 @@ const notifyClinicOfOwnerScheduleChange = async ({
   } catch (error) {
     console.error("CLINIC SCHEDULE NOTIFICATION ERROR:", error);
   }
+
+  try {
+    const [pushTokens] = await db.query(
+      `
+      SELECT push_token_id, expo_push_token
+      FROM push_tokens
+      WHERE user_id = ?
+        AND is_active = TRUE
+      `,
+      [clinicUserId]
+    );
+
+    await Promise.all(
+      pushTokens.map((tokenRow) =>
+        sendExpoPushNotification({
+          to: tokenRow.expo_push_token,
+          title,
+          body: message,
+          data: {
+            type: `schedule_${action}`,
+            petId,
+            serviceType,
+            nextDueDate: nextDueDate || null,
+          },
+          pushTokenId: tokenRow.push_token_id,
+          userId: clinicUserId,
+        })
+      )
+    );
+  } catch (error) {
+    console.error("CLINIC SCHEDULE PUSH ERROR:", error);
+  }
 };
 
 
@@ -176,26 +210,19 @@ router.post(
       
       
 
-      const allowedServices = [
-        "Checkup",
-        "Vaccination",
-        "Deworming",
-        "Treatment",
-        "Surgery",
-        "Other",
-      ];
-
       if (
-        !allowedServices.includes(
-          service_type
-        )
+        typeof service_type !== "string" ||
+        !service_type.trim() ||
+        service_type.trim().length > 100
       ) {
         return res.status(400).json({
           success: false,
           message:
-            "Invalid service type.",
+            "Service type must contain 1 to 100 characters.",
         });
       }
+
+      const normalizedServiceType = service_type.trim();
 
       
       
@@ -239,6 +266,25 @@ router.post(
           success: false,
           message:
             "Owner authorization is required before adding veterinary records.",
+        });
+      }
+
+      const [existingRecords] = await db.query(
+        `
+        SELECT record_id
+        FROM vet_records
+        WHERE pet_id = ?
+          AND clinic_user_id = ?
+        LIMIT 1
+        `,
+        [petId, clinicUserId]
+      );
+
+      if (existingRecords.length > 0) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "A veterinary record has already been added for this approved pet. You can only view the existing record.",
         });
       }
 
@@ -296,7 +342,7 @@ router.post(
             petId,
             clinicUserId,
             visit_date,
-            service_type,
+            normalizedServiceType,
             diagnosis?.trim() || null,
             treatment?.trim() || null,
             medication?.trim() || null,
@@ -319,7 +365,7 @@ router.post(
         "New Veterinary Record";
 
       let notificationMessage =
-        `${pet.pet_name}'s ${service_type} record ` +
+        `${pet.pet_name}'s ${normalizedServiceType} record ` +
         `was updated by ${clinicDisplayName}.`;
 
       if (next_due_date) {
@@ -404,7 +450,7 @@ router.post(
                     recordId,
 
                   serviceType:
-                    service_type,
+                    normalizedServiceType,
 
                   nextDueDate:
                     next_due_date || null,
@@ -491,6 +537,7 @@ router.get(
         INNER JOIN pets p
           ON p.pet_id = vr.pet_id
         WHERE vr.clinic_user_id = ?
+          AND p.archived_at IS NULL
         ORDER BY
           vr.visit_date DESC,
           vr.created_at DESC,
@@ -536,7 +583,7 @@ router.get(
           vr.treatment,
           vr.medication,
           vr.notes,
-          vr.next_due_date,
+          DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
           vr.schedule_status,
           vr.completed_at,
           vr.created_at,
@@ -555,6 +602,7 @@ router.get(
         INNER JOIN pets p
           ON p.pet_id = vr.pet_id
         WHERE vr.clinic_user_id = ?
+          AND p.archived_at IS NULL
           AND vr.next_due_date IS NOT NULL
         ORDER BY
           CASE
@@ -966,7 +1014,7 @@ router.patch(
           vr.pet_id,
           vr.clinic_user_id,
           vr.service_type,
-          vr.next_due_date,
+          DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
           vr.schedule_status,
           p.pet_name
         FROM vet_records vr
@@ -999,6 +1047,28 @@ router.patch(
             schedule.schedule_status === "Completed"
               ? "A completed schedule cannot be cancelled."
               : "This schedule has already been cancelled.",
+        });
+      }
+
+      const dueDate = parseDateOnly(schedule.next_due_date);
+      const today = parseDateOnly(getPhilippineToday());
+      const daysUntilDue =
+        dueDate && today
+          ? Math.round((dueDate.getTime() - today.getTime()) / 86400000)
+          : null;
+
+      if (daysUntilDue === null) {
+        return res.status(400).json({
+          success: false,
+          message: "The schedule due date is invalid.",
+        });
+      }
+
+      if (daysUntilDue <= 3) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "Schedules due within 3 days can no longer be cancelled. Please reschedule instead.",
         });
       }
 
@@ -1151,7 +1221,12 @@ router.patch(
           INNER JOIN pets p ON p.pet_id = vr.pet_id
           SET
             vr.next_due_date = ?,
-            vr.cancelled_at = NULL
+            vr.cancelled_at = NULL,
+            vr.rescheduled_at = CONVERT_TZ(
+              UTC_TIMESTAMP(),
+              '+00:00',
+              '+08:00'
+            )
           WHERE vr.record_id = ?
             AND p.owner_id = ?
             AND vr.next_due_date IS NOT NULL

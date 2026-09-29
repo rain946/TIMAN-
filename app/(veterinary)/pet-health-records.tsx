@@ -650,7 +650,7 @@ const styles = StyleSheet.create({
 
   loadingText: {
     marginTop: 12,
-    fontSize: 15,
+    fontSize: 17,
     color: "#758279",
   },
 
@@ -676,12 +676,15 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "800",
     color: "#1E2D24",
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 50,
@@ -717,21 +720,21 @@ const styles = StyleSheet.create({
   },
 
   petLabel: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "700",
     color: "#6F8175",
   },
 
   petName: {
     marginTop: 2,
-    fontSize: 23,
+    fontSize: 25,
     fontWeight: "900",
     color: "#23442F",
   },
 
   petDetails: {
     marginTop: 4,
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 19,
     color: "#6C7D72",
   },
@@ -773,14 +776,14 @@ const styles = StyleSheet.create({
   },
 
   summaryNumber: {
-    fontSize: 21,
+    fontSize: 23,
     fontWeight: "900",
     color: "#2B3C32",
   },
 
   summaryLabel: {
     marginTop: 2,
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 16,
     color: "#7E8982",
   },
@@ -797,7 +800,7 @@ const styles = StyleSheet.create({
 
   infoText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 20,
     color: "#617167",
   },
@@ -811,13 +814,13 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 21,
+    fontSize: 23,
     fontWeight: "900",
     color: "#26352B",
   },
 
   recordCountText: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "700",
     color: "#738078",
   },
@@ -858,7 +861,7 @@ const styles = StyleSheet.create({
   },
 
   serviceTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "900",
     color: "#2D4035",
   },
@@ -871,7 +874,7 @@ const styles = StyleSheet.create({
   },
 
   latestText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
     color: "#176B3A",
   },
@@ -884,7 +887,7 @@ const styles = StyleSheet.create({
   },
 
   completedBadgeText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
     color: "#176B3A",
   },
@@ -897,7 +900,7 @@ const styles = StyleSheet.create({
   },
 
   dateText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#7D8981",
   },
 
@@ -928,14 +931,14 @@ const styles = StyleSheet.create({
   },
 
   detailLabel: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "700",
     color: "#849088",
   },
 
   detailValue: {
     marginTop: 3,
-    fontSize: 15,
+    fontSize: 17,
     lineHeight: 21,
     color: "#394A40",
   },
@@ -972,7 +975,7 @@ const styles = StyleSheet.create({
   },
 
   scheduleLabel: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "700",
     color: "#8A743B",
   },
@@ -983,7 +986,7 @@ const styles = StyleSheet.create({
 
   scheduleDate: {
     marginTop: 3,
-    fontSize: 15,
+    fontSize: 17,
     lineHeight: 20,
     fontWeight: "800",
     color: "#715819",
@@ -1004,7 +1007,7 @@ const styles = StyleSheet.create({
   },
 
   overdueText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "900",
     color: "#A3453C",
   },
@@ -1014,7 +1017,7 @@ const styles = StyleSheet.create({
   },
 
   todayText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "900",
     color: "#876415",
   },
@@ -1024,7 +1027,7 @@ const styles = StyleSheet.create({
   },
 
   upcomingText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "900",
     color: "#876415",
   },
@@ -1034,7 +1037,7 @@ const styles = StyleSheet.create({
   },
 
   scheduledText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "900",
     color: "#176B3A",
   },
@@ -1063,13 +1066,13 @@ const styles = StyleSheet.create({
   },
 
   clinicLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#8A958E",
   },
 
   clinicName: {
     marginTop: 2,
-    fontSize: 15,
+    fontSize: 17,
     lineHeight: 20,
     fontWeight: "800",
     color: "#415348",
@@ -1077,7 +1080,7 @@ const styles = StyleSheet.create({
 
   recordedBy: {
     marginTop: 3,
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 17,
     color: "#8A958E",
   },
@@ -1102,7 +1105,7 @@ const styles = StyleSheet.create({
 
   emptyTitle: {
     marginTop: 14,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "900",
     color: "#31453A",
   },
@@ -1110,7 +1113,7 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 7,
     maxWidth: 290,
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 20,
     textAlign: "center",
     color: "#7D8981",
@@ -1128,7 +1131,7 @@ const styles = StyleSheet.create({
 
   privacyText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 20,
     color: "#617167",
   },

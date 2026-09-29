@@ -51,6 +51,8 @@ export default function ClinicPetScreen() {
     normalizeStatus(params.authorizationStatus),
   );
 
+  const [hasRecord, setHasRecord] = useState(false);
+
   const [loading, setLoading] = useState(true);
 
   const [requesting, setRequesting] = useState(false);
@@ -120,6 +122,8 @@ export default function ClinicPetScreen() {
       setPet(data.pet);
 
       setStatus(normalizeStatus(data.status));
+
+      setHasRecord(Boolean(data.hasRecord));
     } catch (error) {
       console.log("CLINIC PET ERROR:", error);
 
@@ -437,7 +441,9 @@ export default function ClinicPetScreen() {
               <Ionicons name="shield-checkmark" size={22} color="#176B3A" />
 
               <Text style={styles.approvedMessageText}>
-                Owner authorization confirmed. Veterinary features are unlocked.
+                {hasRecord
+                  ? "Veterinary record saved. This pet is now available for record viewing only."
+                  : "Owner authorization confirmed. Veterinary features are unlocked."}
               </Text>
             </View>
 
@@ -458,21 +464,25 @@ export default function ClinicPetScreen() {
                 }
               />
 
-              <View style={styles.divider} />
+              {!hasRecord && (
+                <>
+                  <View style={styles.divider} />
 
-              <ClinicAction
-                icon="add-circle-outline"
-                title="Add Veterinary Record"
-                description="Record a new visit, vaccination, treatment, or service."
-                onPress={() =>
-                  router.push({
-                    pathname: "/add-vet-record",
-                    params: {
-                      petId: String(pet.pet_id),
-                    },
-                  })
-                }
-              />
+                  <ClinicAction
+                    icon="add-circle-outline"
+                    title="Add Veterinary Record"
+                    description="Record a new visit, vaccination, treatment, or service."
+                    onPress={() =>
+                      router.push({
+                        pathname: "/add-vet-record",
+                        params: {
+                          petId: String(pet.pet_id),
+                        },
+                      })
+                    }
+                  />
+                </>
+              )}
             </View>
           </>
         )}
@@ -501,7 +511,7 @@ export default function ClinicPetScreen() {
           </>
         )}
 
-        <Pressable
+        {!hasRecord && <Pressable
           style={({ pressed }) => [
             styles.scanAnotherButton,
 
@@ -512,7 +522,7 @@ export default function ClinicPetScreen() {
           <Ionicons name="scan-outline" size={19} color="#176B3A" />
 
           <Text style={styles.scanAnotherText}>Scan Another Pet</Text>
-        </Pressable>
+        </Pressable>}
       </ScrollView>
     </SafeAreaView>
   );
@@ -717,12 +727,15 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 19,
+    fontSize: 21,
     fontWeight: "800",
     color: "#1E2D24",
   },
 
   content: {
+    width: "100%",
+    maxWidth: 960,
+    alignSelf: "center",
     paddingHorizontal: 21,
     paddingTop: 22,
     paddingBottom: 45,
@@ -737,20 +750,20 @@ const styles = StyleSheet.create({
 
   loadingText: {
     marginTop: 12,
-    fontSize: 12,
+    fontSize: 14,
     color: "#77847C",
   },
 
   errorTitle: {
     marginTop: 14,
-    fontSize: 19,
+    fontSize: 21,
     fontWeight: "800",
     color: "#26352B",
   },
 
   errorText: {
     marginTop: 5,
-    fontSize: 12,
+    fontSize: 14,
     color: "#7A867F",
   },
 
@@ -768,7 +781,7 @@ const styles = StyleSheet.create({
   retryText: {
     color: "#FFFFFF",
     fontWeight: "800",
-    fontSize: 12,
+    fontSize: 14,
   },
 
   petCard: {
@@ -813,7 +826,7 @@ const styles = StyleSheet.create({
   petName: {
     marginTop: 13,
 
-    fontSize: 23,
+    fontSize: 25,
     fontWeight: "900",
 
     color: "#26352B",
@@ -822,7 +835,7 @@ const styles = StyleSheet.create({
   petBreed: {
     marginTop: 3,
 
-    fontSize: 12,
+    fontSize: 14,
 
     color: "#7A867F",
   },
@@ -830,7 +843,7 @@ const styles = StyleSheet.create({
   petCode: {
     marginTop: 5,
 
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "700",
 
     color: "#176B3A",
@@ -862,7 +875,7 @@ const styles = StyleSheet.create({
   },
 
   petStatusText: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: "800",
 
     color: "#267542",
@@ -896,7 +909,7 @@ const styles = StyleSheet.create({
     marginTop: 25,
     marginBottom: 11,
 
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: "800",
 
     color: "#26352B",
@@ -927,14 +940,14 @@ const styles = StyleSheet.create({
   },
 
   authorizationTitle: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "900",
   },
 
   authorizationDescription: {
     marginTop: 3,
 
-    fontSize: 10,
+    fontSize: 12,
     lineHeight: 15,
 
     color: "#66746B",
@@ -1018,7 +1031,7 @@ const styles = StyleSheet.create({
   requestTitle: {
     marginTop: 12,
 
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "900",
 
     color: "#26352B",
@@ -1029,7 +1042,7 @@ const styles = StyleSheet.create({
 
     maxWidth: 300,
 
-    fontSize: 11,
+    fontSize: 13,
     lineHeight: 17,
 
     textAlign: "center",
@@ -1056,7 +1069,7 @@ const styles = StyleSheet.create({
   previousStatusText: {
     flex: 1,
 
-    fontSize: 10,
+    fontSize: 12,
     lineHeight: 15,
 
     color: "#756126",
@@ -1082,7 +1095,7 @@ const styles = StyleSheet.create({
   requestButtonText: {
     color: "#FFFFFF",
 
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "800",
   },
 
@@ -1120,7 +1133,7 @@ const styles = StyleSheet.create({
   pendingTitle: {
     marginTop: 11,
 
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "900",
 
     color: "#6F571E",
@@ -1131,7 +1144,7 @@ const styles = StyleSheet.create({
 
     maxWidth: 300,
 
-    fontSize: 11,
+    fontSize: 13,
     lineHeight: 17,
 
     textAlign: "center",
@@ -1159,7 +1172,7 @@ const styles = StyleSheet.create({
   },
 
   refreshText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
 
     color: "#176B3A",
@@ -1183,7 +1196,7 @@ const styles = StyleSheet.create({
   approvedMessageText: {
     flex: 1,
 
-    fontSize: 10,
+    fontSize: 12,
     lineHeight: 16,
 
     color: "#476151",
@@ -1231,7 +1244,7 @@ const styles = StyleSheet.create({
   },
 
   actionTitle: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "800",
 
     color: "#31453A",
@@ -1240,7 +1253,7 @@ const styles = StyleSheet.create({
   actionDescription: {
     marginTop: 3,
 
-    fontSize: 9,
+    fontSize: 11,
     lineHeight: 14,
 
     color: "#7B877F",
@@ -1281,7 +1294,7 @@ const styles = StyleSheet.create({
   },
 
   infoLabel: {
-    fontSize: 11,
+    fontSize: 13,
 
     color: "#7A867F",
   },
@@ -1289,7 +1302,7 @@ const styles = StyleSheet.create({
   infoValue: {
     maxWidth: "60%",
 
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "700",
 
     textAlign: "right",
@@ -1316,7 +1329,7 @@ const styles = StyleSheet.create({
   marksText: {
     flex: 1,
 
-    fontSize: 11,
+    fontSize: 13,
     lineHeight: 17,
 
     color: "#5E6D64",
@@ -1342,7 +1355,7 @@ const styles = StyleSheet.create({
   },
 
   scanAnotherText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "800",
 
     color: "#176B3A",

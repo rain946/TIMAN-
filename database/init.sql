@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS pets (
     photo_url VARCHAR(255) NULL,
     qr_code VARCHAR(255) UNIQUE,
     pet_status ENUM('Safe', 'Missing', 'Found') DEFAULT 'Safe',
+    archived_at DATETIME NULL,
+    archive_reason ENUM('Deceased', 'Missing / Not Found', 'Other') NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (owner_id)
@@ -126,14 +128,7 @@ CREATE TABLE IF NOT EXISTS vet_records (
     clinic_user_id INT NOT NULL,
     visit_date DATE NOT NULL,
 
-    service_type ENUM(
-        'Checkup',
-        'Vaccination',
-        'Deworming',
-        'Treatment',
-        'Surgery',
-        'Other'
-    ) NOT NULL,
+    service_type VARCHAR(100) NOT NULL,
 
     diagnosis VARCHAR(255) NULL,
     treatment VARCHAR(255) NULL,
@@ -147,6 +142,7 @@ CREATE TABLE IF NOT EXISTS vet_records (
     ) NOT NULL DEFAULT 'Pending',
     completed_at DATETIME NULL,
     cancelled_at DATETIME NULL,
+    rescheduled_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (pet_id)

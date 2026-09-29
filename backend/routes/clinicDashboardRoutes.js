@@ -34,13 +34,15 @@ router.get("/", authMiddleware, async (req, res) => {
       });
     }
 
-    const [[bookedCountRows], [cancelledCountRows], [pendingRequests], [recentActivity]] =
+    const [[bookedCountRows], [rescheduledCountRows], [cancelledCountRows], [pendingRequests], [recentActivity]] =
       await Promise.all([
         db.query(
           `
           SELECT COUNT(*) AS total
-          FROM vet_records
-          WHERE clinic_user_id = ?
+          FROM vet_records vr
+          INNER JOIN pets p ON p.pet_id = vr.pet_id
+          WHERE vr.clinic_user_id = ?
+            AND p.archived_at IS NULL
             AND next_due_date IS NOT NULL
             AND schedule_status = 'Pending'
             AND next_due_date >= DATE_FORMAT(
@@ -57,14 +59,34 @@ router.get("/", authMiddleware, async (req, res) => {
         db.query(
           `
           SELECT COUNT(*) AS total
-          FROM vet_records
-          WHERE clinic_user_id = ?
-            AND schedule_status = 'Cancelled'
-            AND cancelled_at >= DATE_FORMAT(
+          FROM vet_records vr
+          INNER JOIN pets p ON p.pet_id = vr.pet_id
+          WHERE vr.clinic_user_id = ?
+            AND p.archived_at IS NULL
+            AND vr.rescheduled_at >= DATE_FORMAT(
               CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
               '%Y-%m-01'
             )
-            AND cancelled_at < DATE_ADD(
+            AND vr.rescheduled_at < DATE_ADD(
+              LAST_DAY(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')),
+              INTERVAL 1 DAY
+            )
+          `,
+          [clinicUserId]
+        ),
+        db.query(
+          `
+          SELECT COUNT(*) AS total
+          FROM vet_records vr
+          INNER JOIN pets p ON p.pet_id = vr.pet_id
+          WHERE vr.clinic_user_id = ?
+            AND p.archived_at IS NULL
+            AND vr.schedule_status = 'Cancelled'
+            AND vr.next_due_date >= DATE_FORMAT(
+              CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
+              '%Y-%m-01'
+            )
+            AND vr.next_due_date < DATE_ADD(
               LAST_DAY(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')),
               INTERVAL 1 DAY
             )
@@ -85,6 +107,7 @@ router.get("/", authMiddleware, async (req, res) => {
           INNER JOIN pets p ON p.pet_id = ca.pet_id
           WHERE ca.clinic_user_id = ?
             AND ca.status = 'Pending'
+            AND p.archived_at IS NULL
           ORDER BY ca.requested_at DESC, ca.authorization_id DESC
           LIMIT 3
           `,
@@ -109,6 +132,7 @@ router.get("/", authMiddleware, async (req, res) => {
           FROM vet_records vr
           INNER JOIN pets p ON p.pet_id = vr.pet_id
           WHERE vr.clinic_user_id = ?
+            AND p.archived_at IS NULL
           ORDER BY vr.created_at DESC, vr.record_id DESC
           LIMIT 3
           `,
@@ -128,6 +152,7 @@ router.get("/", authMiddleware, async (req, res) => {
       overview: {
         booked: Number(bookedCountRows[0]?.total || 0),
         cancelled: Number(cancelledCountRows[0]?.total || 0),
+        rescheduled: Number(rescheduledCountRows[0]?.total || 0),
       },
       pending_requests: pendingRequests,
       recent_activity: recentActivity.map((item) => ({

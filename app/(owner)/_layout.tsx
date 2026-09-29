@@ -1,8 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 export default function OwnerTabsLayout() {
+  const { width } = useWindowDimensions();
+  const compact = width < 360;
+
   return (
     <Tabs
       screenOptions={{
@@ -10,12 +13,15 @@ export default function OwnerTabsLayout() {
 
         tabBarShowLabel: false,
 
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, compact && styles.compactTabBar],
 
-        tabBarItemStyle: styles.tabBarItem,
+        tabBarItemStyle: [styles.tabBarItem, compact && styles.compactTabBarItem],
 
         sceneStyle: {
           backgroundColor: "#FFFDF7",
+          width: "100%",
+          maxWidth: 680,
+          alignSelf: "center",
         },
       }}
     >
@@ -131,6 +137,15 @@ const styles = StyleSheet.create({
 
   tabBarItem: {
     height: 68,
+  },
+
+  compactTabBar: {
+    height: 70,
+    paddingTop: 2,
+  },
+
+  compactTabBarItem: {
+    height: 62,
   },
 
   tabItemContent: {

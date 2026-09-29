@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     justifyContent: "center",
-    minWidth: 64,
+    minWidth: 0,
   },
   scanTabButton: {
     alignItems: "center",
@@ -112,7 +112,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 4,
     textAlign: "center",
-    width: 64,
+    width: "100%",
+    paddingHorizontal: 2,
   },
   activeTabText: {
     color: "#176B3A",

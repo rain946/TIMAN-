@@ -833,7 +833,7 @@ const styles = StyleSheet.create({
 
   loadingText: {
     marginTop: 12,
-    fontSize: 11,
+    fontSize: 13,
     color: "#76837B",
   },
 
@@ -858,12 +858,15 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "800",
     color: "#1E2D24",
   },
 
   content: {
+    width: "100%",
+    maxWidth: 960,
+    alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 45,
@@ -907,7 +910,7 @@ const styles = StyleSheet.create({
   },
 
   petLabel: {
-    fontSize: 8,
+    fontSize: 11,
     fontWeight: "700",
     color: "#6E8174",
   },
@@ -915,7 +918,7 @@ const styles = StyleSheet.create({
   petName: {
     marginTop: 2,
 
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "900",
     color: "#23442F",
   },
@@ -923,7 +926,7 @@ const styles = StyleSheet.create({
   petDetails: {
     marginTop: 3,
 
-    fontSize: 9,
+    fontSize: 11,
     color: "#6C7D72",
   },
 
@@ -934,7 +937,7 @@ const styles = StyleSheet.create({
   },
 
   recordNumber: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "900",
     color: "#176B3A",
   },
@@ -942,7 +945,7 @@ const styles = StyleSheet.create({
   recordCountLabel: {
     marginTop: 1,
 
-    fontSize: 7,
+    fontSize: 11,
     color: "#718078",
   },
 
@@ -981,7 +984,7 @@ const styles = StyleSheet.create({
   },
 
   addButtonTitle: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "900",
     color: "#FFFFFF",
   },
@@ -989,7 +992,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     marginTop: 3,
 
-    fontSize: 8,
+    fontSize: 11,
     lineHeight: 12,
     color: "#D9EADF",
   },
@@ -1004,7 +1007,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "900",
     color: "#26352B",
   },
@@ -1019,7 +1022,7 @@ const styles = StyleSheet.create({
   },
 
   totalBadgeText: {
-    fontSize: 8,
+    fontSize: 11,
     fontWeight: "800",
     color: "#176B3A",
   },
@@ -1066,7 +1069,7 @@ const styles = StyleSheet.create({
   },
 
   serviceTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "900",
     color: "#2D4035",
   },
@@ -1081,7 +1084,7 @@ const styles = StyleSheet.create({
   },
 
   latestText: {
-    fontSize: 7,
+    fontSize: 11,
     fontWeight: "800",
     color: "#176B3A",
   },
@@ -1096,7 +1099,7 @@ const styles = StyleSheet.create({
   },
 
   dateText: {
-    fontSize: 9,
+    fontSize: 11,
     color: "#7D8981",
   },
 
@@ -1134,7 +1137,7 @@ const styles = StyleSheet.create({
   },
 
   detailLabel: {
-    fontSize: 8,
+    fontSize: 11,
     fontWeight: "700",
     color: "#849088",
   },
@@ -1142,7 +1145,7 @@ const styles = StyleSheet.create({
   detailValue: {
     marginTop: 3,
 
-    fontSize: 10,
+    fontSize: 12,
     lineHeight: 15,
 
     color: "#394A40",
@@ -1180,7 +1183,7 @@ const styles = StyleSheet.create({
   },
 
   nextDueLabel: {
-    fontSize: 7,
+    fontSize: 11,
     fontWeight: "700",
     color: "#8A743B",
   },
@@ -1188,7 +1191,7 @@ const styles = StyleSheet.create({
   nextDueDate: {
     marginTop: 2,
 
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "800",
     color: "#715819",
   },
@@ -1205,7 +1208,7 @@ const styles = StyleSheet.create({
   },
 
   overdueText: {
-    fontSize: 7,
+    fontSize: 11,
     fontWeight: "900",
     color: "#A3453C",
   },
@@ -1215,7 +1218,7 @@ const styles = StyleSheet.create({
   },
 
   todayText: {
-    fontSize: 7,
+    fontSize: 11,
     fontWeight: "900",
     color: "#876415",
   },
@@ -1225,7 +1228,7 @@ const styles = StyleSheet.create({
   },
 
   soonText: {
-    fontSize: 7,
+    fontSize: 11,
     fontWeight: "900",
     color: "#876415",
   },
@@ -1260,14 +1263,14 @@ const styles = StyleSheet.create({
   },
 
   clinicLabel: {
-    fontSize: 7,
+    fontSize: 11,
     color: "#8A958E",
   },
 
   clinicName: {
     marginTop: 2,
 
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: "800",
     color: "#415348",
   },
@@ -1300,7 +1303,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     marginTop: 13,
 
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: "900",
     color: "#31453A",
   },
@@ -1310,7 +1313,7 @@ const styles = StyleSheet.create({
 
     maxWidth: 270,
 
-    fontSize: 9,
+    fontSize: 11,
     lineHeight: 15,
 
     textAlign: "center",
@@ -1337,7 +1340,7 @@ const styles = StyleSheet.create({
   },
 
   emptyButtonText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "800",
     color: "#FFFFFF",
   },
@@ -1360,7 +1363,7 @@ const styles = StyleSheet.create({
   securityText: {
     flex: 1,
 
-    fontSize: 9,
+    fontSize: 11,
     lineHeight: 15,
 
     color: "#617167",
@@ -1400,7 +1403,7 @@ const styles = StyleSheet.create({
   },
 
   completeButtonTitle: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "900",
     color: "#FFFFFF",
   },
@@ -1408,7 +1411,7 @@ const styles = StyleSheet.create({
   completeButtonText: {
     marginTop: 2,
 
-    fontSize: 7,
+    fontSize: 11,
     lineHeight: 11,
 
     color: "#D9EADF",
@@ -1440,7 +1443,7 @@ const styles = StyleSheet.create({
   },
 
   completedBadgeText: {
-    fontSize: 7,
+    fontSize: 11,
     fontWeight: "900",
     color: "#176B3A",
   },
@@ -1471,7 +1474,7 @@ const styles = StyleSheet.create({
   },
 
   cancelledBadgeText: {
-    fontSize: 7,
+    fontSize: 11,
     fontWeight: "900",
     color: "#8E4E49",
   },

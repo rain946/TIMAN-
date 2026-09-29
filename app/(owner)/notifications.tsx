@@ -41,8 +41,6 @@ export default function NotificationsScreen() {
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const [deletingAllRead, setDeletingAllRead] = useState(false);
-
   const loadNotifications = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -255,75 +253,6 @@ export default function NotificationsScreen() {
     );
   };
 
-  const deleteAllReadNotifications = async () => {
-    try {
-      setDeletingAllRead(true);
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        Alert.alert("Session Expired", "Please log in again.");
-
-        router.replace("/login");
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/notifications/read`, {
-        method: "DELETE",
-
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to delete read notifications.");
-      }
-
-      setNotifications((current) => current.filter((item) => !item.is_read));
-    } catch (error: any) {
-      console.log("DELETE ALL READ ERROR:", error);
-
-      Alert.alert(
-        "Unable to Delete",
-        error?.message || "Unable to delete read notifications.",
-      );
-    } finally {
-      setDeletingAllRead(false);
-    }
-  };
-
-  const handleDeleteAllRead = () => {
-    const readCount = notifications.filter((item) => item.is_read).length;
-
-    if (readCount === 0) {
-      Alert.alert(
-        "No Read Notifications",
-        "There are no read notifications to delete.",
-      );
-
-      return;
-    }
-
-    Alert.alert(
-      "Delete All Read",
-      `Delete ${readCount} read notification${readCount === 1 ? "" : "s"}?`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete All",
-          style: "destructive",
-          onPress: deleteAllReadNotifications,
-        },
-      ],
-    );
-  };
-
   const handleNotificationPress = async (notification: NotificationItem) => {
     if (!notification.is_read) {
       await markAsRead(notification.notification_id);
@@ -399,7 +328,7 @@ export default function NotificationsScreen() {
         }
 
         router.push({
-          pathname: "/schedules",
+          pathname: "/(veterinary)/schedules",
           params: {
             petId: String(notification.pet_id),
           },
@@ -492,8 +421,6 @@ export default function NotificationsScreen() {
 
   const unreadCount = notifications.filter((item) => !item.is_read).length;
 
-  const readCount = notifications.filter((item) => item.is_read).length;
-
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -552,26 +479,6 @@ export default function NotificationsScreen() {
               </Pressable>
             )}
 
-            {readCount > 0 && (
-              <Pressable
-                disabled={deletingAllRead}
-                onPress={handleDeleteAllRead}
-                style={({ pressed }) => [
-                  styles.deleteAllButton,
-                  pressed && styles.pressed,
-                ]}
-              >
-                {deletingAllRead ? (
-                  <ActivityIndicator size="small" color="#B5483A" />
-                ) : (
-                  <>
-                    <Ionicons name="trash-outline" size={14} color="#B5483A" />
-
-                    <Text style={styles.deleteAllText}>Delete read</Text>
-                  </>
-                )}
-              </Pressable>
-            )}
           </View>
         </View>
 
@@ -731,6 +638,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 22,
     paddingBottom: 110,
   },
@@ -898,21 +808,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-  },
-
-  deleteAllButton: {
-    minHeight: 32,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 6,
-    gap: 4,
-  },
-
-  deleteAllText: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: "#B5483A",
   },
 
   deleteRow: {

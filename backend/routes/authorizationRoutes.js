@@ -117,6 +117,7 @@ router.post(
           owner_id
         FROM pets
         WHERE pet_id = ?
+          AND archived_at IS NULL
         LIMIT 1
         `,
         [petId]
@@ -395,6 +396,7 @@ router.get(
           ON p.owner_id = u.user_id
 
         WHERE p.qr_code = ?
+          AND p.archived_at IS NULL
 
         LIMIT 1
         `,
@@ -444,6 +446,19 @@ router.get(
           ? authorization.status
           : "None";
 
+      const [recordRows] = await db.query(
+        `
+        SELECT record_id
+        FROM vet_records
+        WHERE pet_id = ?
+          AND clinic_user_id = ?
+        LIMIT 1
+        `,
+        [pet.pet_id, clinicUserId]
+      );
+
+      const hasRecord = recordRows.length > 0;
+
       return res.json({
         success: true,
 
@@ -451,6 +466,8 @@ router.get(
           status === "Approved",
 
         status,
+
+        hasRecord,
 
         authorization,
 
@@ -549,6 +566,7 @@ router.get(
         FROM pets
 
         WHERE pet_id = ?
+          AND archived_at IS NULL
 
         LIMIT 1
         `,
@@ -596,6 +614,17 @@ router.get(
       const authorization =
         rows[0];
 
+      const [recordRows] = await db.query(
+        `
+        SELECT record_id
+        FROM vet_records
+        WHERE pet_id = ?
+          AND clinic_user_id = ?
+        LIMIT 1
+        `,
+        [petId, clinicUserId]
+      );
+
       return res.json({
         success: true,
 
@@ -605,6 +634,8 @@ router.get(
 
         status:
           authorization.status,
+
+        hasRecord: recordRows.length > 0,
 
         authorization,
 
@@ -646,10 +677,17 @@ router.get(
           p.species,
           p.breed,
           p.photo_url
+          ,EXISTS (
+            SELECT 1
+            FROM vet_records vr
+            WHERE vr.pet_id = ca.pet_id
+              AND vr.clinic_user_id = ca.clinic_user_id
+          ) AS has_record
         FROM clinic_authorizations ca
         INNER JOIN pets p
           ON p.pet_id = ca.pet_id
         WHERE ca.clinic_user_id = ?
+          AND p.archived_at IS NULL
         ORDER BY
           CASE ca.status
             WHEN 'Pending' THEN 0
@@ -715,6 +753,7 @@ router.get(
           ON ca.clinic_user_id = u.user_id
 
         WHERE p.owner_id = ?
+          AND p.archived_at IS NULL
 
         ORDER BY
           CASE

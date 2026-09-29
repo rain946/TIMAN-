@@ -45,6 +45,7 @@ type DashboardData = {
   overview: {
     booked: number;
     cancelled: number;
+    rescheduled: number;
   };
   pending_requests: PendingRequest[];
   recent_activity: RecentActivity[];
@@ -59,6 +60,7 @@ const EMPTY_DASHBOARD: DashboardData = {
   overview: {
     booked: 0,
     cancelled: 0,
+    rescheduled: 0,
   },
   pending_requests: [],
   recent_activity: [],
@@ -187,24 +189,6 @@ export default function ClinicDashboardScreen() {
           </Pressable>
         )}
 
-        <Pressable
-          accessibilityRole="button"
-          style={({ pressed }) => [
-            styles.scanCard,
-            pressed && styles.scanCardPressed,
-          ]}
-          onPress={() => router.push("/qr-scanner")}
-        >
-          <View style={styles.scanIcon}>
-            <Ionicons name="qr-code" size={34} color="#176B3A" />
-          </View>
-          <View style={styles.scanCopy}>
-            <Text style={styles.scanTitle}>Scan Pet QR</Text>
-            <Text style={styles.scanDescription}>Identify a pet to begin</Text>
-          </View>
-          <Ionicons name="arrow-forward" size={23} color="#FFFFFF" />
-        </Pressable>
-
         <SectionTitle title="This Month" />
         <View style={styles.overviewRow}>
           <OverviewCard
@@ -218,33 +202,10 @@ export default function ClinicDashboardScreen() {
             label="Cancelled"
             pending
           />
-        </View>
-
-        <SectionTitle title="Quick Actions" />
-        <View style={styles.actionGrid}>
-          <ActionButton
-            icon="paw-outline"
-            title="Authorized Pets"
-            description="View pets"
-            onPress={() => router.push("/authorized-pets")}
-          />
-          <ActionButton
-            icon="shield-checkmark-outline"
-            title="Access Requests"
-            description="Check status"
-            onPress={() => router.push("/access-requests")}
-          />
-          <ActionButton
-            icon="document-text-outline"
-            title="Vet Records"
-            description="Visit history"
-            onPress={() => router.push("/(clinic)/(tabs)/vet-records")}
-          />
-          <ActionButton
-            icon="calendar-outline"
-            title="Schedules"
-            description="Upcoming due"
-            onPress={() => router.push("/(clinic)/clinic-schedules")}
+          <OverviewCard
+            icon="calendar-number-outline"
+            value={loading ? "â€”" : String(dashboard.overview.rescheduled)}
+            label="Rescheduled"
           />
         </View>
 
@@ -355,47 +316,6 @@ function OverviewCard({
       <Text style={styles.overviewValue}>{value}</Text>
       <Text style={styles.overviewLabel}>{label}</Text>
     </View>
-  );
-}
-
-function ActionButton({
-  icon,
-  title,
-  description,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  description: string;
-  onPress?: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled: !onPress }}
-      disabled={!onPress}
-      style={({ pressed }) => [
-        styles.actionCard,
-        !onPress && styles.actionCardDisabled,
-        pressed && styles.pressed,
-      ]}
-      onPress={onPress}
-    >
-      <View style={styles.actionIcon}>
-        <Ionicons name={icon} size={24} color="#176B3A" />
-      </View>
-      <View style={styles.actionText}>
-        <Text style={styles.actionTitle}>{title}</Text>
-        <Text style={styles.actionDescription}>{description}</Text>
-      </View>
-      {onPress ? (
-        <Ionicons name="chevron-forward" size={19} color="#176B3A" />
-      ) : (
-        <View style={styles.soonBadge}>
-          <Text style={styles.soonText}>Soon</Text>
-        </View>
-      )}
-    </Pressable>
   );
 }
 
@@ -540,7 +460,7 @@ function EmptyCard({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFDF7" },
-  content: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 48 },
+  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 10, paddingBottom: 48 },
   brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
   brandIcon: {
     width: 38,
@@ -591,27 +511,6 @@ const styles = StyleSheet.create({
     color: "#A7483E",
     marginTop: 3,
   },
-  scanCard: {
-    minHeight: 112,
-    marginTop: 23,
-    borderRadius: 22,
-    backgroundColor: "#176B3A",
-    padding: 18,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  scanCardPressed: { opacity: 0.84, transform: [{ scale: 0.985 }] },
-  scanIcon: {
-    width: 62,
-    height: 62,
-    borderRadius: 19,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  scanCopy: { flex: 1, marginHorizontal: 15 },
-  scanTitle: { fontSize: 20, fontWeight: "900", color: "#FFFFFF" },
-  scanDescription: { fontSize: 15, color: "#D9E9DD", marginTop: 5 },
   sectionTitle: {
     fontSize: 21,
     fontWeight: "900",
@@ -619,9 +518,10 @@ const styles = StyleSheet.create({
     marginTop: 27,
     marginBottom: 13,
   },
-  overviewRow: { flexDirection: "row", gap: 11 },
+  overviewRow: { flexDirection: "row", flexWrap: "wrap", gap: 11 },
   overviewCard: {
     flex: 1,
+    minWidth: 150,
     minHeight: 127,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
@@ -645,36 +545,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   overviewLabel: { fontSize: 13, color: "#78857D", marginTop: 2 },
-  actionGrid: { gap: 10 },
-  actionCard: {
-    minHeight: 66,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E2E8E4",
-    borderRadius: 16,
-    paddingHorizontal: 13,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  actionCardDisabled: { opacity: 0.72 },
-  actionIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
-    backgroundColor: "#EAF4EB",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionText: { flex: 1, marginLeft: 12 },
-  actionTitle: { fontSize: 16, fontWeight: "800", color: "#26372C" },
-  actionDescription: { fontSize: 13, color: "#8A958E", marginTop: 2 },
-  soonBadge: {
-    backgroundColor: "#F0F3F1",
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-  },
-  soonText: { fontSize: 11, fontWeight: "800", color: "#7B877F" },
   unavailableHint: {
     fontSize: 12,
     lineHeight: 17,

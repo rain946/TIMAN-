@@ -336,6 +336,24 @@ export default function ProfileScreen() {
 
         <View style={styles.menuCard}>
           <MenuItem
+            icon="shield-checkmark-outline"
+            title="Clinic Authorization"
+            description="Review and manage clinic access requests"
+            onPress={() => router.push("/clinic-authorization")}
+          />
+
+          <MenuDivider />
+
+          <MenuItem
+            icon="archive-outline"
+            title="Archived Pets"
+            description="View or restore hidden pets"
+            onPress={() => router.push("/(pets)/archived-pets")}
+          />
+
+          <MenuDivider />
+
+          <MenuItem
             icon="create-outline"
             title="Edit Profile"
             description="Update your personal information"
@@ -493,6 +511,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 22,
     paddingBottom: 24,
   },

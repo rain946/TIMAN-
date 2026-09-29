@@ -331,9 +331,6 @@ export default function ClinicProfileScreen() {
               <Ionicons name="medical" size={13} color="#176B3A" />
               <Text style={styles.roleBadgeText}>Veterinary Clinic</Text>
             </View>
-            {profile?.email ? (
-              <Text style={styles.summaryEmail}>{profile.email}</Text>
-            ) : null}
           </View>
 
           <Text style={styles.sectionTitle}>Clinic Information</Text>
@@ -488,15 +485,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E9EDE9",
   },
-  headerTitle: { fontSize: 20, fontWeight: "900", color: "#1E2D24" },
-  content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
+  headerTitle: { fontSize: 22, fontWeight: "900", color: "#1E2D24" },
+  content: { width: "100%", maxWidth: 960, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
   stateContainer: {
     flex: 1,
     paddingHorizontal: 24,
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 12, color: "#77847C" },
+  loadingText: { marginTop: 12, fontSize: 14, color: "#77847C" },
   errorIcon: {
     width: 58,
     height: 58,
@@ -507,7 +504,7 @@ const styles = StyleSheet.create({
   },
   stateTitle: {
     marginTop: 14,
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: "900",
     color: "#34453B",
   },
@@ -520,7 +517,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  retryText: { fontSize: 11, fontWeight: "900", color: "#FFFFFF" },
+  retryText: { fontSize: 13, fontWeight: "900", color: "#FFFFFF" },
   inlineError: {
     minHeight: 48,
     marginBottom: 14,
@@ -532,7 +529,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  inlineErrorText: { flex: 1, marginLeft: 9, fontSize: 10, color: "#843C34" },
+  inlineErrorText: { flex: 1, marginLeft: 9, fontSize: 12, color: "#843C34" },
   identityCard: {
     minHeight: 232,
     borderRadius: 22,
@@ -575,7 +572,7 @@ const styles = StyleSheet.create({
   clinicName: {
     maxWidth: 290,
     marginTop: 14,
-    fontSize: 20,
+    fontSize: 22,
     lineHeight: 26,
     fontWeight: "900",
     color: "#24352B",
@@ -591,12 +588,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 5,
   },
-  roleBadgeText: { fontSize: 9, fontWeight: "900", color: "#176B3A" },
-  summaryEmail: { marginTop: 9, fontSize: 10, color: "#7A877F" },
+  roleBadgeText: { fontSize: 11, fontWeight: "900", color: "#176B3A" },
   sectionTitle: {
     marginTop: 27,
     marginBottom: 12,
-    fontSize: 17,
+    fontSize: 19,
     fontWeight: "900",
     color: "#1E2D24",
   },
@@ -623,7 +619,7 @@ const styles = StyleSheet.create({
   },
   infoContent: { flex: 1, minWidth: 0, marginLeft: 12 },
   infoLabel: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: "800",
     color: "#839087",
     textTransform: "uppercase",
@@ -631,7 +627,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 18,
     fontWeight: "700",
     color: "#34453B",
@@ -661,8 +657,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   actionContent: { flex: 1, marginLeft: 12 },
-  actionTitle: { fontSize: 13, fontWeight: "900", color: "#2B3B31" },
-  actionDescription: { marginTop: 3, fontSize: 9, color: "#849088" },
+  actionTitle: { fontSize: 15, fontWeight: "900", color: "#2B3B31" },
+  actionDescription: { marginTop: 3, fontSize: 11, color: "#849088" },
   logoutButton: {
     minHeight: 54,
     marginTop: 28,
@@ -675,6 +671,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  logoutText: { fontSize: 12, fontWeight: "900", color: "#A14343" },
+  logoutText: { fontSize: 14, fontWeight: "900", color: "#A14343" },
   pressed: { opacity: 0.72 },
 });

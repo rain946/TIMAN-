@@ -503,6 +503,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 22,
     paddingTop: 23,
     paddingBottom: 50,

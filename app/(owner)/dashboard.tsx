@@ -215,7 +215,7 @@ export default function DashboardScreen() {
 
   const openSchedule = (petId: number) => {
     router.push({
-      pathname: "/schedules",
+      pathname: "/(veterinary)/schedules",
       params: {
         petId: String(petId),
       },
@@ -736,6 +736,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 22,
     paddingBottom: 110,
   },
@@ -852,11 +855,13 @@ const styles = StyleSheet.create({
 
   overviewRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 9,
   },
 
   overviewCard: {
     flex: 1,
+    minWidth: 92,
     minHeight: 116,
     borderRadius: 18,
     paddingVertical: 13,

@@ -28,6 +28,7 @@ type AuthorizationItem = {
   species: string;
   breed: string | null;
   photo_url: string | null;
+  has_record: boolean | number;
 };
 
 const FILTERS: AuthorizationStatus[] = [
@@ -289,7 +290,11 @@ function AuthorizationCard({ request }: { request: AuthorizationItem }) {
           Requested {formatDate(request.requested_at)}
         </Text>
         <View style={styles.cardActionRow}>
-          <Text style={styles.cardAction}>{actionLabel(request.status)}</Text>
+          <Text style={styles.cardAction}>
+            {request.status === "Approved" && Boolean(request.has_record)
+              ? "View Record"
+              : actionLabel(request.status)}
+          </Text>
           <Ionicons name="chevron-forward" size={17} color="#176B3A" />
         </View>
       </View>
@@ -371,11 +376,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
+  headerTitle: { fontSize: 21, fontWeight: "900", color: "#1E2D24" },
   headerSpacer: { width: 44, height: 44 },
-  content: { paddingHorizontal: 20, paddingTop: 21, paddingBottom: 45 },
-  introTitle: { fontSize: 20, fontWeight: "900", color: "#203027" },
-  introText: { marginTop: 4, fontSize: 11, lineHeight: 17, color: "#77847C" },
+  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 21, paddingBottom: 45 },
+  introTitle: { fontSize: 22, fontWeight: "900", color: "#203027" },
+  introText: { marginTop: 4, fontSize: 13, lineHeight: 17, color: "#77847C" },
   filterRow: { gap: 8, paddingVertical: 19 },
   filterButton: {
     minHeight: 42,
@@ -388,7 +393,7 @@ const styles = StyleSheet.create({
     borderColor: "#DDE5DF",
   },
   filterButtonSelected: { backgroundColor: "#176B3A", borderColor: "#176B3A" },
-  filterText: { fontSize: 11, fontWeight: "800", color: "#66746B" },
+  filterText: { fontSize: 13, fontWeight: "800", color: "#66746B" },
   filterTextSelected: { color: "#FFFFFF" },
   list: { gap: 10 },
   card: {
@@ -414,9 +419,9 @@ const styles = StyleSheet.create({
   petPhoto: { width: "100%", height: "100%" },
   cardContent: { flex: 1, marginLeft: 13 },
   cardTopRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  petName: { flex: 1, fontSize: 15, fontWeight: "900", color: "#27372D" },
-  petDetails: { marginTop: 3, fontSize: 10, color: "#7B877F" },
-  requestDate: { marginTop: 7, fontSize: 9, color: "#929C96" },
+  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#27372D" },
+  petDetails: { marginTop: 3, fontSize: 12, color: "#7B877F" },
+  requestDate: { marginTop: 7, fontSize: 11, color: "#929C96" },
   cardActionRow: {
     marginTop: 10,
     flexDirection: "row",
@@ -424,13 +429,13 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   cardAction: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "800",
     color: "#176B3A",
     marginRight: 2,
   },
   statusBadge: { borderRadius: 9, paddingHorizontal: 8, paddingVertical: 5 },
-  statusText: { fontSize: 8, fontWeight: "900" },
+  statusText: { fontSize: 11, fontWeight: "900" },
   pendingBadge: { backgroundColor: "#FFF1DA" },
   pendingText: { color: "#9A6416" },
   approvedBadge: { backgroundColor: "#E6F4E9" },
@@ -449,10 +454,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 11, color: "#77847C" },
+  loadingText: { marginTop: 12, fontSize: 13, color: "#77847C" },
   stateTitle: {
     marginTop: 12,
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 18,
     fontWeight: "700",
     color: "#526158",
@@ -484,6 +489,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 18,
   },
-  retryText: { color: "#FFFFFF", fontSize: 11, fontWeight: "800" },
+  retryText: { color: "#FFFFFF", fontSize: 13, fontWeight: "800" },
   pressed: { opacity: 0.7 },
 });

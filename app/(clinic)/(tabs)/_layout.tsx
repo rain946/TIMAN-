@@ -1,5 +1,5 @@
 import { router, Tabs } from "expo-router";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -10,6 +10,9 @@ import {
 
 export default function ClinicTabsLayout() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const compact = width < 390;
+  const webWide = Platform.OS === "web" && width >= 768;
   const bottomInset = Math.max(insets.bottom, 6);
 
   return (
@@ -18,15 +21,16 @@ export default function ClinicTabsLayout() {
       initialRouteName="clinic-dashboard"
       screenOptions={{
         headerShown: false,
-        sceneStyle: styles.scene,
+        sceneStyle: [styles.scene, webWide && styles.webScene],
         tabBarHideOnKeyboard: true,
         tabBarShowLabel: false,
         tabBarStyle: [
           clinicBottomNavStyles.tabBar,
           {
-            height: 72 + bottomInset,
+            height: (compact ? 66 : 72) + bottomInset,
             paddingBottom: bottomInset,
           },
+          webWide && styles.webTabBar,
         ],
         tabBarItemStyle: clinicBottomNavStyles.tabBarItem,
       }}
@@ -41,6 +45,21 @@ export default function ClinicTabsLayout() {
               activeIcon="home"
               inactiveIcon="home-outline"
               label="Home"
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="clinic-schedule-tab"
+        options={{
+          title: "Schedules",
+          tabBarIcon: ({ focused }) => (
+            <ClinicTabItem
+              focused={focused}
+              activeIcon="calendar"
+              inactiveIcon="calendar-outline"
+              label="Schedule"
             />
           ),
         }}
@@ -96,5 +115,19 @@ export default function ClinicTabsLayout() {
 const styles = StyleSheet.create({
   scene: {
     backgroundColor: "#FFFDF7",
+  },
+  webScene: {
+    width: "100%",
+    maxWidth: 1280,
+    alignSelf: "center",
+  },
+  webTabBar: {
+    width: "100%",
+    maxWidth: 760,
+    alignSelf: "center",
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderLeftColor: "#E4EAE6",
+    borderRightColor: "#E4EAE6",
   },
 });

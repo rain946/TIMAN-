@@ -239,6 +239,14 @@ export default function SchedulesScreen() {
 
   const confirmCancel = useCallback(
     (schedule: ScheduleItem) => {
+      if (schedule.daysRemaining <= 3) {
+        Alert.alert(
+          "Reschedule Required",
+          "This schedule is already within 3 days of its due date and can no longer be cancelled. Please reschedule it instead.",
+        );
+        return;
+      }
+
       Alert.alert(
         "Cancel Schedule?",
         "Are you sure you want to cancel this scheduled treatment?",
@@ -842,6 +850,8 @@ function ScheduleCard({
   onReschedule: () => void;
   onCancel: () => void;
 }) {
+  const canCancel = item.daysRemaining > 3;
+
   return (
     <View style={styles.scheduleCard}>
       <View style={styles.scheduleTop}>
@@ -907,24 +917,31 @@ function ScheduleCard({
           <Ionicons name="calendar-outline" size={16} color="#176B3A" />
           <Text style={styles.rescheduleButtonText}>Reschedule</Text>
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: actionsDisabled }}
-          disabled={actionsDisabled}
-          style={({ pressed }) => [
-            styles.cancelButton,
-            actionsDisabled && styles.actionDisabled,
-            pressed && styles.pressed,
-          ]}
-          onPress={onCancel}
-        >
-          {updating ? (
-            <ActivityIndicator size="small" color="#A7483E" />
-          ) : (
-            <Ionicons name="close-circle-outline" size={16} color="#A7483E" />
-          )}
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </Pressable>
+        {canCancel ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: actionsDisabled }}
+            disabled={actionsDisabled}
+            style={({ pressed }) => [
+              styles.cancelButton,
+              actionsDisabled && styles.actionDisabled,
+              pressed && styles.pressed,
+            ]}
+            onPress={onCancel}
+          >
+            {updating ? (
+              <ActivityIndicator size="small" color="#A7483E" />
+            ) : (
+              <Ionicons name="close-circle-outline" size={16} color="#A7483E" />
+            )}
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </Pressable>
+        ) : (
+          <View style={styles.rescheduleOnlyBadge}>
+            <Ionicons name="information-circle-outline" size={16} color="#876518" />
+            <Text style={styles.rescheduleOnlyText}>Reschedule only</Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -1187,6 +1204,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 50,
@@ -1571,6 +1591,25 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
     color: "#A7483E",
+  },
+
+  rescheduleOnlyBadge: {
+    flex: 1,
+    minHeight: 42,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E7D7A9",
+    backgroundColor: "#FFF9E8",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+
+  rescheduleOnlyText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#876518",
   },
 
   actionDisabled: {

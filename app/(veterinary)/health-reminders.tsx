@@ -148,7 +148,7 @@ export default function HealthRemindersScreen() {
 
   const openReminder = (reminder: HealthSchedule) => {
     router.push({
-      pathname: "/schedules",
+      pathname: "/(veterinary)/schedules",
       params: {
         petId: String(reminder.pet_id),
       },
@@ -627,6 +627,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 45,

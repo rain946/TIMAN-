@@ -25,6 +25,8 @@ const VALID_NOTIFICATION_TYPES = [
   "pet_qr_scan",
 
   "vet_record_added",
+  "schedule_cancelled",
+  "schedule_rescheduled",
 ];
 
 
@@ -132,7 +134,7 @@ function handleNotificationNavigation(
     );
 
     router.push({
-      pathname: "/schedules",
+      pathname: "/(veterinary)/schedules",
       params: {
         petId,
       },
@@ -197,6 +199,11 @@ function handleNotificationNavigation(
       },
     });
 
+    return;
+  }
+
+  if (type === "schedule_cancelled" || type === "schedule_rescheduled") {
+    router.push("/(clinic)/(tabs)/clinic-schedule-tab");
     return;
   }
 
@@ -442,6 +449,10 @@ export default function RootLayout() {
 
       <Stack.Screen
         name="(pets)/pet-profile"
+      />
+
+      <Stack.Screen
+        name="(pets)/archived-pets"
       />
 
       <Stack.Screen

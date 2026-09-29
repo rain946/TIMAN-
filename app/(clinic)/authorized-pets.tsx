@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
   headerSpacer: { width: 44, height: 44 },
-  content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
+  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
   subtitle: { fontSize: 12, color: "#77847C" },
   searchContainer: {
     minHeight: 50,

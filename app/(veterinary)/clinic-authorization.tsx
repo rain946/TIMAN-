@@ -726,6 +726,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 45,

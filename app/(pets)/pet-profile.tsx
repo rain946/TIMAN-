@@ -68,8 +68,60 @@ export default function PetProfileScreen() {
   const [finderMessage, setFinderMessage] = useState("");
 
   const [reportingMissing, setReportingMissing] = useState(false);
+  const [archiving, setArchiving] = useState(false);
 
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
+
+  const archivePet = async (reason: "Deceased" | "Missing / Not Found") => {
+    if (!petId || archiving) return;
+
+    try {
+      setArchiving(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/pets/${petId}/archive`, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ reason }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Unable to archive this pet.");
+      }
+
+      Alert.alert("Pet Archived", data.message, [
+        { text: "OK", onPress: () => router.replace("/pets") },
+      ]);
+    } catch (error) {
+      Alert.alert(
+        "Archive Failed",
+        error instanceof Error ? error.message : "Unable to archive this pet.",
+      );
+    } finally {
+      setArchiving(false);
+    }
+  };
+
+  const confirmArchive = () => {
+    Alert.alert(
+      "Archive Pet",
+      "Choose why this pet should be hidden. Veterinary records will not be deleted.",
+      [
+        { text: "Pet Has Passed Away", onPress: () => void archivePet("Deceased") },
+        { text: "Missing / Not Found", onPress: () => void archivePet("Missing / Not Found") },
+        { text: "Cancel", style: "cancel" },
+      ],
+    );
+  };
 
   const getPhotoUrl = (photoUrl: string | null) => {
     if (!photoUrl) {
@@ -771,7 +823,7 @@ export default function PetProfileScreen() {
             title="Schedule"
             onPress={() =>
               router.push({
-                pathname: "/schedules",
+                pathname: "/(veterinary)/schedules",
                 params: {
                   petId: pet.pet_id.toString(),
                 },
@@ -831,6 +883,23 @@ export default function PetProfileScreen() {
             {pet.identifying_marks || "No identifying marks recorded."}
           </Text>
         </View>
+
+        <Pressable
+          disabled={archiving}
+          style={({ pressed }) => [
+            styles.archiveButton,
+            pressed && styles.pressed,
+            archiving && styles.disabledButton,
+          ]}
+          onPress={confirmArchive}
+        >
+          {archiving ? (
+            <ActivityIndicator size="small" color="#765D21" />
+          ) : (
+            <Ionicons name="archive-outline" size={20} color="#765D21" />
+          )}
+          <Text style={styles.archiveButtonText}>Archive Pet</Text>
+        </Pressable>
 
         <Text style={styles.sectionTitle}>Pet Safety</Text>
 
@@ -1209,6 +1278,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 22,
     paddingBottom: 50,
   },
@@ -1665,5 +1737,24 @@ const styles = StyleSheet.create({
 
   disabledButton: {
     opacity: 0.6,
+  },
+
+  archiveButton: {
+    minHeight: 52,
+    marginTop: 22,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E1D2A8",
+    backgroundColor: "#FFF9E8",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  archiveButtonText: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#765D21",
   },
 });

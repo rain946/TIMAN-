@@ -54,6 +54,8 @@ export default function AddVetRecordScreen() {
 
   const [serviceType, setServiceType] = useState<ServiceType | null>(null);
 
+  const [otherServiceType, setOtherServiceType] = useState("");
+
   const [diagnosis, setDiagnosis] = useState("");
 
   const [treatment, setTreatment] = useState("");
@@ -114,6 +116,15 @@ export default function AddVetRecordScreen() {
       return;
     }
 
+    if (serviceType === "Other" && !otherServiceType.trim()) {
+      Alert.alert(
+        "Other Service Required",
+        "Please enter the veterinary service provided.",
+      );
+
+      return;
+    }
+
     if (nextDueDate.trim() && !isValidDate(nextDueDate.trim())) {
       Alert.alert(
         "Invalid Next Due Date",
@@ -139,7 +150,8 @@ export default function AddVetRecordScreen() {
       const body = {
         visit_date: visitDate.trim(),
 
-        service_type: serviceType,
+        service_type:
+          serviceType === "Other" ? otherServiceType.trim() : serviceType,
 
         diagnosis: diagnosis.trim(),
 
@@ -314,6 +326,28 @@ export default function AddVetRecordScreen() {
                 );
               })}
             </View>
+
+            {serviceType === "Other" && (
+              <View style={styles.otherServiceContainer}>
+                <Ionicons name="create-outline" size={19} color="#718078" />
+                <TextInput
+                  ref={(input) => {
+                    inputRefs.current.otherServiceType = input;
+                  }}
+                  onFocus={() =>
+                    handleInputFocus(inputRefs.current.otherServiceType)
+                  }
+                  value={otherServiceType}
+                  onChangeText={setOtherServiceType}
+                  placeholder="Enter other service type"
+                  placeholderTextColor="#A4ADA7"
+                  style={styles.input}
+                  autoCapitalize="words"
+                  maxLength={100}
+                  returnKeyType="done"
+                />
+              </View>
+            )}
           </View>
 
           <SectionTitle title="Medical Details" />
@@ -642,13 +676,16 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "800",
 
     color: "#1E2D24",
   },
 
   content: {
+    width: "100%",
+    maxWidth: 960,
+    alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 45,
@@ -684,7 +721,7 @@ const styles = StyleSheet.create({
   },
 
   introTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "900",
 
     color: "#23442F",
@@ -693,7 +730,7 @@ const styles = StyleSheet.create({
   introText: {
     marginTop: 4,
 
-    fontSize: 10,
+    fontSize: 12,
     lineHeight: 15,
 
     color: "#607266",
@@ -703,7 +740,7 @@ const styles = StyleSheet.create({
     marginTop: 25,
     marginBottom: 10,
 
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "900",
 
     color: "#26352B",
@@ -730,7 +767,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
 
     color: "#405148",
@@ -739,7 +776,7 @@ const styles = StyleSheet.create({
   required: {
     marginLeft: 3,
 
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "900",
 
     color: "#B54C40",
@@ -770,7 +807,7 @@ const styles = StyleSheet.create({
 
     paddingVertical: 11,
 
-    fontSize: 12,
+    fontSize: 14,
 
     color: "#26352B",
   },
@@ -778,7 +815,7 @@ const styles = StyleSheet.create({
   helperText: {
     marginTop: 6,
 
-    fontSize: 8,
+    fontSize: 11,
     lineHeight: 13,
 
     color: "#8B958F",
@@ -799,7 +836,7 @@ const styles = StyleSheet.create({
 
     backgroundColor: "#FBFCFA",
 
-    fontSize: 11,
+    fontSize: 13,
     lineHeight: 17,
 
     color: "#26352B",
@@ -843,7 +880,7 @@ const styles = StyleSheet.create({
   },
 
   serviceText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "700",
 
     color: "#176B3A",
@@ -851,6 +888,19 @@ const styles = StyleSheet.create({
 
   serviceTextSelected: {
     color: "#FFFFFF",
+  },
+
+  otherServiceContainer: {
+    marginTop: 10,
+    minHeight: 49,
+    paddingHorizontal: 13,
+    borderRadius: 13,
+    borderWidth: 1,
+    borderColor: "#CFE0D3",
+    backgroundColor: "#FBFCFA",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
   },
 
   reminderCard: {
@@ -888,7 +938,7 @@ const styles = StyleSheet.create({
   },
 
   reminderTitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
 
     color: "#75591A",
@@ -897,7 +947,7 @@ const styles = StyleSheet.create({
   reminderText: {
     marginTop: 3,
 
-    fontSize: 9,
+    fontSize: 11,
     lineHeight: 14,
 
     color: "#7B6B3F",
@@ -921,7 +971,7 @@ const styles = StyleSheet.create({
   securityText: {
     flex: 1,
 
-    fontSize: 9,
+    fontSize: 11,
     lineHeight: 15,
 
     color: "#617167",
@@ -944,7 +994,7 @@ const styles = StyleSheet.create({
   },
 
   saveText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "900",
 
     color: "#FFFFFF",
@@ -966,7 +1016,7 @@ const styles = StyleSheet.create({
   },
 
   cancelText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "700",
 
     color: "#176B3A",

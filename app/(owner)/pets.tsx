@@ -155,7 +155,7 @@ export default function PetsScreen() {
 
   const openSchedule = (pet: Pet) => {
     router.push({
-      pathname: "/schedules",
+      pathname: "/(veterinary)/schedules",
       params: {
         petId: pet.pet_id.toString(),
       },
@@ -444,6 +444,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 110,

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useSegments } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -43,6 +43,10 @@ type ClinicSchedule = {
 const STATUSES: ScheduleStatus[] = ["Pending", "Completed", "Cancelled"];
 
 export default function ClinicSchedulesScreen() {
+  const segments = useSegments();
+  const isTabScreen = segments.some(
+    (segment) => String(segment) === "(tabs)",
+  );
   const [schedules, setSchedules] = useState<ClinicSchedule[]>([]);
   const [selectedStatus, setSelectedStatus] =
     useState<ScheduleStatus>("Pending");
@@ -234,17 +238,21 @@ export default function ClinicSchedulesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.header}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          style={({ pressed }) => [
-            styles.backButton,
-            pressed && styles.pressed,
-          ]}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={23} color="#1E2D24" />
-        </Pressable>
+        {isTabScreen ? (
+          <View style={styles.headerSpacer} />
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            style={({ pressed }) => [
+              styles.backButton,
+              pressed && styles.pressed,
+            ]}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={23} color="#1E2D24" />
+          </Pressable>
+        )}
         <Text style={styles.headerTitle}>Schedules</Text>
         <View style={styles.headerSpacer} />
       </View>
@@ -624,10 +632,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
+  headerTitle: { fontSize: 21, fontWeight: "900", color: "#1E2D24" },
   headerSpacer: { width: 44, height: 44 },
-  content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
-  subtitle: { fontSize: 12, color: "#77847C" },
+  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
+  subtitle: { fontSize: 14, color: "#77847C" },
   searchContainer: {
     minHeight: 50,
     marginTop: 17,
@@ -644,7 +652,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
     marginHorizontal: 10,
     paddingVertical: 0,
-    fontSize: 13,
+    fontSize: 15,
     color: "#26372C",
   },
   tabs: { gap: 8, paddingTop: 17, paddingBottom: 4 },
@@ -659,7 +667,7 @@ const styles = StyleSheet.create({
     borderColor: "#DDE5DF",
   },
   tabSelected: { backgroundColor: "#176B3A", borderColor: "#176B3A" },
-  tabText: { fontSize: 10, fontWeight: "800", color: "#66746B" },
+  tabText: { fontSize: 12, fontWeight: "800", color: "#66746B" },
   tabTextSelected: { color: "#FFFFFF" },
   summaryRow: {
     marginTop: 22,
@@ -668,8 +676,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  summaryTitle: { fontSize: 17, fontWeight: "900", color: "#1E2D24" },
-  summaryCount: { fontSize: 10, fontWeight: "700", color: "#718078" },
+  summaryTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
+  summaryCount: { fontSize: 12, fontWeight: "700", color: "#718078" },
   scheduleList: { gap: 11 },
   scheduleCard: {
     borderRadius: 19,
@@ -697,11 +705,11 @@ const styles = StyleSheet.create({
   petPhoto: { width: "100%", height: "100%" },
   cardContent: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 6 },
   cardTopRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  petName: { flex: 1, fontSize: 15, fontWeight: "900", color: "#27372D" },
-  petContext: { marginTop: 3, fontSize: 10, color: "#7B877F" },
+  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#27372D" },
+  petContext: { marginTop: 3, fontSize: 12, color: "#7B877F" },
   serviceType: {
     marginTop: 8,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "800",
     color: "#395044",
   },
@@ -712,7 +720,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 5,
   },
-  dueDate: { fontSize: 9, color: "#76837B" },
+  dueDate: { fontSize: 11, color: "#76837B" },
   dueBadge: {
     minHeight: 21,
     borderRadius: 8,
@@ -720,7 +728,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  dueBadgeText: { fontSize: 7, fontWeight: "900" },
+  dueBadgeText: { fontSize: 11, fontWeight: "900" },
   statusBadge: {
     minHeight: 23,
     borderRadius: 9,
@@ -728,17 +736,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  statusBadgeText: { fontSize: 7, fontWeight: "900" },
+  statusBadgeText: { fontSize: 11, fontWeight: "900" },
   pendingBadge: { backgroundColor: "#FFF0D5" },
   pendingBadgeText: { color: "#A66A15" },
   completedBadge: { backgroundColor: "#E5F3E8" },
   completedBadgeText: { color: "#176B3A" },
   cancelledBadge: { backgroundColor: "#FBE9E6" },
   cancelledBadgeText: { color: "#A7483E" },
-  completedAt: { marginTop: 7, fontSize: 9, color: "#4D725D" },
+  completedAt: { marginTop: 7, fontSize: 11, color: "#4D725D" },
   accessChanged: {
     marginTop: 7,
-    fontSize: 8,
+    fontSize: 11,
     fontWeight: "800",
     color: "#A66A15",
   },
@@ -754,7 +762,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   completeButtonDisabled: { opacity: 0.58 },
-  completeButtonText: { fontSize: 11, fontWeight: "900", color: "#FFFFFF" },
+  completeButtonText: { fontSize: 13, fontWeight: "900", color: "#FFFFFF" },
   stateCard: {
     minHeight: 245,
     marginTop: 12,
@@ -766,7 +774,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 11, color: "#77847C" },
+  loadingText: { marginTop: 12, fontSize: 13, color: "#77847C" },
   emptyIcon: {
     width: 56,
     height: 56,
@@ -793,7 +801,7 @@ const styles = StyleSheet.create({
   },
   stateTitle: {
     marginTop: 13,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "900",
     color: "#34453B",
     textAlign: "center",
@@ -801,7 +809,7 @@ const styles = StyleSheet.create({
   stateDescription: {
     maxWidth: 280,
     marginTop: 6,
-    fontSize: 10,
+    fontSize: 12,
     lineHeight: 16,
     color: "#77847C",
     textAlign: "center",
@@ -815,7 +823,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  retryText: { fontSize: 11, fontWeight: "900", color: "#FFFFFF" },
+  retryText: { fontSize: 13, fontWeight: "900", color: "#FFFFFF" },
   clearButton: {
     minWidth: 108,
     minHeight: 42,
@@ -826,6 +834,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  clearText: { fontSize: 11, fontWeight: "900", color: "#176B3A" },
+  clearText: { fontSize: 13, fontWeight: "900", color: "#176B3A" },
   pressed: { opacity: 0.72 },
 });

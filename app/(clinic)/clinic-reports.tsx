@@ -596,6 +596,9 @@ const styles = StyleSheet.create({
     color: "#1E2D24",
   },
   content: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 48,
