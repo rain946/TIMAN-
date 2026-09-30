@@ -55,9 +55,12 @@ type VetRecord = {
 export default function ClinicVetRecordsScreen() {
   const params = useLocalSearchParams<{
     petId?: string;
+    scanAccessToken?: string;
   }>();
 
   const petId = params.petId;
+  const scanAccessToken = params.scanAccessToken || "";
+  const hasScanAccess = Boolean(scanAccessToken);
 
   const [pet, setPet] = useState<Pet | null>(null);
 
@@ -99,6 +102,8 @@ export default function ClinicVetRecordsScreen() {
             Accept: "application/json",
 
             Authorization: `Bearer ${token}`,
+
+            "X-TIMAN-Scan-Token": scanAccessToken,
           },
         });
 
@@ -142,7 +147,7 @@ export default function ClinicVetRecordsScreen() {
         setRefreshing(false);
       }
     },
-    [petId],
+    [petId, scanAccessToken],
   );
 
   useFocusEffect(
@@ -178,6 +183,7 @@ export default function ClinicVetRecordsScreen() {
           headers: {
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
+            "X-TIMAN-Scan-Token": scanAccessToken,
           },
         },
       );
@@ -266,6 +272,7 @@ export default function ClinicVetRecordsScreen() {
       pathname: "/add-vet-record",
       params: {
         petId: String(petId),
+        scanAccessToken,
       },
     });
   };
@@ -326,7 +333,7 @@ export default function ClinicVetRecordsScreen() {
           </View>
         )}
 
-        <Pressable
+        {hasScanAccess && <Pressable
           style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
           onPress={addRecord}
         >
@@ -343,7 +350,7 @@ export default function ClinicVetRecordsScreen() {
           </View>
 
           <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
-        </Pressable>
+        </Pressable>}
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Medical History</Text>
@@ -374,7 +381,7 @@ export default function ClinicVetRecordsScreen() {
               record after completing the veterinary service.
             </Text>
 
-            <Pressable
+            {hasScanAccess && <Pressable
               style={({ pressed }) => [
                 styles.emptyButton,
 
@@ -385,7 +392,7 @@ export default function ClinicVetRecordsScreen() {
               <Ionicons name="add-circle-outline" size={18} color="#FFFFFF" />
 
               <Text style={styles.emptyButtonText}>Add First Record</Text>
-            </Pressable>
+            </Pressable>}
           </View>
         ) : (
           records.map((record, index) => (
@@ -393,7 +400,11 @@ export default function ClinicVetRecordsScreen() {
               key={record.record_id}
               record={record}
               isLatest={index === 0}
-              onComplete={() => confirmCompleteSchedule(record)}
+              onComplete={
+                hasScanAccess
+                  ? () => confirmCompleteSchedule(record)
+                  : undefined
+              }
             />
           ))
         )}
@@ -438,7 +449,7 @@ function VetRecordCard({
 }: {
   record: VetRecord;
   isLatest: boolean;
-  onComplete: () => void;
+  onComplete?: () => void;
 }) {
   const clinic =
     record.clinic_name || record.clinic_contact_name || "Veterinary Clinic";
@@ -604,7 +615,7 @@ function VetRecordCard({
             )}
           </View>
 
-          {isPending && (
+          {isPending && onComplete && (
             <Pressable
               style={({ pressed }) => [
                 styles.completeButton,
@@ -811,6 +822,7 @@ function formatDateTime(value: string) {
   }
 
   return date.toLocaleString(undefined, {
+    timeZone: "Asia/Manila",
     month: "short",
     day: "numeric",
     year: "numeric",

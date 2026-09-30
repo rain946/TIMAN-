@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -459,6 +460,19 @@ router.get(
 
       const hasRecord = recordRows.length > 0;
 
+      const scanAccessToken =
+        status === "Approved"
+          ? jwt.sign(
+              {
+                type: "clinic_pet_scan",
+                clinicUserId,
+                petId: pet.pet_id,
+              },
+              process.env.JWT_SECRET || "timan_development_secret",
+              { expiresIn: "30m" }
+            )
+          : null;
+
       return res.json({
         success: true,
 
@@ -468,6 +482,8 @@ router.get(
         status,
 
         hasRecord,
+
+        scanAccessToken,
 
         authorization,
 

@@ -464,6 +464,10 @@ export default function RootLayout() {
       />
 
       <Stack.Screen
+        name="(veterinary)/pet-care-schedule-form"
+      />
+
+      <Stack.Screen
         name="(veterinary)/pet-health-records"
       />
 

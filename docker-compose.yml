@@ -1,6 +1,7 @@
 services:
   db:
     image: mysql:8.0
+    command: --default-time-zone=+08:00
     container_name: timan_mysql
     restart: unless-stopped
 
@@ -46,6 +47,7 @@ services:
       DB_PASSWORD: root
       DB_NAME: timan_db
       JWT_SECRET: timan_development_secret
+      TZ: Asia/Manila
 
     volumes:
       - ./backend/uploads:/app/uploads

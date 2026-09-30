@@ -41,9 +41,11 @@ export default function ClinicPetScreen() {
   const params = useLocalSearchParams<{
     petId?: string;
     authorizationStatus?: string;
+    scanAccessToken?: string;
   }>();
 
   const petId = params.petId;
+  const hasScanAccess = Boolean(params.scanAccessToken);
 
   const [pet, setPet] = useState<Pet | null>(null);
 
@@ -442,7 +444,7 @@ export default function ClinicPetScreen() {
 
               <Text style={styles.approvedMessageText}>
                 {hasRecord
-                  ? "Veterinary record saved. This pet is now available for record viewing only."
+                  ? "Owner authorization confirmed. You can view the pet's history or add another veterinary record."
                   : "Owner authorization confirmed. Veterinary features are unlocked."}
               </Text>
             </View>
@@ -459,12 +461,13 @@ export default function ClinicPetScreen() {
                     pathname: "/clinic-vet-records",
                     params: {
                       petId: String(pet.pet_id),
+                      scanAccessToken: params.scanAccessToken || "",
                     },
                   })
                 }
               />
 
-              {!hasRecord && (
+              {hasScanAccess && (
                 <>
                   <View style={styles.divider} />
 
@@ -477,6 +480,7 @@ export default function ClinicPetScreen() {
                         pathname: "/add-vet-record",
                         params: {
                           petId: String(pet.pet_id),
+                          scanAccessToken: params.scanAccessToken || "",
                         },
                       })
                     }

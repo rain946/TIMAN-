@@ -1,4 +1,5 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 const authMiddleware = require(
   "../middleware/authMiddleware"
@@ -8,6 +9,29 @@ const {
 } = require("../services/pushService");
 
 const router = express.Router();
+
+const hasValidClinicScan = (req, petId) => {
+  const scanToken = req.headers["x-timan-scan-token"];
+
+  if (typeof scanToken !== "string" || !scanToken) {
+    return false;
+  }
+
+  try {
+    const payload = jwt.verify(
+      scanToken,
+      process.env.JWT_SECRET || "timan_development_secret"
+    );
+
+    return (
+      payload.type === "clinic_pet_scan" &&
+      Number(payload.clinicUserId) === Number(req.user.userId) &&
+      Number(payload.petId) === Number(petId)
+    );
+  } catch {
+    return false;
+  }
+};
 
 
 
@@ -222,6 +246,13 @@ router.post(
         });
       }
 
+      if (!hasValidClinicScan(req, petId)) {
+        return res.status(403).json({
+          success: false,
+          message: "Scan the pet's TIMAN QR code before adding a veterinary record.",
+        });
+      }
+
       const normalizedServiceType = service_type.trim();
 
       
@@ -268,29 +299,6 @@ router.post(
             "Owner authorization is required before adding veterinary records.",
         });
       }
-
-      const [existingRecords] = await db.query(
-        `
-        SELECT record_id
-        FROM vet_records
-        WHERE pet_id = ?
-          AND clinic_user_id = ?
-        LIMIT 1
-        `,
-        [petId, clinicUserId]
-      );
-
-      if (existingRecords.length > 0) {
-        return res.status(409).json({
-          success: false,
-          message:
-            "A veterinary record has already been added for this approved pet. You can only view the existing record.",
-        });
-      }
-
-      
-      
-      
 
       const [clinicRows] =
         await db.query(
@@ -721,6 +729,7 @@ router.get(
             vr.next_due_date,
             vr.schedule_status,
             vr.completed_at,
+            vr.rescheduled_at,
             vr.created_at,
 
             u.full_name
@@ -949,6 +958,7 @@ router.get(
             vr.next_due_date,
             vr.schedule_status,
             vr.completed_at,
+            vr.rescheduled_at,
             vr.created_at,
 
             u.full_name
@@ -1016,6 +1026,7 @@ router.patch(
           vr.service_type,
           DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
           vr.schedule_status,
+          vr.rescheduled_at,
           p.pet_name
         FROM vet_records vr
         INNER JOIN pets p ON p.pet_id = vr.pet_id
@@ -1047,6 +1058,12 @@ router.patch(
             schedule.schedule_status === "Completed"
               ? "A completed schedule cannot be cancelled."
               : "This schedule has already been cancelled.",
+        });
+      }
+      if (schedule.rescheduled_at) {
+        return res.status(409).json({
+          success: false,
+          message: "A rescheduled schedule can no longer be cancelled.",
         });
       }
 
@@ -1088,6 +1105,7 @@ router.patch(
           AND p.owner_id = ?
           AND vr.next_due_date IS NOT NULL
           AND vr.schedule_status = 'Pending'
+          AND vr.rescheduled_at IS NULL
         `,
         [recordId, ownerId]
       );
@@ -1171,6 +1189,7 @@ router.patch(
           vr.service_type,
           DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
           vr.schedule_status,
+          vr.rescheduled_at,
           p.pet_name
         FROM vet_records vr
         INNER JOIN pets p ON p.pet_id = vr.pet_id
@@ -1204,6 +1223,12 @@ router.patch(
               : "A cancelled schedule cannot be rescheduled.",
         });
       }
+      if (schedule.rescheduled_at) {
+        return res.status(409).json({
+          success: false,
+          message: "This schedule has already been rescheduled and can no longer be changed.",
+        });
+      }
       if (schedule.next_due_date === nextDueDate) {
         return res.status(400).json({
           success: false,
@@ -1231,6 +1256,7 @@ router.patch(
             AND p.owner_id = ?
             AND vr.next_due_date IS NOT NULL
             AND vr.schedule_status = 'Pending'
+            AND vr.rescheduled_at IS NULL
           `,
           [nextDueDate, recordId, ownerId]
         );
@@ -1345,6 +1371,13 @@ router.patch(
 
       const record =
         recordRows[0];
+
+      if (!hasValidClinicScan(req, record.pet_id)) {
+        return res.status(403).json({
+          success: false,
+          message: "Scan the pet's TIMAN QR code before completing this veterinary schedule.",
+        });
+      }
 
 
       if (

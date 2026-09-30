@@ -110,8 +110,6 @@ export default function QRScannerScreen() {
 
       console.log("SCAN STATUS:", response.status);
 
-      console.log("SCAN RESULT:", result);
-
       if (!response.ok) {
         Alert.alert(
           "QR Not Recognized",
@@ -151,6 +149,8 @@ export default function QRScannerScreen() {
           petId: String(result.pet.pet_id),
 
           authorizationStatus: result.status || "None",
+
+          scanAccessToken: result.scanAccessToken || "",
         },
       });
     } catch (error) {

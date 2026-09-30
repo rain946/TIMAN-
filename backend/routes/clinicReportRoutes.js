@@ -79,7 +79,7 @@ router.get("/", authMiddleware, requireClinic, async (req, res) => {
     const [summaryRows] = await db.query(
       `
       SELECT
-        SUM(next_due_date BETWEEN ? AND ?) AS booked,
+        SUM(next_due_date IS NOT NULL AND DATE(created_at) BETWEEN ? AND ?) AS booked,
         SUM(DATE(completed_at) BETWEEN ? AND ?) AS completed,
         SUM(DATE(cancelled_at) BETWEEN ? AND ?) AS cancelled
       FROM vet_records
@@ -109,12 +109,13 @@ router.get("/", authMiddleware, requireClinic, async (req, res) => {
         vr.next_due_date,
         vr.schedule_status,
         vr.completed_at,
-        vr.cancelled_at
+        vr.cancelled_at,
+        vr.created_at
       FROM vet_records vr
       INNER JOIN pets p ON p.pet_id = vr.pet_id
       WHERE vr.clinic_user_id = ?
         AND (
-          vr.next_due_date BETWEEN ? AND ?
+          (vr.next_due_date IS NOT NULL AND DATE(vr.created_at) BETWEEN ? AND ?)
           OR DATE(vr.completed_at) BETWEEN ? AND ?
           OR DATE(vr.cancelled_at) BETWEEN ? AND ?
         )

@@ -44,12 +44,11 @@ router.get("/", authMiddleware, async (req, res) => {
           WHERE vr.clinic_user_id = ?
             AND p.archived_at IS NULL
             AND next_due_date IS NOT NULL
-            AND schedule_status = 'Pending'
-            AND next_due_date >= DATE_FORMAT(
+            AND vr.created_at >= DATE_FORMAT(
               CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
               '%Y-%m-01'
             )
-            AND next_due_date < DATE_ADD(
+            AND vr.created_at < DATE_ADD(
               LAST_DAY(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')),
               INTERVAL 1 DAY
             )

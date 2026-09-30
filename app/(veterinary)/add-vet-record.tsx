@@ -46,6 +46,7 @@ export default function AddVetRecordScreen() {
   } = useKeyboardAwareScroll(45);
   const params = useLocalSearchParams<{
     petId?: string;
+    scanAccessToken?: string;
   }>();
 
   const petId = params.petId;
@@ -175,6 +176,8 @@ export default function AddVetRecordScreen() {
           "Content-Type": "application/json",
 
           Authorization: `Bearer ${token}`,
+
+          "X-TIMAN-Scan-Token": params.scanAccessToken || "",
         },
 
         body: JSON.stringify(body),

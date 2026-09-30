@@ -791,47 +791,6 @@ export default function PetProfileScreen() {
           </View>
         </View>
 
-        <View style={styles.actionRow}>
-          <ActionButton
-            icon="qr-code-outline"
-            title="QR Code"
-            onPress={() =>
-              router.push({
-                pathname: "/pet-qr",
-                params: {
-                  petId: pet.pet_id.toString(),
-                },
-              })
-            }
-          />
-
-          <ActionButton
-            icon="medical-outline"
-            title="Records"
-            onPress={() =>
-              router.push({
-                pathname: "/(veterinary)/pet-health-records",
-                params: {
-                  petId: pet.pet_id.toString(),
-                },
-              })
-            }
-          />
-
-          <ActionButton
-            icon="calendar-outline"
-            title="Schedule"
-            onPress={() =>
-              router.push({
-                pathname: "/(veterinary)/schedules",
-                params: {
-                  petId: pet.pet_id.toString(),
-                },
-              })
-            }
-          />
-        </View>
-
         <Text style={styles.sectionTitle}>Basic Information</Text>
 
         <View style={styles.infoCard}>
@@ -1191,29 +1150,6 @@ export default function PetProfileScreen() {
   );
 }
 
-function ActionButton({
-  icon,
-  title,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
-      onPress={onPress}
-    >
-      <View style={styles.actionIcon}>
-        <Ionicons name={icon} size={24} color="#176B3A" />
-      </View>
-
-      <Text style={styles.actionTitle}>{title}</Text>
-    </Pressable>
-  );
-}
-
 function InfoRow({
   icon,
   label,
@@ -1377,40 +1313,6 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 13,
     fontWeight: "800",
-  },
-
-  actionRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 20,
-    marginBottom: 0,
-  },
-
-  actionButton: {
-    flex: 1,
-    height: 92,
-    borderRadius: 17,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E1E8E3",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  actionIcon: {
-    width: 43,
-    height: 43,
-    borderRadius: 14,
-    backgroundColor: "#EAF4EB",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  actionTitle: {
-    marginTop: 7,
-    color: "#31453A",
-    fontSize: 14,
-    fontWeight: "700",
   },
 
   sectionTitle: {

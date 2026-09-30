@@ -628,6 +628,7 @@ function formatDateTime(value: string) {
   }
 
   return date.toLocaleString(undefined, {
+    timeZone: "Asia/Manila",
     month: "short",
     day: "numeric",
     year: "numeric",

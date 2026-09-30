@@ -2,69 +2,48 @@ const cron = require("node-cron");
 
 const db = require("../config/db");
 
-const {
-  sendExpoPushNotification,
-} = require("./pushService");
-
-
-
-
+const { sendExpoPushNotification } = require("./pushService");
 
 function getReminderDetails(daysDifference) {
   switch (daysDifference) {
     case -1:
       return {
         type: "due_tomorrow",
-        notificationType:
-          "health_reminder",
-        title:
-          "TIMAN Health Reminder",
-        message:
-          "is due tomorrow.",
+        notificationType: "health_reminder",
+        title: "TIMAN Health Reminder",
+        message: "is due tomorrow.",
       };
 
     case 0:
       return {
         type: "due_today",
-        notificationType:
-          "health_reminder",
-        title:
-          "Pet Health Schedule Due Today",
-        message:
-          "is due today.",
+        notificationType: "health_reminder",
+        title: "Pet Health Schedule Due Today",
+        message: "is due today.",
       };
 
     case 1:
       return {
         type: "overdue_1d",
-        notificationType:
-          "health_reminder",
-        title:
-          "Pet Health Schedule Overdue",
-        message:
-          "is 1 day overdue.",
+        notificationType: "health_reminder",
+        title: "Pet Health Schedule Overdue",
+        message: "is 1 day overdue.",
       };
 
     case 3:
       return {
         type: "overdue_3d",
-        notificationType:
-          "health_reminder",
-        title:
-          "Pet Health Reminder",
-        message:
-          "is 3 days overdue.",
+        notificationType: "health_reminder",
+        title: "Pet Health Reminder",
+        message: "is 3 days overdue.",
       };
 
     case 7:
       return {
         type: "overdue_7d",
-        notificationType:
-          "health_reminder",
-        title:
-          "Important Pet Health Reminder",
-        message:
-          "is 7 days overdue.",
+        notificationType: "health_reminder",
+        title: "Important Pet Health Reminder",
+        message: "is 7 days overdue.",
       };
 
     default:
@@ -72,15 +51,7 @@ function getReminderDetails(daysDifference) {
   }
 }
 
-
-
-
-
-async function reminderAlreadySent(
-  recordId,
-  userId,
-  reminderType
-) {
+async function reminderAlreadySent(recordId, userId, reminderType) {
   const [rows] = await db.query(
     `
     SELECT reminder_log_id
@@ -91,19 +62,11 @@ async function reminderAlreadySent(
       AND status = 'sent'
     LIMIT 1
     `,
-    [
-      recordId,
-      userId,
-      reminderType,
-    ]
+    [recordId, userId, reminderType],
   );
 
   return rows.length > 0;
 }
-
-
-
-
 
 async function saveReminderLog({
   recordId,
@@ -144,27 +107,11 @@ async function saveReminderLog({
       status =
         VALUES(status)
     `,
-    [
-      recordId,
-      userId,
-      reminderType,
-      expoTicketId || null,
-      status,
-    ]
+    [recordId, userId, reminderType, expoTicketId || null, status],
   );
 }
 
-
-
-
-
-async function saveInboxNotification({
-  userId,
-  petId,
-  type,
-  title,
-  message,
-}) {
+async function saveInboxNotification({ userId, petId, type, title, message }) {
   await db.query(
     `
     INSERT INTO notifications (
@@ -178,19 +125,9 @@ async function saveInboxNotification({
     )
     VALUES (?, ?, ?, ?, ?, NULL, FALSE)
     `,
-    [
-      userId,
-      type,
-      title,
-      message,
-      petId,
-    ]
+    [userId, type, title, message, petId],
   );
 }
-
-
-
-
 
 async function getSchedulesForReminder() {
   const [rows] = await db.query(
@@ -243,15 +180,11 @@ async function getSchedulesForReminder() {
 
     ORDER BY
       vr.next_due_date ASC
-    `
+    `,
   );
 
   return rows;
 }
-
-
-
-
 
 async function getOwnerPushTokens(userId) {
   const [rows] = await db.query(
@@ -265,243 +198,265 @@ async function getOwnerPushTokens(userId) {
     WHERE user_id = ?
       AND is_active = TRUE
     `,
-    [userId]
+    [userId],
   );
 
   return rows;
 }
 
-
-
-
-
-async function processHealthReminders() {
-  console.log(
-    "======================================"
-  );
-
-  console.log(
-    "TIMAN: Checking health reminders..."
-  );
-
-  console.log(
-    "Scheduler time:",
-    new Date().toISOString()
-  );
-
+async function processPersonalCareReminders() {
   try {
-    const schedules =
-      await getSchedulesForReminder();
+    const [schedules] = await db.query(
+      `SELECT pcs.care_schedule_id, pcs.pet_id, pcs.owner_id, pcs.care_type,
+              pcs.scheduled_date, p.pet_name,
+              DATEDIFF(DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')), pcs.scheduled_date) AS days_difference
+       FROM pet_care_schedules pcs
+       INNER JOIN pets p ON p.pet_id = pcs.pet_id AND p.owner_id = pcs.owner_id
+       WHERE pcs.status = 'Pending'
+         AND DATEDIFF(DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')), pcs.scheduled_date)
+             IN (-1, 0, 1, 3, 7)
+       ORDER BY pcs.scheduled_date ASC`,
+    );
 
     console.log(
-      `TIMAN: ${schedules.length} schedule(s) require reminder checking.`
+      `TIMAN: ${schedules.length} personal care reminder(s) require checking.`,
+    );
+
+    for (const schedule of schedules) {
+      const reminder = getReminderDetails(Number(schedule.days_difference));
+      if (!reminder) continue;
+
+      const [existing] = await db.query(
+        `SELECT care_reminder_log_id FROM pet_care_reminder_logs
+         WHERE care_schedule_id=? AND owner_id=? AND reminder_type=? AND status='sent' LIMIT 1`,
+        [schedule.care_schedule_id, schedule.owner_id, reminder.type],
+      );
+      if (existing.length) continue;
+
+      const title = "TIMAN Personal Care Reminder";
+      const body = `${schedule.pet_name}'s ${schedule.care_type.toLowerCase()} ${reminder.message}`;
+      const tokens = await getOwnerPushTokens(schedule.owner_id);
+      let sent = false;
+      let ticketId = null;
+
+      for (const token of tokens) {
+        const result = await sendExpoPushNotification({
+          to: token.expo_push_token,
+          pushTokenId: token.push_token_id,
+          userId: schedule.owner_id,
+          title,
+          body,
+          data: {
+            type: "personal_care_reminder",
+            careScheduleId: schedule.care_schedule_id,
+            petId: schedule.pet_id,
+            careType: schedule.care_type,
+            scheduledDate: schedule.scheduled_date,
+          },
+        });
+        if (result.success) {
+          sent = true;
+          ticketId = result.ticket?.id || null;
+        }
+      }
+
+      if (sent) {
+        await saveInboxNotification({
+          userId: schedule.owner_id,
+          petId: schedule.pet_id,
+          type: "personal_care_reminder",
+          title,
+          message: body,
+        });
+        await db.query(
+          `INSERT INTO pet_care_reminder_logs
+           (care_schedule_id, owner_id, reminder_type, reminder_date, expo_ticket_id, status)
+           VALUES (?, ?, ?, DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')), ?, 'sent')
+           ON DUPLICATE KEY UPDATE expo_ticket_id=VALUES(expo_ticket_id), status=VALUES(status)`,
+          [
+            schedule.care_schedule_id,
+            schedule.owner_id,
+            reminder.type,
+            ticketId,
+          ],
+        );
+      }
+    }
+  } catch (error) {
+    console.error("TIMAN PERSONAL CARE REMINDER ERROR:", error);
+  }
+}
+
+async function processHealthReminders() {
+  console.log("======================================");
+
+  console.log("TIMAN: Checking health reminders...");
+
+  console.log("Scheduler time:", new Date().toISOString());
+
+  try {
+    const schedules = await getSchedulesForReminder();
+
+    console.log(
+      `TIMAN: ${schedules.length} schedule(s) require reminder checking.`,
     );
 
     for (const schedule of schedules) {
       try {
-        const reminder =
-          getReminderDetails(
-            Number(
-              schedule.days_difference
-            )
-          );
+        const reminder = getReminderDetails(Number(schedule.days_difference));
 
         if (!reminder) {
           continue;
         }
 
         console.log(
-          `TIMAN: Checking ${schedule.pet_name} - ${schedule.service_type} - ${reminder.type}`
+          `TIMAN: Checking ${schedule.pet_name} - ${schedule.service_type} - ${reminder.type}`,
         );
 
-
-        const alreadySent =
-          await reminderAlreadySent(
-            schedule.record_id,
-            schedule.owner_id,
-            reminder.type
-          );
+        const alreadySent = await reminderAlreadySent(
+          schedule.record_id,
+          schedule.owner_id,
+          reminder.type,
+        );
 
         if (alreadySent) {
           console.log(
-            `TIMAN: ${reminder.type} already sent for record ${schedule.record_id}.`
+            `TIMAN: ${reminder.type} already sent for record ${schedule.record_id}.`,
           );
 
           continue;
         }
 
-
         const body =
-          `${schedule.pet_name}'s ${schedule.service_type} ` +
-          reminder.message;
+          `${schedule.pet_name}'s ${schedule.service_type} ` + reminder.message;
 
-
-        const tokens =
-          await getOwnerPushTokens(
-            schedule.owner_id
-          );
+        const tokens = await getOwnerPushTokens(schedule.owner_id);
 
         if (tokens.length === 0) {
           console.log(
-            `TIMAN: No active push token for owner ${schedule.owner_id}.`
+            `TIMAN: No active push token for owner ${schedule.owner_id}.`,
           );
 
           continue;
         }
-
 
         let notificationSent = false;
         let lastTicketId = null;
 
         for (const token of tokens) {
-          const result =
-            await sendExpoPushNotification({
-              to:
-                token.expo_push_token,
+          const result = await sendExpoPushNotification({
+            to: token.expo_push_token,
 
-              pushTokenId:
-                token.push_token_id,
+            pushTokenId: token.push_token_id,
 
-              userId:
-                schedule.owner_id,
+            userId: schedule.owner_id,
 
-              title:
-                reminder.title,
+            title: reminder.title,
 
-              body,
+            body,
 
-              data: {
-                type:
-                  "health-reminder",
+            data: {
+              type: "health-reminder",
 
-                reminderType:
-                  reminder.type,
+              reminderType: reminder.type,
 
-                recordId:
-                  schedule.record_id,
+              recordId: schedule.record_id,
 
-                petId:
-                  schedule.pet_id,
+              petId: schedule.pet_id,
 
-                serviceType:
-                  schedule.service_type,
+              serviceType: schedule.service_type,
 
-                nextDueDate:
-                  schedule.next_due_date,
-              },
-            });
+              nextDueDate: schedule.next_due_date,
+            },
+          });
 
           if (result.success) {
             notificationSent = true;
 
-            lastTicketId =
-              result.ticket?.id ||
-              null;
+            lastTicketId = result.ticket?.id || null;
 
-            console.log(
-              `TIMAN: Push accepted for ${schedule.pet_name}.`
-            );
+            console.log(`TIMAN: Push accepted for ${schedule.pet_name}.`);
           } else {
             console.log(
               `TIMAN: Push failed for ${schedule.pet_name}:`,
-              result.message ||
-                result.error
+              result.message || result.error,
             );
           }
         }
 
-
         if (notificationSent) {
-
           await saveInboxNotification({
-            userId:
-              schedule.owner_id,
+            userId: schedule.owner_id,
 
-            petId:
-              schedule.pet_id,
+            petId: schedule.pet_id,
 
-            type:
-              reminder.notificationType,
+            type: reminder.notificationType,
 
-            title:
-              reminder.title,
+            title: reminder.title,
 
-            message:
-              body,
+            message: body,
           });
 
           console.log(
-            `TIMAN: Inbox notification saved for ${schedule.pet_name}.`
+            `TIMAN: Inbox notification saved for ${schedule.pet_name}.`,
           );
 
-
           await saveReminderLog({
-            recordId:
-              schedule.record_id,
+            recordId: schedule.record_id,
 
-            userId:
-              schedule.owner_id,
+            userId: schedule.owner_id,
 
-            reminderType:
-              reminder.type,
+            reminderType: reminder.type,
 
-            expoTicketId:
-              lastTicketId,
+            expoTicketId: lastTicketId,
 
-            status:
-              "sent",
+            status: "sent",
           });
 
           console.log(
-            `TIMAN: ${reminder.type} logged for ${schedule.pet_name}.`
+            `TIMAN: ${reminder.type} logged for ${schedule.pet_name}.`,
           );
         }
       } catch (scheduleError) {
         console.error(
           `TIMAN REMINDER RECORD ERROR (${schedule.record_id}):`,
-          scheduleError
+          scheduleError,
         );
       }
     }
 
-    console.log(
-      "TIMAN: Health reminder check completed."
-    );
+    console.log("TIMAN: Health reminder check completed.");
   } catch (error) {
-    console.error(
-      "TIMAN REMINDER SCHEDULER ERROR:",
-      error
-    );
+    console.error("TIMAN REMINDER SCHEDULER ERROR:", error);
   }
 
-  console.log(
-    "======================================"
-  );
+  console.log("======================================");
 }
 
-
 function startReminderScheduler() {
-  console.log(
-    "TIMAN reminder scheduler started."
-  );
+  console.log("TIMAN reminder scheduler started.");
 
   cron.schedule(
     "0 8 * * *",
     async () => {
       await processHealthReminders();
+      await processPersonalCareReminders();
     },
     {
-      timezone:
-        "Asia/Manila",
-    }
+      timezone: "Asia/Manila",
+    },
   );
 
   setTimeout(() => {
     processHealthReminders();
+    processPersonalCareReminders();
   }, 5000);
 }
 
 module.exports = {
   startReminderScheduler,
   processHealthReminders,
+  processPersonalCareReminders,
 };
+
+// Keep scheduler exports at the end of the module.

@@ -366,15 +366,18 @@ export default function ClinicProfileScreen() {
             />
           </View>
 
-          <Text style={styles.sectionTitle}>Account</Text>
+          <Text style={styles.sectionTitle}>Reports</Text>
           <View style={styles.actionCard}>
             <ActionRow
               icon="bar-chart-outline"
-              title="Reports"
-              description="View and download clinic reports"
+              title="Clinic Reports"
+              description="View accurate clinic schedule and treatment totals"
               onPress={() => router.push("/(clinic)/clinic-reports")}
             />
-            <Divider inset />
+          </View>
+
+          <Text style={styles.sectionTitle}>Account</Text>
+          <View style={styles.actionCard}>
             <ActionRow
               icon="create-outline"
               title="Edit Profile"

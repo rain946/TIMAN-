@@ -47,10 +47,20 @@ router.get("/api/public/pets/:qrCode", async (req, res) => {
         p.pet_status,
         p.qr_code,
         u.full_name AS owner_name,
-        u.contact_number AS owner_contact
+        u.contact_number AS owner_contact,
+        lr.lost_report_id AS active_lost_report_id
       FROM pets p
       INNER JOIN users u
         ON p.owner_id = u.user_id
+      LEFT JOIN lost_pet_reports lr
+        ON lr.lost_report_id = (
+          SELECT lr2.lost_report_id
+          FROM lost_pet_reports lr2
+          WHERE lr2.pet_id = p.pet_id
+            AND lr2.case_status = 'Active'
+          ORDER BY lr2.lost_report_id DESC
+          LIMIT 1
+        )
       WHERE p.qr_code = ?
       LIMIT 1
       `,
@@ -64,9 +74,15 @@ router.get("/api/public/pets/:qrCode", async (req, res) => {
       });
     }
 
+    const pet = rows[0];
+    const isMissing = pet.active_lost_report_id !== null;
+
+    delete pet.active_lost_report_id;
+    pet.pet_status = isMissing ? "Missing" : "Safe";
+
     return res.json({
       success: true,
-      pet: rows[0],
+      pet,
     });
   } catch (error) {
     console.error("PUBLIC PET ERROR:", error);
@@ -106,7 +122,8 @@ router.get("/public/pet/:qrCode", async (req, res) => {
 
           lr.current_condition,
           lr.owner_message,
-          lr.missing_since
+          lr.missing_since,
+          lr.lost_report_id AS active_lost_report_id
 
         FROM pets p
 
@@ -217,7 +234,9 @@ router.get("/public/pet/:qrCode", async (req, res) => {
       pet.identifying_marks || "No identifying marks recorded."
     );
 
-    const status = escapeHtml(pet.pet_status);
+    const isMissing = pet.active_lost_report_id !== null;
+
+    const status = isMissing ? "Missing" : "Safe";
 
     const ownerName = escapeHtml(
       pet.owner_name || "Pet Owner"
@@ -234,9 +253,6 @@ router.get("/public/pet/:qrCode", async (req, res) => {
     const petId =
       `PET-${String(pet.pet_id).padStart(4, "0")}`;
 
-    const isMissing =
-      pet.pet_status === "Missing";
-
     const currentCondition = escapeHtml(
       pet.current_condition || "Unknown"
     );
@@ -245,12 +261,7 @@ router.get("/public/pet/:qrCode", async (req, res) => {
       pet.owner_message || ""
     );
 
-    const statusClass =
-      pet.pet_status === "Missing"
-        ? "missing"
-        : pet.pet_status === "Found"
-        ? "found"
-        : "safe";
+    const statusClass = isMissing ? "missing" : "safe";
 
     const statusMessage = isMissing
       ? `
@@ -789,7 +800,7 @@ router.get("/public/pet/:qrCode", async (req, res) => {
 
             </main>
 
-            <script>
+            ${isMissing ? `<script>
               (function () {
                 const qrCode =
                   ${JSON.stringify(pet.qr_code)};
@@ -1082,7 +1093,7 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                     }
                   );
               })();
-            </script>
+            </script>` : ""}
 
           </body>
         </html>
@@ -1225,13 +1236,6 @@ router.post(
 
       const pet = petRows[0];
 
-      const wasAlreadyMissing =
-        pet.pet_status === "Missing";
-
-      
-      
-      
-
       const [activeReportRows] =
         await connection.query(
           `
@@ -1252,89 +1256,41 @@ router.post(
           [pet.pet_id]
         );
 
-      let lostReportId;
-
-      let createdAutomaticReport = false;
-
-      
-      
-      
-
       if (activeReportRows.length === 0) {
-        const automaticMessage =
-          "This pet was automatically marked as missing after its permanent QR code was scanned.";
+        await connection.commit();
+        connection.release();
+        connection = null;
 
-        const [insertReportResult] =
-          await connection.query(
-            `
-              INSERT INTO lost_pet_reports (
-                pet_id,
-                owner_id,
-                current_condition,
-                owner_message,
-                last_seen_latitude,
-                last_seen_longitude,
-                case_status
-              )
-              VALUES (
-                ?,
-                ?,
-                'Unknown',
-                ?,
-                ?,
-                ?,
-                'Active'
-              )
-            `,
-            [
-              pet.pet_id,
-              pet.owner_id,
-              automaticMessage,
-              validLatitude,
-              validLongitude,
-            ]
-          );
-
-        lostReportId =
-          insertReportResult.insertId;
-
-        createdAutomaticReport = true;
-      } else {
-        lostReportId =
-          activeReportRows[0].lost_report_id;
-
-        
-        
-        if (locationShared) {
-          await connection.query(
-            `
-              UPDATE lost_pet_reports
-              SET
-                last_seen_latitude = ?,
-                last_seen_longitude = ?
-              WHERE lost_report_id = ?
-            `,
-            [
-              validLatitude,
-              validLongitude,
-              lostReportId,
-            ]
-          );
-        }
+        return res.status(200).json({
+          success: true,
+          message: "Safe pet profile viewed. No lost-pet scan was recorded.",
+          scan: null,
+          pet: {
+            petId: pet.pet_id,
+            petName: pet.pet_name,
+            status: "Safe",
+          },
+          notified: {
+            ownerDevices: 0,
+            approvedClinics: 0,
+            clinicDevices: 0,
+          },
+        });
       }
 
-      
-      
-      
+      const lostReportId = activeReportRows[0].lost_report_id;
 
-      if (!wasAlreadyMissing) {
+      if (locationShared) {
         await connection.query(
           `
-            UPDATE pets
-            SET pet_status = 'Missing'
-            WHERE pet_id = ?
+            UPDATE lost_pet_reports
+            SET
+              last_seen_latitude = ?,
+              last_seen_longitude = ?
+            WHERE lost_report_id = ?
+              AND case_status = 'Active'
           `,
-          [pet.pet_id]
+          [validLatitude, validLongitude, lostReportId]
         );
       }
 
@@ -1446,18 +1402,12 @@ router.post(
 
 
       const ownerTitle =
-        wasAlreadyMissing
-          ? `${pet.pet_name}'s QR was scanned`
-          : `${pet.pet_name} may have been found`;
+        `${pet.pet_name}'s QR was scanned while marked as Missing`;
 
       const ownerBody =
         locationShared
-          ? wasAlreadyMissing
-            ? `Someone scanned ${pet.pet_name}'s QR code and shared a location. Check Missing Pet Details.`
-            : `Someone scanned ${pet.pet_name}'s QR code. TIMAN marked the pet as missing and received a scan location.`
-          : wasAlreadyMissing
-            ? `Someone scanned ${pet.pet_name}'s QR code. No location was shared.`
-            : `Someone scanned ${pet.pet_name}'s QR code. TIMAN marked the pet as missing. No location was shared.`;
+          ? `Someone scanned ${pet.pet_name}'s QR code while ${pet.pet_name} is marked as Missing and shared a location. Check Missing Pet Details.`
+          : `Someone scanned ${pet.pet_name}'s QR code while ${pet.pet_name} is marked as Missing. No location was shared.`;
 
       for (const tokenRow of ownerTokenRows) {
         notificationPromises.push(
@@ -1539,8 +1489,7 @@ router.post(
           scanId:
             scanResult.insertId,
           lostReportId,
-          wasAlreadyMissing,
-          createdAutomaticReport,
+          activeMissingReport: true,
           locationShared,
           ownerPushTokens:
             ownerTokenRows.length,
@@ -1591,11 +1540,6 @@ router.post(
           status:
             "Missing",
         },
-
-        automaticMissing:
-          !wasAlreadyMissing,
-
-        createdAutomaticReport,
 
         notified: {
           ownerDevices:

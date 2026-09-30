@@ -4,7 +4,6 @@ import { router, useFocusEffect, useSegments } from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Pressable,
   RefreshControl,
@@ -54,7 +53,6 @@ export default function ClinicSchedulesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
-  const [completingId, setCompletingId] = useState<number | null>(null);
   const requestInFlight = useRef(false);
 
   const loadSchedules = useCallback(async (showLoading = true) => {
@@ -160,78 +158,6 @@ export default function ClinicSchedulesScreen() {
     loadSchedules(false);
   }, [loadSchedules]);
 
-  const completeSchedule = useCallback(
-    async (schedule: ClinicSchedule) => {
-      if (completingId !== null) return;
-      setCompletingId(schedule.record_id);
-
-      try {
-        const token = await AsyncStorage.getItem("token");
-        if (!token) {
-          router.replace("/login");
-          return;
-        }
-
-        const response = await fetch(
-          `${API_URL}/vet-records/${schedule.record_id}/complete`,
-          {
-            method: "PATCH",
-            headers: {
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        const responseText = await response.text();
-        let data: any = {};
-
-        try {
-          data = responseText ? JSON.parse(responseText) : {};
-        } catch {
-          data = { message: responseText };
-        }
-
-        if (response.status === 401) {
-          router.replace("/login");
-          return;
-        }
-
-        if (!response.ok || !data.success) {
-          throw new Error(
-            data.message || "Unable to complete health schedule.",
-          );
-        }
-
-        await loadSchedules(false);
-        Alert.alert(
-          "Schedule Completed",
-          data.message || "The schedule has been completed.",
-        );
-      } catch (completeError) {
-        Alert.alert(
-          "Unable to Complete Schedule",
-          completeError instanceof Error
-            ? completeError.message
-            : "Please try again.",
-        );
-      } finally {
-        setCompletingId(null);
-      }
-    },
-    [completingId, loadSchedules],
-  );
-
-  const confirmCompletion = (schedule: ClinicSchedule) => {
-    Alert.alert(
-      "Mark Schedule as Completed?",
-      `This confirms that the scheduled veterinary service for ${schedule.pet_name} has been completed.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Mark Completed", onPress: () => completeSchedule(schedule) },
-      ],
-    );
-  };
-
   const showSearchEmpty =
     statusSchedules.length > 0 && visibleSchedules.length === 0;
 
@@ -316,7 +242,7 @@ export default function ClinicSchedulesScreen() {
                 <Text
                   style={[styles.tabText, selected && styles.tabTextSelected]}
                 >
-                  {status} ({counts[status]})
+                  {status === "Pending" ? "Booked" : status} ({counts[status]})
                 </Text>
               </Pressable>
             );
@@ -325,7 +251,9 @@ export default function ClinicSchedulesScreen() {
 
         {!loading && !error && (
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryTitle}>{selectedStatus} Schedules</Text>
+            <Text style={styles.summaryTitle}>
+              {selectedStatus === "Pending" ? "Booked" : selectedStatus} Schedules
+            </Text>
             <Text style={styles.summaryCount}>
               {visibleSchedules.length}{" "}
               {visibleSchedules.length === 1 ? "schedule" : "schedules"}
@@ -380,9 +308,6 @@ export default function ClinicSchedulesScreen() {
               <ScheduleCard
                 key={schedule.record_id}
                 schedule={schedule}
-                completing={completingId === schedule.record_id}
-                completionDisabled={completingId !== null}
-                onComplete={() => confirmCompletion(schedule)}
               />
             ))}
           </View>
@@ -394,14 +319,8 @@ export default function ClinicSchedulesScreen() {
 
 function ScheduleCard({
   schedule,
-  completing,
-  completionDisabled,
-  onComplete,
 }: {
   schedule: ClinicSchedule;
-  completing: boolean;
-  completionDisabled: boolean;
-  onComplete: () => void;
 }) {
   const imageUrl = getImageUrl(schedule.photo_url);
   const dueState = getDueState(schedule.next_due_date);
@@ -409,22 +328,9 @@ function ScheduleCard({
     .filter(Boolean)
     .join(" • ");
 
-  const openPet = () =>
-    router.push({
-      pathname: "/clinic-pet",
-      params: { petId: String(schedule.pet_id) },
-    });
-
   return (
     <View style={styles.scheduleCard}>
-      <Pressable
-        accessibilityRole="button"
-        style={({ pressed }) => [
-          styles.cardMain,
-          pressed && styles.cardPressed,
-        ]}
-        onPress={openPet}
-      >
+      <View style={styles.cardMain}>
         <View style={styles.photoContainer}>
           {imageUrl ? (
             <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
@@ -474,35 +380,8 @@ function ScheduleCard({
           )}
         </View>
 
-        <Ionicons name="chevron-forward" size={19} color="#95A099" />
-      </Pressable>
+      </View>
 
-      {schedule.schedule_status === "Pending" && schedule.can_open && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: completionDisabled }}
-          disabled={completionDisabled}
-          style={({ pressed }) => [
-            styles.completeButton,
-            completionDisabled && styles.completeButtonDisabled,
-            pressed && styles.pressed,
-          ]}
-          onPress={onComplete}
-        >
-          {completing ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Ionicons
-              name="checkmark-circle-outline"
-              size={18}
-              color="#FFFFFF"
-            />
-          )}
-          <Text style={styles.completeButtonText}>
-            {completing ? "Completing..." : "Mark Completed"}
-          </Text>
-        </Pressable>
-      )}
     </View>
   );
 }
@@ -525,7 +404,7 @@ function StatusBadge({ status }: { status: ScheduleStatus }) {
           status === "Cancelled" && styles.cancelledBadgeText,
         ]}
       >
-        {status.toUpperCase()}
+        {status === "Pending" ? "BOOKED" : status.toUpperCase()}
       </Text>
     </View>
   );
@@ -534,7 +413,7 @@ function StatusBadge({ status }: { status: ScheduleStatus }) {
 function EmptyState({ status }: { status: ScheduleStatus }) {
   const content = {
     Pending: {
-      title: "No pending schedules",
+      title: "No booked schedules",
       description:
         "New follow-up schedules created from veterinary records will appear here.",
       icon: "calendar-outline" as const,
@@ -599,6 +478,7 @@ function formatDateOnly(value: string) {
   const date = parseDateOnly(value);
   if (!date) return "Date unavailable";
   return date.toLocaleDateString([], {
+    timeZone: "Asia/Manila",
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -609,6 +489,7 @@ function formatDateTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Date unavailable";
   return date.toLocaleDateString([], {
+    timeZone: "Asia/Manila",
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -750,19 +631,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#A66A15",
   },
-  completeButton: {
-    minHeight: 47,
-    marginHorizontal: 14,
-    marginBottom: 14,
-    borderRadius: 13,
-    backgroundColor: "#176B3A",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  completeButtonDisabled: { opacity: 0.58 },
-  completeButtonText: { fontSize: 13, fontWeight: "900", color: "#FFFFFF" },
   stateCard: {
     minHeight: 245,
     marginTop: 12,

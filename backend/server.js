@@ -33,6 +33,9 @@ const clinicDashboardRoutes =
 const clinicReportRoutes =
   require("./routes/clinicReportRoutes");
 
+const petCareScheduleRoutes =
+  require("./routes/petCareScheduleRoutes");
+
 const {
   startReminderScheduler,
 } = require("./services/reminderScheduler");
@@ -117,6 +120,11 @@ app.use(
 app.use(
   "/api/clinic-reports",
   clinicReportRoutes
+);
+
+app.use(
+  "/api/pet-care-schedules",
+  petCareScheduleRoutes
 );
 
 // Public pet profile routes

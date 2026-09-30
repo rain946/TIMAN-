@@ -31,6 +31,7 @@ type ClinicReportRecord = {
   schedule_status: "Pending" | "Completed" | "Cancelled";
   completed_at: string | null;
   cancelled_at: string | null;
+  created_at: string;
 };
 
 type ClinicReport = {
@@ -295,9 +296,8 @@ export default function ClinicReportsScreen() {
                 color="#176B3A"
               />
               <Text style={styles.metricNoteText}>
-                Booked counts scheduled dates in this period. Completed and
-                Cancelled use the actual completion or cancellation date, so a
-                treatment may appear in more than one metric.
+                Booked uses the date the clinic created the schedule. Completed
+                and Cancelled use the actual action date.
               </Text>
             </View>
 
@@ -411,6 +411,7 @@ function ReportRecordCard({ record }: { record: ClinicReportRecord }) {
       </View>
 
       <Text style={styles.serviceType}>{record.service_type}</Text>
+      <DetailRow label="Booked Date" value={formatDateTime(record.created_at)} />
       <DetailRow label="Visit Date" value={formatDate(record.visit_date)} />
       <DetailRow
         label="Scheduled Date"
@@ -450,10 +451,20 @@ function StateCard({ children }: { children: React.ReactNode }) {
 }
 
 function getReportPeriod(key: ReportPeriodKey) {
-  const now = new Date();
+  const manilaParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(new Date());
+  const manilaYear = Number(
+    manilaParts.find((part) => part.type === "year")?.value,
+  );
+  const manilaMonth = Number(
+    manilaParts.find((part) => part.type === "month")?.value,
+  );
   const offset = key === "lastMonth" ? -1 : 0;
-  const start = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
+  const start = new Date(manilaYear, manilaMonth - 1 + offset, 1);
+  const end = new Date(manilaYear, manilaMonth + offset, 0);
 
   return {
     startDate: toDateOnly(start),
@@ -487,6 +498,7 @@ function formatDateTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString(undefined, {
+    timeZone: "Asia/Manila",
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -511,7 +523,7 @@ function buildCsv(report: ClinicReport) {
       "Report Period",
       `${report.period.start_date} to ${report.period.end_date}`,
     ],
-    ["Generated Date", new Date().toLocaleString()],
+    ["Generated Date", formatCsvDateTime(new Date())],
     [],
     ["SUMMARY"],
     ["Booked", report.summary.booked],
@@ -523,6 +535,7 @@ function buildCsv(report: ClinicReport) {
       "Pet",
       "Species/Breed",
       "Service",
+      "Booked Date",
       "Visit Date",
       "Scheduled Date",
       "Status",
@@ -533,15 +546,24 @@ function buildCsv(report: ClinicReport) {
       record.pet_name,
       [record.species, record.breed].filter(Boolean).join(" / "),
       record.service_type,
+      formatCsvDateTime(new Date(record.created_at)),
       record.visit_date?.substring(0, 10) || "",
       record.next_due_date?.substring(0, 10) || "",
       record.schedule_status,
-      record.completed_at ? new Date(record.completed_at).toLocaleString() : "",
-      record.cancelled_at ? new Date(record.cancelled_at).toLocaleString() : "",
+      record.completed_at
+        ? formatCsvDateTime(new Date(record.completed_at))
+        : "",
+      record.cancelled_at
+        ? formatCsvDateTime(new Date(record.cancelled_at))
+        : "",
     ]),
   ];
 
   return lines.map((row) => row.map(csvCell).join(",")).join("\r\n");
+}
+
+function formatCsvDateTime(date: Date) {
+  return date.toLocaleString(undefined, { timeZone: "Asia/Manila" });
 }
 
 function buildFilename(startDate: string, endDate: string) {

@@ -46,6 +46,7 @@ type VetRecord = {
   schedule_status: "Pending" | "Completed" | "Cancelled";
 
   completed_at: string | null;
+  rescheduled_at: string | null;
   created_at: string;
   clinic_contact_name: string;
   clinic_name: string | null;
@@ -58,6 +59,19 @@ type ScheduleItem = VetRecord & {
 
 type ScheduleStatus = "Overdue" | "Due Soon" | "Upcoming";
 
+type PersonalCareSchedule = {
+  care_schedule_id: number;
+  pet_id: number;
+  pet_name: string;
+  care_type: string;
+  scheduled_date: string;
+  repeat_type: "None" | "Weekly" | "Monthly";
+  notes: string | null;
+  status: "Pending" | "Completed" | "Cancelled";
+  completed_at: string | null;
+  cancelled_at: string | null;
+};
+
 export default function SchedulesScreen() {
   const params = useLocalSearchParams<{
     petId?: string;
@@ -68,6 +82,7 @@ export default function SchedulesScreen() {
   const [pet, setPet] = useState<Pet | null>(null);
 
   const [records, setRecords] = useState<VetRecord[]>([]);
+  const [personalCare, setPersonalCare] = useState<PersonalCareSchedule[]>([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -145,6 +160,24 @@ export default function SchedulesScreen() {
         setPet(data.pet || null);
 
         setRecords(Array.isArray(data.records) ? data.records : []);
+
+        const careResponse = await fetch(
+          `${API_URL}/pet-care-schedules?pet_id=${petId}`,
+          {
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        const careData = await careResponse.json();
+        if (!careResponse.ok)
+          throw new Error(
+            careData.message || "Unable to load personal care schedules.",
+          );
+        setPersonalCare(
+          Array.isArray(careData.schedules) ? careData.schedules : [],
+        );
       } catch (error) {
         console.log("LOAD SCHEDULE ERROR:", error);
 
@@ -171,6 +204,44 @@ export default function SchedulesScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     loadSchedules(false);
+  };
+
+  const updatePersonalCare = async (
+    schedule: PersonalCareSchedule,
+    action: "complete" | "cancel",
+  ) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+      const response = await fetch(
+        `${API_URL}/pet-care-schedules/${schedule.care_schedule_id}/${action}`,
+        {
+          method: "PATCH",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(
+          data.message || "Unable to update personal care schedule.",
+        );
+      await loadSchedules(false);
+      Alert.alert(
+        action === "complete" ? "Care Marked Done" : "Care Cancelled",
+        data.message,
+      );
+    } catch (error) {
+      Alert.alert(
+        "Unable to Update",
+        error instanceof Error ? error.message : "Please try again.",
+      );
+    }
   };
 
   const updateSchedule = useCallback(
@@ -372,6 +443,13 @@ export default function SchedulesScreen() {
     [records],
   );
 
+  const pendingPersonalCare = personalCare.filter(
+    (item) => item.status === "Pending",
+  );
+  const personalCareHistory = personalCare.filter(
+    (item) => item.status !== "Pending",
+  );
+
   const nextSchedule =
     schedules.find((item) => item.daysRemaining >= 0) || null;
 
@@ -428,6 +506,99 @@ export default function SchedulesScreen() {
             </View>
           </View>
         )}
+
+        <View style={styles.personalHeaderRow}>
+          <View>
+            <Text style={styles.personalEyebrow}>OWNER-CREATED</Text>
+            <Text style={styles.personalTitle}>Personal Care</Text>
+          </View>
+          <Pressable
+            style={({ pressed }) => [
+              styles.addCareButton,
+              pressed && styles.pressed,
+            ]}
+            onPress={() =>
+              router.push({
+                pathname: "/(veterinary)/pet-care-schedule-form",
+                params: { petId: String(petId), petName: pet?.pet_name || "" },
+              })
+            }
+          >
+            <Ionicons name="add" size={18} color="#FFFFFF" />
+            <Text style={styles.addCareText}>Add Pet Care</Text>
+          </Pressable>
+        </View>
+
+        {pendingPersonalCare.length === 0 ? (
+          <View style={styles.personalEmpty}>
+            <Text style={styles.personalEmptyText}>
+              No upcoming personal care reminders.
+            </Text>
+          </View>
+        ) : (
+          pendingPersonalCare.map((item) => (
+            <PersonalCareCard
+              key={item.care_schedule_id}
+              item={item}
+              onEdit={() =>
+                router.push({
+                  pathname: "/(veterinary)/pet-care-schedule-form",
+                  params: {
+                    petId: String(item.pet_id),
+                    petName: item.pet_name,
+                    scheduleId: String(item.care_schedule_id),
+                  },
+                })
+              }
+              onComplete={() =>
+                Alert.alert(
+                  "Mark Personal Care Done?",
+                  `${item.care_type} will be marked completed.`,
+                  [
+                    { text: "Not Yet", style: "cancel" },
+                    {
+                      text: "Mark Done",
+                      onPress: () => void updatePersonalCare(item, "complete"),
+                    },
+                  ],
+                )
+              }
+              onCancel={() =>
+                Alert.alert(
+                  "Cancel Personal Care?",
+                  "This reminder will remain in history.",
+                  [
+                    { text: "Keep", style: "cancel" },
+                    {
+                      text: "Cancel Schedule",
+                      style: "destructive",
+                      onPress: () => void updatePersonalCare(item, "cancel"),
+                    },
+                  ],
+                )
+              }
+            />
+          ))
+        )}
+
+        {personalCareHistory.length > 0 && (
+          <View style={styles.personalHistory}>
+            <Text style={styles.personalHistoryTitle}>
+              Personal Care History
+            </Text>
+            {personalCareHistory.map((item) => (
+              <PersonalCareHistoryCard
+                key={item.care_schedule_id}
+                item={item}
+              />
+            ))}
+          </View>
+        )}
+
+        <View style={styles.medicalHeader}>
+          <Text style={styles.medicalEyebrow}>CLINIC-CREATED</Text>
+          <Text style={styles.medicalTitle}>Veterinary / Medical</Text>
+        </View>
 
         {nextSchedule && (
           <View style={styles.nextCard}>
@@ -736,6 +907,72 @@ function Header() {
   );
 }
 
+function PersonalCareCard({
+  item,
+  onEdit,
+  onComplete,
+  onCancel,
+}: {
+  item: PersonalCareSchedule;
+  onEdit: () => void;
+  onComplete: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <View style={styles.personalCard}>
+      <View style={styles.personalCardTop}>
+        <View style={styles.personalCareIcon}>
+          <Ionicons name="heart-outline" size={20} color="#176B3A" />
+        </View>
+        <View style={styles.personalCardInfo}>
+          <Text style={styles.personalCareType}>{item.care_type}</Text>
+          <Text style={styles.personalCareDate}>
+            {formatDate(item.scheduled_date)} ·{" "}
+            {item.repeat_type === "None" ? "One Time" : item.repeat_type}
+          </Text>
+        </View>
+        <View style={styles.personalBadge}>
+          <Text style={styles.personalBadgeText}>Personal Care</Text>
+        </View>
+      </View>
+      {item.notes && <Text style={styles.personalNotes}>{item.notes}</Text>}
+      <View style={styles.personalActions}>
+        <Pressable onPress={onEdit} style={styles.personalSecondaryButton}>
+          <Text style={styles.personalSecondaryText}>Edit</Text>
+        </Pressable>
+        <Pressable onPress={onCancel} style={styles.personalSecondaryButton}>
+          <Text style={styles.personalCancelText}>Cancel</Text>
+        </Pressable>
+        <Pressable onPress={onComplete} style={styles.personalDoneButton}>
+          <Ionicons name="checkmark" size={16} color="#FFF" />
+          <Text style={styles.personalDoneText}>Mark Done</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+function PersonalCareHistoryCard({ item }: { item: PersonalCareSchedule }) {
+  return (
+    <View style={styles.personalHistoryCard}>
+      <View>
+        <Text style={styles.personalHistoryCare}>{item.care_type}</Text>
+        <Text style={styles.personalHistoryDate}>
+          {formatDate(item.scheduled_date)}
+        </Text>
+      </View>
+      <Text
+        style={[
+          styles.personalHistoryStatus,
+          item.status === "Cancelled" && styles.personalHistoryCancelled,
+        ]}
+      >
+        {item.status}
+      </Text>
+    </View>
+  );
+}
+
 function SummaryCard({
   icon,
   number,
@@ -902,47 +1139,64 @@ function ScheduleCard({
         </View>
       </View>
 
-      <View style={styles.scheduleActions}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: actionsDisabled }}
-          disabled={actionsDisabled}
-          style={({ pressed }) => [
-            styles.rescheduleButton,
-            actionsDisabled && styles.actionDisabled,
-            pressed && styles.pressed,
-          ]}
-          onPress={onReschedule}
-        >
-          <Ionicons name="calendar-outline" size={16} color="#176B3A" />
-          <Text style={styles.rescheduleButtonText}>Reschedule</Text>
-        </Pressable>
-        {canCancel ? (
+      {item.rescheduled_at ? (
+        <View style={styles.lockedScheduleBadge}>
+          <Ionicons name="lock-closed-outline" size={16} color="#66746B" />
+          <Text style={styles.lockedScheduleText}>
+            Rescheduled — no further changes allowed
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.scheduleActions}>
           <Pressable
             accessibilityRole="button"
             accessibilityState={{ disabled: actionsDisabled }}
             disabled={actionsDisabled}
             style={({ pressed }) => [
-              styles.cancelButton,
+              styles.rescheduleButton,
               actionsDisabled && styles.actionDisabled,
               pressed && styles.pressed,
             ]}
-            onPress={onCancel}
+            onPress={onReschedule}
           >
-            {updating ? (
-              <ActivityIndicator size="small" color="#A7483E" />
-            ) : (
-              <Ionicons name="close-circle-outline" size={16} color="#A7483E" />
-            )}
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <Ionicons name="calendar-outline" size={16} color="#176B3A" />
+            <Text style={styles.rescheduleButtonText}>Reschedule</Text>
           </Pressable>
-        ) : (
-          <View style={styles.rescheduleOnlyBadge}>
-            <Ionicons name="information-circle-outline" size={16} color="#876518" />
-            <Text style={styles.rescheduleOnlyText}>Reschedule only</Text>
-          </View>
-        )}
-      </View>
+          {canCancel ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ disabled: actionsDisabled }}
+              disabled={actionsDisabled}
+              style={({ pressed }) => [
+                styles.cancelButton,
+                actionsDisabled && styles.actionDisabled,
+                pressed && styles.pressed,
+              ]}
+              onPress={onCancel}
+            >
+              {updating ? (
+                <ActivityIndicator size="small" color="#A7483E" />
+              ) : (
+                <Ionicons
+                  name="close-circle-outline"
+                  size={16}
+                  color="#A7483E"
+                />
+              )}
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </Pressable>
+          ) : (
+            <View style={styles.rescheduleOnlyBadge}>
+              <Ionicons
+                name="information-circle-outline"
+                size={16}
+                color="#876518"
+              />
+              <Text style={styles.rescheduleOnlyText}>Reschedule only</Text>
+            </View>
+          )}
+        </View>
+      )}
     </View>
   );
 }
@@ -1210,6 +1464,128 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 50,
+  },
+
+  personalHeaderRow: {
+    marginTop: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  personalEyebrow: {
+    fontSize: 9,
+    fontWeight: "900",
+    letterSpacing: 0.7,
+    color: "#6E7C73",
+  },
+  personalTitle: {
+    marginTop: 3,
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#1E2D24",
+  },
+  addCareButton: {
+    minHeight: 42,
+    paddingHorizontal: 13,
+    borderRadius: 12,
+    backgroundColor: "#176B3A",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  addCareText: { fontSize: 11, fontWeight: "900", color: "#FFF" },
+  personalEmpty: {
+    marginTop: 12,
+    padding: 18,
+    borderRadius: 15,
+    backgroundColor: "#F1F7F2",
+    borderWidth: 1,
+    borderColor: "#DCE8DE",
+  },
+  personalEmptyText: { textAlign: "center", fontSize: 12, color: "#718078" },
+  personalCard: {
+    marginTop: 11,
+    padding: 15,
+    borderRadius: 17,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DCE8DE",
+  },
+  personalCardTop: { flexDirection: "row", alignItems: "center" },
+  personalCareIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    backgroundColor: "#EAF4EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  personalCardInfo: { flex: 1, marginLeft: 10 },
+  personalCareType: { fontSize: 15, fontWeight: "900", color: "#26352B" },
+  personalCareDate: { marginTop: 3, fontSize: 11, color: "#758178" },
+  personalBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 9,
+    backgroundColor: "#EAF4EB",
+  },
+  personalBadgeText: { fontSize: 9, fontWeight: "900", color: "#176B3A" },
+  personalNotes: {
+    marginTop: 12,
+    fontSize: 11,
+    lineHeight: 17,
+    color: "#5D6B62",
+  },
+  personalActions: { marginTop: 13, flexDirection: "row", gap: 7 },
+  personalSecondaryButton: {
+    minHeight: 38,
+    paddingHorizontal: 13,
+    borderRadius: 11,
+    borderWidth: 1,
+    borderColor: "#D6DFD8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  personalSecondaryText: { fontSize: 11, fontWeight: "800", color: "#526158" },
+  personalCancelText: { fontSize: 11, fontWeight: "800", color: "#A7483E" },
+  personalDoneButton: {
+    flex: 1,
+    minHeight: 38,
+    borderRadius: 11,
+    backgroundColor: "#176B3A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+  },
+  personalDoneText: { fontSize: 11, fontWeight: "900", color: "#FFF" },
+  personalHistory: { marginTop: 16 },
+  personalHistoryTitle: { fontSize: 13, fontWeight: "900", color: "#526158" },
+  personalHistoryCard: {
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 13,
+    backgroundColor: "#F7F8F7",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  personalHistoryCare: { fontSize: 12, fontWeight: "800", color: "#405047" },
+  personalHistoryDate: { marginTop: 2, fontSize: 10, color: "#879189" },
+  personalHistoryStatus: { fontSize: 10, fontWeight: "900", color: "#176B3A" },
+  personalHistoryCancelled: { color: "#A7483E" },
+  medicalHeader: { marginTop: 30, marginBottom: 4 },
+  medicalEyebrow: {
+    fontSize: 9,
+    fontWeight: "900",
+    letterSpacing: 0.7,
+    color: "#6E7C73",
+  },
+  medicalTitle: {
+    marginTop: 3,
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#1E2D24",
   },
 
   petCard: {
@@ -1553,6 +1929,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 9,
     marginTop: 14,
+  },
+
+  lockedScheduleBadge: {
+    minHeight: 42,
+    marginTop: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#D7DEDA",
+    backgroundColor: "#F3F6F4",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    paddingHorizontal: 12,
+  },
+
+  lockedScheduleText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#66746B",
   },
 
   rescheduleButton: {

@@ -215,7 +215,7 @@ export default function PetQRScreen() {
   const petCode = `PET-${String(pet.pet_id).padStart(4, "0")}`;
 
   const PUBLIC_WEB_URL =
-    "https://invoice-producer-seniors-usc.trycloudflare.com";
+    "https://pin-courts-probably-philip.trycloudflare.com";
 
   const publicProfileUrl = pet.qr_code
     ? `${PUBLIC_WEB_URL}/public/pet/${encodeURIComponent(pet.qr_code)}`

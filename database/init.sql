@@ -274,3 +274,53 @@ CREATE TABLE IF NOT EXISTS qr_scan_history (
         REFERENCES lost_pet_reports(lost_report_id)
         ON DELETE CASCADE
 );
+
+-- OWNER PERSONAL PET CARE SCHEDULES
+
+CREATE TABLE IF NOT EXISTS pet_care_schedules (
+    care_schedule_id INT AUTO_INCREMENT PRIMARY KEY,
+    owner_id INT NOT NULL,
+    pet_id INT NOT NULL,
+    care_type VARCHAR(100) NOT NULL,
+    scheduled_date DATE NOT NULL,
+    repeat_type ENUM('None', 'Weekly', 'Monthly') NOT NULL DEFAULT 'None',
+    notes VARCHAR(500) NULL,
+    status ENUM('Pending', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending',
+    previous_schedule_id INT NULL,
+    completed_at DATETIME NULL,
+    cancelled_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (pet_id) REFERENCES pets(pet_id) ON DELETE CASCADE,
+    FOREIGN KEY (previous_schedule_id)
+        REFERENCES pet_care_schedules(care_schedule_id)
+        ON DELETE SET NULL,
+
+    UNIQUE KEY unique_next_care_occurrence (previous_schedule_id),
+    INDEX idx_pet_care_owner_status_date (owner_id, status, scheduled_date),
+    INDEX idx_pet_care_pet (pet_id)
+);
+
+CREATE TABLE IF NOT EXISTS pet_care_reminder_logs (
+    care_reminder_log_id INT AUTO_INCREMENT PRIMARY KEY,
+    care_schedule_id INT NOT NULL,
+    owner_id INT NOT NULL,
+    reminder_type ENUM('due_tomorrow', 'due_today', 'overdue_1d', 'overdue_3d', 'overdue_7d') NOT NULL,
+    reminder_date DATE NOT NULL,
+    expo_ticket_id VARCHAR(255) NULL,
+    status ENUM('sent', 'failed') NOT NULL DEFAULT 'sent',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (care_schedule_id)
+        REFERENCES pet_care_schedules(care_schedule_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE CASCADE,
+
+    UNIQUE KEY unique_care_reminder (
+        care_schedule_id,
+        reminder_type,
+        reminder_date
+    )
+);
