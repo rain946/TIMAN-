@@ -66,6 +66,15 @@ type HealthOverviewResponse = {
   message?: string;
 };
 
+type PersonalCareSchedule = {
+  care_schedule_id: number;
+  pet_id: number;
+  pet_name: string;
+  care_type: string;
+  scheduled_date: string;
+  status: "Pending" | "Completed" | "Cancelled";
+};
+
 const DEFAULT_SUMMARY: HealthSummary = {
   overdue: 0,
   dueSoon: 0,
@@ -82,8 +91,58 @@ export default function DashboardScreen() {
 
   const [reminders, setReminders] = useState<HealthSchedule[]>([]);
 
+  const [personalCare, setPersonalCare] = useState<PersonalCareSchedule[]>([]);
+  const [personalCareLoading, setPersonalCareLoading] = useState(true);
+  const [personalCareError, setPersonalCareError] = useState<string | null>(
+    null,
+  );
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const loadPersonalCare = useCallback(async (token: string) => {
+    try {
+      setPersonalCareLoading(true);
+      setPersonalCareError(null);
+
+      const response = await fetch(`${API_URL}/pet-care-schedules`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || "Unable to load personal care reminders.",
+        );
+      }
+
+      const today = getPhilippineDate();
+      const upcoming = (Array.isArray(data.schedules) ? data.schedules : [])
+        .filter(
+          (schedule: PersonalCareSchedule) =>
+            schedule.status === "Pending" &&
+            schedule.scheduled_date >= today,
+        )
+        .sort((a: PersonalCareSchedule, b: PersonalCareSchedule) =>
+          a.scheduled_date.localeCompare(b.scheduled_date),
+        )
+        .slice(0, 3);
+
+      setPersonalCare(upcoming);
+    } catch (error) {
+      console.error("LOAD PERSONAL CARE DASHBOARD ERROR:", error);
+      setPersonalCareError(
+        error instanceof Error
+          ? error.message
+          : "Unable to load personal care reminders.",
+      );
+    } finally {
+      setPersonalCareLoading(false);
+    }
+  }, []);
 
   const loadDashboard = useCallback(async (showLoading = true) => {
     try {
@@ -101,6 +160,8 @@ export default function DashboardScreen() {
         router.replace("/login");
         return;
       }
+
+      void loadPersonalCare(token);
 
       if (storedUser) {
         try {
@@ -175,7 +236,7 @@ export default function DashboardScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [loadPersonalCare]);
 
   useFocusEffect(
     useCallback(() => {
@@ -404,6 +465,54 @@ export default function DashboardScreen() {
             />
           ))
         )}
+
+        {(personalCareLoading ||
+          personalCareError ||
+          personalCare.length > 0) && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Personal Care</Text>
+            </View>
+
+            {personalCareLoading ? (
+              <View style={styles.personalCareLoading}>
+                <ActivityIndicator size="small" color="#176B3A" />
+                <Text style={styles.loadingText}>
+                  Loading personal care reminders...
+                </Text>
+              </View>
+            ) : personalCareError ? (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.personalCareError,
+                  pressed && styles.pressed,
+                ]}
+                onPress={async () => {
+                  const token = await AsyncStorage.getItem("token");
+                  if (token) void loadPersonalCare(token);
+                }}
+              >
+                <Ionicons name="refresh-outline" size={20} color="#176B3A" />
+                <View style={styles.personalCareErrorText}>
+                  <Text style={styles.personalCareErrorTitle}>
+                    Personal Care unavailable
+                  </Text>
+                  <Text style={styles.personalCareErrorDescription}>
+                    Tap to try again.
+                  </Text>
+                </View>
+              </Pressable>
+            ) : (
+              personalCare.map((schedule) => (
+                <PersonalCareCard
+                  key={schedule.care_schedule_id}
+                  schedule={schedule}
+                  onPress={() => openSchedule(schedule.pet_id)}
+                />
+              ))
+            )}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -609,6 +718,42 @@ function ReminderCard({
   );
 }
 
+function PersonalCareCard({
+  schedule,
+  onPress,
+}: {
+  schedule: PersonalCareSchedule;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.reminderCard, pressed && styles.pressed]}
+      onPress={onPress}
+    >
+      <View style={[styles.reminderIcon, styles.personalCareIcon]}>
+        <Ionicons name="sparkles-outline" size={23} color="#176B3A" />
+      </View>
+
+      <View style={styles.reminderInfo}>
+        <Text style={styles.reminderTitle} numberOfLines={1}>
+          {schedule.care_type}
+        </Text>
+        <Text style={styles.reminderPet}>{schedule.pet_name}</Text>
+        <View style={styles.dateRow}>
+          <Ionicons name="calendar-outline" size={14} color="#7A877F" />
+          <Text style={styles.dateText}>
+            {formatDate(schedule.scheduled_date)}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.personalCareBadge}>
+        <Text style={styles.personalCareBadgeText}>Personal Care</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 function getPetImageSource(
   photoUrl?: string | null,
 ): ImageSourcePropType | null {
@@ -701,6 +846,20 @@ function formatDate(date: string) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function getPhilippineDate() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(
+    parts.map((part) => [part.type, part.value]),
+  );
+
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function getServiceIcon(serviceType: string): keyof typeof Ionicons.glyphMap {
@@ -1131,6 +1290,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#FDE5E2",
   },
 
+  personalCareIcon: {
+    backgroundColor: "#E5F3E8",
+  },
+
   reminderInfo: {
     flex: 1,
     marginLeft: 12,
@@ -1194,6 +1357,60 @@ const styles = StyleSheet.create({
 
   upcomingText: {
     color: "#267542",
+  },
+
+  personalCareBadge: {
+    maxWidth: 76,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 10,
+    marginLeft: 5,
+    backgroundColor: "#E5F3E8",
+  },
+
+  personalCareBadgeText: {
+    color: "#176B3A",
+    fontSize: 11,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+
+  personalCareLoading: {
+    minHeight: 70,
+    borderRadius: 17,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E4EAE6",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  personalCareError: {
+    borderRadius: 17,
+    backgroundColor: "#F4F8F4",
+    borderWidth: 1,
+    borderColor: "#DCE8DE",
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  personalCareErrorText: {
+    marginLeft: 10,
+  },
+
+  personalCareErrorTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#253229",
+  },
+
+  personalCareErrorDescription: {
+    marginTop: 2,
+    fontSize: 12,
+    color: "#7B877F",
   },
 
   emptyReminder: {

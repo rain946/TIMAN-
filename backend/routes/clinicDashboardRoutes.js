@@ -5,6 +5,17 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+const philippineMonthStart = `
+  DATE_FORMAT(
+    CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
+    '%Y-%m-01'
+  )
+`;
+
+const philippineNextMonthStart = `
+  DATE_ADD(${philippineMonthStart}, INTERVAL 1 MONTH)
+`;
+
 router.get("/", authMiddleware, async (req, res) => {
   try {
     if (req.user.role !== "clinic") {
@@ -43,15 +54,8 @@ router.get("/", authMiddleware, async (req, res) => {
           INNER JOIN pets p ON p.pet_id = vr.pet_id
           WHERE vr.clinic_user_id = ?
             AND p.archived_at IS NULL
-            AND next_due_date IS NOT NULL
-            AND vr.created_at >= DATE_FORMAT(
-              CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
-              '%Y-%m-01'
-            )
-            AND vr.created_at < DATE_ADD(
-              LAST_DAY(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')),
-              INTERVAL 1 DAY
-            )
+            AND vr.next_due_date >= ${philippineMonthStart}
+            AND vr.next_due_date < ${philippineNextMonthStart}
           `,
           [clinicUserId]
         ),
@@ -62,14 +66,8 @@ router.get("/", authMiddleware, async (req, res) => {
           INNER JOIN pets p ON p.pet_id = vr.pet_id
           WHERE vr.clinic_user_id = ?
             AND p.archived_at IS NULL
-            AND vr.rescheduled_at >= DATE_FORMAT(
-              CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
-              '%Y-%m-01'
-            )
-            AND vr.rescheduled_at < DATE_ADD(
-              LAST_DAY(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')),
-              INTERVAL 1 DAY
-            )
+            AND vr.rescheduled_at >= ${philippineMonthStart}
+            AND vr.rescheduled_at < ${philippineNextMonthStart}
           `,
           [clinicUserId]
         ),
@@ -81,14 +79,8 @@ router.get("/", authMiddleware, async (req, res) => {
           WHERE vr.clinic_user_id = ?
             AND p.archived_at IS NULL
             AND vr.schedule_status = 'Cancelled'
-            AND vr.next_due_date >= DATE_FORMAT(
-              CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'),
-              '%Y-%m-01'
-            )
-            AND vr.next_due_date < DATE_ADD(
-              LAST_DAY(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')),
-              INTERVAL 1 DAY
-            )
+            AND vr.cancelled_at >= ${philippineMonthStart}
+            AND vr.cancelled_at < ${philippineNextMonthStart}
           `,
           [clinicUserId]
         ),

@@ -332,7 +332,7 @@ export default function ProfileScreen() {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Account</Text>
+        <Text style={styles.sectionTitle}>Pet Management</Text>
 
         <View style={styles.menuCard}>
           <MenuItem
@@ -350,9 +350,11 @@ export default function ProfileScreen() {
             description="View or restore hidden pets"
             onPress={() => router.push("/(pets)/archived-pets")}
           />
+        </View>
 
-          <MenuDivider />
+        <Text style={styles.sectionTitle}>Account</Text>
 
+        <View style={styles.menuCard}>
           <MenuItem
             icon="create-outline"
             title="Edit Profile"

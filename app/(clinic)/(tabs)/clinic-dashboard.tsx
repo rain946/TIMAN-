@@ -204,7 +204,7 @@ export default function ClinicDashboardScreen() {
           />
           <OverviewCard
             icon="calendar-number-outline"
-            value={loading ? "â€”" : String(dashboard.overview.rescheduled)}
+            value={loading ? "—" : String(dashboard.overview.rescheduled)}
             label="Rescheduled"
           />
         </View>

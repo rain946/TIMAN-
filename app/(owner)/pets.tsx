@@ -247,8 +247,6 @@ export default function PetsScreen() {
                 <Text style={styles.countText}>
                   {pets.length} {pets.length === 1 ? "Pet" : "Pets"}
                 </Text>
-
-                <Text style={styles.refreshHint}>Pull down to refresh</Text>
               </View>
 
               {pets.map((pet) => {
@@ -483,9 +481,6 @@ const styles = StyleSheet.create({
   },
 
   countRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     marginBottom: 12,
   },
 
@@ -493,11 +488,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "800",
     color: "#405248",
-  },
-
-  refreshHint: {
-    fontSize: 12,
-    color: "#9AA49E",
   },
 
   emptyContainer: {
