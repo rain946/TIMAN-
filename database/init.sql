@@ -17,6 +17,41 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- EXPLICIT, OPT-IN LOCATIONS USED ONLY FOR NEARBY LOST-PET ALERTS
+
+CREATE TABLE IF NOT EXISTS nearby_alert_preferences (
+    user_id INT PRIMARY KEY,
+    nearby_alerts_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    alert_latitude DECIMAL(10, 8) NULL,
+    alert_longitude DECIMAL(11, 8) NULL,
+    location_updated_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_nearby_alert_preferences_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_nearby_alert_preference_coordinates
+        CHECK (
+            (alert_latitude IS NULL AND alert_longitude IS NULL)
+            OR
+            (
+                alert_latitude IS NOT NULL
+                AND alert_longitude IS NOT NULL
+                AND
+                alert_latitude BETWEEN -90 AND 90
+                AND alert_longitude BETWEEN -180 AND 180
+            )
+        ),
+
+    INDEX idx_nearby_alert_eligibility (
+        nearby_alerts_enabled,
+        location_updated_at
+    )
+);
+
 
 -- PETS
 
@@ -154,6 +189,83 @@ CREATE TABLE IF NOT EXISTS vet_records (
         ON DELETE CASCADE
 );
 
+-- CONFIGURABLE VACCINATION PROTOCOLS
+-- Seed rows below are TIMAN demonstration configuration only. They are not
+-- universal veterinary medical advice and may be changed or disabled by an
+-- authorized database administrator.
+
+CREATE TABLE IF NOT EXISTS vaccination_protocols (
+    protocol_id INT AUTO_INCREMENT PRIMARY KEY,
+    species VARCHAR(50) NOT NULL,
+    service_type VARCHAR(100) NOT NULL,
+    dose_sequence SMALLINT UNSIGNED NULL,
+    rule_sequence_key SMALLINT UNSIGNED
+        GENERATED ALWAYS AS (COALESCE(dose_sequence, 0)) STORED,
+    minimum_age_value SMALLINT UNSIGNED NULL,
+    recommended_age_value SMALLINT UNSIGNED NULL,
+    age_unit ENUM('day', 'week', 'month', 'year') NULL,
+    interval_value SMALLINT UNSIGNED NULL,
+    interval_unit ENUM('day', 'week', 'month', 'year') NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_vaccination_protocol_dose
+        CHECK (dose_sequence IS NULL OR dose_sequence > 0),
+    CONSTRAINT chk_vaccination_protocol_minimum_age
+        CHECK (minimum_age_value IS NULL OR minimum_age_value > 0),
+    CONSTRAINT chk_vaccination_protocol_recommended_age
+        CHECK (recommended_age_value IS NULL OR recommended_age_value > 0),
+    CONSTRAINT chk_vaccination_protocol_age_unit
+        CHECK (
+            (minimum_age_value IS NULL AND recommended_age_value IS NULL AND age_unit IS NULL)
+            OR
+            ((minimum_age_value IS NOT NULL OR recommended_age_value IS NOT NULL) AND age_unit IS NOT NULL)
+        ),
+    CONSTRAINT chk_vaccination_protocol_interval
+        CHECK (
+            (interval_value IS NULL AND interval_unit IS NULL)
+            OR
+            (interval_value > 0 AND interval_unit IS NOT NULL)
+        ),
+
+    INDEX idx_vaccination_protocol_lookup (
+        species,
+        service_type,
+        is_active
+    ),
+    UNIQUE KEY unique_vaccination_protocol_rule (
+        species,
+        service_type,
+        rule_sequence_key
+    )
+);
+
+INSERT IGNORE INTO vaccination_protocols (
+    species,
+    service_type,
+    dose_sequence,
+    minimum_age_value,
+    recommended_age_value,
+    age_unit,
+    interval_value,
+    interval_unit,
+    is_active
+)
+VALUES
+    ('Dog', 'Vaccination - Rabies', 1, 12, 12, 'week', 1, 'year', TRUE),
+    ('Dog', 'Vaccination - Rabies', NULL, NULL, NULL, NULL, 1, 'year', TRUE),
+    ('Dog', 'Vaccination - DHPP', 1, 6, 8, 'week', 3, 'week', TRUE),
+    ('Dog', 'Vaccination - DHPP', 2, 9, 11, 'week', 3, 'week', TRUE),
+    ('Dog', 'Vaccination - DHPP', 3, 12, 14, 'week', 1, 'year', TRUE),
+    ('Dog', 'Vaccination - DHPP', NULL, NULL, NULL, NULL, 1, 'year', TRUE),
+    ('Cat', 'Vaccination - Rabies', 1, 12, 12, 'week', 1, 'year', TRUE),
+    ('Cat', 'Vaccination - Rabies', NULL, NULL, NULL, NULL, 1, 'year', TRUE),
+    ('Cat', 'Vaccination - FVRCP', 1, 6, 8, 'week', 3, 'week', TRUE),
+    ('Cat', 'Vaccination - FVRCP', 2, 9, 11, 'week', 3, 'week', TRUE),
+    ('Cat', 'Vaccination - FVRCP', 3, 12, 14, 'week', 1, 'year', TRUE),
+    ('Cat', 'Vaccination - FVRCP', NULL, NULL, NULL, NULL, 1, 'year', TRUE);
+
 -- PUSH TOKEN
 
 CREATE TABLE IF NOT EXISTS push_tokens (
@@ -226,12 +338,15 @@ CREATE TABLE IF NOT EXISTS lost_pet_reports (
     pet_id INT NOT NULL,
     owner_id INT NOT NULL,
 
-    current_condition ENUM('Safe', 'Not Safe') NOT NULL,
+    current_condition ENUM('Safe', 'Not Safe', 'Unknown') NOT NULL,
 
     owner_message TEXT NOT NULL,
 
     last_seen_latitude DECIMAL(10, 8) NULL,
     last_seen_longitude DECIMAL(11, 8) NULL,
+    last_nearby_alert_at DATETIME NULL,
+    last_alert_latitude DECIMAL(10, 8) NULL,
+    last_alert_longitude DECIMAL(11, 8) NULL,
 
     missing_since DATETIME DEFAULT CURRENT_TIMESTAMP,
     recovered_at DATETIME NULL,

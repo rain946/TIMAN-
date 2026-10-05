@@ -7,6 +7,9 @@ const authMiddleware = require(
 const {
   sendExpoPushNotification,
 } = require("../services/pushService");
+const {
+  getVaccinationScheduleSuggestion,
+} = require("../services/vaccinationScheduleService");
 
 const router = express.Router();
 
@@ -177,6 +180,96 @@ const notifyClinicOfOwnerScheduleChange = async ({
 
 
 
+
+router.post(
+  "/:petId/vaccination-suggestion",
+  authMiddleware,
+  requireRole("clinic"),
+  async (req, res) => {
+    try {
+      const petId = Number(req.params.petId);
+      const clinicUserId = req.user.userId;
+      const serviceType = String(req.body.service_type || "").trim();
+      const visitDate = String(req.body.visit_date || "").trim();
+
+      if (!Number.isInteger(petId) || petId <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid pet ID.",
+        });
+      }
+
+      if (
+        !serviceType ||
+        serviceType.length > 100 ||
+        !serviceType.startsWith("Vaccination - ")
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "A valid specific vaccination service is required.",
+        });
+      }
+
+      if (!parseDateOnly(visitDate)) {
+        return res.status(400).json({
+          success: false,
+          message: "A valid visit date in YYYY-MM-DD format is required.",
+        });
+      }
+
+      if (!hasValidClinicScan(req, petId)) {
+        return res.status(403).json({
+          success: false,
+          message: "Scan the pet's TIMAN QR code before requesting a vaccination schedule suggestion.",
+        });
+      }
+
+      const authorized = await checkClinicAuthorization(petId, clinicUserId);
+      if (!authorized) {
+        return res.status(403).json({
+          success: false,
+          message: "Owner authorization is required before requesting a vaccination schedule suggestion.",
+        });
+      }
+
+      const [petRows] = await db.query(
+        `
+        SELECT pet_id, pet_name, species, birth_date
+        FROM pets
+        WHERE pet_id = ?
+          AND archived_at IS NULL
+        LIMIT 1
+        `,
+        [petId]
+      );
+
+      if (petRows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Pet not found.",
+        });
+      }
+
+      const suggestion = await getVaccinationScheduleSuggestion({
+        db,
+        pet: petRows[0],
+        serviceType,
+        visitDate,
+      });
+
+      return res.json({
+        success: true,
+        suggestion,
+      });
+    } catch (error) {
+      console.error("VACCINATION SUGGESTION ERROR:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to calculate a vaccination schedule suggestion.",
+      });
+    }
+  }
+);
 
 router.post(
   "/:petId",

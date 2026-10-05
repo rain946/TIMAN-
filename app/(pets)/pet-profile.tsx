@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 
@@ -66,6 +67,11 @@ export default function PetProfileScreen() {
     useState<MissingCondition>("Safe");
 
   const [finderMessage, setFinderMessage] = useState("");
+  const [lastSeenLocation, setLastSeenLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [gettingLastSeenLocation, setGettingLastSeenLocation] = useState(false);
 
   const [reportingMissing, setReportingMissing] = useState(false);
   const [archiving, setArchiving] = useState(false);
@@ -439,6 +445,7 @@ export default function PetProfileScreen() {
 
     setMissingCondition("Safe");
     setFinderMessage("");
+    setLastSeenLocation(null);
     setMissingModalVisible(true);
   };
 
@@ -450,6 +457,36 @@ export default function PetProfileScreen() {
     setMissingModalVisible(false);
     setMissingCondition("Safe");
     setFinderMessage("");
+    setLastSeenLocation(null);
+  };
+
+  const captureCurrentLocationAsLastSeen = async () => {
+    try {
+      setGettingLastSeenLocation(true);
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (permission.status !== Location.PermissionStatus.GRANTED) {
+        Alert.alert(
+          "Location Not Shared",
+          "You can still mark your pet as Missing. A nearby alert cannot start until a last-known location is available.",
+        );
+        return;
+      }
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      setLastSeenLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+      Alert.alert("Location Added", "Your current location will be used as the pet's last-seen location.");
+    } catch (error) {
+      Alert.alert(
+        "Location Unavailable",
+        error instanceof Error ? error.message : "You can still mark your pet as Missing without a location.",
+      );
+    } finally {
+      setGettingLastSeenLocation(false);
+    }
   };
 
   const submitMissingReport = async () => {
@@ -492,6 +529,8 @@ export default function PetProfileScreen() {
         body: JSON.stringify({
           currentCondition: missingCondition,
           ownerMessage: cleanMessage,
+          lastSeenLatitude: lastSeenLocation?.latitude ?? null,
+          lastSeenLongitude: lastSeenLocation?.longitude ?? null,
         }),
       });
 
@@ -513,12 +552,19 @@ export default function PetProfileScreen() {
       setMissingModalVisible(false);
       setMissingCondition("Safe");
       setFinderMessage("");
+      setLastSeenLocation(null);
 
       await loadPet();
 
       Alert.alert(
         "Pet Marked as Missing",
-        `${pet.pet_name} is now marked as missing.`,
+        data.nearbyAlert?.status === "sent" && data.nearbyAlert?.recipientCount > 0
+          ? `${pet.pet_name} is now marked as missing. ${data.nearbyAlert.recipientCount} nearby TIMAN user${data.nearbyAlert.recipientCount === 1 ? " was" : "s were"} alerted.`
+          : data.nearbyAlert?.status === "sent"
+            ? `${pet.pet_name} is now marked as missing. No eligible nearby TIMAN users were found.`
+            : data.nearbyAlert?.reason === "no_location"
+              ? `${pet.pet_name} is now marked as missing. Nearby alerts require a last-known location.`
+              : `${pet.pet_name} is now marked as missing. The nearby alert could not be sent, but the missing report was saved.`,
       );
     } catch (error) {
       console.log("REPORT MISSING ERROR:", error);
@@ -1104,6 +1150,39 @@ export default function PetProfileScreen() {
                 {finderMessage.length}/500
               </Text>
 
+              <Text style={styles.modalLabel}>Last-Seen Location (Optional)</Text>
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.locationButton,
+                  lastSeenLocation && styles.locationButtonSelected,
+                  (pressed || gettingLastSeenLocation) && styles.pressed,
+                ]}
+                onPress={() => void captureCurrentLocationAsLastSeen()}
+                disabled={reportingMissing || gettingLastSeenLocation}
+              >
+                {gettingLastSeenLocation ? (
+                  <ActivityIndicator size="small" color="#176B3A" />
+                ) : (
+                  <>
+                    <Ionicons
+                      name={lastSeenLocation ? "checkmark-circle" : "navigate-outline"}
+                      size={20}
+                      color="#176B3A"
+                    />
+                    <Text style={styles.locationButtonText}>
+                      {lastSeenLocation
+                        ? "Current Location Added"
+                        : "Use Current Location as Last Seen"}
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+
+              <Text style={styles.conditionHelpText}>
+                TIMAN requests location only when you tap this button. You can still report the pet without it.
+              </Text>
+
               <View style={styles.modalActions}>
                 <Pressable
                   style={({ pressed }) => [
@@ -1596,6 +1675,31 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: 12,
     color: "#909A94",
+  },
+
+  locationButton: {
+    minHeight: 50,
+    borderWidth: 1,
+    borderColor: "#BBD4C2",
+    borderRadius: 13,
+    backgroundColor: "#F2F8F3",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    paddingHorizontal: 12,
+  },
+
+  locationButtonSelected: {
+    backgroundColor: "#E7F4E9",
+    borderColor: "#176B3A",
+  },
+
+  locationButtonText: {
+    color: "#176B3A",
+    fontSize: 13,
+    fontWeight: "800",
+    textAlign: "center",
   },
 
   modalActions: {

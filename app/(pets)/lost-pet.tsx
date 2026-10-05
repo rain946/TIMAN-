@@ -42,6 +42,8 @@ type LostReport = {
   owner_message: string;
   last_seen_latitude: string | number | null;
   last_seen_longitude: string | number | null;
+  lastSeenLatitude?: string | number | null;
+  lastSeenLongitude?: string | number | null;
   missing_since: string;
   recovered_at: string | null;
   case_status: "Active" | "Recovered";
@@ -211,12 +213,20 @@ export default function LostPetScreen() {
   const latestLocationLatitude =
     latestLocationScan?.latitude != null
       ? Number(latestLocationScan.latitude)
-      : null;
+      : lostReport?.lastSeenLatitude != null
+        ? Number(lostReport.lastSeenLatitude)
+        : lostReport?.last_seen_latitude != null
+          ? Number(lostReport.last_seen_latitude)
+          : null;
 
   const latestLocationLongitude =
     latestLocationScan?.longitude != null
       ? Number(latestLocationScan.longitude)
-      : null;
+      : lostReport?.lastSeenLongitude != null
+        ? Number(lostReport.lastSeenLongitude)
+        : lostReport?.last_seen_longitude != null
+          ? Number(lostReport.last_seen_longitude)
+          : null;
 
   const hasLatestAvailableLocation =
     latestLocationLatitude !== null &&
@@ -568,7 +578,7 @@ export default function LostPetScreen() {
                   Latest Available Location
                 </Text>
 
-                {hasLatestAvailableLocation && latestLocationScan ? (
+                {hasLatestAvailableLocation ? (
                   <>
                     <Text style={styles.processDescription}>
                       Latitude: {latestLocationLatitude}
@@ -579,7 +589,9 @@ export default function LostPetScreen() {
                     </Text>
 
                     <Text style={styles.processDescription}>
-                      Shared: {formatDateTime(latestLocationScan.scannedAt)}
+                      {latestLocationScan
+                        ? `Shared: ${formatDateTime(latestLocationScan.scannedAt)}`
+                        : "Initial location shared by the owner."}
                     </Text>
                   </>
                 ) : (
@@ -614,9 +626,20 @@ export default function LostPetScreen() {
             <Text style={styles.emptyTitle}>No QR Scans Yet</Text>
 
             <Text style={styles.emptyText}>
-              QR scan activity and shared locations will appear here when
-              someone scans {pet.pet_name}&apos;s QR code.
+              {hasLatestAvailableLocation
+                ? "The owner's initial last-seen location is available below."
+                : `QR scan activity and shared locations will appear here when someone scans ${pet.pet_name}'s QR code.`}
             </Text>
+
+            {hasLatestAvailableLocation && (
+              <Pressable
+                style={({ pressed }) => [styles.previewButton, pressed && styles.pressed]}
+                onPress={openLastScanLocation}
+              >
+                <Ionicons name="map-outline" size={20} color="#176B3A" />
+                <Text style={styles.previewText}>Open Initial Location in Maps</Text>
+              </Pressable>
+            )}
           </View>
         )}
 

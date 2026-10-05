@@ -1,6 +1,10 @@
 const express = require("express");
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
+const {
+  broadcastNearbyLostPet,
+  parseCoordinatePair,
+} = require("../services/nearbyLostPetAlertService");
 
 const router = express.Router();
 
@@ -63,6 +67,21 @@ router.post(
         });
       }
 
+      const coordinates = parseCoordinatePair(
+        lastSeenLatitude,
+        lastSeenLongitude
+      );
+
+      if (!coordinates.valid) {
+        return res.status(400).json({
+          success: false,
+          message:
+            coordinates.reason === "partial_coordinates"
+              ? "Latitude and longitude must be supplied together."
+              : "Invalid latitude or longitude.",
+        });
+      }
+
       await connection.beginTransaction();
 
 
@@ -122,51 +141,8 @@ router.post(
       }
 
 
-      const latitude =
-        lastSeenLatitude === null ||
-        lastSeenLatitude === undefined ||
-        lastSeenLatitude === ""
-          ? null
-          : Number(lastSeenLatitude);
-
-      const longitude =
-        lastSeenLongitude === null ||
-        lastSeenLongitude === undefined ||
-        lastSeenLongitude === ""
-          ? null
-          : Number(lastSeenLongitude);
-
-      if (
-        latitude !== null &&
-        (
-          Number.isNaN(latitude) ||
-          latitude < -90 ||
-          latitude > 90
-        )
-      ) {
-        await connection.rollback();
-
-        return res.status(400).json({
-          success: false,
-          message: "Invalid latitude.",
-        });
-      }
-
-      if (
-        longitude !== null &&
-        (
-          Number.isNaN(longitude) ||
-          longitude < -180 ||
-          longitude > 180
-        )
-      ) {
-        await connection.rollback();
-
-        return res.status(400).json({
-          success: false,
-          message: "Invalid longitude.",
-        });
-      }
+      const latitude = coordinates.latitude;
+      const longitude = coordinates.longitude;
 
 
       const [insertResult] = await connection.query(
@@ -209,6 +185,27 @@ router.post(
 
       await connection.commit();
 
+      let nearbyAlert = {
+        status: "skipped",
+        reason: "no_location",
+      };
+
+      if (!coordinates.empty) {
+        try {
+          nearbyAlert = await broadcastNearbyLostPet({
+            lostReportId: insertResult.insertId,
+            latitude,
+            longitude,
+          });
+        } catch (broadcastError) {
+          console.error("INITIAL NEARBY LOST PET ALERT ERROR:", broadcastError);
+          nearbyAlert = {
+            status: "failed",
+            reason: "broadcast_error",
+          };
+        }
+      }
+
       return res.status(201).json({
         success: true,
         message: `${pet.pet_name} has been reported as missing.`,
@@ -222,6 +219,7 @@ router.post(
           lastSeenLatitude: latitude,
           lastSeenLongitude: longitude,
         },
+        nearbyAlert,
       });
     } catch (error) {
       try {

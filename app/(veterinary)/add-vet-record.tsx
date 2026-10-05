@@ -34,7 +34,32 @@ const SERVICE_TYPES = [
   "Other",
 ] as const;
 
+const VACCINE_OPTIONS = [
+  { label: "Rabies", serviceType: "Vaccination - Rabies" },
+  { label: "DHPP", serviceType: "Vaccination - DHPP" },
+  { label: "FVRCP", serviceType: "Vaccination - FVRCP" },
+] as const;
+
 type ServiceType = (typeof SERVICE_TYPES)[number];
+type VaccineServiceType = (typeof VACCINE_OPTIONS)[number]["serviceType"];
+
+type VaccinationSuggestion = {
+  status: string;
+  suggestion_available: boolean;
+  suggested_next_due_date: string | null;
+  service_type: string;
+  dose_sequence: number | null;
+  rule: {
+    protocol_id: number;
+    dose_sequence: number | null;
+    interval_value: number;
+    interval_unit: string;
+    label: string;
+  } | null;
+  explanation: string;
+  age_verification_possible: boolean;
+  age_verified: boolean;
+};
 
 export default function AddVetRecordScreen() {
   const inputRefs = useRef<Record<string, TextInput | null>>({});
@@ -57,6 +82,14 @@ export default function AddVetRecordScreen() {
 
   const [otherServiceType, setOtherServiceType] = useState("");
 
+  const [vaccineServiceType, setVaccineServiceType] =
+    useState<VaccineServiceType | null>(null);
+
+  const [suggestion, setSuggestion] =
+    useState<VaccinationSuggestion | null>(null);
+
+  const [loadingSuggestion, setLoadingSuggestion] = useState(false);
+
   const [diagnosis, setDiagnosis] = useState("");
 
   const [treatment, setTreatment] = useState("");
@@ -68,6 +101,83 @@ export default function AddVetRecordScreen() {
   const [nextDueDate, setNextDueDate] = useState("");
 
   const [saving, setSaving] = useState(false);
+
+  const selectServiceType = (service: ServiceType) => {
+    setServiceType(service);
+    setSuggestion(null);
+
+    if (service !== "Vaccination") {
+      setVaccineServiceType(null);
+    }
+  };
+
+  const selectVisitDate = (value: string) => {
+    setVisitDate(value);
+    setSuggestion(null);
+  };
+
+  const requestVaccinationSuggestion = async () => {
+    if (!petId || !vaccineServiceType || !isValidDate(visitDate.trim())) {
+      Alert.alert(
+        "Suggestion Information Required",
+        "Select a vaccine and enter a valid visit date first.",
+      );
+      return;
+    }
+
+    try {
+      setLoadingSuggestion(true);
+      setSuggestion(null);
+
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Session Expired", "Please log in again.");
+        router.replace("/login");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/vet-records/${petId}/vaccination-suggestion`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "X-TIMAN-Scan-Token": params.scanAccessToken || "",
+          },
+          body: JSON.stringify({
+            service_type: vaccineServiceType,
+            visit_date: visitDate.trim(),
+          }),
+        },
+      );
+
+      const responseText = await response.text();
+      let data: any = {};
+
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        data = { message: responseText };
+      }
+
+      if (!response.ok) {
+        Alert.alert(
+          "Suggestion Unavailable",
+          data.message || "Unable to calculate a schedule suggestion.",
+        );
+        return;
+      }
+
+      setSuggestion(data.suggestion || null);
+    } catch (error) {
+      console.log("VACCINATION SUGGESTION ERROR:", error);
+      Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
+    } finally {
+      setLoadingSuggestion(false);
+    }
+  };
 
   const openDatePicker = (value: string, onSelect: (value: string) => void) => {
     if (Platform.OS !== "android") {
@@ -126,6 +236,11 @@ export default function AddVetRecordScreen() {
       return;
     }
 
+    if (serviceType === "Vaccination" && !vaccineServiceType) {
+      Alert.alert("Vaccine Required", "Please select the vaccine administered.");
+      return;
+    }
+
     if (nextDueDate.trim() && !isValidDate(nextDueDate.trim())) {
       Alert.alert(
         "Invalid Next Due Date",
@@ -152,7 +267,11 @@ export default function AddVetRecordScreen() {
         visit_date: visitDate.trim(),
 
         service_type:
-          serviceType === "Other" ? otherServiceType.trim() : serviceType,
+          serviceType === "Other"
+            ? otherServiceType.trim()
+            : serviceType === "Vaccination"
+              ? vaccineServiceType
+              : serviceType,
 
         diagnosis: diagnosis.trim(),
 
@@ -273,13 +392,13 @@ export default function AddVetRecordScreen() {
                 styles.inputContainer,
                 pressed && styles.pressed,
               ]}
-              onPress={() => openDatePicker(visitDate, setVisitDate)}
+              onPress={() => openDatePicker(visitDate, selectVisitDate)}
             >
               <Ionicons name="calendar-outline" size={19} color="#718078" />
 
               <TextInput
                 value={visitDate}
-                onChangeText={setVisitDate}
+                onChangeText={selectVisitDate}
                 placeholder="YYYY-MM-DD"
                 placeholderTextColor="#A4ADA7"
                 style={styles.input}
@@ -308,7 +427,7 @@ export default function AddVetRecordScreen() {
 
                       pressed && styles.pressed,
                     ]}
-                    onPress={() => setServiceType(service)}
+                    onPress={() => selectServiceType(service)}
                   >
                     <Ionicons
                       name={getServiceIcon(service)}
@@ -351,7 +470,120 @@ export default function AddVetRecordScreen() {
                 />
               </View>
             )}
+
+            {serviceType === "Vaccination" && (
+              <View style={styles.vaccineSection}>
+                <FieldLabel title="Specific Vaccine" required />
+
+                <View style={styles.serviceContainer}>
+                  {VACCINE_OPTIONS.map((vaccine) => {
+                    const selected = vaccineServiceType === vaccine.serviceType;
+
+                    return (
+                      <Pressable
+                        key={vaccine.serviceType}
+                        style={({ pressed }) => [
+                          styles.serviceButton,
+                          selected && styles.serviceButtonSelected,
+                          pressed && styles.pressed,
+                        ]}
+                        onPress={() => {
+                          setVaccineServiceType(vaccine.serviceType);
+                          setSuggestion(null);
+                        }}
+                      >
+                        <Ionicons
+                          name="shield-checkmark-outline"
+                          size={17}
+                          color={selected ? "#FFFFFF" : "#176B3A"}
+                        />
+                        <Text
+                          style={[
+                            styles.serviceText,
+                            selected && styles.serviceTextSelected,
+                          ]}
+                        >
+                          {vaccine.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                <Text style={styles.helperText}>
+                  TIMAN protocol records are configurable suggestions. The clinic
+                  remains responsible for reviewing the schedule.
+                </Text>
+
+                <Pressable
+                  disabled={loadingSuggestion || !vaccineServiceType}
+                  style={({ pressed }) => [
+                    styles.suggestionButton,
+                    pressed && styles.pressed,
+                    (loadingSuggestion || !vaccineServiceType) && styles.disabled,
+                  ]}
+                  onPress={requestVaccinationSuggestion}
+                >
+                  {loadingSuggestion ? (
+                    <ActivityIndicator size="small" color="#176B3A" />
+                  ) : (
+                    <>
+                      <Ionicons name="calendar-outline" size={18} color="#176B3A" />
+                      <Text style={styles.suggestionButtonText}>
+                        Get Schedule Suggestion
+                      </Text>
+                    </>
+                  )}
+                </Pressable>
+              </View>
+            )}
           </View>
+
+          {serviceType === "Vaccination" && suggestion && (
+            <View style={styles.suggestionCard}>
+              <View style={styles.suggestionHeader}>
+                <Ionicons name="sparkles-outline" size={21} color="#176B3A" />
+                <Text style={styles.suggestionTitle}>TIMAN Schedule Suggestion</Text>
+              </View>
+
+              <SuggestionRow label="Vaccine" value={suggestion.service_type} />
+              <SuggestionRow
+                label="Suggested Next Due"
+                value={suggestion.suggested_next_due_date || "No automatic date"}
+              />
+              <SuggestionRow
+                label="Rule"
+                value={
+                  suggestion.rule?.label ||
+                  `Dose ${suggestion.dose_sequence || "unknown"}`
+                }
+              />
+
+              <Text style={styles.suggestionExplanation}>
+                {suggestion.explanation}
+              </Text>
+
+              {suggestion.suggestion_available &&
+                suggestion.suggested_next_due_date && (
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.useSuggestionButton,
+                      pressed && styles.pressed,
+                    ]}
+                    onPress={() =>
+                      setNextDueDate(suggestion.suggested_next_due_date || "")
+                    }
+                  >
+                    <Ionicons
+                      name="checkmark-circle-outline"
+                      size={19}
+                      color="#FFFFFF"
+                    />
+                    <Text style={styles.useSuggestionText}>Use Suggested Date</Text>
+                  </Pressable>
+                )}
+            </View>
+          )}
 
           <SectionTitle title="Medical Details" />
 
@@ -434,6 +666,17 @@ export default function AddVetRecordScreen() {
                 editable={Platform.OS !== "android"}
                 pointerEvents={Platform.OS === "android" ? "none" : "auto"}
               />
+
+              {nextDueDate !== "" && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear next due date"
+                  hitSlop={8}
+                  onPress={() => setNextDueDate("")}
+                >
+                  <Ionicons name="close-circle" size={20} color="#8B958F" />
+                </Pressable>
+              )}
             </Pressable>
 
             <Text style={styles.helperText}>
@@ -569,6 +812,15 @@ function FieldLabel({
       <Text style={styles.label}>{title}</Text>
 
       {required && <Text style={styles.required}>*</Text>}
+    </View>
+  );
+}
+
+function SuggestionRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.suggestionRow}>
+      <Text style={styles.suggestionLabel}>{label}</Text>
+      <Text style={styles.suggestionValue}>{value}</Text>
     </View>
   );
 }
@@ -904,6 +1156,96 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 9,
+  },
+
+  vaccineSection: {
+    marginTop: 18,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E5EBE7",
+  },
+
+  suggestionButton: {
+    marginTop: 12,
+    minHeight: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#BFD5C5",
+    backgroundColor: "#F5FAF6",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+  },
+
+  suggestionButtonText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#176B3A",
+  },
+
+  suggestionCard: {
+    marginTop: 14,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#CFE0D3",
+    backgroundColor: "#F3F9F4",
+  },
+
+  suggestionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 11,
+  },
+
+  suggestionTitle: {
+    fontSize: 15,
+    fontWeight: "900",
+    color: "#23442F",
+  },
+
+  suggestionRow: {
+    marginTop: 6,
+  },
+
+  suggestionLabel: {
+    fontSize: 10,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    color: "#718078",
+  },
+
+  suggestionValue: {
+    marginTop: 2,
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#26352B",
+  },
+
+  suggestionExplanation: {
+    marginTop: 12,
+    fontSize: 11,
+    lineHeight: 16,
+    color: "#607266",
+  },
+
+  useSuggestionButton: {
+    marginTop: 14,
+    minHeight: 44,
+    borderRadius: 12,
+    backgroundColor: "#176B3A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+  },
+
+  useSuggestionText: {
+    fontSize: 12,
+    fontWeight: "900",
+    color: "#FFFFFF",
   },
 
   reminderCard: {

@@ -26,6 +26,7 @@ const notificationRoutes =
   require("./routes/notificationRoutes");
 
 const lostPetRoutes = require("./routes/lostPetRoutes");
+const nearbyAlertRoutes = require("./routes/nearbyAlertRoutes");
 
 const clinicDashboardRoutes =
   require("./routes/clinicDashboardRoutes");
@@ -105,6 +106,11 @@ app.use(
 app.use(
   "/api/lost-pets",
   lostPetRoutes
+);
+
+app.use(
+  "/api/nearby-alerts",
+  nearbyAlertRoutes
 );
 
 app.use(

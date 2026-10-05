@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import ChangePasswordModal from "../../../components/modals/ChangePasswordModal";
 import EditProfileModal from "../../../components/modals/EditProfileModal";
+import NearbyAlertSettings from "../../../components/NearbyAlertSettings";
 import { API_URL, getImageUrl } from "../../../config/api";
 import { unregisterDevicePushToken } from "../../../services/notificationService";
 
@@ -375,6 +376,10 @@ export default function ClinicProfileScreen() {
               onPress={() => router.push("/(clinic)/clinic-reports")}
             />
           </View>
+
+          <Text style={styles.sectionTitle}>Nearby Lost-Pet Alerts</Text>
+
+          <NearbyAlertSettings />
 
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.actionCard}>

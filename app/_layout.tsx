@@ -23,6 +23,7 @@ const VALID_NOTIFICATION_TYPES = [
   "lost_pet_scan",
   "pet_qr_scanned",
   "pet_qr_scan",
+  "nearby_lost_pet",
 
   "vet_record_added",
   "schedule_cancelled",
@@ -236,6 +237,15 @@ function handleNotificationNavigation(
       },
     });
 
+    return;
+  }
+
+  if (type === "nearby_lost_pet") {
+    if (!petId) return;
+    router.push({
+      pathname: "/nearby-lost-pet",
+      params: { petId },
+    });
     return;
   }
 

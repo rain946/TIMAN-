@@ -1369,6 +1369,10 @@ function getClinicName(record: VetRecord) {
 }
 
 function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
+  if (service.startsWith("Vaccination - ")) {
+    return "shield-checkmark-outline";
+  }
+
   switch (service) {
     case "Checkup":
       return "medical-outline";

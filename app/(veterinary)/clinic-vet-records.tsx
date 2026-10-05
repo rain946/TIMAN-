@@ -727,6 +727,10 @@ function DueStatus({ value }: { value: string }) {
 }
 
 function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
+  if (service.startsWith("Vaccination - ")) {
+    return "shield-checkmark-outline";
+  }
+
   switch (service) {
     case "Checkup":
       return "medical-outline";
@@ -749,6 +753,10 @@ function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
 }
 
 function getServiceBackground(service: string) {
+  if (service.startsWith("Vaccination - ")) {
+    return "#E6F3E8";
+  }
+
   switch (service) {
     case "Vaccination":
       return "#E6F3E8";

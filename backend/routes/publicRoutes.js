@@ -4,8 +4,40 @@ const db = require("../config/db");
 const {
   sendExpoPushNotification,
 } = require("../services/pushService");
+const {
+  broadcastNearbyLostPet,
+  parseCoordinatePair,
+} = require("../services/nearbyLostPetAlertService");
 
 const router = express.Router();
+
+const publicScanAttempts = new Map();
+const PUBLIC_SCAN_WINDOW_MS = 60 * 1000;
+const PUBLIC_SCAN_MAX_ATTEMPTS = 5;
+
+function publicScanRateLimiter(req, res, next) {
+  const key = `${req.ip || req.socket?.remoteAddress || "unknown"}:${req.params.qrCode}`;
+  const now = Date.now();
+  const recent = (publicScanAttempts.get(key) || []).filter(
+    (timestamp) => now - timestamp < PUBLIC_SCAN_WINDOW_MS
+  );
+  if (recent.length >= PUBLIC_SCAN_MAX_ATTEMPTS) {
+    return res.status(429).json({
+      success: false,
+      message: "Too many scan updates. Please wait a minute and try again.",
+    });
+  }
+  recent.push(now);
+  publicScanAttempts.set(key, recent);
+  if (publicScanAttempts.size > 1000) {
+    for (const [attemptKey, timestamps] of publicScanAttempts) {
+      if (!timestamps.some((timestamp) => now - timestamp < PUBLIC_SCAN_WINDOW_MS)) {
+        publicScanAttempts.delete(attemptKey);
+      }
+    }
+  }
+  next();
+}
 
 
 
@@ -876,11 +908,6 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                       return;
                     }
 
-                    console.log(
-                      "TIMAN QR scan recorded:",
-                      result
-                    );
-
                     try {
                       sessionStorage.setItem(
                         reloadKey,
@@ -919,12 +946,6 @@ router.get("/public/pet/:qrCode", async (req, res) => {
 
                   navigator.geolocation.getCurrentPosition(
                     function (position) {
-                      console.log(
-                        "TIMAN location received:",
-                        position.coords.latitude,
-                        position.coords.longitude
-                      );
-
                       submitScan(
                         position.coords.latitude,
                         position.coords.longitude
@@ -1130,6 +1151,7 @@ router.get("/public/pet/:qrCode", async (req, res) => {
 
 router.post(
   "/api/public/pets/:qrCode/scan",
+  publicScanRateLimiter,
   async (req, res) => {
     let connection;
 
@@ -1156,35 +1178,19 @@ router.post(
       
       
 
-      let validLatitude = null;
-      let validLongitude = null;
-      let locationShared = false;
-
-      if (
-        latitude !== null &&
-        latitude !== undefined &&
-        longitude !== null &&
-        longitude !== undefined
-      ) {
-        const parsedLatitude =
-          Number(latitude);
-
-        const parsedLongitude =
-          Number(longitude);
-
-        if (
-          Number.isFinite(parsedLatitude) &&
-          Number.isFinite(parsedLongitude) &&
-          parsedLatitude >= -90 &&
-          parsedLatitude <= 90 &&
-          parsedLongitude >= -180 &&
-          parsedLongitude <= 180
-        ) {
-          validLatitude = parsedLatitude;
-          validLongitude = parsedLongitude;
-          locationShared = true;
-        }
+      const coordinates = parseCoordinatePair(latitude, longitude);
+      if (!coordinates.valid) {
+        return res.status(400).json({
+          success: false,
+          message:
+            coordinates.reason === "partial_coordinates"
+              ? "Latitude and longitude must be supplied together."
+              : "Invalid latitude or longitude.",
+        });
       }
+      const validLatitude = coordinates.latitude;
+      const validLongitude = coordinates.longitude;
+      const locationShared = !coordinates.empty;
 
       
       
@@ -1481,6 +1487,20 @@ router.post(
           notificationPromises
         );
 
+      let nearbyAlert = { status: "skipped", reason: "no_location" };
+      if (locationShared && pet.pet_status === "Missing") {
+        try {
+          nearbyAlert = await broadcastNearbyLostPet({
+            lostReportId,
+            latitude: validLatitude,
+            longitude: validLongitude,
+          });
+        } catch (broadcastError) {
+          console.error("FINDER NEARBY LOST PET ALERT ERROR:", broadcastError);
+          nearbyAlert = { status: "failed", reason: "broadcast_error" };
+        }
+      }
+
       console.log(
         "PUBLIC QR SCAN:",
         {
@@ -1523,11 +1543,6 @@ router.post(
 
           locationShared,
 
-          latitude:
-            validLatitude,
-
-          longitude:
-            validLongitude,
         },
 
         pet: {
@@ -1550,6 +1565,10 @@ router.post(
 
           clinicDevices:
             clinicTokenRows.length,
+        },
+        nearbyAlert: {
+          status: nearbyAlert.status,
+          reason: nearbyAlert.reason,
         },
       });
     } catch (error) {

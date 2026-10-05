@@ -60,6 +60,12 @@
           "color": "#176B3A"
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow TIMAN to use your location when you explicitly share it for nearby lost-pet alerts."
+        }
+      ],
       "@react-native-community/datetimepicker"
     ],
     "experiments": {

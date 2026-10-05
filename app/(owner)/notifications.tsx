@@ -315,6 +315,17 @@ export default function NotificationsScreen() {
 
         break;
 
+      case "nearby_lost_pet":
+        if (!notification.pet_id) {
+          Alert.alert("Pet Error", "This notification is not connected to a pet.");
+          return;
+        }
+        router.push({
+          pathname: "/nearby-lost-pet",
+          params: { petId: String(notification.pet_id) },
+        });
+        break;
+
       case "vaccination_reminder":
       case "deworming_reminder":
       case "health_reminder":
@@ -408,6 +419,9 @@ export default function NotificationsScreen() {
       case "pet_qr_scanned":
       case "lost_pet_scan":
         return "qr-code-outline";
+
+      case "nearby_lost_pet":
+        return "alert-circle-outline";
 
       case "vaccination_reminder":
       case "deworming_reminder":

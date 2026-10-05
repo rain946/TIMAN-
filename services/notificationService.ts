@@ -10,6 +10,15 @@ const PUSH_TOKEN_STORAGE_KEY = "timan_expo_push_token";
 export const HEALTH_REMINDERS_CHANNEL_ID =
   "pet-health-reminders";
 
+const PUSH_TOKEN_RETRY_DELAYS_MS = [1000, 2500, 5000] as const;
+
+let pushRegistrationPromise: Promise<PushRegistrationResult> | null = null;
+
+type PushRegistrationResult = {
+  success: boolean;
+  message: string;
+};
+
 function maskPushToken(token: string) {
   if (token.length <= 16) {
     return "***";
@@ -100,7 +109,50 @@ export async function requestNotificationPermission() {
 
 
 
-export async function registerDeviceForPushNotifications() {
+function wait(delayMs: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+}
+
+function isTransientNetworkError(error: unknown) {
+  const message =
+    error instanceof Error
+      ? error.message
+      : String(error);
+
+  return /network request failed|network error|timeout|timed out|offline/i.test(
+    message
+  );
+}
+
+async function getExpoPushTokenWithRetry(projectId: string) {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= PUSH_TOKEN_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      return await Notifications.getExpoPushTokenAsync({ projectId });
+    } catch (error) {
+      lastError = error;
+
+      const retryDelay = PUSH_TOKEN_RETRY_DELAYS_MS[attempt];
+      if (retryDelay === undefined || !isTransientNetworkError(error)) {
+        throw error;
+      }
+
+      console.log(
+        `TIMAN: Expo push token request failed; retrying in ${retryDelay}ms.`,
+        error instanceof Error ? error.message : String(error)
+      );
+
+      await wait(retryDelay);
+    }
+  }
+
+  throw lastError;
+}
+
+async function performPushRegistration(): Promise<PushRegistrationResult> {
   try {
     
     
@@ -145,9 +197,7 @@ export async function registerDeviceForPushNotifications() {
     
 
     const pushTokenResult =
-      await Notifications.getExpoPushTokenAsync({
-        projectId,
-      });
+      await getExpoPushTokenWithRetry(projectId);
 
     const expoPushToken =
       pushTokenResult.data;
@@ -300,6 +350,18 @@ export async function unregisterDevicePushToken() {
     console.log("UNREGISTER DEVICE PUSH ERROR:", error);
     return false;
   }
+}
+
+export function registerDeviceForPushNotifications() {
+  if (pushRegistrationPromise) {
+    return pushRegistrationPromise;
+  }
+
+  pushRegistrationPromise = performPushRegistration().finally(() => {
+    pushRegistrationPromise = null;
+  });
+
+  return pushRegistrationPromise;
 }
 
 
