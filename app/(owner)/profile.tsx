@@ -16,7 +16,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import EditProfileModal from "../../components/modals/EditProfileModal";
 import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
-import NearbyAlertSettings from "../../components/NearbyAlertSettings";
 
 import { API_URL, getImageUrl } from "../../config/api";
 import { unregisterDevicePushToken } from "../../services/notificationService";
@@ -332,10 +331,6 @@ export default function ProfileScreen() {
             value={profile?.address || ""}
           />
         </View>
-
-        <Text style={styles.sectionTitle}>Nearby Lost-Pet Alerts</Text>
-
-        <NearbyAlertSettings />
 
         <Text style={styles.sectionTitle}>Pet Management</Text>
 
