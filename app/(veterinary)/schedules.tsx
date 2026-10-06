@@ -459,7 +459,7 @@ export default function SchedulesScreen() {
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Loading pet schedules...</Text>
         </View>
@@ -489,7 +489,7 @@ export default function SchedulesScreen() {
               />
             ) : (
               <View style={styles.petPlaceholder}>
-                <Ionicons name="paw" size={31} color="#6E9179" />
+                <Ionicons name="paw" size={31} color="#4C6A92" />
               </View>
             )}
 
@@ -502,7 +502,7 @@ export default function SchedulesScreen() {
             </View>
 
             <View style={styles.calendarIcon}>
-              <Ionicons name="calendar" size={23} color="#176B3A" />
+              <Ionicons name="calendar" size={23} color="#243B53" />
             </View>
           </View>
         )}
@@ -604,7 +604,7 @@ export default function SchedulesScreen() {
           <View style={styles.nextCard}>
             <View style={styles.nextTop}>
               <View style={styles.nextIcon}>
-                <Ionicons name="notifications" size={21} color="#876518" />
+                <Ionicons name="notifications" size={21} color="#B55F54" />
               </View>
 
               <View style={styles.nextInfo}>
@@ -631,7 +631,7 @@ export default function SchedulesScreen() {
             <View style={styles.nextDivider} />
 
             <View style={styles.nextDateRow}>
-              <Ionicons name="calendar-outline" size={17} color="#765D21" />
+              <Ionicons name="calendar-outline" size={17} color="#B55F54" />
 
               <Text style={styles.nextDate}>
                 {formatDate(nextSchedule.next_due_date)}
@@ -653,24 +653,24 @@ export default function SchedulesScreen() {
             icon="alert-circle-outline"
             number={overdue.length}
             label="Overdue"
-            background="#F8E5E2"
-            iconColor="#A64B42"
+            background="#FBE3DE"
+            iconColor="#E88C7D"
           />
 
           <SummaryCard
             icon="time-outline"
             number={dueSoon.length}
             label="Due Soon"
-            background="#FFF0C7"
-            iconColor="#8A6818"
+            background="#FBE3DE"
+            iconColor="#B55F54"
           />
 
           <SummaryCard
             icon="calendar-outline"
             number={upcoming.length}
             label="Upcoming"
-            background="#E7F2E8"
-            iconColor="#176B3A"
+            background="#DCEAF7"
+            iconColor="#243B53"
           />
         </View>
 
@@ -678,7 +678,7 @@ export default function SchedulesScreen() {
           <Ionicons
             name="information-circle-outline"
             size={20}
-            color="#176B3A"
+            color="#243B53"
           />
 
           <Text style={styles.infoText}>
@@ -691,7 +691,7 @@ export default function SchedulesScreen() {
         {schedules.length === 0 && (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
-              <Ionicons name="calendar-outline" size={36} color="#779080" />
+              <Ionicons name="calendar-outline" size={36} color="#4C6A92" />
             </View>
 
             <Text style={styles.emptyTitle}>No Active Schedules</Text>
@@ -776,7 +776,7 @@ export default function SchedulesScreen() {
                 <Ionicons
                   name="close-circle-outline"
                   size={19}
-                  color="#A7483E"
+                  color="#E88C7D"
                 />
                 <Text style={styles.sectionTitle}>Cancelled</Text>
                 <View style={[styles.countBadge, styles.cancelledCountBadge]}>
@@ -803,7 +803,7 @@ export default function SchedulesScreen() {
               <Ionicons
                 name="notifications-outline"
                 size={21}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
 
@@ -897,7 +897,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Health Schedule</Text>
@@ -922,7 +922,7 @@ function PersonalCareCard({
     <View style={styles.personalCard}>
       <View style={styles.personalCardTop}>
         <View style={styles.personalCareIcon}>
-          <Ionicons name="heart-outline" size={20} color="#176B3A" />
+          <Ionicons name="heart-outline" size={20} color="#243B53" />
         </View>
         <View style={styles.personalCardInfo}>
           <Text style={styles.personalCareType}>{item.care_type}</Text>
@@ -1111,7 +1111,7 @@ function ScheduleCard({
           <Text style={styles.serviceTitle}>{item.service_type}</Text>
 
           <View style={styles.scheduleDateRow}>
-            <Ionicons name="calendar-outline" size={13} color="#7B8880" />
+            <Ionicons name="calendar-outline" size={13} color="#7C858D" />
 
             <Text style={styles.scheduleDate}>
               {formatDate(item.next_due_date)}
@@ -1126,7 +1126,7 @@ function ScheduleCard({
 
       <View style={styles.sourceRow}>
         <View style={styles.sourceIcon}>
-          <Ionicons name="medical-outline" size={15} color="#176B3A" />
+          <Ionicons name="medical-outline" size={15} color="#243B53" />
         </View>
 
         <View style={styles.sourceInfo}>
@@ -1141,7 +1141,7 @@ function ScheduleCard({
 
       {item.rescheduled_at ? (
         <View style={styles.lockedScheduleBadge}>
-          <Ionicons name="lock-closed-outline" size={16} color="#66746B" />
+          <Ionicons name="lock-closed-outline" size={16} color="#7C858D" />
           <Text style={styles.lockedScheduleText}>
             Rescheduled — no further changes allowed
           </Text>
@@ -1159,7 +1159,7 @@ function ScheduleCard({
             ]}
             onPress={onReschedule}
           >
-            <Ionicons name="calendar-outline" size={16} color="#176B3A" />
+            <Ionicons name="calendar-outline" size={16} color="#243B53" />
             <Text style={styles.rescheduleButtonText}>Reschedule</Text>
           </Pressable>
           {canCancel ? (
@@ -1175,12 +1175,12 @@ function ScheduleCard({
               onPress={onCancel}
             >
               {updating ? (
-                <ActivityIndicator size="small" color="#A7483E" />
+                <ActivityIndicator size="small" color="#E88C7D" />
               ) : (
                 <Ionicons
                   name="close-circle-outline"
                   size={16}
-                  color="#A7483E"
+                  color="#E88C7D"
                 />
               )}
               <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -1190,7 +1190,7 @@ function ScheduleCard({
               <Ionicons
                 name="information-circle-outline"
                 size={16}
-                color="#876518"
+                color="#B55F54"
               />
               <Text style={styles.rescheduleOnlyText}>Reschedule only</Text>
             </View>
@@ -1209,13 +1209,13 @@ function CancelledScheduleCard({ item }: { item: ScheduleItem }) {
           <Ionicons
             name={getServiceIcon(item.service_type)}
             size={22}
-            color="#A7483E"
+            color="#E88C7D"
           />
         </View>
         <View style={styles.scheduleInfo}>
           <Text style={styles.serviceTitle}>{item.service_type}</Text>
           <View style={styles.scheduleDateRow}>
-            <Ionicons name="calendar-outline" size={13} color="#7B8880" />
+            <Ionicons name="calendar-outline" size={13} color="#7C858D" />
             <Text style={styles.scheduleDate}>
               {formatDate(item.next_due_date)}
             </Text>
@@ -1397,33 +1397,33 @@ function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
 function getStatusColor(status: ScheduleStatus) {
   switch (status) {
     case "Overdue":
-      return "#A64B42";
+      return "#E88C7D";
 
     case "Due Soon":
-      return "#896719";
+      return "#B55F54";
 
     case "Upcoming":
-      return "#176B3A";
+      return "#243B53";
   }
 }
 
 function getStatusBackground(status: ScheduleStatus) {
   switch (status) {
     case "Overdue":
-      return "#F8E5E2";
+      return "#FBE3DE";
 
     case "Due Soon":
-      return "#FFF0C7";
+      return "#FBE3DE";
 
     case "Upcoming":
-      return "#E7F2E8";
+      return "#DCEAF7";
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   center: {
@@ -1435,7 +1435,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: "#758279",
+    color: "#7C858D",
   },
 
   header: {
@@ -1445,7 +1445,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -1458,7 +1458,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -1486,13 +1486,13 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontSize: 20,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
   addCareButton: {
     minHeight: 42,
     paddingHorizontal: 13,
     borderRadius: 12,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
@@ -1506,7 +1506,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#DCE8DE",
   },
-  personalEmptyText: { textAlign: "center", fontSize: 12, color: "#718078" },
+  personalEmptyText: { textAlign: "center", fontSize: 12, color: "#7C858D" },
   personalCard: {
     marginTop: 11,
     padding: 15,
@@ -1520,20 +1520,20 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 13,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
   personalCardInfo: { flex: 1, marginLeft: 10 },
-  personalCareType: { fontSize: 15, fontWeight: "900", color: "#26352B" },
+  personalCareType: { fontSize: 15, fontWeight: "900", color: "#2B3440" },
   personalCareDate: { marginTop: 3, fontSize: 11, color: "#758178" },
   personalBadge: {
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 9,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
   },
-  personalBadgeText: { fontSize: 9, fontWeight: "900", color: "#176B3A" },
+  personalBadgeText: { fontSize: 9, fontWeight: "900", color: "#243B53" },
   personalNotes: {
     marginTop: 12,
     fontSize: 11,
@@ -1550,13 +1550,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  personalSecondaryText: { fontSize: 11, fontWeight: "800", color: "#526158" },
-  personalCancelText: { fontSize: 11, fontWeight: "800", color: "#A7483E" },
+  personalSecondaryText: { fontSize: 11, fontWeight: "800", color: "#4C6A92" },
+  personalCancelText: { fontSize: 11, fontWeight: "800", color: "#E88C7D" },
   personalDoneButton: {
     flex: 1,
     minHeight: 38,
     borderRadius: 11,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1564,7 +1564,7 @@ const styles = StyleSheet.create({
   },
   personalDoneText: { fontSize: 11, fontWeight: "900", color: "#FFF" },
   personalHistory: { marginTop: 16 },
-  personalHistoryTitle: { fontSize: 13, fontWeight: "900", color: "#526158" },
+  personalHistoryTitle: { fontSize: 13, fontWeight: "900", color: "#4C6A92" },
   personalHistoryCard: {
     marginTop: 8,
     padding: 12,
@@ -1576,8 +1576,8 @@ const styles = StyleSheet.create({
   },
   personalHistoryCare: { fontSize: 12, fontWeight: "800", color: "#405047" },
   personalHistoryDate: { marginTop: 2, fontSize: 10, color: "#879189" },
-  personalHistoryStatus: { fontSize: 10, fontWeight: "900", color: "#176B3A" },
-  personalHistoryCancelled: { color: "#A7483E" },
+  personalHistoryStatus: { fontSize: 10, fontWeight: "900", color: "#243B53" },
+  personalHistoryCancelled: { color: "#E88C7D" },
   medicalHeader: { marginTop: 30, marginBottom: 4 },
   medicalEyebrow: {
     fontSize: 9,
@@ -1589,13 +1589,13 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontSize: 20,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   petCard: {
     padding: 16,
     borderRadius: 19,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -1604,14 +1604,14 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 20,
-    backgroundColor: "#DCEADF",
+    backgroundColor: "#DCEAF7",
   },
 
   petPlaceholder: {
     width: 70,
     height: 70,
     borderRadius: 20,
-    backgroundColor: "#DCEADF",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1624,21 +1624,21 @@ const styles = StyleSheet.create({
   petLabel: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#6F8175",
+    color: "#4C6A92",
   },
 
   petName: {
     marginTop: 2,
     fontSize: 23,
     fontWeight: "900",
-    color: "#23442F",
+    color: "#2B3440",
   },
 
   petDetails: {
     marginTop: 4,
     fontSize: 15,
     lineHeight: 20,
-    color: "#6C7D72",
+    color: "#7C858D",
   },
 
   calendarIcon: {
@@ -1654,7 +1654,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     padding: 17,
     borderRadius: 18,
-    backgroundColor: "#FFF3C9",
+    backgroundColor: "#FBE3DE",
     borderWidth: 1,
     borderColor: "#F0DFAC",
   },
@@ -1668,7 +1668,7 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: "#FFE8A3",
+    backgroundColor: "#F3C8C0",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1682,14 +1682,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "900",
     letterSpacing: 0.7,
-    color: "#96752C",
+    color: "#B55F54",
   },
 
   nextService: {
     marginTop: 3,
     fontSize: 19,
     fontWeight: "900",
-    color: "#6F571E",
+    color: "#B55F54",
   },
 
   nextDays: {
@@ -1700,7 +1700,7 @@ const styles = StyleSheet.create({
   nextDaysNumber: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#765B1D",
+    color: "#B55F54",
   },
 
   nextDaysLabel: {
@@ -1724,7 +1724,7 @@ const styles = StyleSheet.create({
   nextDate: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#765D21",
+    color: "#B55F54",
   },
 
   nextClinic: {
@@ -1748,7 +1748,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1772,7 +1772,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontSize: 13,
     fontWeight: "700",
-    color: "#7A877F",
+    color: "#7C858D",
     textAlign: "center",
   },
 
@@ -1780,7 +1780,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     padding: 14,
     borderRadius: 14,
-    backgroundColor: "#F0F6F1",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 9,
@@ -1790,7 +1790,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: "#617167",
+    color: "#7C858D",
   },
 
   scheduleSection: {
@@ -1810,7 +1810,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#2B3D32",
+    color: "#2B3440",
   },
 
   countBadge: {
@@ -1831,7 +1831,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
     lineHeight: 19,
-    color: "#7C8981",
+    color: "#7C858D",
   },
 
   scheduleCard: {
@@ -1840,7 +1840,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
   },
 
   scheduleTop: {
@@ -1864,7 +1864,7 @@ const styles = StyleSheet.create({
   serviceTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#2E4036",
+    color: "#2B3440",
   },
 
   scheduleDateRow: {
@@ -1877,7 +1877,7 @@ const styles = StyleSheet.create({
   scheduleDate: {
     fontSize: 14,
     lineHeight: 19,
-    color: "#7B8880",
+    color: "#7C858D",
   },
 
   statusBadge: {
@@ -1894,7 +1894,7 @@ const styles = StyleSheet.create({
   scheduleDivider: {
     height: 1,
     marginVertical: 13,
-    backgroundColor: "#EDF1EE",
+    backgroundColor: "#E6E9ED",
   },
 
   sourceRow: {
@@ -1906,7 +1906,7 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     borderRadius: 11,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1918,7 +1918,7 @@ const styles = StyleSheet.create({
 
   sourceLabel: {
     fontSize: 12,
-    color: "#89948D",
+    color: "#7C858D",
   },
 
   sourceText: {
@@ -1926,7 +1926,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 19,
     fontWeight: "700",
-    color: "#53645A",
+    color: "#4C6A92",
   },
 
   scheduleActions: {
@@ -1952,7 +1952,7 @@ const styles = StyleSheet.create({
   lockedScheduleText: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#66746B",
+    color: "#7C858D",
   },
 
   rescheduleButton: {
@@ -1960,7 +1960,7 @@ const styles = StyleSheet.create({
     minHeight: 42,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#176B3A",
+    borderColor: "#243B53",
     backgroundColor: "#F4FAF5",
     flexDirection: "row",
     alignItems: "center",
@@ -1971,7 +1971,7 @@ const styles = StyleSheet.create({
   rescheduleButtonText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   cancelButton: {
@@ -1990,7 +1990,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#A7483E",
+    color: "#E88C7D",
   },
 
   rescheduleOnlyBadge: {
@@ -2009,7 +2009,7 @@ const styles = StyleSheet.create({
   rescheduleOnlyText: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#876518",
+    color: "#B55F54",
   },
 
   actionDisabled: {
@@ -2017,15 +2017,15 @@ const styles = StyleSheet.create({
   },
 
   cancelledCountBadge: {
-    backgroundColor: "#FBE9E6",
+    backgroundColor: "#FBE3DE",
   },
 
   cancelledCountText: {
-    color: "#A7483E",
+    color: "#E88C7D",
   },
 
   cancelledIcon: {
-    backgroundColor: "#FBE9E6",
+    backgroundColor: "#FBE3DE",
   },
 
   cancelledHistoryText: {
@@ -2047,7 +2047,7 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     borderRadius: 20,
     padding: 20,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   rescheduleModalTitle: {
@@ -2060,7 +2060,7 @@ const styles = StyleSheet.create({
   rescheduleDateLabel: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#7A877F",
+    color: "#7C858D",
     textTransform: "uppercase",
     marginTop: 8,
   },
@@ -2068,7 +2068,7 @@ const styles = StyleSheet.create({
   rescheduleDateValue: {
     fontSize: 17,
     fontWeight: "800",
-    color: "#2E4036",
+    color: "#2B3440",
     marginTop: 3,
   },
 
@@ -2098,7 +2098,7 @@ const styles = StyleSheet.create({
     flex: 1.5,
     minHeight: 44,
     borderRadius: 12,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2126,7 +2126,7 @@ const styles = StyleSheet.create({
   completedSectionTitle: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#2B3D32",
+    color: "#2B3440",
   },
 
   completedCountBadge: {
@@ -2134,7 +2134,7 @@ const styles = StyleSheet.create({
     height: 25,
     paddingHorizontal: 7,
     borderRadius: 13,
-    backgroundColor: "#DDEFE1",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2142,23 +2142,23 @@ const styles = StyleSheet.create({
   completedCountText: {
     fontSize: 12,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   completedSectionSubtitle: {
     marginTop: 5,
     fontSize: 14,
     lineHeight: 19,
-    color: "#7C8981",
+    color: "#7C858D",
   },
 
   completedScheduleCard: {
     marginBottom: 13,
     padding: 16,
     borderRadius: 18,
-    backgroundColor: "#F3F9F4",
+    backgroundColor: "#DCEAF7",
     borderWidth: 1,
-    borderColor: "#D6E8DA",
+    borderColor: "#C9D8E8",
   },
 
   completedScheduleTop: {
@@ -2170,7 +2170,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 15,
-    backgroundColor: "#DDEFE1",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2183,33 +2183,33 @@ const styles = StyleSheet.create({
   completedServiceTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#2E4036",
+    color: "#2B3440",
   },
 
   completedScheduleDate: {
     marginTop: 5,
     fontSize: 14,
     lineHeight: 19,
-    color: "#718078",
+    color: "#7C858D",
   },
 
   completedStatusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 7,
     borderRadius: 11,
-    backgroundColor: "#DDEFE1",
+    backgroundColor: "#DCEAF7",
   },
 
   completedStatusText: {
     fontSize: 12,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   completedScheduleDivider: {
     height: 1,
     marginVertical: 13,
-    backgroundColor: "#DCEADF",
+    backgroundColor: "#DCEAF7",
   },
 
   completedDetailRow: {
@@ -2224,7 +2224,7 @@ const styles = StyleSheet.create({
 
   completedDetailLabel: {
     fontSize: 12,
-    color: "#89948D",
+    color: "#7C858D",
   },
 
   completedDetailValue: {
@@ -2232,7 +2232,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 20,
     fontWeight: "800",
-    color: "#31503D",
+    color: "#2B3440",
   },
 
   completedClinicRow: {
@@ -2246,7 +2246,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 19,
-    color: "#687A6E",
+    color: "#7C858D",
   },
 
   emptyCard: {
@@ -2255,7 +2255,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     alignItems: "center",
   },
 
@@ -2263,7 +2263,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 22,
-    backgroundColor: "#EDF4EE",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2272,7 +2272,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     fontSize: 20,
     fontWeight: "900",
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   emptyText: {
@@ -2281,7 +2281,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 21,
     textAlign: "center",
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   recordsButton: {
@@ -2290,7 +2290,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 13,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -2307,7 +2307,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     padding: 15,
     borderRadius: 15,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "flex-start",
   },
@@ -2329,14 +2329,14 @@ const styles = StyleSheet.create({
   reminderTitle: {
     fontSize: 16,
     fontWeight: "900",
-    color: "#31503D",
+    color: "#2B3440",
   },
 
   reminderText: {
     marginTop: 4,
     fontSize: 14,
     lineHeight: 20,
-    color: "#687A6E",
+    color: "#7C858D",
   },
 
   pressed: {

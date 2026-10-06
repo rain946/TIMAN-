@@ -76,11 +76,11 @@ export default function ChangePasswordModal({
   };
 
   const handleChangePassword = async () => {
-    const current = currentPassword.trim();
-    const newPass = newPassword.trim();
-    const confirmPass = confirmPassword.trim();
+    const current = currentPassword;
+    const newPass = newPassword;
+    const confirmPass = confirmPassword;
 
-    if (!current || !newPass || !confirmPass) {
+    if (!current.trim() || !newPass.trim() || !confirmPass.trim()) {
       Alert.alert(
         "Incomplete Information",
         "Please complete all password fields.",
@@ -142,7 +142,11 @@ export default function ChangePasswordModal({
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Unable to change password.");
+        Alert.alert(
+          "Change Password Failed",
+          data.message || "Unable to change password.",
+        );
+        return;
       }
 
       setCurrentPassword("");
@@ -192,7 +196,7 @@ export default function ChangePasswordModal({
 
           <View style={styles.header}>
             <View style={styles.headerIcon}>
-              <Ionicons name="lock-closed" size={22} color="#176B3A" />
+              <Ionicons name="lock-closed" size={22} color="#243B53" />
             </View>
 
             <View style={styles.headerTextContainer}>
@@ -229,7 +233,7 @@ export default function ChangePasswordModal({
             <Text style={styles.label}>Current Password</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={19} color="#758179" />
+              <Ionicons name="lock-closed-outline" size={19} color="#7C858D" />
 
               <TextInput
                 ref={currentPasswordInputRef}
@@ -259,7 +263,7 @@ export default function ChangePasswordModal({
                 <Ionicons
                   name={showCurrentPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
-                  color="#758179"
+                  color="#7C858D"
                 />
               </Pressable>
             </View>
@@ -267,7 +271,7 @@ export default function ChangePasswordModal({
             <Text style={styles.label}>New Password</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="key-outline" size={19} color="#758179" />
+              <Ionicons name="key-outline" size={19} color="#7C858D" />
 
               <TextInput
                 ref={newPasswordInputRef}
@@ -295,7 +299,7 @@ export default function ChangePasswordModal({
                 <Ionicons
                   name={showNewPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
-                  color="#758179"
+                  color="#7C858D"
                 />
               </Pressable>
             </View>
@@ -308,7 +312,7 @@ export default function ChangePasswordModal({
               <Ionicons
                 name="checkmark-circle-outline"
                 size={19}
-                color="#758179"
+                color="#7C858D"
               />
 
               <TextInput
@@ -341,7 +345,7 @@ export default function ChangePasswordModal({
                 <Ionicons
                   name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
-                  color="#758179"
+                  color="#7C858D"
                 />
               </Pressable>
             </View>
@@ -350,7 +354,7 @@ export default function ChangePasswordModal({
               <Ionicons
                 name="shield-checkmark-outline"
                 size={22}
-                color="#176B3A"
+                color="#243B53"
               />
 
               <Text style={styles.securityText}>
@@ -411,7 +415,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     width: "100%",
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
     paddingTop: 10,
@@ -438,14 +442,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerIcon: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -458,13 +462,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   subtitle: {
     marginTop: 3,
     fontSize: 10,
-    color: "#7B877F",
+    color: "#7C858D",
   },
 
   closeButton: {
@@ -485,7 +489,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#3A4A40",
+    color: "#2B3440",
     marginBottom: 7,
     marginTop: 14,
   },
@@ -493,7 +497,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     minHeight: 54,
     borderWidth: 1,
-    borderColor: "#DDE5DF",
+    borderColor: "#E6E9ED",
     borderRadius: 14,
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 14,
@@ -506,7 +510,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     paddingVertical: 12,
     fontSize: 12,
-    color: "#26392D",
+    color: "#2B3440",
   },
 
   eyeButton: {
@@ -518,7 +522,7 @@ const styles = StyleSheet.create({
 
   passwordHint: {
     fontSize: 9,
-    color: "#8A958E",
+    color: "#7C858D",
     marginTop: 6,
     marginLeft: 3,
   },
@@ -526,7 +530,7 @@ const styles = StyleSheet.create({
   securityCard: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     borderRadius: 14,
     padding: 13,
     marginTop: 22,
@@ -567,7 +571,7 @@ const styles = StyleSheet.create({
     flex: 1.5,
     height: 52,
     borderRadius: 14,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

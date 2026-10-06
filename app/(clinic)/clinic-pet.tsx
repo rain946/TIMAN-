@@ -234,7 +234,7 @@ export default function ClinicPetScreen() {
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Checking clinic access...</Text>
         </View>
@@ -350,7 +350,7 @@ export default function ClinicPetScreen() {
         {canRequest && (
           <View style={styles.requestCard}>
             <View style={styles.requestIcon}>
-              <Ionicons name="shield-outline" size={29} color="#176B3A" />
+              <Ionicons name="shield-outline" size={29} color="#243B53" />
             </View>
 
             <Text style={styles.requestTitle}>
@@ -430,7 +430,7 @@ export default function ClinicPetScreen() {
               ]}
               onPress={loadPet}
             >
-              <Ionicons name="refresh" size={17} color="#176B3A" />
+              <Ionicons name="refresh" size={17} color="#243B53" />
 
               <Text style={styles.refreshText}>Check Status</Text>
             </Pressable>
@@ -440,7 +440,7 @@ export default function ClinicPetScreen() {
         {approved && (
           <>
             <View style={styles.approvedMessage}>
-              <Ionicons name="shield-checkmark" size={22} color="#176B3A" />
+              <Ionicons name="shield-checkmark" size={22} color="#243B53" />
 
               <Text style={styles.approvedMessageText}>
                 {hasRecord
@@ -508,7 +508,7 @@ export default function ClinicPetScreen() {
             <Text style={styles.sectionTitle}>Identifying Marks</Text>
 
             <View style={styles.marksCard}>
-              <Ionicons name="paw-outline" size={20} color="#176B3A" />
+              <Ionicons name="paw-outline" size={20} color="#243B53" />
 
               <Text style={styles.marksText}>{pet.identifying_marks}</Text>
             </View>
@@ -523,7 +523,7 @@ export default function ClinicPetScreen() {
           ]}
           onPress={() => router.replace("/qr-scanner")}
         >
-          <Ionicons name="scan-outline" size={19} color="#176B3A" />
+          <Ionicons name="scan-outline" size={19} color="#243B53" />
 
           <Text style={styles.scanAnotherText}>Scan Another Pet</Text>
         </Pressable>}
@@ -555,7 +555,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Clinic Pet</Text>
@@ -672,7 +672,7 @@ function ClinicAction({
       onPress={onPress}
     >
       <View style={styles.actionIcon}>
-        <Ionicons name={icon} size={24} color="#176B3A" />
+        <Ionicons name={icon} size={24} color="#243B53" />
       </View>
 
       <View style={styles.actionContent}>
@@ -707,7 +707,7 @@ function InfoRow({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   header: {
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 21,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -755,20 +755,20 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: "#77847C",
+    color: "#7C858D",
   },
 
   errorTitle: {
     marginTop: 14,
     fontSize: 21,
     fontWeight: "800",
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   errorText: {
     marginTop: 5,
     fontSize: 14,
-    color: "#7A867F",
+    color: "#7C858D",
   },
 
   retryButton: {
@@ -777,7 +777,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 11,
     borderRadius: 12,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
 
     borderRadius: 22,
 
@@ -809,10 +809,10 @@ const styles = StyleSheet.create({
 
     overflow: "hidden",
 
-    backgroundColor: "#E8F2E9",
+    backgroundColor: "#DCEAF7",
 
     borderWidth: 4,
-    borderColor: "#EEF6EF",
+    borderColor: "#DCEAF7",
   },
 
   petPhoto: {
@@ -833,7 +833,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "900",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   petBreed: {
@@ -841,7 +841,7 @@ const styles = StyleSheet.create({
 
     fontSize: 14,
 
-    color: "#7A867F",
+    color: "#7C858D",
   },
 
   petCode: {
@@ -850,7 +850,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
 
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   petStatus: {
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
 
     gap: 5,
 
-    backgroundColor: "#E6F3E8",
+    backgroundColor: "#DCEAF7",
   },
 
   petStatusDot: {
@@ -875,14 +875,14 @@ const styles = StyleSheet.create({
 
     borderRadius: 3,
 
-    backgroundColor: "#267542",
+    backgroundColor: "#4C6A92",
   },
 
   petStatusText: {
     fontSize: 11,
     fontWeight: "800",
 
-    color: "#267542",
+    color: "#4C6A92",
   },
 
   petMissing: {
@@ -890,11 +890,11 @@ const styles = StyleSheet.create({
   },
 
   petMissingDot: {
-    backgroundColor: "#B64236",
+    backgroundColor: "#E88C7D",
   },
 
   petMissingText: {
-    color: "#B64236",
+    color: "#E88C7D",
   },
 
   petFound: {
@@ -902,11 +902,11 @@ const styles = StyleSheet.create({
   },
 
   petFoundDot: {
-    backgroundColor: "#8C6A16",
+    backgroundColor: "#B55F54",
   },
 
   petFoundText: {
-    color: "#8C6A16",
+    color: "#B55F54",
   },
 
   sectionTitle: {
@@ -916,7 +916,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: "800",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   authorizationCard: {
@@ -954,7 +954,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 15,
 
-    color: "#66746B",
+    color: "#7C858D",
   },
 
   noneAuthorization: {
@@ -986,11 +986,11 @@ const styles = StyleSheet.create({
   },
 
   approvedAuthorizationIcon: {
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
   },
 
   approvedAuthorizationTitle: {
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   declinedAuthorization: {
@@ -1015,7 +1015,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
 
     alignItems: "center",
   },
@@ -1026,7 +1026,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 19,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1038,7 +1038,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   requestDescription: {
@@ -1051,7 +1051,7 @@ const styles = StyleSheet.create({
 
     textAlign: "center",
 
-    color: "#748078",
+    color: "#7C858D",
   },
 
   previousStatus: {
@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1128,7 +1128,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 19,
 
-    backgroundColor: "#FFF0C4",
+    backgroundColor: "#FBE3DE",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1140,7 +1140,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
 
-    color: "#6F571E",
+    color: "#B55F54",
   },
 
   pendingDescription: {
@@ -1179,7 +1179,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
 
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   approvedMessage: {
@@ -1189,7 +1189,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 15,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1210,7 +1210,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
 
     borderRadius: 17,
 
@@ -1234,7 +1234,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1251,7 +1251,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "800",
 
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   actionDescription: {
@@ -1260,13 +1260,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 14,
 
-    color: "#7B877F",
+    color: "#7C858D",
   },
 
   divider: {
     height: 1,
 
-    backgroundColor: "#EDF1EE",
+    backgroundColor: "#E6E9ED",
 
     marginLeft: 70,
   },
@@ -1275,7 +1275,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
 
     borderRadius: 17,
 
@@ -1290,7 +1290,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     borderBottomWidth: 1,
-    borderBottomColor: "#EEF1EF",
+    borderBottomColor: "#E6E9ED",
   },
 
   infoRowLast: {
@@ -1300,7 +1300,7 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 13,
 
-    color: "#7A867F",
+    color: "#7C858D",
   },
 
   infoValue: {
@@ -1311,7 +1311,7 @@ const styles = StyleSheet.create({
 
     textAlign: "right",
 
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   marksCard: {
@@ -1322,7 +1322,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
 
     flexDirection: "row",
     alignItems: "flex-start",
@@ -1362,7 +1362,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "800",
 
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   pressed: {

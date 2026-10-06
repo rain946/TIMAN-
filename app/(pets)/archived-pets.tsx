@@ -68,18 +68,18 @@ export default function ArchivedPetsScreen() {
 
   return <SafeAreaView style={styles.container}>
     <View style={styles.header}>
-      <Pressable style={styles.headerButton} onPress={() => router.back()}><Ionicons name="chevron-back" size={27} color="#173D2A" /></Pressable>
+      <Pressable style={styles.headerButton} onPress={() => router.back()}><Ionicons name="chevron-back" size={27} color="#243B53" /></Pressable>
       <Text style={styles.headerTitle}>Archived Pets</Text><View style={styles.headerButton} />
     </View>
-    {loading ? <View style={styles.center}><ActivityIndicator size="large" color="#176B3A" /><Text style={styles.loadingText}>Loading archived pets...</Text></View> :
+    {loading ? <View style={styles.center}><ActivityIndicator size="large" color="#243B53" /><Text style={styles.loadingText}>Loading archived pets...</Text></View> :
       <ScrollView contentContainerStyle={styles.content}>
-        {pets.length === 0 ? <View style={styles.center}><Ionicons name="archive-outline" size={52} color="#8A958E" /><Text style={styles.emptyTitle}>No Archived Pets</Text><Text style={styles.emptyText}>Pets you archive will appear here.</Text></View> : pets.map((pet) => {
+        {pets.length === 0 ? <View style={styles.center}><Ionicons name="archive-outline" size={52} color="#7C858D" /><Text style={styles.emptyTitle}>No Archived Pets</Text><Text style={styles.emptyText}>Pets you archive will appear here.</Text></View> : pets.map((pet) => {
           const photoUrl = getImageUrl(pet.photo_url);
           return <View key={pet.pet_id} style={styles.card}>
-            {photoUrl ? <Image source={{ uri: photoUrl }} style={styles.photo} /> : <View style={styles.photo}><Ionicons name="paw" size={27} color="#176B3A" /></View>}
+            {photoUrl ? <Image source={{ uri: photoUrl }} style={styles.photo} /> : <View style={styles.photo}><Ionicons name="paw" size={27} color="#243B53" /></View>}
             <View style={styles.info}><Text style={styles.name}>{pet.pet_name}</Text><Text style={styles.details}>{pet.breed || pet.species}</Text><Text style={styles.reason}>{pet.archive_reason}</Text><Text style={styles.date}>Archived {new Date(pet.archived_at).toLocaleDateString()}</Text></View>
             {pet.archive_reason === "Missing / Not Found" ? (
-              <Pressable disabled={restoringId !== null} style={styles.restoreButton} onPress={() => confirmRestore(pet)}>{restoringId === pet.pet_id ? <ActivityIndicator color="#176B3A" /> : <Ionicons name="refresh" size={21} color="#176B3A" />}</Pressable>
+              <Pressable disabled={restoringId !== null} style={styles.restoreButton} onPress={() => confirmRestore(pet)}>{restoringId === pet.pet_id ? <ActivityIndicator color="#243B53" /> : <Ionicons name="refresh" size={21} color="#243B53" />}</Pressable>
             ) : (
               <View style={styles.permanentBadge}>
                 <Ionicons name="lock-closed" size={17} color="#7A6660" />
@@ -93,23 +93,23 @@ export default function ArchivedPetsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFDF7" },
-  header: { height: 60, paddingHorizontal: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#E9EDE9" },
+  container: { flex: 1, backgroundColor: "#F6F0E6" },
+  header: { height: 60, paddingHorizontal: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: 1, borderBottomColor: "#E6E9ED" },
   headerButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
-  headerTitle: { fontSize: 21, fontWeight: "900", color: "#1E2D24" },
+  headerTitle: { fontSize: 21, fontWeight: "900", color: "#2B3440" },
   content: { width: "100%", maxWidth: 680, alignSelf: "center", padding: 20, gap: 12, flexGrow: 1 },
   center: { flex: 1, minHeight: 280, alignItems: "center", justifyContent: "center", padding: 24 },
-  loadingText: { marginTop: 12, fontSize: 14, color: "#77847C" },
-  emptyTitle: { marginTop: 14, fontSize: 19, fontWeight: "900", color: "#34453B" },
-  emptyText: { marginTop: 6, fontSize: 14, color: "#77847C" },
-  card: { minHeight: 108, padding: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8E4", borderRadius: 18, flexDirection: "row", alignItems: "center" },
-  photo: { width: 72, height: 72, borderRadius: 18, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  loadingText: { marginTop: 12, fontSize: 14, color: "#7C858D" },
+  emptyTitle: { marginTop: 14, fontSize: 19, fontWeight: "900", color: "#2B3440" },
+  emptyText: { marginTop: 6, fontSize: 14, color: "#7C858D" },
+  card: { minHeight: 108, padding: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E6E9ED", borderRadius: 18, flexDirection: "row", alignItems: "center" },
+  photo: { width: 72, height: 72, borderRadius: 18, backgroundColor: "#DCEAF7", alignItems: "center", justifyContent: "center" },
   info: { flex: 1, marginLeft: 13 },
-  name: { fontSize: 18, fontWeight: "900", color: "#27372D" },
-  details: { marginTop: 2, fontSize: 13, color: "#77847C" },
-  reason: { marginTop: 7, fontSize: 13, fontWeight: "800", color: "#765D21" },
-  date: { marginTop: 2, fontSize: 11, color: "#929C96" },
-  restoreButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: "#EAF4EB", alignItems: "center", justifyContent: "center" },
+  name: { fontSize: 18, fontWeight: "900", color: "#2B3440" },
+  details: { marginTop: 2, fontSize: 13, color: "#7C858D" },
+  reason: { marginTop: 7, fontSize: 13, fontWeight: "800", color: "#B55F54" },
+  date: { marginTop: 2, fontSize: 11, color: "#7C858D" },
+  restoreButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: "#DCEAF7", alignItems: "center", justifyContent: "center" },
   permanentBadge: { paddingHorizontal: 9, paddingVertical: 8, borderRadius: 11, backgroundColor: "#F3EEEC", alignItems: "center", gap: 3 },
   permanentText: { fontSize: 10, fontWeight: "800", color: "#7A6660" },
 });

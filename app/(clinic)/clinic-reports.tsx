@@ -177,7 +177,7 @@ export default function ClinicReportsScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={23} color="#1E2D24" />
+          <Ionicons name="arrow-back" size={23} color="#2B3440" />
         </Pressable>
         <Text style={styles.headerTitle}>Clinic Reports</Text>
         <View style={styles.headerButton} />
@@ -189,8 +189,8 @@ export default function ClinicReportsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            colors={["#176B3A"]}
-            tintColor="#176B3A"
+            colors={["#243B53"]}
+            tintColor="#243B53"
             onRefresh={() => {
               setRefreshing(true);
               void loadReport(false);
@@ -232,7 +232,7 @@ export default function ClinicReportsScreen() {
         </View>
 
         <View style={styles.periodCard}>
-          <Ionicons name="calendar-outline" size={20} color="#176B3A" />
+          <Ionicons name="calendar-outline" size={20} color="#243B53" />
           <View style={styles.periodText}>
             <Text style={styles.periodLabel}>{selectedPeriod.label}</Text>
             <Text style={styles.periodDates}>
@@ -244,12 +244,12 @@ export default function ClinicReportsScreen() {
 
         {loading && !report ? (
           <StateCard>
-            <ActivityIndicator color="#176B3A" />
+            <ActivityIndicator color="#243B53" />
             <Text style={styles.stateText}>Generating report...</Text>
           </StateCard>
         ) : error ? (
           <StateCard>
-            <Ionicons name="alert-circle-outline" size={29} color="#A7483E" />
+            <Ionicons name="alert-circle-outline" size={29} color="#E88C7D" />
             <Text style={styles.errorText}>{error}</Text>
             <Pressable
               accessibilityRole="button"
@@ -270,8 +270,8 @@ export default function ClinicReportsScreen() {
                 icon="calendar-outline"
                 label="Booked"
                 value={report.summary.booked}
-                color="#176B3A"
-                background="#EAF4EB"
+                color="#243B53"
+                background="#DCEAF7"
               />
               <SummaryCard
                 icon="checkmark-circle-outline"
@@ -284,8 +284,8 @@ export default function ClinicReportsScreen() {
                 icon="close-circle-outline"
                 label="Cancelled"
                 value={report.summary.cancelled}
-                color="#A7483E"
-                background="#FBE9E6"
+                color="#E88C7D"
+                background="#FBE3DE"
               />
             </View>
 
@@ -293,7 +293,7 @@ export default function ClinicReportsScreen() {
               <Ionicons
                 name="information-circle-outline"
                 size={19}
-                color="#176B3A"
+                color="#243B53"
               />
               <Text style={styles.metricNoteText}>
                 Booked uses the date the clinic created the schedule. Completed
@@ -335,7 +335,7 @@ export default function ClinicReportsScreen() {
                 <Ionicons
                   name="document-text-outline"
                   size={31}
-                  color="#718078"
+                  color="#7C858D"
                 />
                 <Text style={styles.emptyTitle}>No report activity</Text>
                 <Text style={styles.emptyText}>
@@ -386,7 +386,7 @@ function ReportRecordCard({ record }: { record: ClinicReportRecord }) {
     <View style={styles.recordCard}>
       <View style={styles.recordTopRow}>
         <View style={styles.recordIcon}>
-          <Ionicons name="paw-outline" size={21} color="#176B3A" />
+          <Ionicons name="paw-outline" size={21} color="#243B53" />
         </View>
         <View style={styles.recordTitleContent}>
           <Text style={styles.petName} numberOfLines={1}>
@@ -595,7 +595,7 @@ function getStatusTextStyle(status: ClinicReportRecord["schedule_status"]) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
   header: {
     minHeight: 62,
@@ -615,7 +615,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
   content: {
     width: "100%",
@@ -634,7 +634,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
     lineHeight: 20,
-    color: "#77847C",
+    color: "#7C858D",
   },
   periodOptions: {
     flexDirection: "row",
@@ -652,8 +652,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   periodButtonSelected: {
-    backgroundColor: "#176B3A",
-    borderColor: "#176B3A",
+    backgroundColor: "#243B53",
+    borderColor: "#243B53",
   },
   periodButtonText: {
     fontSize: 14,
@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderWidth: 1,
     borderColor: "#DDE6DF",
-    backgroundColor: "#F2F8F3",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -700,13 +700,13 @@ const styles = StyleSheet.create({
   stateText: {
     marginTop: 11,
     fontSize: 14,
-    color: "#77847C",
+    color: "#7C858D",
   },
   errorText: {
     marginTop: 10,
     fontSize: 14,
     lineHeight: 20,
-    color: "#843C34",
+    color: "#B55F54",
     textAlign: "center",
   },
   retryButton: {
@@ -714,7 +714,7 @@ const styles = StyleSheet.create({
     minHeight: 43,
     marginTop: 15,
     borderRadius: 12,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -728,12 +728,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 21,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
   sectionTitleNoMargin: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
   summaryRow: { flexDirection: "row", gap: 8 },
   summaryCard: {
@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -759,20 +759,20 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 25,
     fontWeight: "900",
-    color: "#27372D",
+    color: "#2B3440",
   },
   summaryLabel: {
     marginTop: 3,
     fontSize: 12,
     fontWeight: "700",
-    color: "#718078",
+    color: "#7C858D",
     textAlign: "center",
   },
   metricNote: {
     marginTop: 13,
     padding: 13,
     borderRadius: 14,
-    backgroundColor: "#EEF6EF",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "flex-start",
   },
@@ -787,7 +787,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
     marginTop: 16,
     borderRadius: 14,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -809,14 +809,14 @@ const styles = StyleSheet.create({
   recordCount: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#718078",
+    color: "#7C858D",
   },
   emptyCard: {
     minHeight: 150,
     padding: 20,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -825,13 +825,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     fontWeight: "900",
-    color: "#34453B",
+    color: "#2B3440",
   },
   emptyText: {
     marginTop: 5,
     fontSize: 14,
     lineHeight: 20,
-    color: "#77847C",
+    color: "#7C858D",
     textAlign: "center",
   },
   recordCard: {
@@ -839,7 +839,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFFFFF",
   },
   recordTopRow: { flexDirection: "row", alignItems: "center" },
@@ -847,7 +847,7 @@ const styles = StyleSheet.create({
     width: 43,
     height: 43,
     borderRadius: 13,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -860,12 +860,12 @@ const styles = StyleSheet.create({
   petName: {
     fontSize: 16,
     fontWeight: "900",
-    color: "#27372D",
+    color: "#2B3440",
   },
   petDetails: {
     marginTop: 2,
     fontSize: 13,
-    color: "#77847C",
+    color: "#7C858D",
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -873,12 +873,12 @@ const styles = StyleSheet.create({
     borderRadius: 9,
   },
   statusText: { fontSize: 10, fontWeight: "900" },
-  pendingBadge: { backgroundColor: "#FFF1DA" },
-  completedBadge: { backgroundColor: "#E5F3E8" },
-  cancelledBadge: { backgroundColor: "#FBE9E6" },
-  pendingText: { color: "#A66A15" },
-  completedText: { color: "#176B3A" },
-  cancelledText: { color: "#A7483E" },
+  pendingBadge: { backgroundColor: "#FBE3DE" },
+  completedBadge: { backgroundColor: "#DCEAF7" },
+  cancelledBadge: { backgroundColor: "#FBE3DE" },
+  pendingText: { color: "#B55F54" },
+  completedText: { color: "#243B53" },
+  cancelledText: { color: "#E88C7D" },
   serviceType: {
     marginTop: 13,
     marginBottom: 8,
@@ -893,7 +893,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 12,
   },
-  detailLabel: { fontSize: 13, color: "#7A877F" },
+  detailLabel: { fontSize: 13, color: "#7C858D" },
   detailValue: {
     flex: 1,
     fontSize: 13,

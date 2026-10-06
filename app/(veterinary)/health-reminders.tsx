@@ -161,7 +161,7 @@ export default function HealthRemindersScreen() {
         <Header />
 
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Loading health reminders...</Text>
         </View>
@@ -212,7 +212,7 @@ export default function HealthRemindersScreen() {
               <Ionicons
                 name="checkmark-circle-outline"
                 size={38}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
 
@@ -274,7 +274,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Health Reminders</Text>
@@ -315,10 +315,10 @@ function SummaryCard({
           size={19}
           color={
             type === "overdue"
-              ? "#B84C4C"
+              ? "#E88C7D"
               : type === "due"
-                ? "#A56812"
-                : "#176B3A"
+                ? "#B55F54"
+                : "#243B53"
           }
         />
       </View>
@@ -434,13 +434,13 @@ function ReminderCard({
         </Text>
 
         <View style={styles.petRow}>
-          <Ionicons name="paw-outline" size={13} color="#176B3A" />
+          <Ionicons name="paw-outline" size={13} color="#243B53" />
 
           <Text style={styles.petName}>{reminder.pet_name}</Text>
         </View>
 
         <View style={styles.dateRow}>
-          <Ionicons name="calendar-outline" size={13} color="#7B8880" />
+          <Ionicons name="calendar-outline" size={13} color="#7C858D" />
 
           <Text style={styles.dateText}>
             {formatDueText(days, reminder.next_due_date)}
@@ -469,7 +469,7 @@ function ReminderCard({
           </Text>
         </View>
 
-        <Ionicons name="chevron-forward" size={18} color="#A0AAA4" />
+        <Ionicons name="chevron-forward" size={18} color="#7C858D" />
       </View>
     </Pressable>
   );
@@ -477,26 +477,26 @@ function ReminderCard({
 
 function getStatusColor(status: ReminderStatus) {
   if (status === "Overdue") {
-    return "#B84C4C";
+    return "#E88C7D";
   }
 
   if (status === "Due Soon") {
-    return "#A56812";
+    return "#B55F54";
   }
 
-  return "#176B3A";
+  return "#243B53";
 }
 
 function getStatusBackground(status: ReminderStatus) {
   if (status === "Overdue") {
-    return "#FDE5E2";
+    return "#FBE3DE";
   }
 
   if (status === "Due Soon") {
-    return "#FFF0D5";
+    return "#FBE3DE";
   }
 
-  return "#E8F5EA";
+  return "#DCEAF7";
 }
 
 function getStatusText(status: ReminderStatus, days: number) {
@@ -600,7 +600,7 @@ function getServiceIcon(serviceType: string): keyof typeof Ionicons.glyphMap {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   header: {
@@ -610,7 +610,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -623,7 +623,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -644,7 +644,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 11,
     fontSize: 11,
-    color: "#758279",
+    color: "#7C858D",
   },
 
   summaryRow: {
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -673,37 +673,37 @@ const styles = StyleSheet.create({
   },
 
   overdueIcon: {
-    backgroundColor: "#FDE5E2",
+    backgroundColor: "#FBE3DE",
   },
 
   dueIcon: {
-    backgroundColor: "#FFF0D5",
+    backgroundColor: "#FBE3DE",
   },
 
   upcomingIcon: {
-    backgroundColor: "#E8F5EA",
+    backgroundColor: "#DCEAF7",
   },
 
   summaryCount: {
     marginTop: 6,
     fontSize: 21,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   overdueCount: {
-    color: "#B84C4C",
+    color: "#E88C7D",
   },
 
   dueCount: {
-    color: "#A56812",
+    color: "#B55F54",
   },
 
   summaryLabel: {
     marginTop: 2,
     fontSize: 9,
     fontWeight: "700",
-    color: "#7A877F",
+    color: "#7C858D",
   },
 
   emptyCard: {
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     alignItems: "center",
   },
 
@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
     width: 68,
     height: 68,
     borderRadius: 22,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
     marginTop: 13,
     fontSize: 15,
     fontWeight: "900",
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   emptyText: {
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 10,
     lineHeight: 16,
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   section: {
@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "900",
-    color: "#2B3D32",
+    color: "#2B3440",
   },
 
   countBadge: {
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     marginTop: 4,
     fontSize: 9,
-    color: "#7C8981",
+    color: "#7C858D",
   },
 
   reminderCard: {
@@ -788,7 +788,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
   serviceTitle: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#2E4036",
+    color: "#2B3440",
   },
 
   petRow: {
@@ -822,7 +822,7 @@ const styles = StyleSheet.create({
   petName: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   dateRow: {
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
 
   dateText: {
     fontSize: 10,
-    color: "#7B8880",
+    color: "#7C858D",
   },
 
   rightSide: {

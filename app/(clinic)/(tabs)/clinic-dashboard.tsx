@@ -145,8 +145,8 @@ export default function ClinicDashboardScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            tintColor="#176B3A"
-            colors={["#176B3A"]}
+            tintColor="#243B53"
+            colors={["#243B53"]}
             onRefresh={() => {
               setRefreshing(true);
               loadDashboard(false);
@@ -164,13 +164,27 @@ export default function ClinicDashboardScreen() {
           </View>
         </View>
 
-        <Text style={styles.greeting}>{getGreeting()},</Text>
-        <Text style={styles.clinicName} numberOfLines={2}>
-          {loading ? "Loading clinic..." : clinicName}
-        </Text>
-        <Text style={styles.subtitle}>
-          Manage pet visits and health records
-        </Text>
+        <View style={styles.welcomeCard}>
+          <View pointerEvents="none" style={styles.welcomeCreamShape} />
+          <View pointerEvents="none" style={styles.welcomeCoralShape} />
+
+          <View style={styles.welcomeTextContainer}>
+            <Text style={styles.greeting}>{getGreeting()},</Text>
+            <Text style={styles.clinicName} numberOfLines={2}>
+              {loading ? "Loading clinic..." : clinicName}
+            </Text>
+            <Text style={styles.subtitle}>
+              Manage pet visits and health records
+            </Text>
+          </View>
+
+          <Image
+            source={require("../../../assets/images/clinic-dashboard-vet.png")}
+            style={styles.welcomeVetImage}
+            resizeMode="contain"
+            accessible={false}
+          />
+        </View>
 
         {error && (
           <Pressable
@@ -181,7 +195,7 @@ export default function ClinicDashboardScreen() {
             ]}
             onPress={() => loadDashboard()}
           >
-            <Ionicons name="alert-circle-outline" size={20} color="#A7483E" />
+            <Ionicons name="alert-circle-outline" size={20} color="#E88C7D" />
             <View style={styles.errorContent}>
               <Text style={styles.errorText}>{error}</Text>
               <Text style={styles.retryText}>Tap to retry</Text>
@@ -310,7 +324,7 @@ function OverviewCard({
         <Ionicons
           name={icon}
           size={22}
-          color={pending ? "#A66A15" : "#176B3A"}
+          color={pending ? "#B55F54" : "#243B53"}
         />
       </View>
       <Text style={styles.overviewValue}>{value}</Text>
@@ -340,7 +354,7 @@ function PendingRequestCard({ request }: { request: PendingRequest }) {
         {photoUrl ? (
           <Image source={{ uri: photoUrl }} style={styles.petPhoto} />
         ) : (
-          <Ionicons name="paw" size={23} color="#176B3A" />
+          <Ionicons name="paw" size={23} color="#243B53" />
         )}
       </View>
       <View style={styles.requestInfo}>
@@ -363,7 +377,7 @@ function ActivityCard({ activity }: { activity: RecentActivity }) {
   const content = (
     <>
       <View style={styles.activityIcon}>
-        <Ionicons name="medical-outline" size={21} color="#176B3A" />
+        <Ionicons name="medical-outline" size={21} color="#243B53" />
       </View>
       <View style={styles.activityInfo}>
         <Text style={styles.activityTitle} numberOfLines={1}>
@@ -435,7 +449,7 @@ function formatActivityTime(value: string) {
 function LoadingCard({ label }: { label: string }) {
   return (
     <View style={styles.loadingCard}>
-      <ActivityIndicator size="small" color="#176B3A" />
+      <ActivityIndicator size="small" color="#243B53" />
       <Text style={styles.loadingText}>{label}</Text>
     </View>
   );
@@ -459,14 +473,14 @@ function EmptyCard({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFDF7" },
+  container: { flex: 1, backgroundColor: "#F6F0E6" },
   content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 10, paddingBottom: 48 },
   brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
   brandIcon: {
     width: 38,
     height: 38,
     borderRadius: 13,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -474,7 +488,7 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 17,
     fontWeight: "900",
-    color: "#173D2A",
+    color: "#243B53",
     letterSpacing: 0.5,
   },
   brandRole: {
@@ -484,12 +498,54 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     marginTop: 1,
   },
-  greeting: { fontSize: 16, color: "#718078", fontWeight: "600" },
+  welcomeCard: {
+    minHeight: 172,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#D2E2F0",
+    backgroundColor: "#DCEAF7",
+    padding: 19,
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  welcomeTextContainer: {
+    width: "58%",
+    zIndex: 3,
+  },
+  welcomeCreamShape: {
+    position: "absolute",
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    right: -42,
+    top: -51,
+    backgroundColor: "#F6F0E6",
+    opacity: 0.9,
+  },
+  welcomeCoralShape: {
+    position: "absolute",
+    width: 39,
+    height: 39,
+    borderRadius: 20,
+    right: 127,
+    bottom: 18,
+    backgroundColor: "#E88C7D",
+    opacity: 0.2,
+  },
+  welcomeVetImage: {
+    position: "absolute",
+    width: "44%",
+    height: 174,
+    right: -3,
+    bottom: -7,
+    zIndex: 2,
+  },
+  greeting: { fontSize: 16, color: "#7C858D", fontWeight: "600" },
   clinicName: {
     fontSize: 26,
     lineHeight: 32,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
     marginTop: 2,
   },
   subtitle: { fontSize: 15, color: "#7B887F", marginTop: 5 },
@@ -504,17 +560,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   errorContent: { flex: 1, marginLeft: 10 },
-  errorText: { fontSize: 14, lineHeight: 20, color: "#843C34" },
+  errorText: { fontSize: 14, lineHeight: 20, color: "#B55F54" },
   retryText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#A7483E",
+    color: "#E88C7D",
     marginTop: 3,
   },
   sectionTitle: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
     marginTop: 27,
     marginBottom: 13,
   },
@@ -525,7 +581,7 @@ const styles = StyleSheet.create({
     minHeight: 127,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 18,
     padding: 15,
   },
@@ -533,15 +589,15 @@ const styles = StyleSheet.create({
     width: 39,
     height: 39,
     borderRadius: 12,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
-  overviewIconPending: { backgroundColor: "#FFF1DA" },
+  overviewIconPending: { backgroundColor: "#FBE3DE" },
   overviewValue: {
     fontSize: 27,
     fontWeight: "900",
-    color: "#26372C",
+    color: "#2B3440",
     marginTop: 10,
   },
   overviewLabel: { fontSize: 13, color: "#78857D", marginTop: 2 },
@@ -558,14 +614,14 @@ const styles = StyleSheet.create({
     marginTop: 28,
     marginBottom: 12,
   },
-  sectionTitleNoMargin: { fontSize: 21, fontWeight: "900", color: "#1E2D24" },
-  seeAll: { fontSize: 15, fontWeight: "700", color: "#176B3A" },
-  seeAllDisabled: { fontSize: 15, fontWeight: "700", color: "#A4ADA7" },
+  sectionTitleNoMargin: { fontSize: 21, fontWeight: "900", color: "#2B3440" },
+  seeAll: { fontSize: 15, fontWeight: "700", color: "#243B53" },
+  seeAllDisabled: { fontSize: 15, fontWeight: "700", color: "#7C858D" },
   requestCard: {
     minHeight: 78,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 17,
     padding: 13,
     flexDirection: "row",
@@ -577,27 +633,27 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
   petPhoto: { width: "100%", height: "100%" },
   requestInfo: { flex: 1, marginLeft: 12, marginRight: 8 },
-  petName: { fontSize: 16, fontWeight: "900", color: "#27372D" },
+  petName: { fontSize: 16, fontWeight: "900", color: "#2B3440" },
   petDetails: { fontSize: 14, color: "#808C84", marginTop: 2 },
-  requestStatus: { fontSize: 13, color: "#A66A15", marginTop: 5 },
+  requestStatus: { fontSize: 13, color: "#B55F54", marginTop: 5 },
   pendingBadge: {
-    backgroundColor: "#FFF1DA",
+    backgroundColor: "#FBE3DE",
     paddingHorizontal: 8,
     paddingVertical: 5,
     borderRadius: 9,
   },
-  pendingText: { fontSize: 11, fontWeight: "800", color: "#A66A15" },
+  pendingText: { fontSize: 11, fontWeight: "800", color: "#B55F54" },
   activityCard: {
     minHeight: 74,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 16,
     padding: 13,
     marginBottom: 9,
@@ -608,7 +664,7 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 14,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -617,26 +673,26 @@ const styles = StyleSheet.create({
   activityPet: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#176B3A",
+    color: "#243B53",
     marginTop: 3,
   },
-  activityTime: { fontSize: 13, color: "#909A94", marginTop: 3 },
+  activityTime: { fontSize: 13, color: "#7C858D", marginTop: 3 },
   loadingCard: {
     minHeight: 88,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
   },
-  loadingText: { fontSize: 14, color: "#77847C", marginLeft: 9 },
+  loadingText: { fontSize: 14, color: "#7C858D", marginLeft: 9 },
   emptyCard: {
     minHeight: 102,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -651,6 +707,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 8,
   },
-  emptyText: { fontSize: 14, color: "#77847C", textAlign: "center" },
+  emptyText: { fontSize: 14, color: "#7C858D", textAlign: "center" },
   pressed: { opacity: 0.72 },
 });

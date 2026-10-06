@@ -301,6 +301,9 @@ export default function DashboardScreen() {
         </View>
 
         <View style={styles.welcomeCard}>
+          <View pointerEvents="none" style={styles.welcomeCreamShape} />
+          <View pointerEvents="none" style={styles.welcomeCoralShape} />
+
           <View style={styles.welcomeTextContainer}>
             <Text style={styles.welcomeTitle}>
               Keep your pets{"\n"}healthy & safe.
@@ -312,6 +315,12 @@ export default function DashboardScreen() {
           </View>
 
           <Text style={styles.bigPaw}>🐾</Text>
+          <Image
+            source={require("../../assets/images/owner-dashboard-pets.png")}
+            style={styles.welcomePetImage}
+            resizeMode="contain"
+            accessible={false}
+          />
         </View>
 
         <View style={styles.sectionHeader}>
@@ -320,7 +329,7 @@ export default function DashboardScreen() {
 
         {loading ? (
           <View style={styles.overviewLoadingContainer}>
-            <ActivityIndicator size="small" color="#176B3A" />
+            <ActivityIndicator size="small" color="#243B53" />
 
             <Text style={styles.loadingText}>Loading health schedules...</Text>
           </View>
@@ -390,7 +399,7 @@ export default function DashboardScreen() {
         {!loading && pets.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
-              <Ionicons name="paw-outline" size={28} color="#176B3A" />
+              <Ionicons name="paw-outline" size={28} color="#243B53" />
             </View>
 
             <Text style={styles.emptyTitle}>No pets registered</Text>
@@ -444,7 +453,7 @@ export default function DashboardScreen() {
               <Ionicons
                 name="checkmark-circle-outline"
                 size={27}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
 
@@ -476,7 +485,7 @@ export default function DashboardScreen() {
 
             {personalCareLoading ? (
               <View style={styles.personalCareLoading}>
-                <ActivityIndicator size="small" color="#176B3A" />
+                <ActivityIndicator size="small" color="#243B53" />
                 <Text style={styles.loadingText}>
                   Loading personal care reminders...
                 </Text>
@@ -492,7 +501,7 @@ export default function DashboardScreen() {
                   if (token) void loadPersonalCare(token);
                 }}
               >
-                <Ionicons name="refresh-outline" size={20} color="#176B3A" />
+                <Ionicons name="refresh-outline" size={20} color="#243B53" />
                 <View style={styles.personalCareErrorText}>
                   <Text style={styles.personalCareErrorTitle}>
                     Personal Care unavailable
@@ -555,10 +564,10 @@ function OverviewCard({
           size={20}
           color={
             type === "overdue"
-              ? "#B84C4C"
+              ? "#E88C7D"
               : type === "due"
                 ? "#B87516"
-                : "#176B3A"
+                : "#243B53"
           }
         />
       </View>
@@ -603,7 +612,7 @@ function PetCard({ pet, onPress }: { pet: Pet; onPress: () => void }) {
           />
         ) : (
           <View style={styles.petPlaceholder}>
-            <Ionicons name="paw" size={30} color="#176B3A" />
+            <Ionicons name="paw" size={30} color="#243B53" />
           </View>
         )}
       </View>
@@ -626,7 +635,7 @@ function PetCard({ pet, onPress }: { pet: Pet; onPress: () => void }) {
         <Text style={styles.petBreed}>{details || pet.species || "Pet"}</Text>
 
         <View style={styles.petDetail}>
-          <Ionicons name="medical-outline" size={16} color="#176B3A" />
+          <Ionicons name="medical-outline" size={16} color="#243B53" />
 
           <Text style={styles.petDetailText}>
             View health records & schedules
@@ -667,10 +676,10 @@ function ReminderCard({
           size={23}
           color={
             statusInfo.type === "overdue"
-              ? "#B84C4C"
+              ? "#E88C7D"
               : statusInfo.type === "due"
                 ? "#B87516"
-                : "#176B3A"
+                : "#243B53"
           }
         />
       </View>
@@ -683,7 +692,7 @@ function ReminderCard({
         <Text style={styles.reminderPet}>{schedule.pet_name}</Text>
 
         <View style={styles.dateRow}>
-          <Ionicons name="calendar-outline" size={14} color="#7A877F" />
+          <Ionicons name="calendar-outline" size={14} color="#7C858D" />
 
           <Text style={styles.dateText}>
             {formatDueText(days, schedule.next_due_date)}
@@ -731,7 +740,7 @@ function PersonalCareCard({
       onPress={onPress}
     >
       <View style={[styles.reminderIcon, styles.personalCareIcon]}>
-        <Ionicons name="sparkles-outline" size={23} color="#176B3A" />
+        <Ionicons name="sparkles-outline" size={23} color="#243B53" />
       </View>
 
       <View style={styles.reminderInfo}>
@@ -740,7 +749,7 @@ function PersonalCareCard({
         </Text>
         <Text style={styles.reminderPet}>{schedule.pet_name}</Text>
         <View style={styles.dateRow}>
-          <Ionicons name="calendar-outline" size={14} color="#7A877F" />
+          <Ionicons name="calendar-outline" size={14} color="#7C858D" />
           <Text style={styles.dateText}>
             {formatDate(schedule.scheduled_date)}
           </Text>
@@ -891,7 +900,7 @@ function getServiceIcon(serviceType: string): keyof typeof Ionicons.glyphMap {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   content: {
@@ -912,13 +921,13 @@ const styles = StyleSheet.create({
 
   smallText: {
     fontSize: 16,
-    color: "#7B877F",
+    color: "#7C858D",
   },
 
   ownerName: {
     fontSize: 26,
     fontWeight: "800",
-    color: "#17251D",
+    color: "#2B3440",
     marginTop: 2,
   },
 
@@ -944,41 +953,75 @@ const styles = StyleSheet.create({
   },
 
   welcomeCard: {
-    minHeight: 145,
+    minHeight: 168,
     borderRadius: 22,
-    backgroundColor: "#176B3A",
-    padding: 19,
+    backgroundColor: "#DCEAF7",
+    borderWidth: 1,
+    borderColor: "#D2E2F0",
+    padding: 20,
     overflow: "hidden",
     flexDirection: "row",
     alignItems: "center",
   },
 
   welcomeTextContainer: {
-    flex: 1,
-    zIndex: 2,
+    width: "58%",
+    zIndex: 3,
   },
 
   welcomeTitle: {
     fontSize: 25,
     lineHeight: 31,
-    color: "#FFFFFF",
+    color: "#243B53",
     fontWeight: "800",
   },
 
   welcomeSubtitle: {
     marginTop: 8,
-    color: "#DCEBDF",
+    color: "#4C6A92",
     fontSize: 15,
     lineHeight: 21,
-    maxWidth: 250,
+    maxWidth: 210,
+  },
+
+  welcomeCreamShape: {
+    position: "absolute",
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    right: -34,
+    top: -43,
+    backgroundColor: "#F6F0E6",
+    opacity: 0.92,
+  },
+
+  welcomeCoralShape: {
+    position: "absolute",
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    right: 118,
+    bottom: 17,
+    backgroundColor: "#E88C7D",
+    opacity: 0.22,
+  },
+
+  welcomePetImage: {
+    position: "absolute",
+    width: "45%",
+    height: 168,
+    right: -3,
+    bottom: -5,
+    zIndex: 2,
   },
 
   bigPaw: {
     position: "absolute",
-    fontSize: 115,
-    right: -15,
-    bottom: -25,
-    opacity: 0.13,
+    fontSize: 82,
+    right: 91,
+    bottom: -23,
+    opacity: 0.05,
+    zIndex: 1,
   },
 
   sectionHeader: {
@@ -992,12 +1035,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 21,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   seeAll: {
     fontSize: 15,
-    color: "#176B3A",
+    color: "#243B53",
     fontWeight: "700",
   },
 
@@ -1069,15 +1112,15 @@ const styles = StyleSheet.create({
   overviewCount: {
     fontSize: 27,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   overdueCount: {
-    color: "#B84C4C",
+    color: "#E88C7D",
   },
 
   dueCount: {
-    color: "#A56812",
+    color: "#B55F54",
   },
 
   overviewLabel: {
@@ -1101,7 +1144,7 @@ const styles = StyleSheet.create({
 
   loadingText: {
     fontSize: 14,
-    color: "#7B877F",
+    color: "#7C858D",
   },
 
   petCard: {
@@ -1159,7 +1202,7 @@ const styles = StyleSheet.create({
   safeBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E8F5EA",
+    backgroundColor: "#DCEAF7",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 10,
@@ -1174,7 +1217,7 @@ const styles = StyleSheet.create({
   },
 
   safeText: {
-    color: "#267542",
+    color: "#4C6A92",
     fontSize: 12,
     fontWeight: "700",
   },
@@ -1193,7 +1236,7 @@ const styles = StyleSheet.create({
 
   petBreed: {
     fontSize: 14,
-    color: "#7B877F",
+    color: "#7C858D",
     marginTop: 3,
   },
 
@@ -1206,7 +1249,7 @@ const styles = StyleSheet.create({
 
   petDetailText: {
     fontSize: 13,
-    color: "#176B3A",
+    color: "#243B53",
     fontWeight: "600",
   },
 
@@ -1231,14 +1274,14 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 17,
     fontWeight: "800",
-    color: "#253229",
+    color: "#2B3440",
     marginTop: 12,
   },
 
   emptyDescription: {
     fontSize: 14,
     lineHeight: 20,
-    color: "#7B877F",
+    color: "#7C858D",
     textAlign: "center",
     marginTop: 5,
   },
@@ -1248,7 +1291,7 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 13,
     paddingHorizontal: 18,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1266,7 +1309,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: "#E4EAE6",
+    borderColor: "#E6E9ED",
     padding: 13,
     marginBottom: 11,
     flexDirection: "row",
@@ -1287,11 +1330,11 @@ const styles = StyleSheet.create({
   },
 
   overdueReminderIcon: {
-    backgroundColor: "#FDE5E2",
+    backgroundColor: "#FBE3DE",
   },
 
   personalCareIcon: {
-    backgroundColor: "#E5F3E8",
+    backgroundColor: "#DCEAF7",
   },
 
   reminderInfo: {
@@ -1302,12 +1345,12 @@ const styles = StyleSheet.create({
   reminderTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#253229",
+    color: "#2B3440",
   },
 
   reminderPet: {
     fontSize: 14,
-    color: "#7B877F",
+    color: "#7C858D",
     marginTop: 2,
   },
 
@@ -1320,7 +1363,7 @@ const styles = StyleSheet.create({
 
   dateText: {
     fontSize: 13,
-    color: "#7A877F",
+    color: "#7C858D",
   },
 
   statusBadge: {
@@ -1331,15 +1374,15 @@ const styles = StyleSheet.create({
   },
 
   overdueBadge: {
-    backgroundColor: "#FDE5E2",
+    backgroundColor: "#FBE3DE",
   },
 
   warningBadge: {
-    backgroundColor: "#FFF0D5",
+    backgroundColor: "#FBE3DE",
   },
 
   upcomingBadge: {
-    backgroundColor: "#E8F5EA",
+    backgroundColor: "#DCEAF7",
   },
 
   statusText: {
@@ -1348,15 +1391,15 @@ const styles = StyleSheet.create({
   },
 
   overdueText: {
-    color: "#B84C4C",
+    color: "#E88C7D",
   },
 
   warningText: {
-    color: "#A56812",
+    color: "#B55F54",
   },
 
   upcomingText: {
-    color: "#267542",
+    color: "#4C6A92",
   },
 
   personalCareBadge: {
@@ -1365,11 +1408,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 10,
     marginLeft: 5,
-    backgroundColor: "#E5F3E8",
+    backgroundColor: "#DCEAF7",
   },
 
   personalCareBadgeText: {
-    color: "#176B3A",
+    color: "#243B53",
     fontSize: 11,
     fontWeight: "800",
     textAlign: "center",
@@ -1380,7 +1423,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E4EAE6",
+    borderColor: "#E6E9ED",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1404,19 +1447,19 @@ const styles = StyleSheet.create({
   personalCareErrorTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#253229",
+    color: "#2B3440",
   },
 
   personalCareErrorDescription: {
     marginTop: 2,
     fontSize: 12,
-    color: "#7B877F",
+    color: "#7C858D",
   },
 
   emptyReminder: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E4EAE6",
+    borderColor: "#E6E9ED",
     borderRadius: 17,
     padding: 16,
     flexDirection: "row",
@@ -1440,13 +1483,13 @@ const styles = StyleSheet.create({
   emptyReminderTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#253229",
+    color: "#2B3440",
   },
 
   emptyReminderDescription: {
     fontSize: 13,
     lineHeight: 18,
-    color: "#7B877F",
+    color: "#7C858D",
     marginTop: 3,
   },
 
@@ -1458,7 +1501,7 @@ const styles = StyleSheet.create({
     height: 78,
     backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: "#E4EAE6",
+    borderTopColor: "#E6E9ED",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
@@ -1473,13 +1516,13 @@ const styles = StyleSheet.create({
 
   navText: {
     fontSize: 12,
-    color: "#89948E",
+    color: "#7C858D",
     marginTop: 4,
     fontWeight: "600",
   },
 
   activeNavText: {
-    color: "#176B3A",
+    color: "#243B53",
     fontWeight: "800",
   },
 

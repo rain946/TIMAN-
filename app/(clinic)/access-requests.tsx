@@ -141,7 +141,7 @@ export default function AccessRequestsScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={27} color="#173D2A" />
+          <Ionicons name="chevron-back" size={27} color="#243B53" />
         </Pressable>
         <Text style={styles.headerTitle}>Access Requests</Text>
         <View style={styles.headerSpacer} />
@@ -153,8 +153,8 @@ export default function AccessRequestsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            colors={["#176B3A"]}
-            tintColor="#176B3A"
+            colors={["#243B53"]}
+            tintColor="#243B53"
             onRefresh={() => {
               setRefreshing(true);
               loadRequests(false);
@@ -201,13 +201,13 @@ export default function AccessRequestsScreen() {
 
         {loading ? (
           <View style={styles.stateCard}>
-            <ActivityIndicator color="#176B3A" />
+            <ActivityIndicator color="#243B53" />
             <Text style={styles.loadingText}>Loading access requests...</Text>
           </View>
         ) : error ? (
           <View style={styles.stateCard}>
             <View style={styles.errorIcon}>
-              <Ionicons name="alert-circle-outline" size={27} color="#A7483E" />
+              <Ionicons name="alert-circle-outline" size={27} color="#E88C7D" />
             </View>
             <Text style={styles.stateTitle}>
               Unable to load access requests.
@@ -272,7 +272,7 @@ function AuthorizationCard({ request }: { request: AuthorizationItem }) {
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
         ) : (
-          <Ionicons name="paw" size={25} color="#176B3A" />
+          <Ionicons name="paw" size={25} color="#243B53" />
         )}
       </View>
 
@@ -295,7 +295,7 @@ function AuthorizationCard({ request }: { request: AuthorizationItem }) {
               ? "View Record"
               : actionLabel(request.status)}
           </Text>
-          <Ionicons name="chevron-forward" size={17} color="#176B3A" />
+          <Ionicons name="chevron-forward" size={17} color="#243B53" />
         </View>
       </View>
     </Pressable>
@@ -359,7 +359,7 @@ function formatDate(value: string) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFDF7" },
+  container: { flex: 1, backgroundColor: "#F6F0E6" },
   header: {
     height: 60,
     paddingHorizontal: 18,
@@ -367,8 +367,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E9EDE9",
-    backgroundColor: "#FFFDF7",
+    borderBottomColor: "#E6E9ED",
+    backgroundColor: "#F6F0E6",
   },
   backButton: {
     width: 44,
@@ -376,11 +376,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 21, fontWeight: "900", color: "#1E2D24" },
+  headerTitle: { fontSize: 21, fontWeight: "900", color: "#2B3440" },
   headerSpacer: { width: 44, height: 44 },
   content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 21, paddingBottom: 45 },
   introTitle: { fontSize: 22, fontWeight: "900", color: "#203027" },
-  introText: { marginTop: 4, fontSize: 13, lineHeight: 17, color: "#77847C" },
+  introText: { marginTop: 4, fontSize: 13, lineHeight: 17, color: "#7C858D" },
   filterRow: { gap: 8, paddingVertical: 19 },
   filterButton: {
     minHeight: 42,
@@ -390,10 +390,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#DDE5DF",
+    borderColor: "#E6E9ED",
   },
-  filterButtonSelected: { backgroundColor: "#176B3A", borderColor: "#176B3A" },
-  filterText: { fontSize: 13, fontWeight: "800", color: "#66746B" },
+  filterButtonSelected: { backgroundColor: "#243B53", borderColor: "#243B53" },
+  filterText: { fontSize: 13, fontWeight: "800", color: "#7C858D" },
   filterTextSelected: { color: "#FFFFFF" },
   list: { gap: 10 },
   card: {
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     padding: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -412,16 +412,16 @@ const styles = StyleSheet.create({
     height: 66,
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
   petPhoto: { width: "100%", height: "100%" },
   cardContent: { flex: 1, marginLeft: 13 },
   cardTopRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#27372D" },
-  petDetails: { marginTop: 3, fontSize: 12, color: "#7B877F" },
-  requestDate: { marginTop: 7, fontSize: 11, color: "#929C96" },
+  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#2B3440" },
+  petDetails: { marginTop: 3, fontSize: 12, color: "#7C858D" },
+  requestDate: { marginTop: 7, fontSize: 11, color: "#7C858D" },
   cardActionRow: {
     marginTop: 10,
     flexDirection: "row",
@@ -431,17 +431,17 @@ const styles = StyleSheet.create({
   cardAction: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
     marginRight: 2,
   },
   statusBadge: { borderRadius: 9, paddingHorizontal: 8, paddingVertical: 5 },
   statusText: { fontSize: 11, fontWeight: "900" },
-  pendingBadge: { backgroundColor: "#FFF1DA" },
+  pendingBadge: { backgroundColor: "#FBE3DE" },
   pendingText: { color: "#9A6416" },
   approvedBadge: { backgroundColor: "#E6F4E9" },
-  approvedText: { color: "#176B3A" },
+  approvedText: { color: "#243B53" },
   declinedBadge: { backgroundColor: "#FDE9E6" },
-  declinedText: { color: "#A7483E" },
+  declinedText: { color: "#E88C7D" },
   revokedBadge: { backgroundColor: "#F4E8E6" },
   revokedText: { color: "#8F4A42" },
   stateCard: {
@@ -449,18 +449,18 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     padding: 24,
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 13, color: "#77847C" },
+  loadingText: { marginTop: 12, fontSize: 13, color: "#7C858D" },
   stateTitle: {
     marginTop: 12,
     fontSize: 14,
     lineHeight: 18,
     fontWeight: "700",
-    color: "#526158",
+    color: "#4C6A92",
     textAlign: "center",
   },
   emptyIcon: {
@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 17,
-    backgroundColor: "#FDEDEA",
+    backgroundColor: "#FBE3DE",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
     marginTop: 17,
     borderRadius: 12,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 18,

@@ -21,6 +21,35 @@ import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
 
 import { registerDeviceForPushNotifications } from "../../services/notificationService";
+import { checkNearbyAlertEnrollmentForSession } from "../../services/nearbyAlertEnrollment";
+
+type AuthenticatedUser = {
+  user_id?: number;
+  userId?: number;
+  role?: string;
+};
+
+function startPostLoginSetup(token: string, user: AuthenticatedUser) {
+  console.log("TIMAN: Starting background push registration...");
+
+  void registerDeviceForPushNotifications()
+    .then((pushResult) => {
+      console.log("TIMAN PUSH REGISTRATION RESULT:", pushResult);
+
+      if (!pushResult.success) {
+        console.log(
+          "TIMAN: Push registration was not completed.",
+          pushResult.message,
+        );
+      }
+    })
+    .catch((pushError) => {
+      console.log("TIMAN BACKGROUND PUSH REGISTRATION ERROR:", pushError);
+    })
+    .finally(() => {
+      void checkNearbyAlertEnrollmentForSession({ token, user });
+    });
+}
 
 export default function LoginScreen() {
   const emailInputRef = useRef<TextInput>(null);
@@ -110,31 +139,18 @@ export default function LoginScreen() {
 
       console.log("LOGIN SUCCESS:", data.user);
 
-      try {
-        console.log("TIMAN: Starting automatic push registration...");
-
-        const pushResult = await registerDeviceForPushNotifications();
-
-        console.log("TIMAN PUSH REGISTRATION RESULT:", pushResult);
-
-        if (!pushResult.success) {
-          console.log(
-            "TIMAN: Push registration was not completed.",
-            pushResult.message,
-          );
-        }
-      } catch (pushError) {
-        console.log("TIMAN AUTO PUSH REGISTRATION ERROR:", pushError);
-      }
-
       if (data.user.role === "owner") {
         router.replace("/dashboard");
+
+        startPostLoginSetup(data.token, data.user);
 
         return;
       }
 
       if (data.user.role === "clinic") {
         router.replace("/(clinic)/(tabs)/clinic-dashboard");
+
+        startPostLoginSetup(data.token, data.user);
 
         return;
       }
@@ -178,7 +194,7 @@ export default function LoginScreen() {
             disabled={loading}
             onPress={() => router.back()}
           >
-            <Ionicons name="chevron-back" size={28} color="#173D2A" />
+            <Ionicons name="chevron-back" size={28} color="#243B53" />
           </Pressable>
 
           <View style={styles.logoContainer}>
@@ -198,14 +214,14 @@ export default function LoginScreen() {
           <Text style={styles.label}>Email</Text>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={21} color="#65736B" />
+            <Ionicons name="mail-outline" size={21} color="#7C858D" />
 
             <TextInput
               ref={emailInputRef}
               onFocus={() => handleInputFocus(emailInputRef.current)}
               style={styles.input}
               placeholder="Enter your email"
-              placeholderTextColor="#8A948E"
+              placeholderTextColor="#7C858D"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -218,14 +234,14 @@ export default function LoginScreen() {
           <Text style={styles.label}>Password</Text>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={21} color="#65736B" />
+            <Ionicons name="lock-closed-outline" size={21} color="#7C858D" />
 
             <TextInput
               ref={passwordInputRef}
               onFocus={() => handleInputFocus(passwordInputRef.current)}
               style={styles.input}
               placeholder="Enter your password"
-              placeholderTextColor="#8A948E"
+              placeholderTextColor="#7C858D"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -246,7 +262,7 @@ export default function LoginScreen() {
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={21}
-                color="#65736B"
+                color="#7C858D"
               />
             </Pressable>
           </View>
@@ -287,7 +303,7 @@ export default function LoginScreen() {
             <Ionicons
               name="shield-checkmark-outline"
               size={21}
-              color="#176B3A"
+              color="#243B53"
             />
 
             <Text style={styles.roleInfoText}>
@@ -313,14 +329,14 @@ export default function LoginScreen() {
             disabled={loading}
             onPress={() => router.push("/register")}
           >
-            <Ionicons name="person-add-outline" size={20} color="#176B3A" />
+            <Ionicons name="person-add-outline" size={20} color="#243B53" />
 
             <Text style={styles.createButtonText}>Create an Account</Text>
           </Pressable>
 
           <View style={styles.securityCard}>
             <View style={styles.securityIcon}>
-              <Ionicons name="lock-closed" size={20} color="#176B3A" />
+              <Ionicons name="lock-closed" size={20} color="#243B53" />
             </View>
 
             <View style={styles.securityContent}>
@@ -341,7 +357,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   content: {
@@ -368,7 +384,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 39,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
     letterSpacing: 2,
     marginTop: -6,
   },
@@ -382,12 +398,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "900",
-    color: "#17251D",
+    color: "#2B3440",
   },
 
   subtitle: {
     fontSize: 16,
-    color: "#68766E",
+    color: "#7C858D",
     lineHeight: 23,
     textAlign: "center",
     marginTop: 7,
@@ -397,7 +413,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#354B3E",
+    color: "#2B3440",
     marginBottom: 7,
   },
 
@@ -405,7 +421,7 @@ const styles = StyleSheet.create({
     minHeight: 58,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#D9E2DC",
+    borderColor: "#E6E9ED",
     borderRadius: 13,
     flexDirection: "row",
     alignItems: "center",
@@ -417,7 +433,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 11,
     fontSize: 17,
-    color: "#17251D",
+    color: "#2B3440",
     paddingVertical: 15,
   },
 
@@ -441,12 +457,12 @@ const styles = StyleSheet.create({
   forgotText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   loginButton: {
     height: 58,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
@@ -473,7 +489,7 @@ const styles = StyleSheet.create({
   },
 
   roleInfo: {
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     borderRadius: 13,
     padding: 12,
     flexDirection: "row",
@@ -485,7 +501,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     lineHeight: 19,
-    color: "#5E7164",
+    color: "#4C6A92",
     marginLeft: 8,
   },
 
@@ -498,19 +514,19 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "#DDE3DF",
+    backgroundColor: "#E6E9ED",
   },
 
   dividerText: {
     fontSize: 13,
-    color: "#8B958F",
+    color: "#7C858D",
     marginHorizontal: 10,
   },
 
   createButton: {
     height: 55,
     borderWidth: 1.5,
-    borderColor: "#176B3A",
+    borderColor: "#243B53",
     borderRadius: 13,
     flexDirection: "row",
     alignItems: "center",
@@ -519,13 +535,13 @@ const styles = StyleSheet.create({
   },
 
   createButtonText: {
-    color: "#176B3A",
+    color: "#243B53",
     fontSize: 16,
     fontWeight: "800",
   },
 
   securityCard: {
-    backgroundColor: "#F2F7F2",
+    backgroundColor: "#DCEAF7",
     borderRadius: 15,
     padding: 14,
     flexDirection: "row",
@@ -549,7 +565,7 @@ const styles = StyleSheet.create({
   securityTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#294C34",
+    color: "#2B3440",
   },
 
   securityText: {

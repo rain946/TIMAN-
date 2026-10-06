@@ -283,7 +283,7 @@ export default function ClinicVetRecordsScreen() {
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Loading veterinary records...</Text>
         </View>
@@ -338,7 +338,7 @@ export default function ClinicVetRecordsScreen() {
           onPress={addRecord}
         >
           <View style={styles.addButtonIcon}>
-            <Ionicons name="add" size={22} color="#176B3A" />
+            <Ionicons name="add" size={22} color="#243B53" />
           </View>
 
           <View style={styles.addButtonContent}>
@@ -410,7 +410,7 @@ export default function ClinicVetRecordsScreen() {
         )}
 
         <View style={styles.securityCard}>
-          <Ionicons name="shield-checkmark-outline" size={20} color="#176B3A" />
+          <Ionicons name="shield-checkmark-outline" size={20} color="#243B53" />
 
           <Text style={styles.securityText}>
             Veterinary records are available because the pet owner has approved
@@ -432,7 +432,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Veterinary Records</Text>
@@ -476,7 +476,7 @@ function VetRecordCard({
           <Ionicons
             name={getServiceIcon(record.service_type)}
             size={22}
-            color="#176B3A"
+            color="#243B53"
           />
         </View>
 
@@ -492,7 +492,7 @@ function VetRecordCard({
           </View>
 
           <View style={styles.dateRow}>
-            <Ionicons name="calendar-outline" size={13} color="#7D8981" />
+            <Ionicons name="calendar-outline" size={13} color="#7C858D" />
 
             <Text style={styles.dateText}>{formatDate(record.visit_date)}</Text>
           </View>
@@ -563,7 +563,7 @@ function VetRecordCard({
                 }
                 size={18}
                 color={
-                  isCompleted ? "#176B3A" : isCancelled ? "#9A5550" : "#896819"
+                  isCompleted ? "#243B53" : isCancelled ? "#9A5550" : "#896819"
                 }
               />
             </View>
@@ -645,7 +645,7 @@ function VetRecordCard({
 
       <View style={styles.clinicFooter}>
         <View style={styles.clinicIcon}>
-          <Ionicons name="business-outline" size={15} color="#176B3A" />
+          <Ionicons name="business-outline" size={15} color="#243B53" />
         </View>
 
         <View style={styles.clinicInfo}>
@@ -754,12 +754,12 @@ function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
 
 function getServiceBackground(service: string) {
   if (service.startsWith("Vaccination - ")) {
-    return "#E6F3E8";
+    return "#DCEAF7";
   }
 
   switch (service) {
     case "Vaccination":
-      return "#E6F3E8";
+      return "#DCEAF7";
 
     case "Deworming":
       return "#FFF2D5";
@@ -774,7 +774,7 @@ function getServiceBackground(service: string) {
       return "#E8F1EB";
 
     default:
-      return "#EEF2EF";
+      return "#E6E9ED";
   }
 }
 
@@ -842,7 +842,7 @@ function formatDateTime(value: string) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   center: {
@@ -854,7 +854,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 13,
-    color: "#76837B",
+    color: "#7C858D",
   },
 
   header: {
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -880,7 +880,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -897,7 +897,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 19,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     flexDirection: "row",
     alignItems: "center",
@@ -940,14 +940,14 @@ const styles = StyleSheet.create({
 
     fontSize: 20,
     fontWeight: "900",
-    color: "#23442F",
+    color: "#2B3440",
   },
 
   petDetails: {
     marginTop: 3,
 
     fontSize: 11,
-    color: "#6C7D72",
+    color: "#7C858D",
   },
 
   recordCount: {
@@ -959,14 +959,14 @@ const styles = StyleSheet.create({
   recordNumber: {
     fontSize: 22,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   recordCountLabel: {
     marginTop: 1,
 
     fontSize: 11,
-    color: "#718078",
+    color: "#7C858D",
   },
 
   addButton: {
@@ -978,7 +978,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 17,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1029,7 +1029,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   totalBadge: {
@@ -1038,13 +1038,13 @@ const styles = StyleSheet.create({
 
     borderRadius: 12,
 
-    backgroundColor: "#E8F2E9",
+    backgroundColor: "#DCEAF7",
   },
 
   totalBadgeText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   recordCard: {
@@ -1057,7 +1057,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
   },
 
   recordHeader: {
@@ -1100,13 +1100,13 @@ const styles = StyleSheet.create({
 
     borderRadius: 10,
 
-    backgroundColor: "#E5F2E7",
+    backgroundColor: "#DCEAF7",
   },
 
   latestText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   dateRow: {
@@ -1120,7 +1120,7 @@ const styles = StyleSheet.create({
 
   dateText: {
     fontSize: 11,
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   divider: {
@@ -1128,7 +1128,7 @@ const styles = StyleSheet.create({
 
     marginVertical: 14,
 
-    backgroundColor: "#EDF1EE",
+    backgroundColor: "#E6E9ED",
   },
 
   detailRow: {
@@ -1159,7 +1159,7 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#849088",
+    color: "#7C858D",
   },
 
   detailValue: {
@@ -1230,7 +1230,7 @@ const styles = StyleSheet.create({
   overdueText: {
     fontSize: 11,
     fontWeight: "900",
-    color: "#A3453C",
+    color: "#E88C7D",
   },
 
   todayBadge: {
@@ -1240,17 +1240,17 @@ const styles = StyleSheet.create({
   todayText: {
     fontSize: 11,
     fontWeight: "900",
-    color: "#876415",
+    color: "#B55F54",
   },
 
   soonBadge: {
-    backgroundColor: "#FFF0C4",
+    backgroundColor: "#FBE3DE",
   },
 
   soonText: {
     fontSize: 11,
     fontWeight: "900",
-    color: "#876415",
+    color: "#B55F54",
   },
 
   clinicFooter: {
@@ -1258,7 +1258,7 @@ const styles = StyleSheet.create({
     paddingTop: 13,
 
     borderTopWidth: 1,
-    borderTopColor: "#EDF1EE",
+    borderTopColor: "#E6E9ED",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1270,7 +1270,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 10,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1284,7 +1284,7 @@ const styles = StyleSheet.create({
 
   clinicLabel: {
     fontSize: 11,
-    color: "#8A958E",
+    color: "#7C858D",
   },
 
   clinicName: {
@@ -1303,7 +1303,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
 
     alignItems: "center",
   },
@@ -1314,7 +1314,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 22,
 
-    backgroundColor: "#EDF4EE",
+    backgroundColor: "#DCEAF7",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1325,7 +1325,7 @@ const styles = StyleSheet.create({
 
     fontSize: 17,
     fontWeight: "900",
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   emptyText: {
@@ -1338,7 +1338,7 @@ const styles = StyleSheet.create({
 
     textAlign: "center",
 
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   emptyButton: {
@@ -1350,7 +1350,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 13,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1372,7 +1372,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 15,
 
-    backgroundColor: "#EFF6F0",
+    backgroundColor: "#DCEAF7",
 
     flexDirection: "row",
     alignItems: "flex-start",
@@ -1386,7 +1386,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
 
-    color: "#617167",
+    color: "#7C858D",
   },
 
   completeButton: {
@@ -1397,7 +1397,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1450,7 +1450,7 @@ const styles = StyleSheet.create({
   },
 
   completedDueDate: {
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   completedBadge: {
@@ -1465,7 +1465,7 @@ const styles = StyleSheet.create({
   completedBadgeText: {
     fontSize: 11,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   cancelledDueCard: {

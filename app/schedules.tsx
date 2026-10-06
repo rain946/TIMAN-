@@ -388,7 +388,7 @@ export default function SchedulesScreen() {
         <View style={styles.center}>
           <ActivityIndicator
             size="large"
-            color="#176B3A"
+            color="#243B53"
           />
 
           <Text
@@ -454,7 +454,7 @@ export default function SchedulesScreen() {
                 <Ionicons
                   name="paw"
                   size={31}
-                  color="#6E9179"
+                  color="#4C6A92"
                 />
               </View>
             )}
@@ -496,7 +496,7 @@ export default function SchedulesScreen() {
               <Ionicons
                 name="calendar"
                 size={23}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
           </View>
@@ -519,7 +519,7 @@ export default function SchedulesScreen() {
                 <Ionicons
                   name="notifications"
                   size={21}
-                  color="#876518"
+                  color="#B55F54"
                 />
               </View>
 
@@ -590,7 +590,7 @@ export default function SchedulesScreen() {
               <Ionicons
                 name="calendar-outline"
                 size={17}
-                color="#765D21"
+                color="#B55F54"
               />
 
               <Text
@@ -635,24 +635,24 @@ export default function SchedulesScreen() {
             icon="alert-circle-outline"
             number={overdue.length}
             label="Overdue"
-            background="#F8E5E2"
-            iconColor="#A64B42"
+            background="#FBE3DE"
+            iconColor="#E88C7D"
           />
 
           <SummaryCard
             icon="time-outline"
             number={dueSoon.length}
             label="Due Soon"
-            background="#FFF0C7"
-            iconColor="#8A6818"
+            background="#FBE3DE"
+            iconColor="#B55F54"
           />
 
           <SummaryCard
             icon="calendar-outline"
             number={upcoming.length}
             label="Upcoming"
-            background="#E7F2E8"
-            iconColor="#176B3A"
+            background="#DCEAF7"
+            iconColor="#243B53"
           />
         </View>
 
@@ -664,7 +664,7 @@ export default function SchedulesScreen() {
           <Ionicons
             name="information-circle-outline"
             size={20}
-            color="#176B3A"
+            color="#243B53"
           />
 
           <Text
@@ -695,7 +695,7 @@ export default function SchedulesScreen() {
               <Ionicons
                 name="calendar-outline"
                 size={36}
-                color="#779080"
+                color="#4C6A92"
               />
             </View>
 
@@ -817,7 +817,7 @@ export default function SchedulesScreen() {
                 <Ionicons
                   name="checkmark-circle"
                   size={20}
-                  color="#176B3A"
+                  color="#243B53"
                 />
 
                 <Text
@@ -886,7 +886,7 @@ export default function SchedulesScreen() {
               <Ionicons
                 name="notifications-outline"
                 size={21}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
 
@@ -938,7 +938,7 @@ function Header() {
         <Ionicons
           name="chevron-back"
           size={27}
-          color="#173D2A"
+          color="#243B53"
         />
       </Pressable>
 
@@ -1172,7 +1172,7 @@ function ScheduleCard({
             <Ionicons
               name="calendar-outline"
               size={13}
-              color="#7B8880"
+              color="#7C858D"
             />
 
             <Text
@@ -1208,7 +1208,7 @@ function ScheduleCard({
           <Ionicons
             name="medical-outline"
             size={15}
-            color="#176B3A"
+            color="#243B53"
           />
         </View>
 
@@ -1272,7 +1272,7 @@ function CompletedScheduleCard({
           <Ionicons
             name="checkmark-circle"
             size={23}
-            color="#176B3A"
+            color="#243B53"
           />
         </View>
 
@@ -1330,7 +1330,7 @@ function CompletedScheduleCard({
         <Ionicons
           name="checkmark-done-outline"
           size={17}
-          color="#176B3A"
+          color="#243B53"
         />
 
         <View
@@ -1368,7 +1368,7 @@ function CompletedScheduleCard({
         <Ionicons
           name="business-outline"
           size={15}
-          color="#6C7D72"
+          color="#7C858D"
         />
 
         <Text
@@ -1626,13 +1626,13 @@ function getStatusColor(
 ) {
   switch (status) {
     case "Overdue":
-      return "#A64B42";
+      return "#E88C7D";
 
     case "Due Soon":
-      return "#896719";
+      return "#B55F54";
 
     case "Upcoming":
-      return "#176B3A";
+      return "#243B53";
   }
 }
 
@@ -1641,20 +1641,20 @@ function getStatusBackground(
 ) {
   switch (status) {
     case "Overdue":
-      return "#F8E5E2";
+      return "#FBE3DE";
 
     case "Due Soon":
-      return "#FFF0C7";
+      return "#FBE3DE";
 
     case "Upcoming":
-      return "#E7F2E8";
+      return "#DCEAF7";
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   center: {
@@ -1666,7 +1666,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: "#758279",
+    color: "#7C858D",
   },
 
 
@@ -1678,7 +1678,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -1691,7 +1691,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -1704,7 +1704,7 @@ const styles = StyleSheet.create({
   petCard: {
     padding: 16,
     borderRadius: 19,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -1713,14 +1713,14 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 20,
-    backgroundColor: "#DCEADF",
+    backgroundColor: "#DCEAF7",
   },
 
   petPlaceholder: {
     width: 70,
     height: 70,
     borderRadius: 20,
-    backgroundColor: "#DCEADF",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1733,21 +1733,21 @@ const styles = StyleSheet.create({
   petLabel: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#6F8175",
+    color: "#4C6A92",
   },
 
   petName: {
     marginTop: 2,
     fontSize: 23,
     fontWeight: "900",
-    color: "#23442F",
+    color: "#2B3440",
   },
 
   petDetails: {
     marginTop: 4,
     fontSize: 15,
     lineHeight: 20,
-    color: "#6C7D72",
+    color: "#7C858D",
   },
 
   calendarIcon: {
@@ -1764,7 +1764,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     padding: 17,
     borderRadius: 18,
-    backgroundColor: "#FFF3C9",
+    backgroundColor: "#FBE3DE",
     borderWidth: 1,
     borderColor: "#F0DFAC",
   },
@@ -1778,7 +1778,7 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: "#FFE8A3",
+    backgroundColor: "#F3C8C0",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1792,14 +1792,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "900",
     letterSpacing: 0.7,
-    color: "#96752C",
+    color: "#B55F54",
   },
 
   nextService: {
     marginTop: 3,
     fontSize: 19,
     fontWeight: "900",
-    color: "#6F571E",
+    color: "#B55F54",
   },
 
   nextDays: {
@@ -1810,7 +1810,7 @@ const styles = StyleSheet.create({
   nextDaysNumber: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#765B1D",
+    color: "#B55F54",
   },
 
   nextDaysLabel: {
@@ -1834,7 +1834,7 @@ const styles = StyleSheet.create({
   nextDate: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#765D21",
+    color: "#B55F54",
   },
 
   nextClinic: {
@@ -1859,7 +1859,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1883,7 +1883,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontSize: 13,
     fontWeight: "700",
-    color: "#7A877F",
+    color: "#7C858D",
     textAlign: "center",
   },
 
@@ -1891,7 +1891,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     padding: 14,
     borderRadius: 14,
-    backgroundColor: "#F0F6F1",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 9,
@@ -1901,7 +1901,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: "#617167",
+    color: "#7C858D",
   },
 
   scheduleSection: {
@@ -1921,7 +1921,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#2B3D32",
+    color: "#2B3440",
   },
 
   countBadge: {
@@ -1942,7 +1942,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
     lineHeight: 19,
-    color: "#7C8981",
+    color: "#7C858D",
   },
 
   scheduleCard: {
@@ -1951,7 +1951,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
   },
 
   scheduleTop: {
@@ -1975,7 +1975,7 @@ const styles = StyleSheet.create({
   serviceTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#2E4036",
+    color: "#2B3440",
   },
 
   scheduleDateRow: {
@@ -1988,7 +1988,7 @@ const styles = StyleSheet.create({
   scheduleDate: {
     fontSize: 14,
     lineHeight: 19,
-    color: "#7B8880",
+    color: "#7C858D",
   },
 
   statusBadge: {
@@ -2005,7 +2005,7 @@ const styles = StyleSheet.create({
   scheduleDivider: {
     height: 1,
     marginVertical: 13,
-    backgroundColor: "#EDF1EE",
+    backgroundColor: "#E6E9ED",
   },
 
   sourceRow: {
@@ -2017,7 +2017,7 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     borderRadius: 11,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2029,7 +2029,7 @@ const styles = StyleSheet.create({
 
   sourceLabel: {
     fontSize: 12,
-    color: "#89948D",
+    color: "#7C858D",
   },
 
   sourceText: {
@@ -2037,7 +2037,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 19,
     fontWeight: "700",
-    color: "#53645A",
+    color: "#4C6A92",
   },
 
   completedSection: {
@@ -2057,7 +2057,7 @@ const styles = StyleSheet.create({
   completedSectionTitle: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#2B3D32",
+    color: "#2B3440",
   },
 
   completedCountBadge: {
@@ -2065,7 +2065,7 @@ const styles = StyleSheet.create({
     height: 25,
     paddingHorizontal: 7,
     borderRadius: 13,
-    backgroundColor: "#DDEFE1",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2073,23 +2073,23 @@ const styles = StyleSheet.create({
   completedCountText: {
     fontSize: 12,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   completedSectionSubtitle: {
     marginTop: 5,
     fontSize: 14,
     lineHeight: 19,
-    color: "#7C8981",
+    color: "#7C858D",
   },
 
   completedScheduleCard: {
     marginBottom: 13,
     padding: 16,
     borderRadius: 18,
-    backgroundColor: "#F3F9F4",
+    backgroundColor: "#DCEAF7",
     borderWidth: 1,
-    borderColor: "#D6E8DA",
+    borderColor: "#C9D8E8",
   },
 
   completedScheduleTop: {
@@ -2101,7 +2101,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 15,
-    backgroundColor: "#DDEFE1",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2114,33 +2114,33 @@ const styles = StyleSheet.create({
   completedServiceTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#2E4036",
+    color: "#2B3440",
   },
 
   completedScheduleDate: {
     marginTop: 5,
     fontSize: 14,
     lineHeight: 19,
-    color: "#718078",
+    color: "#7C858D",
   },
 
   completedStatusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 7,
     borderRadius: 11,
-    backgroundColor: "#DDEFE1",
+    backgroundColor: "#DCEAF7",
   },
 
   completedStatusText: {
     fontSize: 12,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   completedScheduleDivider: {
     height: 1,
     marginVertical: 13,
-    backgroundColor: "#DCEADF",
+    backgroundColor: "#DCEAF7",
   },
 
   completedDetailRow: {
@@ -2155,7 +2155,7 @@ const styles = StyleSheet.create({
 
   completedDetailLabel: {
     fontSize: 12,
-    color: "#89948D",
+    color: "#7C858D",
   },
 
   completedDetailValue: {
@@ -2163,7 +2163,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 20,
     fontWeight: "800",
-    color: "#31503D",
+    color: "#2B3440",
   },
 
   completedClinicRow: {
@@ -2177,7 +2177,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 19,
-    color: "#687A6E",
+    color: "#7C858D",
   },
 
   emptyCard: {
@@ -2186,7 +2186,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     alignItems: "center",
   },
 
@@ -2194,7 +2194,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 22,
-    backgroundColor: "#EDF4EE",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2203,7 +2203,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     fontSize: 20,
     fontWeight: "900",
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   emptyText: {
@@ -2212,7 +2212,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 21,
     textAlign: "center",
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   recordsButton: {
@@ -2221,7 +2221,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 13,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -2240,7 +2240,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     padding: 15,
     borderRadius: 15,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "flex-start",
   },
@@ -2262,14 +2262,14 @@ const styles = StyleSheet.create({
   reminderTitle: {
     fontSize: 16,
     fontWeight: "900",
-    color: "#31503D",
+    color: "#2B3440",
   },
 
   reminderText: {
     marginTop: 4,
     fontSize: 14,
     lineHeight: 20,
-    color: "#687A6E",
+    color: "#7C858D",
   },
 
   pressed: {

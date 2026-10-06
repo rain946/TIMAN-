@@ -152,7 +152,7 @@ export default function VetRecordsScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={27} color="#173D2A" />
+          <Ionicons name="chevron-back" size={27} color="#243B53" />
         </Pressable>
         <Text style={styles.headerTitle}>Vet Records</Text>
         <View style={styles.headerSpacer} />
@@ -165,8 +165,8 @@ export default function VetRecordsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            colors={["#176B3A"]}
-            tintColor="#176B3A"
+            colors={["#243B53"]}
+            tintColor="#243B53"
             onRefresh={() => {
               setRefreshing(true);
               loadRecords(false);
@@ -179,7 +179,7 @@ export default function VetRecordsScreen() {
         </Text>
 
         <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={20} color="#718078" />
+          <Ionicons name="search-outline" size={20} color="#7C858D" />
           <TextInput
             value={search}
             onChangeText={setSearch}
@@ -197,7 +197,7 @@ export default function VetRecordsScreen() {
               hitSlop={8}
               onPress={() => setSearch("")}
             >
-              <Ionicons name="close-circle" size={20} color="#89958E" />
+              <Ionicons name="close-circle" size={20} color="#7C858D" />
             </Pressable>
           )}
         </View>
@@ -248,7 +248,7 @@ export default function VetRecordsScreen() {
 
         {loading ? (
           <StateCard>
-            <ActivityIndicator color="#176B3A" />
+            <ActivityIndicator color="#243B53" />
             <Text style={styles.loadingText}>
               Loading veterinary records...
             </Text>
@@ -256,7 +256,7 @@ export default function VetRecordsScreen() {
         ) : error ? (
           <StateCard>
             <View style={styles.errorIcon}>
-              <Ionicons name="alert-circle-outline" size={28} color="#A7483E" />
+              <Ionicons name="alert-circle-outline" size={28} color="#E88C7D" />
             </View>
             <Text style={styles.stateTitle}>
               Unable to load veterinary records.
@@ -278,7 +278,7 @@ export default function VetRecordsScreen() {
               <Ionicons
                 name="document-text-outline"
                 size={29}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
             <Text style={styles.stateTitle}>No veterinary records yet</Text>
@@ -302,7 +302,7 @@ export default function VetRecordsScreen() {
         ) : filteredRecords.length === 0 ? (
           <StateCard>
             <View style={styles.emptyIconMuted}>
-              <Ionicons name="search-outline" size={29} color="#66746B" />
+              <Ionicons name="search-outline" size={29} color="#7C858D" />
             </View>
             <Text style={styles.stateTitle}>No matching records</Text>
             <Text style={styles.stateDescription}>
@@ -364,7 +364,7 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
         ) : (
-          <Ionicons name="paw" size={25} color="#176B3A" />
+          <Ionicons name="paw" size={25} color="#243B53" />
         )}
       </View>
 
@@ -387,7 +387,7 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
         )}
         <View style={styles.recordBottomRow}>
           <View style={styles.dateRow}>
-            <Ionicons name="calendar-outline" size={14} color="#7C8981" />
+            <Ionicons name="calendar-outline" size={14} color="#7C858D" />
             <Text style={styles.visitDate}>
               {formatDate(record.visit_date)}
             </Text>
@@ -418,7 +418,7 @@ function formatDate(value: string) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFDF7" },
+  container: { flex: 1, backgroundColor: "#F6F0E6" },
   header: {
     height: 60,
     paddingHorizontal: 18,
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E9EDE9",
+    borderBottomColor: "#E6E9ED",
   },
   backButton: {
     width: 44,
@@ -434,10 +434,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 21, fontWeight: "900", color: "#1E2D24" },
+  headerTitle: { fontSize: 21, fontWeight: "900", color: "#2B3440" },
   headerSpacer: { width: 44, height: 44 },
   content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
-  subtitle: { fontSize: 14, color: "#77847C" },
+  subtitle: { fontSize: 14, color: "#7C858D" },
   searchContainer: {
     minHeight: 50,
     marginTop: 17,
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#DDE5DF",
+    borderColor: "#E6E9ED",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     paddingVertical: 0,
     fontSize: 15,
-    color: "#26372C",
+    color: "#2B3440",
   },
   filterRow: { gap: 8, paddingTop: 17, paddingBottom: 4 },
   filterButton: {
@@ -466,10 +466,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#DDE5DF",
+    borderColor: "#E6E9ED",
   },
-  filterButtonSelected: { backgroundColor: "#176B3A", borderColor: "#176B3A" },
-  filterText: { fontSize: 12, fontWeight: "800", color: "#66746B" },
+  filterButtonSelected: { backgroundColor: "#243B53", borderColor: "#243B53" },
+  filterText: { fontSize: 12, fontWeight: "800", color: "#7C858D" },
   filterTextSelected: { color: "#FFFFFF" },
   summaryRow: {
     marginTop: 22,
@@ -478,8 +478,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  summaryTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
-  summaryCount: { fontSize: 12, fontWeight: "700", color: "#718078" },
+  summaryTitle: { fontSize: 19, fontWeight: "900", color: "#2B3440" },
+  summaryCount: { fontSize: 12, fontWeight: "700", color: "#7C858D" },
   recordList: { gap: 10 },
   recordCard: {
     minHeight: 132,
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     padding: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -497,14 +497,14 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
   petPhoto: { width: "100%", height: "100%" },
   recordContent: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 6 },
   recordTopRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#27372D" },
+  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#2B3440" },
   serviceBadge: {
     maxWidth: "48%",
     minHeight: 24,
@@ -512,15 +512,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#E5F3E8",
+    backgroundColor: "#DCEAF7",
   },
-  serviceBadgeText: { fontSize: 11, fontWeight: "900", color: "#176B3A" },
-  petContext: { marginTop: 4, fontSize: 12, color: "#7B877F" },
+  serviceBadgeText: { fontSize: 11, fontWeight: "900", color: "#243B53" },
+  petContext: { marginTop: 4, fontSize: 12, color: "#7C858D" },
   diagnosis: {
     marginTop: 7,
     fontSize: 12,
     fontWeight: "700",
-    color: "#526158",
+    color: "#4C6A92",
   },
   recordBottomRow: {
     marginTop: 10,
@@ -530,8 +530,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dateRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  visitDate: { fontSize: 11, color: "#7C8981" },
-  accessChanged: { fontSize: 11, fontWeight: "800", color: "#A66A15" },
+  visitDate: { fontSize: 11, color: "#7C858D" },
+  accessChanged: { fontSize: 11, fontWeight: "800", color: "#B55F54" },
   stateCard: {
     minHeight: 245,
     marginTop: 24,
@@ -539,11 +539,11 @@ const styles = StyleSheet.create({
     padding: 25,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 13, color: "#77847C" },
+  loadingText: { marginTop: 12, fontSize: 13, color: "#7C858D" },
   emptyIcon: {
     width: 56,
     height: 56,
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#EEF2EF",
+    backgroundColor: "#E6E9ED",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#FDEDEA",
+    backgroundColor: "#FBE3DE",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     marginTop: 13,
     fontSize: 16,
     fontWeight: "900",
-    color: "#34453B",
+    color: "#2B3440",
     textAlign: "center",
   },
   stateDescription: {
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontSize: 12,
     lineHeight: 16,
-    color: "#77847C",
+    color: "#7C858D",
     textAlign: "center",
   },
   retryButton: {
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     marginTop: 17,
     borderRadius: 12,
     paddingHorizontal: 18,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     borderRadius: 13,
     paddingHorizontal: 18,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -620,6 +620,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  resetText: { fontSize: 12, fontWeight: "800", color: "#176B3A" },
+  resetText: { fontSize: 12, fontWeight: "800", color: "#243B53" },
   pressed: { opacity: 0.7 },
 });

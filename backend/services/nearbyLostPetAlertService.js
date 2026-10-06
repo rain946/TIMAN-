@@ -76,6 +76,35 @@ function isLocationFresh(updatedAt, maxAgeDays, now = new Date()) {
   return ageMs >= 0 && ageMs <= Number(maxAgeDays) * 24 * 60 * 60 * 1000;
 }
 
+function getNearbyAlertEnrollmentStatus(preference, now = new Date()) {
+  const nearbyAlertsEnabled = Boolean(preference?.nearby_alerts_enabled);
+  const hasLocation = isValidCoordinate(
+    preference?.alert_latitude,
+    preference?.alert_longitude
+  );
+  const locationFresh =
+    hasLocation &&
+    isLocationFresh(
+      preference?.location_updated_at,
+      nearbyAlertConfig.locationMaxAgeDays,
+      now
+    );
+
+  let enrollmentReason = null;
+  if (!preference) enrollmentReason = "no_preference";
+  else if (!nearbyAlertsEnabled) enrollmentReason = "disabled";
+  else if (!hasLocation) enrollmentReason = "missing_location";
+  else if (!locationFresh) enrollmentReason = "stale_location";
+
+  return {
+    nearbyAlertsEnabled,
+    hasLocation,
+    locationFresh,
+    enrollmentNeeded: Boolean(enrollmentReason),
+    enrollmentReason,
+  };
+}
+
 function isRecipientEligible(candidate, context) {
   if (!candidate || Number(candidate.user_id) === Number(context.ownerId)) return false;
   if (!Boolean(candidate.nearby_alerts_enabled)) return false;
@@ -281,6 +310,7 @@ module.exports = {
   canBroadcastReport,
   distinctPushTokens,
   evaluateBroadcast,
+  getNearbyAlertEnrollmentStatus,
   hasCooldownExpired,
   hasMovedMinimumDistance,
   haversineDistanceKm,

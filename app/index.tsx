@@ -66,7 +66,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
     paddingHorizontal: 25,
     paddingTop: 20,
   },
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 58,
     fontWeight: "900",
-    color: "#145A32",
+    color: "#243B53",
     letterSpacing: 2,
   },
 
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 20,
     lineHeight: 28,
-    color: "#194D33",
+    color: "#4C6A92",
     fontWeight: "500",
   },
 
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 230,
     borderRadius: 100,
-    backgroundColor: "#DCEEDC",
+    backgroundColor: "#DCEAF7",
     bottom: 5,
   },
 
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
 
   tagline: {
     alignSelf: "center",
-    backgroundColor: "#27663D",
+    backgroundColor: "#4C6A92",
     paddingVertical: 11,
     paddingHorizontal: 25,
     borderRadius: 25,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
 
   button: {
     height: 58,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     borderRadius: 15,
     marginTop: 45,
     flexDirection: "row",
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
 
   loginLink: {
-    color: "#145A32",
+    color: "#243B53",
     fontSize: 16,
     fontWeight: "700",
     textDecorationLine: "underline",
@@ -206,6 +206,6 @@ const styles = StyleSheet.create({
 
   bottomHeart: {
     fontSize: 45,
-    color: "#145A32",
+    color: "#243B53",
   },
 });

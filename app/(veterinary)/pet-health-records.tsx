@@ -181,7 +181,7 @@ export default function VetRecordsScreen() {
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Loading pet health records...</Text>
         </View>
@@ -211,7 +211,7 @@ export default function VetRecordsScreen() {
               />
             ) : (
               <View style={styles.petPlaceholder}>
-                <Ionicons name="paw" size={31} color="#6E9179" />
+                <Ionicons name="paw" size={31} color="#4C6A92" />
               </View>
             )}
 
@@ -222,7 +222,7 @@ export default function VetRecordsScreen() {
             </View>
 
             <View style={styles.verifiedIcon}>
-              <Ionicons name="shield-checkmark" size={23} color="#176B3A" />
+              <Ionicons name="shield-checkmark" size={23} color="#243B53" />
             </View>
           </View>
         )}
@@ -233,14 +233,14 @@ export default function VetRecordsScreen() {
               style={[
                 styles.summaryIcon,
                 {
-                  backgroundColor: "#E7F2E8",
+                  backgroundColor: "#DCEAF7",
                 },
               ]}
             >
               <Ionicons
                 name="document-text-outline"
                 size={20}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
 
@@ -256,11 +256,11 @@ export default function VetRecordsScreen() {
               style={[
                 styles.summaryIcon,
                 {
-                  backgroundColor: "#FFF0C7",
+                  backgroundColor: "#FBE3DE",
                 },
               ]}
             >
-              <Ionicons name="calendar-outline" size={20} color="#8A6818" />
+              <Ionicons name="calendar-outline" size={20} color="#B55F54" />
             </View>
 
             <View>
@@ -284,7 +284,7 @@ export default function VetRecordsScreen() {
         {records.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
-              <Ionicons name="medical-outline" size={35} color="#779080" />
+              <Ionicons name="medical-outline" size={35} color="#4C6A92" />
             </View>
 
             <Text style={styles.emptyTitle}>No Health Records Yet</Text>
@@ -300,7 +300,7 @@ export default function VetRecordsScreen() {
         )}
 
         <View style={styles.privacyCard}>
-          <Ionicons name="lock-closed-outline" size={19} color="#176B3A" />
+          <Ionicons name="lock-closed-outline" size={19} color="#243B53" />
 
           <Text style={styles.privacyText}>
             Only you and veterinary clinics with approved access can view
@@ -322,7 +322,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Health Records</Text>
@@ -351,7 +351,7 @@ function OwnerRecordCard({
           <Ionicons
             name={getServiceIcon(record.service_type)}
             size={22}
-            color="#176B3A"
+            color="#243B53"
           />
         </View>
 
@@ -373,7 +373,7 @@ function OwnerRecordCard({
           </View>
 
           <View style={styles.dateRow}>
-            <Ionicons name="calendar-outline" size={13} color="#7D8981" />
+            <Ionicons name="calendar-outline" size={13} color="#7C858D" />
 
             <Text style={styles.dateText}>{formatDate(record.visit_date)}</Text>
           </View>
@@ -432,7 +432,7 @@ function OwnerRecordCard({
                 isCompleted ? "checkmark-done-outline" : "notifications-outline"
               }
               size={19}
-              color={isCompleted ? "#176B3A" : "#876518"}
+              color={isCompleted ? "#243B53" : "#B55F54"}
             />
           </View>
 
@@ -464,7 +464,7 @@ function OwnerRecordCard({
 
       <View style={styles.clinicFooter}>
         <View style={styles.clinicIcon}>
-          <Ionicons name="business-outline" size={16} color="#176B3A" />
+          <Ionicons name="business-outline" size={16} color="#243B53" />
         </View>
 
         <View style={styles.clinicInfo}>
@@ -479,7 +479,7 @@ function OwnerRecordCard({
           )}
         </View>
 
-        <Ionicons name="checkmark-circle" size={19} color="#176B3A" />
+        <Ionicons name="checkmark-circle" size={19} color="#243B53" />
       </View>
     </View>
   );
@@ -644,7 +644,7 @@ function formatDateTime(value: string) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   center: {
@@ -656,7 +656,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 17,
-    color: "#758279",
+    color: "#7C858D",
   },
 
   header: {
@@ -666,7 +666,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
   petCard: {
     padding: 16,
     borderRadius: 19,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -707,14 +707,14 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 20,
-    backgroundColor: "#DCEADF",
+    backgroundColor: "#DCEAF7",
   },
 
   petPlaceholder: {
     width: 70,
     height: 70,
     borderRadius: 20,
-    backgroundColor: "#DCEADF",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -727,21 +727,21 @@ const styles = StyleSheet.create({
   petLabel: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#6F8175",
+    color: "#4C6A92",
   },
 
   petName: {
     marginTop: 2,
     fontSize: 25,
     fontWeight: "900",
-    color: "#23442F",
+    color: "#2B3440",
   },
 
   petDetails: {
     marginTop: 4,
     fontSize: 16,
     lineHeight: 19,
-    color: "#6C7D72",
+    color: "#7C858D",
   },
 
   verifiedIcon: {
@@ -766,7 +766,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     padding: 14,
     borderRadius: 14,
-    backgroundColor: "#F0F6F1",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 9,
@@ -807,7 +807,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     lineHeight: 20,
-    color: "#617167",
+    color: "#7C858D",
   },
 
   sectionHeader: {
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 23,
     fontWeight: "900",
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   recordCountText: {
@@ -836,7 +836,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
   },
 
   recordHeader: {
@@ -848,7 +848,7 @@ const styles = StyleSheet.create({
     width: 51,
     height: 51,
     borderRadius: 16,
-    backgroundColor: "#E7F2E8",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -875,26 +875,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 5,
     borderRadius: 10,
-    backgroundColor: "#E5F2E7",
+    backgroundColor: "#DCEAF7",
   },
 
   latestText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   completedBadge: {
     paddingHorizontal: 9,
     paddingVertical: 5,
     borderRadius: 10,
-    backgroundColor: "#E5F2E7",
+    backgroundColor: "#DCEAF7",
   },
 
   completedBadgeText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   dateRow: {
@@ -906,13 +906,13 @@ const styles = StyleSheet.create({
 
   dateText: {
     fontSize: 16,
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   divider: {
     height: 1,
     marginVertical: 15,
-    backgroundColor: "#EDF1EE",
+    backgroundColor: "#E6E9ED",
   },
 
   detailRow: {
@@ -938,7 +938,7 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#849088",
+    color: "#7C858D",
   },
 
   detailValue: {
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
   },
 
   completedScheduleCard: {
-    backgroundColor: "#EEF6EF",
+    backgroundColor: "#DCEAF7",
   },
 
   scheduleIcon: {
@@ -998,7 +998,7 @@ const styles = StyleSheet.create({
   },
 
   completedScheduleDate: {
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   dueBadge: {
@@ -1014,7 +1014,7 @@ const styles = StyleSheet.create({
   overdueText: {
     fontSize: 13,
     fontWeight: "900",
-    color: "#A3453C",
+    color: "#E88C7D",
   },
 
   todayBadge: {
@@ -1024,34 +1024,34 @@ const styles = StyleSheet.create({
   todayText: {
     fontSize: 13,
     fontWeight: "900",
-    color: "#876415",
+    color: "#B55F54",
   },
 
   upcomingBadge: {
-    backgroundColor: "#FFF0C4",
+    backgroundColor: "#FBE3DE",
   },
 
   upcomingText: {
     fontSize: 13,
     fontWeight: "900",
-    color: "#876415",
+    color: "#B55F54",
   },
 
   scheduledBadge: {
-    backgroundColor: "#E7F2E8",
+    backgroundColor: "#DCEAF7",
   },
 
   scheduledText: {
     fontSize: 13,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   clinicFooter: {
     marginTop: 15,
     paddingTop: 14,
     borderTopWidth: 1,
-    borderTopColor: "#EDF1EE",
+    borderTopColor: "#E6E9ED",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -1060,7 +1060,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1072,7 +1072,7 @@ const styles = StyleSheet.create({
 
   clinicLabel: {
     fontSize: 14,
-    color: "#8A958E",
+    color: "#7C858D",
   },
 
   clinicName: {
@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontSize: 14,
     lineHeight: 17,
-    color: "#8A958E",
+    color: "#7C858D",
   },
 
   emptyCard: {
@@ -1095,7 +1095,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
     alignItems: "center",
   },
 
@@ -1103,7 +1103,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 22,
-    backgroundColor: "#EDF4EE",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1112,7 +1112,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     fontSize: 22,
     fontWeight: "900",
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   emptyText: {
@@ -1121,14 +1121,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 20,
     textAlign: "center",
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   privacyCard: {
     marginTop: 13,
     padding: 15,
     borderRadius: 15,
-    backgroundColor: "#EFF6F0",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
@@ -1138,6 +1138,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     lineHeight: 20,
-    color: "#617167",
+    color: "#7C858D",
   },
 });

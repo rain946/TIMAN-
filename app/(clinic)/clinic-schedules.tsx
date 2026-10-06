@@ -176,7 +176,7 @@ export default function ClinicSchedulesScreen() {
             ]}
             onPress={() => router.back()}
           >
-            <Ionicons name="arrow-back" size={23} color="#1E2D24" />
+            <Ionicons name="arrow-back" size={23} color="#2B3440" />
           </Pressable>
         )}
         <Text style={styles.headerTitle}>Schedules</Text>
@@ -190,7 +190,7 @@ export default function ClinicSchedulesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={refresh}
-            tintColor="#176B3A"
+            tintColor="#243B53"
           />
         }
       >
@@ -205,7 +205,7 @@ export default function ClinicSchedulesScreen() {
             value={search}
             onChangeText={setSearch}
             placeholder="Search schedules..."
-            placeholderTextColor="#9AA39D"
+            placeholderTextColor="#7C858D"
             style={styles.searchInput}
             returnKeyType="search"
           />
@@ -263,13 +263,13 @@ export default function ClinicSchedulesScreen() {
 
         {loading ? (
           <StateCard>
-            <ActivityIndicator color="#176B3A" />
+            <ActivityIndicator color="#243B53" />
             <Text style={styles.loadingText}>Loading schedules...</Text>
           </StateCard>
         ) : error ? (
           <StateCard>
             <View style={styles.errorIcon}>
-              <Ionicons name="alert-circle-outline" size={29} color="#A7483E" />
+              <Ionicons name="alert-circle-outline" size={29} color="#E88C7D" />
             </View>
             <Text style={styles.stateTitle}>Unable to load schedules.</Text>
             <Pressable
@@ -286,7 +286,7 @@ export default function ClinicSchedulesScreen() {
         ) : showSearchEmpty ? (
           <StateCard>
             <View style={styles.emptyIconMuted}>
-              <Ionicons name="search-outline" size={29} color="#66746B" />
+              <Ionicons name="search-outline" size={29} color="#7C858D" />
             </View>
             <Text style={styles.stateTitle}>No matching schedules</Text>
             <Pressable
@@ -335,7 +335,7 @@ function ScheduleCard({
           {imageUrl ? (
             <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
           ) : (
-            <Ionicons name="paw" size={25} color="#176B3A" />
+            <Ionicons name="paw" size={25} color="#243B53" />
           )}
         </View>
 
@@ -351,7 +351,7 @@ function ScheduleCard({
           </Text>
           <Text style={styles.serviceType}>{schedule.service_type}</Text>
           <View style={styles.dueRow}>
-            <Ionicons name="calendar-outline" size={14} color="#76837B" />
+            <Ionicons name="calendar-outline" size={14} color="#7C858D" />
             <Text style={styles.dueDate}>
               {schedule.schedule_status === "Pending" ? "Due " : "Scheduled "}
               {formatDateOnly(schedule.next_due_date)}
@@ -433,7 +433,7 @@ function EmptyState({ status }: { status: ScheduleStatus }) {
   return (
     <StateCard>
       <View style={styles.emptyIcon}>
-        <Ionicons name={content.icon} size={29} color="#176B3A" />
+        <Ionicons name={content.icon} size={29} color="#243B53" />
       </View>
       <Text style={styles.stateTitle}>{content.title}</Text>
       <Text style={styles.stateDescription}>{content.description}</Text>
@@ -455,23 +455,23 @@ function parseDateOnly(value: string) {
 function getDueState(value: string) {
   const dueDate = parseDateOnly(value);
   if (!dueDate)
-    return { label: "SCHEDULED", color: "#176B3A", backgroundColor: "#E5F3E8" };
+    return { label: "SCHEDULED", color: "#243B53", backgroundColor: "#DCEAF7" };
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const days = Math.round((dueDate.getTime() - today.getTime()) / 86_400_000);
 
   if (days < 0)
-    return { label: "OVERDUE", color: "#A7483E", backgroundColor: "#FBE9E6" };
+    return { label: "OVERDUE", color: "#E88C7D", backgroundColor: "#FBE3DE" };
   if (days === 0)
-    return { label: "TODAY", color: "#A66A15", backgroundColor: "#FFF0D5" };
+    return { label: "TODAY", color: "#B55F54", backgroundColor: "#FBE3DE" };
   if (days <= 30)
     return {
       label: `${days} DAYS`,
-      color: "#A66A15",
-      backgroundColor: "#FFF0D5",
+      color: "#B55F54",
+      backgroundColor: "#FBE3DE",
     };
-  return { label: "SCHEDULED", color: "#176B3A", backgroundColor: "#E5F3E8" };
+  return { label: "SCHEDULED", color: "#243B53", backgroundColor: "#DCEAF7" };
 }
 
 function formatDateOnly(value: string) {
@@ -497,7 +497,7 @@ function formatDateTime(value: string) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFDF7" },
+  container: { flex: 1, backgroundColor: "#F6F0E6" },
   header: {
     height: 60,
     paddingHorizontal: 18,
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E9EDE9",
+    borderBottomColor: "#E6E9ED",
   },
   backButton: {
     width: 44,
@@ -513,10 +513,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 21, fontWeight: "900", color: "#1E2D24" },
+  headerTitle: { fontSize: 21, fontWeight: "900", color: "#2B3440" },
   headerSpacer: { width: 44, height: 44 },
   content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
-  subtitle: { fontSize: 14, color: "#77847C" },
+  subtitle: { fontSize: 14, color: "#7C858D" },
   searchContainer: {
     minHeight: 50,
     marginTop: 17,
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#DDE5DF",
+    borderColor: "#E6E9ED",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     paddingVertical: 0,
     fontSize: 15,
-    color: "#26372C",
+    color: "#2B3440",
   },
   tabs: { gap: 8, paddingTop: 17, paddingBottom: 4 },
   tab: {
@@ -545,10 +545,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#DDE5DF",
+    borderColor: "#E6E9ED",
   },
-  tabSelected: { backgroundColor: "#176B3A", borderColor: "#176B3A" },
-  tabText: { fontSize: 12, fontWeight: "800", color: "#66746B" },
+  tabSelected: { backgroundColor: "#243B53", borderColor: "#243B53" },
+  tabText: { fontSize: 12, fontWeight: "800", color: "#7C858D" },
   tabTextSelected: { color: "#FFFFFF" },
   summaryRow: {
     marginTop: 22,
@@ -557,14 +557,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  summaryTitle: { fontSize: 19, fontWeight: "900", color: "#1E2D24" },
-  summaryCount: { fontSize: 12, fontWeight: "700", color: "#718078" },
+  summaryTitle: { fontSize: 19, fontWeight: "900", color: "#2B3440" },
+  summaryCount: { fontSize: 12, fontWeight: "700", color: "#7C858D" },
   scheduleList: { gap: 11 },
   scheduleCard: {
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     overflow: "hidden",
   },
   cardMain: {
@@ -579,15 +579,15 @@ const styles = StyleSheet.create({
     height: 62,
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
   petPhoto: { width: "100%", height: "100%" },
   cardContent: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 6 },
   cardTopRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#27372D" },
-  petContext: { marginTop: 3, fontSize: 12, color: "#7B877F" },
+  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#2B3440" },
+  petContext: { marginTop: 3, fontSize: 12, color: "#7C858D" },
   serviceType: {
     marginTop: 8,
     fontSize: 14,
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 5,
   },
-  dueDate: { fontSize: 11, color: "#76837B" },
+  dueDate: { fontSize: 11, color: "#7C858D" },
   dueBadge: {
     minHeight: 21,
     borderRadius: 8,
@@ -618,18 +618,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   statusBadgeText: { fontSize: 11, fontWeight: "900" },
-  pendingBadge: { backgroundColor: "#FFF0D5" },
-  pendingBadgeText: { color: "#A66A15" },
-  completedBadge: { backgroundColor: "#E5F3E8" },
-  completedBadgeText: { color: "#176B3A" },
-  cancelledBadge: { backgroundColor: "#FBE9E6" },
-  cancelledBadgeText: { color: "#A7483E" },
+  pendingBadge: { backgroundColor: "#FBE3DE" },
+  pendingBadgeText: { color: "#B55F54" },
+  completedBadge: { backgroundColor: "#DCEAF7" },
+  completedBadgeText: { color: "#243B53" },
+  cancelledBadge: { backgroundColor: "#FBE3DE" },
+  cancelledBadgeText: { color: "#E88C7D" },
   completedAt: { marginTop: 7, fontSize: 11, color: "#4D725D" },
   accessChanged: {
     marginTop: 7,
     fontSize: 11,
     fontWeight: "800",
-    color: "#A66A15",
+    color: "#B55F54",
   },
   stateCard: {
     minHeight: 245,
@@ -638,11 +638,11 @@ const styles = StyleSheet.create({
     padding: 25,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 13, color: "#77847C" },
+  loadingText: { marginTop: 12, fontSize: 13, color: "#7C858D" },
   emptyIcon: {
     width: 56,
     height: 56,
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#EEF2EF",
+    backgroundColor: "#E6E9ED",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#FDEDEA",
+    backgroundColor: "#FBE3DE",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -671,7 +671,7 @@ const styles = StyleSheet.create({
     marginTop: 13,
     fontSize: 16,
     fontWeight: "900",
-    color: "#34453B",
+    color: "#2B3440",
     textAlign: "center",
   },
   stateDescription: {
@@ -679,7 +679,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontSize: 12,
     lineHeight: 16,
-    color: "#77847C",
+    color: "#7C858D",
     textAlign: "center",
   },
   retryButton: {
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
     minHeight: 42,
     marginTop: 16,
     borderRadius: 12,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -698,10 +698,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#176B3A",
+    borderColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
-  clearText: { fontSize: 13, fontWeight: "900", color: "#176B3A" },
+  clearText: { fontSize: 13, fontWeight: "900", color: "#243B53" },
   pressed: { opacity: 0.72 },
 });

@@ -160,7 +160,7 @@ export default function PetCareScheduleForm() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.center}>
-          <ActivityIndicator color="#176B3A" />
+          <ActivityIndicator color="#243B53" />
         </View>
       </SafeAreaView>
     );
@@ -169,7 +169,7 @@ export default function PetCareScheduleForm() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.headerButton}>
-          <Ionicons name="chevron-back" size={27} color="#173D2A" />
+          <Ionicons name="chevron-back" size={27} color="#243B53" />
         </Pressable>
         <Text style={styles.headerTitle}>
           {scheduleId ? "Edit Personal Care" : "Add Personal Care"}
@@ -185,7 +185,7 @@ export default function PetCareScheduleForm() {
           contentContainerStyle={styles.content}
         >
           <View style={styles.petCard}>
-            <Ionicons name="paw" size={22} color="#176B3A" />
+            <Ionicons name="paw" size={22} color="#243B53" />
             <View>
               <Text style={styles.label}>PET</Text>
               <Text style={styles.petName}>
@@ -226,7 +226,7 @@ export default function PetCareScheduleForm() {
           )}
           <Text style={styles.sectionTitle}>Date</Text>
           <Pressable onPress={openDatePicker} style={styles.inputRow}>
-            <Ionicons name="calendar-outline" size={19} color="#176B3A" />
+            <Ionicons name="calendar-outline" size={19} color="#243B53" />
             <Text style={styles.inputValue}>{scheduledDate}</Text>
           </Pressable>
           {showIosDatePicker && Platform.OS === "ios" && (
@@ -319,7 +319,7 @@ function parseDate(value: string) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7"
+    backgroundColor: "#F6F0E6"
   },
   flex: {
     flex: 1
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#1E2D24"
+    color: "#2B3440"
   },
   content: {
     padding: 20,
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 16,
     borderRadius: 17,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
   },
   label: {
     fontSize: 9,
@@ -368,14 +368,14 @@ const styles = StyleSheet.create({
   petName: {
     marginTop: 2,
     fontSize: 17, fontWeight: "900",
-    color: "#26352B"
+    color: "#2B3440"
   },
   sectionTitle: {
     marginTop: 22,
     marginBottom: 10,
     fontSize: 14,
     fontWeight: "900",
-    color: "#26352B",
+    color: "#2B3440",
   },
   options: {
     flexDirection: "row",
@@ -387,17 +387,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#DCE4DE",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFF",
   },
   optionSelected: {
-    backgroundColor: "#176B3A",
-    borderColor: "#176B3A"
+    backgroundColor: "#243B53",
+    borderColor: "#243B53"
   },
   optionText: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#526158"
+    color: "#4C6A92"
   },
   optionTextSelected: {
     color: "#FFF"
@@ -408,9 +408,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 13,
     borderWidth: 1,
-    borderColor: "#DCE4DE",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFF",
-    color: "#26352B",
+    color: "#2B3440",
   },
   inputRow: {
     height: 54,
@@ -420,13 +420,13 @@ const styles = StyleSheet.create({
     gap: 10,
     borderRadius: 13,
     borderWidth: 1,
-    borderColor: "#DCE4DE",
+    borderColor: "#E6E9ED",
     backgroundColor: "#FFF",
   },
   inputValue: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#34453B"
+    color: "#2B3440"
   },
   iosPickerCard: {
     marginTop: 8,
@@ -434,14 +434,14 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     backgroundColor: "#FFF",
     borderWidth: 1,
-    borderColor: "#DCE4DE",
+    borderColor: "#E6E9ED",
   },
   iosPickerDone: {
     alignSelf: "flex-end",
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: 10,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
   },
   iosPickerDoneText: {
     color: "#FFF",
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     height: 56,
     marginTop: 28,
     borderRadius: 15,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

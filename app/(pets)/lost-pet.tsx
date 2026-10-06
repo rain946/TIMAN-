@@ -361,7 +361,7 @@ export default function LostPetScreen() {
             ]}
             onPress={() => router.back()}
           >
-            <Ionicons name="chevron-back" size={27} color="#173D2A" />
+            <Ionicons name="chevron-back" size={27} color="#243B53" />
           </Pressable>
 
           <Text style={styles.headerTitle}>Missing Pet Details</Text>
@@ -370,7 +370,7 @@ export default function LostPetScreen() {
         </View>
 
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Loading missing pet details...</Text>
         </View>
@@ -389,7 +389,7 @@ export default function LostPetScreen() {
             ]}
             onPress={() => router.back()}
           >
-            <Ionicons name="chevron-back" size={27} color="#173D2A" />
+            <Ionicons name="chevron-back" size={27} color="#243B53" />
           </Pressable>
 
           <Text style={styles.headerTitle}>Missing Pet Details</Text>
@@ -398,7 +398,7 @@ export default function LostPetScreen() {
         </View>
 
         <View style={styles.emptyPetContainer}>
-          <Ionicons name="paw-outline" size={50} color="#9BA69F" />
+          <Ionicons name="paw-outline" size={50} color="#7C858D" />
 
           <Text style={styles.emptyPetTitle}>Pet Not Found</Text>
 
@@ -432,7 +432,7 @@ export default function LostPetScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={27} color="#173D2A" />
+          <Ionicons name="chevron-back" size={27} color="#243B53" />
         </Pressable>
 
         <Text style={styles.headerTitle}>Missing Pet Details</Text>
@@ -449,7 +449,7 @@ export default function LostPetScreen() {
       >
         <View style={styles.petCard}>
           <View style={styles.petIcon}>
-            <Ionicons name="paw" size={38} color="#176B3A" />
+            <Ionicons name="paw" size={38} color="#243B53" />
           </View>
 
           <View style={styles.petInfo}>
@@ -471,7 +471,7 @@ export default function LostPetScreen() {
         {pet.pet_status === "Missing" ? (
           <View style={styles.missingCard}>
             <View style={styles.missingIcon}>
-              <Ionicons name="alert-circle" size={30} color="#A14343" />
+              <Ionicons name="alert-circle" size={30} color="#E88C7D" />
             </View>
 
             <View style={styles.statusContent}>
@@ -486,7 +486,7 @@ export default function LostPetScreen() {
         ) : (
           <View style={styles.safeCard}>
             <View style={styles.safeIcon}>
-              <Ionicons name="shield-checkmark" size={30} color="#267542" />
+              <Ionicons name="shield-checkmark" size={30} color="#4C6A92" />
             </View>
 
             <View style={styles.statusContent}>
@@ -508,7 +508,7 @@ export default function LostPetScreen() {
                 <Ionicons
                   name="document-text-outline"
                   size={27}
-                  color="#176B3A"
+                  color="#243B53"
                 />
               </View>
 
@@ -542,7 +542,7 @@ export default function LostPetScreen() {
           <View style={styles.processCard}>
             <View style={styles.processItem}>
               <View style={styles.processIcon}>
-                <Ionicons name="qr-code-outline" size={24} color="#176B3A" />
+                <Ionicons name="qr-code-outline" size={24} color="#243B53" />
               </View>
 
               <View style={styles.processContent}>
@@ -563,14 +563,14 @@ export default function LostPetScreen() {
             <View
               style={{
                 height: 1,
-                backgroundColor: "#E5EAE7",
+                backgroundColor: "#E6E9ED",
                 marginVertical: 14,
               }}
             />
 
             <View style={styles.processItem}>
               <View style={styles.processIcon}>
-                <Ionicons name="location-outline" size={24} color="#176B3A" />
+                <Ionicons name="location-outline" size={24} color="#243B53" />
               </View>
 
               <View style={styles.processContent}>
@@ -613,7 +613,7 @@ export default function LostPetScreen() {
                 ]}
                 onPress={openLastScanLocation}
               >
-                <Ionicons name="map-outline" size={20} color="#176B3A" />
+                <Ionicons name="map-outline" size={20} color="#243B53" />
 
                 <Text style={styles.previewText}>Open Location in Maps</Text>
               </Pressable>
@@ -621,7 +621,7 @@ export default function LostPetScreen() {
           </View>
         ) : (
           <View style={styles.emptyReport}>
-            <Ionicons name="location-outline" size={31} color="#9BA69F" />
+            <Ionicons name="location-outline" size={31} color="#7C858D" />
 
             <Text style={styles.emptyTitle}>No QR Scans Yet</Text>
 
@@ -636,7 +636,7 @@ export default function LostPetScreen() {
                 style={({ pressed }) => [styles.previewButton, pressed && styles.pressed]}
                 onPress={openLastScanLocation}
               >
-                <Ionicons name="map-outline" size={20} color="#176B3A" />
+                <Ionicons name="map-outline" size={20} color="#243B53" />
                 <Text style={styles.previewText}>Open Initial Location in Maps</Text>
               </Pressable>
             )}
@@ -680,7 +680,7 @@ export default function LostPetScreen() {
                     <Ionicons
                       name={index === 0 ? "location" : "location-outline"}
                       size={24}
-                      color="#176B3A"
+                      color="#243B53"
                     />
                   </View>
 
@@ -717,7 +717,7 @@ export default function LostPetScreen() {
                         <Ionicons
                           name="map-outline"
                           size={17}
-                          color="#176B3A"
+                          color="#243B53"
                         />
 
                         <Text style={styles.scanMapButtonText}>
@@ -761,7 +761,7 @@ export default function LostPetScreen() {
           <Ionicons
             name="information-circle-outline"
             size={21}
-            color="#176B3A"
+            color="#243B53"
           />
 
           <Text style={styles.infoText}>
@@ -795,10 +795,10 @@ function StatusBadge({ status }: { status: PetStatus }) {
           styles.statusDot,
           {
             backgroundColor: isSafe
-              ? "#2E9C52"
+              ? "#4C6A92"
               : isFound
                 ? "#D99B35"
-                : "#B84A4A",
+                : "#E88C7D",
           },
         ]}
       />
@@ -807,7 +807,7 @@ function StatusBadge({ status }: { status: PetStatus }) {
         style={[
           styles.statusBadgeText,
           {
-            color: isSafe ? "#267542" : isFound ? "#99691E" : "#A14343",
+            color: isSafe ? "#4C6A92" : isFound ? "#99691E" : "#E88C7D",
           },
         ]}
       >
@@ -820,7 +820,7 @@ function StatusBadge({ status }: { status: PetStatus }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   header: {
@@ -830,7 +830,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -843,7 +843,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 21,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -863,7 +863,7 @@ const styles = StyleSheet.create({
 
   loadingText: {
     fontSize: 14,
-    color: "#77857C",
+    color: "#7C858D",
     marginTop: 12,
   },
 
@@ -877,7 +877,7 @@ const styles = StyleSheet.create({
   emptyPetTitle: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#293A30",
+    color: "#2B3440",
     marginTop: 12,
   },
 
@@ -885,12 +885,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     textAlign: "center",
-    color: "#77857C",
+    color: "#7C858D",
     marginTop: 6,
   },
 
   backButton: {
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     borderRadius: 12,
     paddingHorizontal: 25,
     paddingVertical: 13,
@@ -906,7 +906,7 @@ const styles = StyleSheet.create({
   petCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 18,
     padding: 15,
     marginTop: 20,
@@ -918,7 +918,7 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 18,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -931,18 +931,18 @@ const styles = StyleSheet.create({
   petName: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#293A30",
+    color: "#2B3440",
   },
 
   petBreed: {
     fontSize: 13,
-    color: "#77857C",
+    color: "#7C858D",
     marginTop: 3,
   },
 
   petId: {
     fontSize: 11,
-    color: "#9AA39D",
+    color: "#7C858D",
     marginTop: 4,
   },
 
@@ -955,15 +955,15 @@ const styles = StyleSheet.create({
   },
 
   statusBadgeSafe: {
-    backgroundColor: "#E7F4E9",
+    backgroundColor: "#DCEAF7",
   },
 
   statusBadgeMissing: {
-    backgroundColor: "#FFF0F0",
+    backgroundColor: "#FBE3DE",
   },
 
   statusBadgeFound: {
-    backgroundColor: "#FFF3DF",
+    backgroundColor: "#FBE3DE",
   },
 
   statusDot: {
@@ -979,7 +979,7 @@ const styles = StyleSheet.create({
   },
 
   safeCard: {
-    backgroundColor: "#E7F4E9",
+    backgroundColor: "#DCEAF7",
     borderRadius: 17,
     padding: 15,
     marginTop: 14,
@@ -997,7 +997,7 @@ const styles = StyleSheet.create({
   },
 
   missingCard: {
-    backgroundColor: "#FFF0F0",
+    backgroundColor: "#FBE3DE",
     borderRadius: 17,
     padding: 15,
     marginTop: 14,
@@ -1015,7 +1015,7 @@ const styles = StyleSheet.create({
   },
 
   foundStatusCard: {
-    backgroundColor: "#FFF3DF",
+    backgroundColor: "#FBE3DE",
     borderRadius: 17,
     padding: 15,
     marginTop: 14,
@@ -1040,13 +1040,13 @@ const styles = StyleSheet.create({
   safeTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: "#267542",
+    color: "#4C6A92",
   },
 
   missingTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: "#A14343",
+    color: "#E88C7D",
   },
 
   foundStatusTitle: {
@@ -1058,14 +1058,14 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     lineHeight: 18,
-    color: "#68766E",
+    color: "#7C858D",
     marginTop: 3,
   },
 
   sectionTitle: {
     fontSize: 19,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
     marginTop: 25,
     marginBottom: 11,
   },
@@ -1073,7 +1073,7 @@ const styles = StyleSheet.create({
   processCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 18,
     padding: 15,
   },
@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
     width: 23,
     height: 23,
     borderRadius: 12,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1102,7 +1102,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 13,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 9,
@@ -1116,18 +1116,18 @@ const styles = StyleSheet.create({
   processTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#3A4A40",
+    color: "#2B3440",
   },
 
   processDescription: {
     fontSize: 12,
     lineHeight: 17,
-    color: "#7A877F",
+    color: "#7C858D",
     marginTop: 2,
   },
 
   qrCard: {
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     borderRadius: 15,
     padding: 14,
     flexDirection: "row",
@@ -1151,20 +1151,20 @@ const styles = StyleSheet.create({
   qrTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#294C34",
+    color: "#2B3440",
   },
 
   qrText: {
     fontSize: 12,
     lineHeight: 18,
-    color: "#66766B",
+    color: "#7C858D",
     marginTop: 3,
   },
 
   previewButton: {
     height: 48,
     borderWidth: 1,
-    borderColor: "#176B3A",
+    borderColor: "#243B53",
     borderRadius: 13,
     flexDirection: "row",
     alignItems: "center",
@@ -1174,7 +1174,7 @@ const styles = StyleSheet.create({
   },
 
   previewText: {
-    color: "#176B3A",
+    color: "#243B53",
     fontSize: 13,
     fontWeight: "800",
   },
@@ -1183,7 +1183,7 @@ const styles = StyleSheet.create({
     marginTop: 9,
     minHeight: 44,
     borderWidth: 1,
-    borderColor: "#176B3A",
+    borderColor: "#243B53",
     borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -1194,7 +1194,7 @@ const styles = StyleSheet.create({
   scanMapButtonText: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   sectionHeader: {
@@ -1208,7 +1208,7 @@ const styles = StyleSheet.create({
     width: 23,
     height: 23,
     borderRadius: 12,
-    backgroundColor: "#A14343",
+    backgroundColor: "#E88C7D",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1222,7 +1222,7 @@ const styles = StyleSheet.create({
   emptyReport: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 16,
     alignItems: "center",
     padding: 23,
@@ -1231,7 +1231,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#59675E",
+    color: "#4C6A92",
     marginTop: 7,
   },
 
@@ -1245,7 +1245,7 @@ const styles = StyleSheet.create({
 
   missingButton: {
     minHeight: 56,
-    backgroundColor: "#A14343",
+    backgroundColor: "#E88C7D",
     borderRadius: 14,
     marginTop: 27,
     paddingHorizontal: 15,
@@ -1265,7 +1265,7 @@ const styles = StyleSheet.create({
 
   safeButton: {
     minHeight: 56,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     borderRadius: 14,
     marginTop: 27,
     paddingHorizontal: 15,
@@ -1284,7 +1284,7 @@ const styles = StyleSheet.create({
   },
 
   infoCard: {
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     borderRadius: 14,
     padding: 13,
     marginTop: 20,
@@ -1295,7 +1295,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     lineHeight: 18,
-    color: "#66766B",
+    color: "#7C858D",
     marginLeft: 8,
   },
 

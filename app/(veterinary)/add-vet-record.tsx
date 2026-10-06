@@ -369,7 +369,7 @@ export default function AddVetRecordScreen() {
         >
           <View style={styles.introCard}>
             <View style={styles.introIcon}>
-              <Ionicons name="medical" size={27} color="#176B3A" />
+              <Ionicons name="medical" size={27} color="#243B53" />
             </View>
 
             <View style={styles.introContent}>
@@ -394,13 +394,13 @@ export default function AddVetRecordScreen() {
               ]}
               onPress={() => openDatePicker(visitDate, selectVisitDate)}
             >
-              <Ionicons name="calendar-outline" size={19} color="#718078" />
+              <Ionicons name="calendar-outline" size={19} color="#7C858D" />
 
               <TextInput
                 value={visitDate}
                 onChangeText={selectVisitDate}
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="#A4ADA7"
+                placeholderTextColor="#7C858D"
                 style={styles.input}
                 autoCapitalize="none"
                 maxLength={10}
@@ -432,7 +432,7 @@ export default function AddVetRecordScreen() {
                     <Ionicons
                       name={getServiceIcon(service)}
                       size={17}
-                      color={selected ? "#FFFFFF" : "#176B3A"}
+                      color={selected ? "#FFFFFF" : "#243B53"}
                     />
 
                     <Text
@@ -451,7 +451,7 @@ export default function AddVetRecordScreen() {
 
             {serviceType === "Other" && (
               <View style={styles.otherServiceContainer}>
-                <Ionicons name="create-outline" size={19} color="#718078" />
+                <Ionicons name="create-outline" size={19} color="#7C858D" />
                 <TextInput
                   ref={(input) => {
                     inputRefs.current.otherServiceType = input;
@@ -462,7 +462,7 @@ export default function AddVetRecordScreen() {
                   value={otherServiceType}
                   onChangeText={setOtherServiceType}
                   placeholder="Enter other service type"
-                  placeholderTextColor="#A4ADA7"
+                  placeholderTextColor="#7C858D"
                   style={styles.input}
                   autoCapitalize="words"
                   maxLength={100}
@@ -495,7 +495,7 @@ export default function AddVetRecordScreen() {
                         <Ionicons
                           name="shield-checkmark-outline"
                           size={17}
-                          color={selected ? "#FFFFFF" : "#176B3A"}
+                          color={selected ? "#FFFFFF" : "#243B53"}
                         />
                         <Text
                           style={[
@@ -525,10 +525,10 @@ export default function AddVetRecordScreen() {
                   onPress={requestVaccinationSuggestion}
                 >
                   {loadingSuggestion ? (
-                    <ActivityIndicator size="small" color="#176B3A" />
+                    <ActivityIndicator size="small" color="#243B53" />
                   ) : (
                     <>
-                      <Ionicons name="calendar-outline" size={18} color="#176B3A" />
+                      <Ionicons name="calendar-outline" size={18} color="#243B53" />
                       <Text style={styles.suggestionButtonText}>
                         Get Schedule Suggestion
                       </Text>
@@ -542,7 +542,7 @@ export default function AddVetRecordScreen() {
           {serviceType === "Vaccination" && suggestion && (
             <View style={styles.suggestionCard}>
               <View style={styles.suggestionHeader}>
-                <Ionicons name="sparkles-outline" size={21} color="#176B3A" />
+                <Ionicons name="sparkles-outline" size={21} color="#243B53" />
                 <Text style={styles.suggestionTitle}>TIMAN Schedule Suggestion</Text>
               </View>
 
@@ -598,7 +598,7 @@ export default function AddVetRecordScreen() {
               value={diagnosis}
               onChangeText={setDiagnosis}
               placeholder="Enter diagnosis, if applicable"
-              placeholderTextColor="#A4ADA7"
+              placeholderTextColor="#7C858D"
               style={styles.textArea}
               multiline
               textAlignVertical="top"
@@ -614,7 +614,7 @@ export default function AddVetRecordScreen() {
               value={treatment}
               onChangeText={setTreatment}
               placeholder="Treatment or procedure performed"
-              placeholderTextColor="#A4ADA7"
+              placeholderTextColor="#7C858D"
               style={styles.textArea}
               multiline
               textAlignVertical="top"
@@ -630,7 +630,7 @@ export default function AddVetRecordScreen() {
               value={medication}
               onChangeText={setMedication}
               placeholder="Medication given or prescribed"
-              placeholderTextColor="#A4ADA7"
+              placeholderTextColor="#7C858D"
               style={styles.textArea}
               multiline
               textAlignVertical="top"
@@ -652,14 +652,14 @@ export default function AddVetRecordScreen() {
               <Ionicons
                 name="notifications-outline"
                 size={19}
-                color="#718078"
+                color="#7C858D"
               />
 
               <TextInput
                 value={nextDueDate}
                 onChangeText={setNextDueDate}
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="#A4ADA7"
+                placeholderTextColor="#7C858D"
                 style={styles.input}
                 autoCapitalize="none"
                 maxLength={10}
@@ -674,7 +674,7 @@ export default function AddVetRecordScreen() {
                   hitSlop={8}
                   onPress={() => setNextDueDate("")}
                 >
-                  <Ionicons name="close-circle" size={20} color="#8B958F" />
+                  <Ionicons name="close-circle" size={20} color="#7C858D" />
                 </Pressable>
               )}
             </Pressable>
@@ -694,7 +694,7 @@ export default function AddVetRecordScreen() {
               value={notes}
               onChangeText={setNotes}
               placeholder="Additional veterinary notes..."
-              placeholderTextColor="#A4ADA7"
+              placeholderTextColor="#7C858D"
               style={[styles.textArea, styles.notesInput]}
               multiline
               textAlignVertical="top"
@@ -726,7 +726,7 @@ export default function AddVetRecordScreen() {
             <Ionicons
               name="shield-checkmark-outline"
               size={20}
-              color="#176B3A"
+              color="#243B53"
             />
 
             <Text style={styles.securityText}>
@@ -784,7 +784,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Add Vet Record</Text>
@@ -906,7 +906,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   header: {
@@ -919,7 +919,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -934,7 +934,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "800",
 
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -951,7 +951,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 19,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     flexDirection: "row",
     alignItems: "center",
@@ -979,7 +979,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
 
-    color: "#23442F",
+    color: "#2B3440",
   },
 
   introText: {
@@ -998,7 +998,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   formCard: {
@@ -1009,7 +1009,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
   },
 
   labelRow: {
@@ -1047,7 +1047,7 @@ const styles = StyleSheet.create({
     borderRadius: 13,
 
     borderWidth: 1,
-    borderColor: "#DCE4DE",
+    borderColor: "#E6E9ED",
 
     backgroundColor: "#FBFCFA",
 
@@ -1064,7 +1064,7 @@ const styles = StyleSheet.create({
 
     fontSize: 14,
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   helperText: {
@@ -1073,7 +1073,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 13,
 
-    color: "#8B958F",
+    color: "#7C858D",
   },
 
   textArea: {
@@ -1087,14 +1087,14 @@ const styles = StyleSheet.create({
     borderRadius: 13,
 
     borderWidth: 1,
-    borderColor: "#DCE4DE",
+    borderColor: "#E6E9ED",
 
     backgroundColor: "#FBFCFA",
 
     fontSize: 13,
     lineHeight: 17,
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   notesInput: {
@@ -1129,16 +1129,16 @@ const styles = StyleSheet.create({
   },
 
   serviceButtonSelected: {
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
-    borderColor: "#176B3A",
+    borderColor: "#243B53",
   },
 
   serviceText: {
     fontSize: 12,
     fontWeight: "700",
 
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   serviceTextSelected: {
@@ -1181,7 +1181,7 @@ const styles = StyleSheet.create({
   suggestionButtonText: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   suggestionCard: {
@@ -1190,7 +1190,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: "#CFE0D3",
-    backgroundColor: "#F3F9F4",
+    backgroundColor: "#DCEAF7",
   },
 
   suggestionHeader: {
@@ -1203,7 +1203,7 @@ const styles = StyleSheet.create({
   suggestionTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: "#23442F",
+    color: "#2B3440",
   },
 
   suggestionRow: {
@@ -1214,14 +1214,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "800",
     textTransform: "uppercase",
-    color: "#718078",
+    color: "#7C858D",
   },
 
   suggestionValue: {
     marginTop: 2,
     fontSize: 13,
     fontWeight: "700",
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   suggestionExplanation: {
@@ -1235,7 +1235,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     minHeight: 44,
     borderRadius: 12,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1305,7 +1305,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 15,
 
-    backgroundColor: "#EFF6F0",
+    backgroundColor: "#DCEAF7",
 
     flexDirection: "row",
     alignItems: "flex-start",
@@ -1319,7 +1319,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
 
-    color: "#617167",
+    color: "#7C858D",
   },
 
   saveButton: {
@@ -1329,7 +1329,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1364,7 +1364,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
 
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   pressed: {

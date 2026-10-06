@@ -184,7 +184,7 @@ export default function PetQRScreen() {
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Loading pet QR...</Text>
         </View>
@@ -231,7 +231,7 @@ export default function PetQRScreen() {
       >
         <View style={styles.titleSection}>
           <View style={styles.iconCircle}>
-            <Ionicons name="qr-code" size={28} color="#176B3A" />
+            <Ionicons name="qr-code" size={28} color="#243B53" />
           </View>
 
           <Text style={styles.title}>Permanent Pet QR</Text>
@@ -253,7 +253,7 @@ export default function PetQRScreen() {
               />
             ) : (
               <View style={styles.photoPlaceholder}>
-                <Ionicons name="paw" size={30} color="#7EA48A" />
+                <Ionicons name="paw" size={30} color="#4C6A92" />
               </View>
             )}
           </View>
@@ -284,14 +284,14 @@ export default function PetQRScreen() {
                 value={publicProfileUrl}
                 size={220}
                 backgroundColor="#FFFFFF"
-                color="#173D2A"
+                color="#243B53"
                 getRef={(ref) => {
                   qrRef.current = ref;
                 }}
               />
             ) : (
               <View style={styles.noQr}>
-                <Ionicons name="qr-code-outline" size={70} color="#9BA69F" />
+                <Ionicons name="qr-code-outline" size={70} color="#7C858D" />
 
                 <Text style={styles.noQrText}>No permanent QR assigned</Text>
               </View>
@@ -303,7 +303,7 @@ export default function PetQRScreen() {
           <Text style={styles.qrPetCode}>{petCode}</Text>
 
           <View style={styles.permanentBadge}>
-            <Ionicons name="shield-checkmark" size={16} color="#176B3A" />
+            <Ionicons name="shield-checkmark" size={16} color="#243B53" />
 
             <Text style={styles.permanentText}>Permanent QR</Text>
           </View>
@@ -392,7 +392,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Pet QR Code</Text>
@@ -454,7 +454,7 @@ function Step({
       </View>
 
       <View style={styles.stepIcon}>
-        <Ionicons name={icon} size={21} color="#176B3A" />
+        <Ionicons name={icon} size={21} color="#243B53" />
       </View>
 
       <View style={styles.stepContent}>
@@ -473,7 +473,7 @@ function Divider() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   header: {
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -521,21 +521,21 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 15,
-    color: "#7A867F",
+    color: "#7C858D",
   },
 
   errorTitle: {
     marginTop: 15,
     fontSize: 22,
     fontWeight: "800",
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   errorText: {
     marginTop: 6,
     fontSize: 15,
     lineHeight: 21,
-    color: "#7A867F",
+    color: "#7C858D",
     textAlign: "center",
   },
 
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   subtitle: {
@@ -570,14 +570,14 @@ const styles = StyleSheet.create({
     lineHeight: 21,
 
     textAlign: "center",
-    color: "#7A867F",
+    color: "#7C858D",
   },
 
   petCard: {
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 17,
 
     padding: 14,
@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
     height: 66,
     borderRadius: 17,
     overflow: "hidden",
-    backgroundColor: "#E8F2E9",
+    backgroundColor: "#DCEAF7",
   },
 
   petPhoto: {
@@ -615,21 +615,21 @@ const styles = StyleSheet.create({
   petName: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   petDetails: {
     marginTop: 4,
     fontSize: 14,
     lineHeight: 19,
-    color: "#7B877F",
+    color: "#7C858D",
   },
 
   petCode: {
     marginTop: 5,
     fontSize: 13,
     fontWeight: "700",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   statusBadge: {
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: "#267542",
+    backgroundColor: "#4C6A92",
   },
 
   statusText: {
@@ -655,11 +655,11 @@ const styles = StyleSheet.create({
   },
 
   safeBadge: {
-    backgroundColor: "#E6F3E8",
+    backgroundColor: "#DCEAF7",
   },
 
   safeText: {
-    color: "#267542",
+    color: "#4C6A92",
   },
 
   missingBadge: {
@@ -667,11 +667,11 @@ const styles = StyleSheet.create({
   },
 
   missingText: {
-    color: "#B64236",
+    color: "#E88C7D",
   },
 
   missingDot: {
-    backgroundColor: "#B64236",
+    backgroundColor: "#E88C7D",
   },
 
   foundBadge: {
@@ -679,11 +679,11 @@ const styles = StyleSheet.create({
   },
 
   foundText: {
-    color: "#8C6A16",
+    color: "#B55F54",
   },
 
   foundDot: {
-    backgroundColor: "#8C6A16",
+    backgroundColor: "#B55F54",
   },
 
   qrCard: {
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 13,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     alignItems: "center",
     justifyContent: "center",
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     letterSpacing: 2,
 
-    color: "#173D2A",
+    color: "#243B53",
   },
 
   qrLabel: {
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 1,
 
-    color: "#89958E",
+    color: "#7C858D",
   },
 
   qrBox: {
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
 
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
 
     backgroundColor: "#FFFFFF",
 
@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
   noQrText: {
     marginTop: 9,
     fontSize: 14,
-    color: "#89958E",
+    color: "#7C858D",
   },
 
   qrPetName: {
@@ -764,13 +764,13 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "900",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   qrPetCode: {
     marginTop: 4,
     fontSize: 14,
-    color: "#7A867F",
+    color: "#7C858D",
   },
 
   permanentBadge: {
@@ -781,7 +781,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 20,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     flexDirection: "row",
     alignItems: "center",
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
   permanentText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   sectionTitle: {
@@ -802,14 +802,14 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: "800",
 
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   stepsCard: {
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
 
     borderRadius: 17,
 
@@ -829,7 +829,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     alignItems: "center",
     justifyContent: "center",
@@ -849,7 +849,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 13,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     alignItems: "center",
     justifyContent: "center",
@@ -863,7 +863,7 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 16,
     fontWeight: "800",
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   stepDescription: {
@@ -872,12 +872,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
 
-    color: "#7B877F",
+    color: "#7C858D",
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#EEF1EF",
+    backgroundColor: "#E6E9ED",
     marginLeft: 82,
   },
 
@@ -888,7 +888,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
 
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
 
     backgroundColor: "#FFFFFF",
 
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
     height: 56,
 
     borderRadius: 15,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     alignItems: "center",
     justifyContent: "center",
@@ -923,7 +923,7 @@ const styles = StyleSheet.create({
     height: 54,
 
     borderRadius: 14,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     flexDirection: "row",
     alignItems: "center",

@@ -1,7 +1,10 @@
 const express = require("express");
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
-const { parseCoordinatePair } = require("../services/nearbyLostPetAlertService");
+const {
+  getNearbyAlertEnrollmentStatus,
+  parseCoordinatePair,
+} = require("../services/nearbyLostPetAlertService");
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -15,17 +18,16 @@ router.get("/preferences", async (req, res) => {
       [req.user.userId]
     );
     const preference = rows[0];
+    const enrollment = getNearbyAlertEnrollmentStatus(preference);
     return res.json({
       success: true,
       preference: {
-        nearbyAlertsEnabled: Boolean(preference?.nearby_alerts_enabled),
-        hasLocation: Boolean(
-          preference?.alert_latitude !== null &&
-            preference?.alert_latitude !== undefined &&
-            preference?.alert_longitude !== null &&
-            preference?.alert_longitude !== undefined
-        ),
+        nearbyAlertsEnabled: enrollment.nearbyAlertsEnabled,
+        hasLocation: enrollment.hasLocation,
         locationUpdatedAt: preference?.location_updated_at || null,
+        locationFresh: enrollment.locationFresh,
+        enrollmentNeeded: enrollment.enrollmentNeeded,
+        enrollmentReason: enrollment.enrollmentReason,
       },
     });
   } catch (error) {

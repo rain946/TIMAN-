@@ -439,7 +439,7 @@ export default function NotificationsScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Loading notifications...</Text>
         </View>
@@ -486,7 +486,7 @@ export default function NotificationsScreen() {
                 ]}
               >
                 {markingAll ? (
-                  <ActivityIndicator size="small" color="#176B3A" />
+                  <ActivityIndicator size="small" color="#243B53" />
                 ) : (
                   <Text style={styles.markAllText}>Mark all read</Text>
                 )}
@@ -502,7 +502,7 @@ export default function NotificationsScreen() {
               <Ionicons
                 name="notifications-outline"
                 size={37}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
 
@@ -528,7 +528,7 @@ export default function NotificationsScreen() {
               <Ionicons
                 name={getNotificationIcon(notification.type)}
                 size={23}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
 
@@ -557,7 +557,7 @@ export default function NotificationsScreen() {
                 <View style={styles.actionRow}>
                   <Text style={styles.actionText}>View Request</Text>
 
-                  <Ionicons name="chevron-forward" size={16} color="#176B3A" />
+                  <Ionicons name="chevron-forward" size={16} color="#243B53" />
                 </View>
               )}
 
@@ -603,7 +603,7 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   loadingContainer: {
@@ -615,7 +615,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 12,
-    color: "#77857C",
+    color: "#7C858D",
   },
 
   header: {
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   backButton: {
@@ -642,12 +642,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   headerSubtitle: {
     fontSize: 9,
-    color: "#77857C",
+    color: "#7C858D",
     marginTop: 2,
   },
 
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   unreadBadge: {
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     height: 22,
     paddingHorizontal: 6,
     borderRadius: 11,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
@@ -704,13 +704,13 @@ const styles = StyleSheet.create({
   markAllText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   emptyCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 18,
     paddingHorizontal: 25,
     paddingVertical: 34,
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 22,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: "#293A30",
+    color: "#2B3440",
     marginTop: 14,
   },
 
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
     position: "relative",
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 18,
     padding: 15,
     marginBottom: 10,
@@ -756,14 +756,14 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
   },
 
   notificationIcon: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -789,7 +789,7 @@ const styles = StyleSheet.create({
 
   unreadTitle: {
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   notificationTime: {
@@ -814,7 +814,7 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 10,
     fontWeight: "900",
-    color: "#176B3A",
+    color: "#243B53",
     marginRight: 3,
   },
 

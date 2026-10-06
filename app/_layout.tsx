@@ -3,7 +3,9 @@ import { router, Stack } from "expo-router";
 import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import MissingPetAlertConsentModal from "../components/modals/MissingPetAlertConsentModal";
 import { registerDeviceForPushNotifications } from "../services/notificationService";
+import { checkNearbyAlertEnrollmentForSession } from "../services/nearbyAlertEnrollment";
 
 
 
@@ -269,25 +271,36 @@ export default function RootLayout() {
   useEffect(() => {
     let isMounted = true;
 
-    const refreshAuthenticatedPushRegistration = async () => {
+    const refreshAuthenticatedServices = async () => {
       const authToken = await AsyncStorage.getItem("token");
 
       if (!authToken || !isMounted) {
         return;
       }
 
-      const result = await registerDeviceForPushNotifications();
+      try {
+        const result = await registerDeviceForPushNotifications();
 
-      if (!result.success) {
+        if (!result.success) {
+          console.log(
+            "TIMAN: Startup push registration was not completed:",
+            result.message
+          );
+        }
+      } catch (error) {
         console.log(
-          "TIMAN: Startup push registration was not completed:",
-          result.message
+          "TIMAN STARTUP PUSH REGISTRATION ERROR:",
+          error
         );
+      }
+
+      if (isMounted) {
+        await checkNearbyAlertEnrollmentForSession();
       }
     };
 
-    refreshAuthenticatedPushRegistration().catch((error) => {
-      console.log("TIMAN STARTUP PUSH REGISTRATION ERROR:", error);
+    void refreshAuthenticatedServices().catch((error) => {
+      console.log("TIMAN STARTUP SERVICE REFRESH ERROR:", error);
     });
 
 
@@ -435,6 +448,7 @@ export default function RootLayout() {
 
 
   return (
+    <>
     <Stack
       screenOptions={{
         headerShown: false,
@@ -515,6 +529,8 @@ export default function RootLayout() {
       />
 
     </Stack>
+    <MissingPetAlertConsentModal />
+    </>
   );
 
 }

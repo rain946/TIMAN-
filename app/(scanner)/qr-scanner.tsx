@@ -174,7 +174,7 @@ export default function QRScannerScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Checking camera permission...</Text>
         </View>
@@ -189,7 +189,7 @@ export default function QRScannerScreen() {
 
         <View style={styles.permissionContainer}>
           <View style={styles.permissionIcon}>
-            <Ionicons name="camera-outline" size={42} color="#176B3A" />
+            <Ionicons name="camera-outline" size={42} color="#243B53" />
           </View>
 
           <Text style={styles.permissionTitle}>Camera Permission</Text>
@@ -301,7 +301,7 @@ export default function QRScannerScreen() {
               ]}
               onPress={() => setScanned(false)}
             >
-              <Ionicons name="scan" size={18} color="#173D2A" />
+              <Ionicons name="scan" size={18} color="#243B53" />
 
               <Text style={styles.scanAgainText}>Scan Again</Text>
             </Pressable>
@@ -322,7 +322,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Scan Pet QR</Text>
@@ -335,7 +335,7 @@ function Header() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   center: {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 12,
-    color: "#718078",
+    color: "#7C858D",
   },
 
   header: {
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 19,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   permissionContainer: {
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontWeight: "900",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   permissionText: {
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
 
     textAlign: "center",
 
-    color: "#76837B",
+    color: "#7C858D",
   },
 
   permissionButton: {
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 15,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     flexDirection: "row",
     alignItems: "center",
@@ -606,7 +606,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 16,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     alignItems: "center",
     justifyContent: "center",
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
 
-    color: "#173D2A",
+    color: "#243B53",
   },
 
   pressed: {

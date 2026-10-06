@@ -244,13 +244,13 @@ export default function ClinicProfileScreen() {
 
       {loading && !profile ? (
         <View style={styles.stateContainer}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
           <Text style={styles.loadingText}>Loading profile...</Text>
         </View>
       ) : error && !profile ? (
         <View style={styles.stateContainer}>
           <View style={styles.errorIcon}>
-            <Ionicons name="alert-circle-outline" size={30} color="#A7483E" />
+            <Ionicons name="alert-circle-outline" size={30} color="#E88C7D" />
           </View>
           <Text style={styles.stateTitle}>Unable to load profile.</Text>
           <Pressable
@@ -272,8 +272,8 @@ export default function ClinicProfileScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#176B3A"
-              colors={["#176B3A"]}
+              tintColor="#243B53"
+              colors={["#243B53"]}
             />
           }
         >
@@ -286,7 +286,7 @@ export default function ClinicProfileScreen() {
               ]}
               onPress={() => loadProfile(false)}
             >
-              <Ionicons name="alert-circle-outline" size={19} color="#A7483E" />
+              <Ionicons name="alert-circle-outline" size={19} color="#E88C7D" />
               <Text style={styles.inlineErrorText}>
                 Unable to refresh profile. Tap to retry.
               </Text>
@@ -328,7 +328,7 @@ export default function ClinicProfileScreen() {
                 "Veterinary Clinic"}
             </Text>
             <View style={styles.roleBadge}>
-              <Ionicons name="medical" size={13} color="#176B3A" />
+              <Ionicons name="medical" size={13} color="#243B53" />
               <Text style={styles.roleBadgeText}>Veterinary Clinic</Text>
             </View>
           </View>
@@ -401,7 +401,7 @@ export default function ClinicProfileScreen() {
             ]}
             onPress={handleLogout}
           >
-            <Ionicons name="log-out-outline" size={21} color="#A14343" />
+            <Ionicons name="log-out-outline" size={21} color="#E88C7D" />
             <Text style={styles.logoutText}>Log Out</Text>
           </Pressable>
         </ScrollView>
@@ -433,7 +433,7 @@ function InfoRow({
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoIcon}>
-        <Ionicons name={icon} size={18} color="#176B3A" />
+        <Ionicons name={icon} size={18} color="#243B53" />
       </View>
       <View style={styles.infoContent}>
         <Text style={styles.infoLabel}>{label}</Text>
@@ -464,7 +464,7 @@ function ActionRow({
       onPress={onPress}
     >
       <View style={styles.actionIcon}>
-        <Ionicons name={icon} size={20} color="#176B3A" />
+        <Ionicons name={icon} size={20} color="#243B53" />
       </View>
       <View style={styles.actionContent}>
         <Text style={styles.actionTitle}>{title}</Text>
@@ -480,15 +480,15 @@ function Divider({ inset = false }: { inset?: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFDF7" },
+  container: { flex: 1, backgroundColor: "#F6F0E6" },
   header: {
     minHeight: 60,
     paddingHorizontal: 20,
     justifyContent: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#E9EDE9",
+    borderBottomColor: "#E6E9ED",
   },
-  headerTitle: { fontSize: 22, fontWeight: "900", color: "#1E2D24" },
+  headerTitle: { fontSize: 22, fontWeight: "900", color: "#2B3440" },
   content: { width: "100%", maxWidth: 960, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
   stateContainer: {
     flex: 1,
@@ -496,12 +496,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 14, color: "#77847C" },
+  loadingText: { marginTop: 12, fontSize: 14, color: "#7C858D" },
   errorIcon: {
     width: 58,
     height: 58,
     borderRadius: 18,
-    backgroundColor: "#FDEDEA",
+    backgroundColor: "#FBE3DE",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -509,14 +509,14 @@ const styles = StyleSheet.create({
     marginTop: 14,
     fontSize: 17,
     fontWeight: "900",
-    color: "#34453B",
+    color: "#2B3440",
   },
   retryButton: {
     minWidth: 112,
     minHeight: 44,
     marginTop: 17,
     borderRadius: 13,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -532,21 +532,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  inlineErrorText: { flex: 1, marginLeft: 9, fontSize: 12, color: "#843C34" },
+  inlineErrorText: { flex: 1, marginLeft: 9, fontSize: 12, color: "#B55F54" },
   identityCard: {
     minHeight: 232,
     borderRadius: 22,
     padding: 22,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     alignItems: "center",
   },
   clinicIconOuter: {
     width: 92,
     height: 92,
     borderRadius: 29,
-    backgroundColor: "#E5F3E8",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 23,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     borderWidth: 2,
     borderColor: "#FFFFFF",
     alignItems: "center",
@@ -586,25 +586,25 @@ const styles = StyleSheet.create({
     marginTop: 9,
     borderRadius: 10,
     paddingHorizontal: 10,
-    backgroundColor: "#E5F3E8",
+    backgroundColor: "#DCEAF7",
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
   },
-  roleBadgeText: { fontSize: 11, fontWeight: "900", color: "#176B3A" },
+  roleBadgeText: { fontSize: 11, fontWeight: "900", color: "#243B53" },
   sectionTitle: {
     marginTop: 27,
     marginBottom: 12,
     fontSize: 19,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
   infoCard: {
     borderRadius: 19,
     paddingHorizontal: 15,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
   },
   infoRow: {
     minHeight: 72,
@@ -616,7 +616,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 13,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 18,
     fontWeight: "700",
-    color: "#34453B",
+    color: "#2B3440",
   },
   divider: { height: 1, backgroundColor: "#EDF0ED" },
   dividerInset: { marginLeft: 65 },
@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E8E3",
+    borderColor: "#E6E9ED",
     overflow: "hidden",
   },
   actionRow: {
@@ -655,13 +655,13 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 13,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
   actionContent: { flex: 1, marginLeft: 12 },
   actionTitle: { fontSize: 15, fontWeight: "900", color: "#2B3B31" },
-  actionDescription: { marginTop: 3, fontSize: 11, color: "#849088" },
+  actionDescription: { marginTop: 3, fontSize: 11, color: "#7C858D" },
   logoutButton: {
     minHeight: 54,
     marginTop: 28,
@@ -674,6 +674,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  logoutText: { fontSize: 14, fontWeight: "900", color: "#A14343" },
+  logoutText: { fontSize: 14, fontWeight: "900", color: "#E88C7D" },
   pressed: { opacity: 0.72 },
 });

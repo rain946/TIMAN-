@@ -5,6 +5,7 @@ const {
   canBroadcastReport,
   distinctPushTokens,
   evaluateBroadcast,
+  getNearbyAlertEnrollmentStatus,
   haversineDistanceKm,
   isLocationFresh,
   isRecipientEligible,
@@ -79,6 +80,58 @@ test("stale location is excluded", () => {
 
 test("fresh location is accepted", () => {
   assert.equal(isLocationFresh("2026-10-04T12:00:00Z", 30, now), true);
+});
+
+test("enabled preference with fresh valid location needs no enrollment", () => {
+  const status = getNearbyAlertEnrollmentStatus(
+    {
+      nearby_alerts_enabled: 1,
+      alert_latitude: 14.6,
+      alert_longitude: 121,
+      location_updated_at: "2026-10-04T12:00:00Z",
+    },
+    now
+  );
+  assert.equal(status.enrollmentNeeded, false);
+  assert.equal(status.locationFresh, true);
+});
+
+test("missing preference needs enrollment", () => {
+  assert.equal(getNearbyAlertEnrollmentStatus(undefined, now).enrollmentReason, "no_preference");
+});
+
+test("disabled preference needs enrollment", () => {
+  const status = getNearbyAlertEnrollmentStatus(
+    {
+      nearby_alerts_enabled: 0,
+      alert_latitude: 14.6,
+      alert_longitude: 121,
+      location_updated_at: "2026-10-06T12:00:00Z",
+    },
+    now
+  );
+  assert.equal(status.enrollmentReason, "disabled");
+});
+
+test("preference without coordinates needs enrollment", () => {
+  const status = getNearbyAlertEnrollmentStatus(
+    { nearby_alerts_enabled: 1, alert_latitude: null, alert_longitude: null },
+    now
+  );
+  assert.equal(status.enrollmentReason, "missing_location");
+});
+
+test("preference with stale location needs refresh enrollment", () => {
+  const status = getNearbyAlertEnrollmentStatus(
+    {
+      nearby_alerts_enabled: 1,
+      alert_latitude: 14.6,
+      alert_longitude: 121,
+      location_updated_at: "2026-08-01T12:00:00Z",
+    },
+    now
+  );
+  assert.equal(status.enrollmentReason, "stale_location");
 });
 
 test("invalid latitude is rejected", () => assert.equal(isValidCoordinate(91, 120), false));

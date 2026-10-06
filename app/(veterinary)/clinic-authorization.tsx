@@ -292,7 +292,7 @@ export default function ClinicAuthorizationScreen() {
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#176B3A" />
+          <ActivityIndicator size="large" color="#243B53" />
 
           <Text style={styles.loadingText}>Loading clinic requests...</Text>
         </View>
@@ -316,7 +316,7 @@ export default function ClinicAuthorizationScreen() {
             <Ionicons
               name="shield-checkmark-outline"
               size={30}
-              color="#176B3A"
+              color="#243B53"
             />
           </View>
 
@@ -346,7 +346,7 @@ export default function ClinicAuthorizationScreen() {
               <Ionicons
                 name="checkmark-circle-outline"
                 size={21}
-                color="#176B3A"
+                color="#243B53"
               />
             </View>
 
@@ -439,7 +439,7 @@ export default function ClinicAuthorizationScreen() {
         )}
 
         <View style={styles.securityCard}>
-          <Ionicons name="lock-closed-outline" size={19} color="#176B3A" />
+          <Ionicons name="lock-closed-outline" size={19} color="#243B53" />
 
           <Text style={styles.securityText}>
             Clinics cannot access protected veterinary records until you approve
@@ -461,7 +461,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#173D2A" />
+        <Ionicons name="chevron-back" size={27} color="#243B53" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Clinic Authorization</Text>
@@ -532,7 +532,7 @@ function AuthorizationCard({
 
       <View style={styles.clinicSection}>
         <View style={styles.clinicIcon}>
-          <Ionicons name="medical-outline" size={23} color="#176B3A" />
+          <Ionicons name="medical-outline" size={23} color="#243B53" />
         </View>
 
         <View style={styles.clinicInfo}>
@@ -549,7 +549,7 @@ function AuthorizationCard({
       </View>
 
       <View style={styles.dateRow}>
-        <Ionicons name="calendar-outline" size={15} color="#849088" />
+        <Ionicons name="calendar-outline" size={15} color="#7C858D" />
 
         <Text style={styles.dateText}>
           Requested {formatDate(item.requested_at)}
@@ -569,7 +569,7 @@ function AuthorizationCard({
             ]}
             onPress={onDecline}
           >
-            <Ionicons name="close" size={18} color="#A3453C" />
+            <Ionicons name="close" size={18} color="#E88C7D" />
 
             <Text style={styles.declineText}>Decline</Text>
           </Pressable>
@@ -611,10 +611,10 @@ function AuthorizationCard({
           onPress={onRevoke}
         >
           {processing ? (
-            <ActivityIndicator size="small" color="#A3453C" />
+            <ActivityIndicator size="small" color="#E88C7D" />
           ) : (
             <>
-              <Ionicons name="shield-outline" size={17} color="#A3453C" />
+              <Ionicons name="shield-outline" size={17} color="#E88C7D" />
 
               <Text style={styles.revokeText}>Revoke Access</Text>
             </>
@@ -663,10 +663,10 @@ function StatusBadge({ status }: { status: AuthorizationStatus }) {
         size={13}
         color={
           status === "Approved"
-            ? "#176B3A"
+            ? "#243B53"
             : status === "Pending"
               ? "#8B691C"
-              : "#A3453C"
+              : "#E88C7D"
         }
       />
 
@@ -696,7 +696,7 @@ function formatDate(value: string) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   header: {
@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   content: {
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
 
     fontSize: 12,
-    color: "#76837B",
+    color: "#7C858D",
   },
 
   introCard: {
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 18,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     flexDirection: "row",
     alignItems: "center",
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
   introTitle: {
     fontSize: 16,
     fontWeight: "900",
-    color: "#23442F",
+    color: "#2B3440",
   },
 
   introText: {
@@ -828,7 +828,7 @@ const styles = StyleSheet.create({
   },
 
   approvedSummaryIcon: {
-    backgroundColor: "#E5F2E7",
+    backgroundColor: "#DCEAF7",
   },
 
   summaryNumber: {
@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: "900",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   summaryLabel: {
@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
 
     fontSize: 9,
 
-    color: "#7B877F",
+    color: "#7C858D",
   },
 
   sectionHeader: {
@@ -860,7 +860,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   countBadge: {
@@ -873,7 +873,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 12,
 
-    backgroundColor: "#E7F2E8",
+    backgroundColor: "#DCEAF7",
 
     alignItems: "center",
     justifyContent: "center",
@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "800",
 
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   requestCard: {
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E1E7E2",
+    borderColor: "#E6E9ED",
   },
 
   petSection: {
@@ -936,7 +936,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "900",
 
-    color: "#26352B",
+    color: "#2B3440",
   },
 
   petBreed: {
@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
 
     fontSize: 9,
 
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   statusBadge: {
@@ -973,11 +973,11 @@ const styles = StyleSheet.create({
   },
 
   approvedBadge: {
-    backgroundColor: "#E5F2E7",
+    backgroundColor: "#DCEAF7",
   },
 
   approvedBadgeText: {
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   declinedBadge: {
@@ -985,7 +985,7 @@ const styles = StyleSheet.create({
   },
 
   declinedBadgeText: {
-    color: "#A3453C",
+    color: "#E88C7D",
   },
 
   revokedBadge: {
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
   },
 
   revokedBadgeText: {
-    color: "#A3453C",
+    color: "#E88C7D",
   },
 
   divider: {
@@ -1001,7 +1001,7 @@ const styles = StyleSheet.create({
 
     marginVertical: 14,
 
-    backgroundColor: "#EDF1EE",
+    backgroundColor: "#E6E9ED",
   },
 
   clinicSection: {
@@ -1015,7 +1015,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1030,7 +1030,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: "700",
 
-    color: "#8B958F",
+    color: "#7C858D",
   },
 
   clinicName: {
@@ -1039,7 +1039,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
 
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   contactName: {
@@ -1047,7 +1047,7 @@ const styles = StyleSheet.create({
 
     fontSize: 8,
 
-    color: "#849088",
+    color: "#7C858D",
   },
 
   dateRow: {
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 8,
 
-    color: "#849088",
+    color: "#7C858D",
   },
 
   actionRow: {
@@ -1094,7 +1094,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "800",
 
-    color: "#A3453C",
+    color: "#E88C7D",
   },
 
   approveButton: {
@@ -1103,7 +1103,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 13,
 
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1142,7 +1142,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "800",
 
-    color: "#A3453C",
+    color: "#E88C7D",
   },
 
   disabled: {
@@ -1174,7 +1174,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 23,
 
-    backgroundColor: "#EDF4EE",
+    backgroundColor: "#DCEAF7",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1186,7 +1186,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
 
-    color: "#31453A",
+    color: "#2B3440",
   },
 
   emptyText: {
@@ -1199,7 +1199,7 @@ const styles = StyleSheet.create({
 
     textAlign: "center",
 
-    color: "#7D8981",
+    color: "#7C858D",
   },
 
   securityCard: {
@@ -1209,7 +1209,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 15,
 
-    backgroundColor: "#EFF6F0",
+    backgroundColor: "#DCEAF7",
 
     flexDirection: "row",
     alignItems: "flex-start",
@@ -1223,6 +1223,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     lineHeight: 15,
 
-    color: "#617167",
+    color: "#7C858D",
   },
 });

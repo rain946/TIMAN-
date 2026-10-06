@@ -114,7 +114,7 @@ export default function ClinicTabsLayout() {
 
 const styles = StyleSheet.create({
   scene: {
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
   webScene: {
     width: "100%",
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderLeftColor: "#E4EAE6",
-    borderRightColor: "#E4EAE6",
+    borderLeftColor: "#E6E9ED",
+    borderRightColor: "#E6E9ED",
   },
 });

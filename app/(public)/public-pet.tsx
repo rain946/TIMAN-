@@ -61,11 +61,11 @@ export default function PublicPetScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={27} color="#173D2A" />
+          <Ionicons name="chevron-back" size={27} color="#243B53" />
         </Pressable>
 
         <View style={styles.logoRow}>
-          <Ionicons name="paw" size={19} color="#176B3A" />
+          <Ionicons name="paw" size={19} color="#243B53" />
 
           <Text style={styles.logo}>TIMAN</Text>
         </View>
@@ -78,7 +78,7 @@ export default function PublicPetScreen() {
         contentContainerStyle={styles.content}
       >
         <View style={styles.verifiedCard}>
-          <Ionicons name="checkmark-circle" size={22} color="#267542" />
+          <Ionicons name="checkmark-circle" size={22} color="#4C6A92" />
 
           <View style={styles.verifiedContent}>
             <Text style={styles.verifiedTitle}>TIMAN Pet Profile</Text>
@@ -114,7 +114,7 @@ export default function PublicPetScreen() {
         {pet.status === "Missing" && (
           <View style={styles.alertCard}>
             <View style={styles.alertIcon}>
-              <Ionicons name="heart" size={24} color="#A14343" />
+              <Ionicons name="heart" size={24} color="#E88C7D" />
             </View>
 
             <View style={styles.alertContent}>
@@ -157,7 +157,7 @@ export default function PublicPetScreen() {
         <Text style={styles.sectionTitle}>Identifying Marks</Text>
 
         <View style={styles.markCard}>
-          <Ionicons name="search-outline" size={22} color="#176B3A" />
+          <Ionicons name="search-outline" size={22} color="#243B53" />
 
           <Text style={styles.markText}>{pet.identifyingMarks}</Text>
         </View>
@@ -166,7 +166,7 @@ export default function PublicPetScreen() {
 
         <View style={styles.ownerCard}>
           <View style={styles.ownerAvatar}>
-            <Ionicons name="person-outline" size={24} color="#176B3A" />
+            <Ionicons name="person-outline" size={24} color="#243B53" />
           </View>
 
           <View style={styles.ownerInfo}>
@@ -179,7 +179,7 @@ export default function PublicPetScreen() {
             </Text>
           </View>
 
-          <Ionicons name="shield-checkmark-outline" size={21} color="#176B3A" />
+          <Ionicons name="shield-checkmark-outline" size={21} color="#243B53" />
         </View>
 
         {pet.status === "Missing" && (
@@ -205,7 +205,7 @@ export default function PublicPetScreen() {
               ]}
               onPress={handleReportFound}
             >
-              <Ionicons name="location-outline" size={21} color="#176B3A" />
+              <Ionicons name="location-outline" size={21} color="#243B53" />
 
               <Text style={styles.foundButtonText}>Report Pet Found</Text>
             </Pressable>
@@ -213,7 +213,7 @@ export default function PublicPetScreen() {
         )}
 
         <View style={styles.privacyCard}>
-          <Ionicons name="lock-closed-outline" size={20} color="#176B3A" />
+          <Ionicons name="lock-closed-outline" size={20} color="#243B53" />
 
           <View style={styles.privacyContent}>
             <Text style={styles.privacyTitle}>Privacy Protected</Text>
@@ -244,7 +244,7 @@ function InfoRow({
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoIcon}>
-        <Ionicons name={icon} size={18} color="#176B3A" />
+        <Ionicons name={icon} size={18} color="#243B53" />
       </View>
 
       <Text style={styles.infoLabel}>{label}</Text>
@@ -261,7 +261,7 @@ function Divider() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
   },
 
   header: {
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#EDF0EE",
+    borderBottomColor: "#E6E9ED",
   },
 
   headerButton: {
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
     letterSpacing: 1,
-    color: "#176B3A",
+    color: "#243B53",
   },
 
   content: {
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   },
 
   verifiedCard: {
-    backgroundColor: "#E7F4E9",
+    backgroundColor: "#DCEAF7",
     borderRadius: 14,
     padding: 12,
     marginTop: 18,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     height: 230,
     borderRadius: 23,
     overflow: "hidden",
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     marginTop: 15,
   },
 
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 14,
     right: 14,
-    backgroundColor: "#A14343",
+    backgroundColor: "#E88C7D",
     borderRadius: 11,
     paddingHorizontal: 10,
     paddingVertical: 7,
@@ -370,12 +370,12 @@ const styles = StyleSheet.create({
 
   petBreed: {
     fontSize: 12,
-    color: "#7C8981",
+    color: "#7C858D",
     marginTop: 3,
   },
 
   alertCard: {
-    backgroundColor: "#FFF0F0",
+    backgroundColor: "#FBE3DE",
     borderWidth: 1,
     borderColor: "#F0D0D0",
     borderRadius: 17,
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
     marginTop: 25,
     marginBottom: 11,
   },
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   infoCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 17,
     paddingHorizontal: 14,
   },
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -457,13 +457,13 @@ const styles = StyleSheet.create({
 
   divider: {
     height: 1,
-    backgroundColor: "#EEF1EF",
+    backgroundColor: "#E6E9ED",
   },
 
   markCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 15,
     padding: 14,
     flexDirection: "row",
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   ownerCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8E4",
+    borderColor: "#E6E9ED",
     borderRadius: 16,
     padding: 14,
     flexDirection: "row",
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     width: 47,
     height: 47,
     borderRadius: 15,
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
 
   contactButton: {
     height: 56,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     borderRadius: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
     height: 56,
     backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
-    borderColor: "#176B3A",
+    borderColor: "#243B53",
     borderRadius: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -550,13 +550,13 @@ const styles = StyleSheet.create({
   },
 
   foundButtonText: {
-    color: "#176B3A",
+    color: "#243B53",
     fontSize: 14,
     fontWeight: "800",
   },
 
   privacyCard: {
-    backgroundColor: "#EAF4EB",
+    backgroundColor: "#DCEAF7",
     borderRadius: 15,
     padding: 14,
     flexDirection: "row",
@@ -571,20 +571,20 @@ const styles = StyleSheet.create({
   privacyTitle: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#294C34",
+    color: "#2B3440",
   },
 
   privacyText: {
     fontSize: 9,
     lineHeight: 15,
-    color: "#66766B",
+    color: "#7C858D",
     marginTop: 3,
   },
 
   footer: {
     textAlign: "center",
     fontSize: 9,
-    color: "#A0AAA4",
+    color: "#7C858D",
     marginTop: 25,
   },
 

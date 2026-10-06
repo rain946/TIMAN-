@@ -245,7 +245,7 @@ export default function EditProfileModal({
                 <Text style={styles.label}>Clinic Name</Text>
 
                 <View style={styles.inputContainer}>
-                  <Ionicons name="medkit-outline" size={19} color="#176B3A" />
+                  <Ionicons name="medkit-outline" size={19} color="#243B53" />
 
                   <TextInput
                     ref={clinicNameInputRef}
@@ -254,7 +254,7 @@ export default function EditProfileModal({
                     value={clinicName}
                     onChangeText={setClinicName}
                     placeholder="Enter clinic name"
-                    placeholderTextColor="#A3ADA7"
+                    placeholderTextColor="#7C858D"
                     autoCapitalize="words"
                     editable={!saving}
                     maxLength={150}
@@ -266,7 +266,7 @@ export default function EditProfileModal({
             <Text style={styles.label}>Full Name</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={19} color="#176B3A" />
+              <Ionicons name="person-outline" size={19} color="#243B53" />
 
               <TextInput
                 ref={fullNameInputRef}
@@ -275,7 +275,7 @@ export default function EditProfileModal({
                 value={fullName}
                 onChangeText={setFullName}
                 placeholder="Enter full name"
-                placeholderTextColor="#A3ADA7"
+                placeholderTextColor="#7C858D"
                 autoCapitalize="words"
                 editable={!saving}
               />
@@ -284,7 +284,7 @@ export default function EditProfileModal({
             <Text style={styles.label}>Email Address</Text>
 
             <View style={[styles.inputContainer, styles.disabledInput]}>
-              <Ionicons name="mail-outline" size={19} color="#89948E" />
+              <Ionicons name="mail-outline" size={19} color="#7C858D" />
 
               <TextInput
                 style={[styles.input, styles.disabledInputText]}
@@ -302,7 +302,7 @@ export default function EditProfileModal({
             <Text style={styles.label}>Contact Number</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="call-outline" size={19} color="#176B3A" />
+              <Ionicons name="call-outline" size={19} color="#243B53" />
 
               <TextInput
                 ref={contactInputRef}
@@ -311,7 +311,7 @@ export default function EditProfileModal({
                 value={contactNumber}
                 onChangeText={setContactNumber}
                 placeholder="Enter contact number"
-                placeholderTextColor="#A3ADA7"
+                placeholderTextColor="#7C858D"
                 keyboardType="phone-pad"
                 editable={!saving}
                 maxLength={20}
@@ -324,7 +324,7 @@ export default function EditProfileModal({
               <Ionicons
                 name="location-outline"
                 size={19}
-                color="#176B3A"
+                color="#243B53"
                 style={styles.addressIcon}
               />
 
@@ -335,7 +335,7 @@ export default function EditProfileModal({
                 value={address}
                 onChangeText={setAddress}
                 placeholder="Enter address"
-                placeholderTextColor="#A3ADA7"
+                placeholderTextColor="#7C858D"
                 multiline
                 textAlignVertical="top"
                 autoCapitalize="words"
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     width: "100%",
-    backgroundColor: "#FFFDF7",
+    backgroundColor: "#F6F0E6",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     maxHeight: "90%",
@@ -430,12 +430,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#1E2D24",
+    color: "#2B3440",
   },
 
   subtitle: {
     fontSize: 11,
-    color: "#7B877F",
+    color: "#7C858D",
     marginTop: 3,
   },
 
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     minHeight: 53,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#DDE5DF",
+    borderColor: "#E6E9ED",
     borderRadius: 14,
     paddingHorizontal: 14,
     flexDirection: "row",
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     flex: 1.5,
     height: 52,
     borderRadius: 14,
-    backgroundColor: "#176B3A",
+    backgroundColor: "#243B53",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
