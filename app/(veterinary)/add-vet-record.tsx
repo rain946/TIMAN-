@@ -67,6 +67,12 @@ export default function AddVetRecordScreen() {
 
   const [nextDueDate, setNextDueDate] = useState("");
 
+  const [nextServiceType, setNextServiceType] = useState<ServiceType | null>(null);
+
+  const [otherNextServiceType, setOtherNextServiceType] = useState("");
+
+  const [followUpPlan, setFollowUpPlan] = useState("");
+
   const [saving, setSaving] = useState(false);
 
   const selectServiceType = (service: ServiceType) => {
@@ -143,6 +149,34 @@ export default function AddVetRecordScreen() {
       return;
     }
 
+    if (nextDueDate.trim() && nextDueDate.trim() <= getToday()) {
+      Alert.alert(
+        "Future Date Required",
+        "Please select a future date for the next follow-up.",
+      );
+      return;
+    }
+
+    if (nextDueDate.trim() && !nextServiceType) {
+      Alert.alert(
+        "Next Service Required",
+        "Please select the service planned for the next visit.",
+      );
+      return;
+    }
+
+    if (
+      nextDueDate.trim() &&
+      nextServiceType === "Other" &&
+      !otherNextServiceType.trim()
+    ) {
+      Alert.alert(
+        "Other Next Service Required",
+        "Please enter the service planned for the next visit.",
+      );
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -173,6 +207,14 @@ export default function AddVetRecordScreen() {
         notes: notes.trim(),
 
         next_due_date: nextDueDate.trim() || null,
+
+        next_service_type: nextDueDate.trim()
+          ? nextServiceType === "Other"
+            ? otherNextServiceType.trim()
+            : nextServiceType
+          : null,
+
+        follow_up_plan: nextDueDate.trim() ? followUpPlan.trim() || null : null,
       };
 
       console.log("SAVE VET RECORD:", body);
@@ -414,9 +456,25 @@ export default function AddVetRecordScreen() {
               multiline
               textAlignVertical="top"
             />
+
+            <FieldLabel title="Notes" top />
+
+            <TextInput
+              ref={(input) => {
+                inputRefs.current.notes = input;
+              }}
+              onFocus={() => handleInputFocus(inputRefs.current.notes)}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Additional notes about this visit..."
+              placeholderTextColor="#6B7C73"
+              style={[styles.textArea, styles.notesInput]}
+              multiline
+              textAlignVertical="top"
+            />
           </View>
 
-          <SectionTitle title="Follow-up" />
+          <SectionTitle title="Next Follow-up" />
 
           <View style={styles.formCard}>
             <FieldLabel title="Next Due Date" />
@@ -463,21 +521,78 @@ export default function AddVetRecordScreen() {
               or other scheduled visit.
             </Text>
 
-            <FieldLabel title="Notes" top />
+            {nextDueDate.trim() !== "" && (
+              <>
+                <FieldLabel title="Next Service Type" required top />
 
-            <TextInput
-              ref={(input) => {
-                inputRefs.current.notes = input;
-              }}
-              onFocus={() => handleInputFocus(inputRefs.current.notes)}
-              value={notes}
-              onChangeText={setNotes}
-              placeholder="Additional veterinary notes..."
-              placeholderTextColor="#6B7C73"
-              style={[styles.textArea, styles.notesInput]}
-              multiline
-              textAlignVertical="top"
-            />
+                <View style={styles.serviceContainer}>
+                  {SERVICE_TYPES.map((service) => {
+                    const selected = nextServiceType === service;
+                    return (
+                      <Pressable
+                        key={`next-${service}`}
+                        style={({ pressed }) => [
+                          styles.serviceButton,
+                          selected && styles.serviceButtonSelected,
+                          pressed && styles.pressed,
+                        ]}
+                        onPress={() => setNextServiceType(service)}
+                      >
+                        <Ionicons
+                          name={getServiceIcon(service)}
+                          size={17}
+                          color={selected ? "#FFFFFF" : "#2E7D6B"}
+                        />
+                        <Text
+                          style={[
+                            styles.serviceText,
+                            selected && styles.serviceTextSelected,
+                          ]}
+                        >
+                          {service}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                {nextServiceType === "Other" && (
+                  <View style={styles.otherServiceContainer}>
+                    <Ionicons name="create-outline" size={19} color="#6B7C73" />
+                    <TextInput
+                      ref={(input) => {
+                        inputRefs.current.otherNextServiceType = input;
+                      }}
+                      onFocus={() =>
+                        handleInputFocus(inputRefs.current.otherNextServiceType)
+                      }
+                      value={otherNextServiceType}
+                      onChangeText={setOtherNextServiceType}
+                      placeholder="Other next service type"
+                      placeholderTextColor="#6B7C73"
+                      style={styles.input}
+                      maxLength={100}
+                    />
+                  </View>
+                )}
+
+                <FieldLabel title="Follow-up Plan / Instructions" top />
+
+                <TextInput
+                  ref={(input) => {
+                    inputRefs.current.followUpPlan = input;
+                  }}
+                  onFocus={() => handleInputFocus(inputRefs.current.followUpPlan)}
+                  value={followUpPlan}
+                  onChangeText={setFollowUpPlan}
+                  placeholder="Describe the plan for the next visit..."
+                  placeholderTextColor="#6B7C73"
+                  style={[styles.textArea, styles.notesInput]}
+                  multiline
+                  textAlignVertical="top"
+                />
+              </>
+            )}
           </View>
 
           {nextDueDate.trim() !== "" && (

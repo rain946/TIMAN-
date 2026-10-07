@@ -40,6 +40,8 @@ type VetRecord = {
   medication: string | null;
   notes: string | null;
   next_due_date: string | null;
+  next_service_type: string | null;
+  follow_up_plan: string | null;
 
   schedule_status:
     | "Pending"
@@ -542,7 +544,7 @@ export default function SchedulesScreen() {
                   }
                 >
                   {
-                    nextSchedule.service_type
+                    getScheduleService(nextSchedule)
                   }
                 </Text>
               </View>
@@ -609,11 +611,7 @@ export default function SchedulesScreen() {
                 styles.nextClinic
               }
             >
-              Scheduled from a{" "}
-              {
-                nextSchedule.service_type
-              }{" "}
-              veterinary record
+              Planned follow-up from a veterinary record
               {getClinicName(
                 nextSchedule
               )
@@ -623,6 +621,11 @@ export default function SchedulesScreen() {
                 : ""}
               .
             </Text>
+            {nextSchedule.follow_up_plan && (
+              <Text style={styles.nextClinic}>
+                Planned follow-up: {nextSchedule.follow_up_plan}
+              </Text>
+            )}
           </View>
         )}
 
@@ -1142,7 +1145,7 @@ function ScheduleCard({
         >
           <Ionicons
             name={getServiceIcon(
-              item.service_type
+              getScheduleService(item)
             )}
             size={22}
             color={getStatusColor(
@@ -1161,7 +1164,7 @@ function ScheduleCard({
               styles.serviceTitle
             }
           >
-            {item.service_type}
+            {getScheduleService(item)}
           </Text>
 
           <View
@@ -1198,6 +1201,12 @@ function ScheduleCard({
           styles.scheduleDivider
         }
       />
+
+      {item.follow_up_plan && (
+        <Text style={styles.followUpPlan}>
+          Planned follow-up: {item.follow_up_plan}
+        </Text>
+      )}
 
       <View
         style={styles.sourceRow}
@@ -1286,7 +1295,7 @@ function CompletedScheduleCard({
               styles.completedServiceTitle
             }
           >
-            {record.service_type}
+            {getScheduleService(record)}
           </Text>
 
           <Text
@@ -1595,6 +1604,10 @@ function getClinicName(
     record.clinic_contact_name ||
     ""
   );
+}
+
+function getScheduleService(record: VetRecord) {
+  return record.next_service_type?.trim() || record.service_type;
 }
 
 function getServiceIcon(
@@ -2006,6 +2019,12 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 13,
     backgroundColor: "#CFE8DD",
+  },
+  followUpPlan: {
+    marginBottom: 13,
+    fontSize: 12,
+    lineHeight: 17,
+    color: "#6B7C73",
   },
 
   sourceRow: {

@@ -41,6 +41,8 @@ type VetRecord = {
   notes: string | null;
 
   next_due_date: string | null;
+  next_service_type: string | null;
+  follow_up_plan: string | null;
 
   schedule_status: "Pending" | "Completed" | "Cancelled";
 
@@ -287,7 +289,7 @@ export default function ClinicVetRecordsScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Header />
+        <Header singleRecord={showsSingleRecord} />
 
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#2E7D6B" />
@@ -300,7 +302,7 @@ export default function ClinicVetRecordsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
+      <Header singleRecord={showsSingleRecord} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -331,14 +333,16 @@ export default function ClinicVetRecordsScreen() {
 
               <Text style={styles.petName}>{pet.pet_name}</Text>
 
-              <Text style={styles.petDetails}>{pet.breed || pet.species}</Text>
+              <Text style={styles.petDetails}>
+                {[pet.species, pet.breed].filter(Boolean).join(" • ")}
+              </Text>
             </View>
 
-            <View style={styles.recordCount}>
+            {!showsSingleRecord && <View style={styles.recordCount}>
               <Text style={styles.recordNumber}>{visibleRecords.length}</Text>
 
               <Text style={styles.recordCountLabel}>Records</Text>
-            </View>
+            </View>}
           </View>
         )}
 
@@ -366,7 +370,7 @@ export default function ClinicVetRecordsScreen() {
             {showsSingleRecord ? "Record Details" : "Medical History"}
           </Text>
 
-          {visibleRecords.length > 0 && (
+          {!showsSingleRecord && visibleRecords.length > 0 && (
             <View style={styles.totalBadge}>
               <Text style={styles.totalBadgeText}>
                 {visibleRecords.length} {visibleRecords.length === 1 ? "record" : "records"}
@@ -411,6 +415,7 @@ export default function ClinicVetRecordsScreen() {
               key={record.record_id}
               record={record}
               isLatest={!showsSingleRecord && index === 0}
+              singleRecord={showsSingleRecord}
               onComplete={
                 hasScanAccess
                   ? () => confirmCompleteSchedule(record)
@@ -420,20 +425,20 @@ export default function ClinicVetRecordsScreen() {
           ))
         )}
 
-        <View style={styles.securityCard}>
+        {!showsSingleRecord && <View style={styles.securityCard}>
           <Ionicons name="shield-checkmark-outline" size={20} color="#2E7D6B" />
 
           <Text style={styles.securityText}>
             Veterinary records are available because the pet owner has approved
             your clinic&apos;s access.
           </Text>
-        </View>
+        </View>}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Header() {
+function Header({ singleRecord = false }: { singleRecord?: boolean }) {
   return (
     <View style={styles.header}>
       <Pressable
@@ -446,7 +451,9 @@ function Header() {
         <Ionicons name="chevron-back" size={27} color="#2E7D6B" />
       </Pressable>
 
-      <Text style={styles.headerTitle}>Veterinary Records</Text>
+      <Text style={styles.headerTitle}>
+        {singleRecord ? "Veterinary Record" : "Veterinary Records"}
+      </Text>
 
       <View style={styles.headerButton} />
     </View>
@@ -456,10 +463,12 @@ function Header() {
 function VetRecordCard({
   record,
   isLatest,
+  singleRecord,
   onComplete,
 }: {
   record: VetRecord;
   isLatest: boolean;
+  singleRecord: boolean;
   onComplete?: () => void;
 }) {
   const clinic =
@@ -512,118 +521,72 @@ function VetRecordCard({
 
       <View style={styles.divider} />
 
-      {record.diagnosis && (
+      <Text style={styles.medicalSectionTitle}>MEDICAL DETAILS</Text>
+
+      {(singleRecord || record.diagnosis) && (
         <DetailRow
           icon="medkit-outline"
           label="Diagnosis"
-          value={record.diagnosis}
+          value={record.diagnosis || "—"}
         />
       )}
 
-      {record.treatment && (
+      {(singleRecord || record.treatment) && (
         <DetailRow
           icon="medical-outline"
           label="Treatment / Procedure"
-          value={record.treatment}
+          value={record.treatment || "—"}
         />
       )}
 
-      {record.medication && (
+      {(singleRecord || record.medication) && (
         <DetailRow
           icon="bandage-outline"
           label="Medication"
-          value={record.medication}
+          value={record.medication || "—"}
         />
       )}
 
-      {record.notes && (
+      {(singleRecord || record.notes) && (
         <DetailRow
           icon="document-text-outline"
           label="Notes"
-          value={record.notes}
+          value={record.notes || "—"}
         />
       )}
 
       {hasSchedule && (
         <>
-          <View
-            style={[
-              styles.nextDueCard,
-
-              isCompleted && styles.completedDueCard,
-
-              isCancelled && styles.cancelledDueCard,
-            ]}
-          >
-            <View
-              style={[
-                styles.nextDueIcon,
-
-                isCompleted && styles.completedDueIcon,
-
-                isCancelled && styles.cancelledDueIcon,
-              ]}
-            >
-              <Ionicons
-                name={
-                  isCompleted
-                    ? "checkmark-circle-outline"
-                    : isCancelled
-                      ? "close-circle-outline"
-                      : "notifications-outline"
-                }
-                size={18}
-                color={
-                  isCompleted ? "#81C784" : isCancelled ? "#E57373" : "#F5A623"
-                }
-              />
+          <View style={styles.followUpSection}>
+            <View style={styles.followUpHeader}>
+              <Text style={styles.followUpTitle}>FOLLOW-UP</Text>
+              {isPending && <DueStatus value={record.next_due_date!} />}
+              {isCompleted && (
+                <View style={styles.completedBadge}>
+                  <Text style={styles.completedBadgeText}>Completed</Text>
+                </View>
+              )}
+              {isCancelled && (
+                <View style={styles.cancelledBadge}>
+                  <Text style={styles.cancelledBadgeText}>Cancelled</Text>
+                </View>
+              )}
             </View>
-
-            <View style={styles.nextDueInfo}>
-              <Text
-                style={[
-                  styles.nextDueLabel,
-
-                  isCompleted && styles.completedDueLabel,
-
-                  isCancelled && styles.cancelledDueLabel,
-                ]}
-              >
-                {isCompleted
-                  ? "Completed Schedule"
-                  : isCancelled
-                    ? "Cancelled Schedule"
-                    : "Next Due Date"}
-              </Text>
-
-              <Text
-                style={[
-                  styles.nextDueDate,
-
-                  isCompleted && styles.completedDueDate,
-
-                  isCancelled && styles.cancelledDueDate,
-                ]}
-              >
-                {isCompleted && record.completed_at
-                  ? `Completed ${formatDateTime(record.completed_at)}`
-                  : formatDate(record.next_due_date!)}
-              </Text>
-            </View>
-
-            {isPending && <DueStatus value={record.next_due_date!} />}
-
-            {isCompleted && (
-              <View style={styles.completedBadge}>
-                <Text style={styles.completedBadgeText}>Completed</Text>
-              </View>
-            )}
-
-            {isCancelled && (
-              <View style={styles.cancelledBadge}>
-                <Text style={styles.cancelledBadgeText}>Cancelled</Text>
-              </View>
-            )}
+            <DetailRow
+              icon="calendar-outline"
+              label="Next Due Date"
+              value={formatDate(record.next_due_date!)}
+            />
+            <DetailRow
+              icon="medical-outline"
+              label="Next Service"
+              value={record.next_service_type || "—"}
+            />
+            <DetailRow
+              icon="document-text-outline"
+              label="Follow-up Plan / Instructions"
+              value={record.follow_up_plan || "—"}
+            />
           </View>
 
           {isPending && onComplete && (
@@ -654,7 +617,7 @@ function VetRecordCard({
         </>
       )}
 
-      <View style={styles.clinicFooter}>
+      {!singleRecord && <View style={styles.clinicFooter}>
         <View style={styles.clinicIcon}>
           <Ionicons name="business-outline" size={15} color="#2E7D6B" />
         </View>
@@ -664,7 +627,7 @@ function VetRecordCard({
 
           <Text style={styles.clinicName}>{clinic}</Text>
         </View>
-      </View>
+      </View>}
     </View>
   );
 }
@@ -826,27 +789,6 @@ function formatDate(value: string) {
     month: "short",
     day: "numeric",
     year: "numeric",
-  });
-}
-
-function formatDateTime(value: string) {
-  if (!value) {
-    return "";
-  }
-
-  const date = new Date(value.replace(" ", "T"));
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString(undefined, {
-    timeZone: "Asia/Manila",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
   });
 }
 
@@ -1193,6 +1135,34 @@ const styles = StyleSheet.create({
 
     flexDirection: "row",
     alignItems: "center",
+  },
+  followUpSection: {
+    marginTop: 18,
+    padding: 15,
+    borderRadius: 17,
+    backgroundColor: "#FFF5E9",
+    borderWidth: 1,
+    borderColor: "#FAD7A0",
+  },
+  followUpHeader: {
+    marginBottom: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  followUpTitle: {
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+    color: "#2E3A34",
+  },
+  medicalSectionTitle: {
+    marginTop: 15,
+    marginBottom: 3,
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+    color: "#2E3A34",
   },
 
   nextDueIcon: {

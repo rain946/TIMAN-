@@ -28,6 +28,7 @@ type ClinicVetRecord = {
   species: string;
   breed: string | null;
   photo_url: string | null;
+  owner_name: string;
   can_open: boolean;
 };
 
@@ -99,6 +100,7 @@ export default function VetRecordsScreen() {
           !normalizedSearch ||
           [
             record.pet_name,
+            record.owner_name,
             record.breed,
             record.species,
             record.service_type,
@@ -327,7 +329,7 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
           </View>
         </View>
         <Text style={styles.petContext} numberOfLines={1}>
-          {[record.breed, record.species].filter(Boolean).join(" • ")}
+          Owner: {record.owner_name || "—"}
         </Text>
         {record.diagnosis && (
           <Text style={styles.diagnosis} numberOfLines={1}>
@@ -357,8 +359,9 @@ function StateCard({ children }: { children: React.ReactNode }) {
 }
 
 function formatDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Date unavailable";
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || "").slice(0, 10));
+  if (!match) return "Date unavailable";
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
   return date.toLocaleDateString([], {
     month: "short",
     day: "numeric",

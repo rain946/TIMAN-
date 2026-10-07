@@ -106,15 +106,19 @@ router.get("/", authMiddleware, requireClinic, async (req, res) => {
         p.pet_name,
         p.species,
         p.breed,
+        owner_user.full_name AS owner_name,
         vr.service_type,
-        vr.visit_date,
-        vr.next_due_date,
+        DATE_FORMAT(vr.visit_date, '%Y-%m-%d') AS visit_date,
+        DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
+        vr.next_service_type,
+        vr.follow_up_plan,
         vr.schedule_status,
         vr.completed_at,
         vr.cancelled_at,
         vr.created_at
       FROM vet_records vr
       INNER JOIN pets p ON p.pet_id = vr.pet_id
+      INNER JOIN users owner_user ON owner_user.user_id = p.owner_id
       WHERE vr.clinic_user_id = ?
         AND p.archived_at IS NULL
         AND (

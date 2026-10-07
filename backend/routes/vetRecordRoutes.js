@@ -199,6 +199,8 @@ router.post(
         medication,
         notes,
         next_due_date,
+        next_service_type,
+        follow_up_plan,
       } = req.body;
 
       
@@ -254,6 +256,36 @@ router.post(
       }
 
       const normalizedServiceType = service_type.trim();
+      const normalizedNextDueDate =
+        typeof next_due_date === "string" ? next_due_date.trim() : "";
+      const normalizedNextServiceType =
+        typeof next_service_type === "string" ? next_service_type.trim() : "";
+      const normalizedFollowUpPlan =
+        typeof follow_up_plan === "string" ? follow_up_plan.trim() : "";
+
+      if (normalizedNextDueDate && !parseDateOnly(normalizedNextDueDate)) {
+        return res.status(400).json({
+          success: false,
+          message: "Next due date must be a valid YYYY-MM-DD date.",
+        });
+      }
+
+      if (normalizedNextDueDate && normalizedNextDueDate <= getPhilippineToday()) {
+        return res.status(400).json({
+          success: false,
+          message: "Next due date must be in the future.",
+        });
+      }
+
+      if (
+        normalizedNextDueDate &&
+        (!normalizedNextServiceType || normalizedNextServiceType.length > 100)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Next service type is required and must not exceed 100 characters.",
+        });
+      }
 
       
       
@@ -342,9 +374,11 @@ router.post(
             treatment,
             medication,
             notes,
-            next_due_date
+            next_due_date,
+            next_service_type,
+            follow_up_plan
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `,
           [
             petId,
@@ -355,7 +389,9 @@ router.post(
             treatment?.trim() || null,
             medication?.trim() || null,
             notes?.trim() || null,
-            next_due_date || null,
+            normalizedNextDueDate || null,
+            normalizedNextDueDate ? normalizedNextServiceType : null,
+            normalizedNextDueDate ? normalizedFollowUpPlan || null : null,
           ]
         );
 
@@ -376,7 +412,7 @@ router.post(
         `${pet.pet_name}'s ${normalizedServiceType} record ` +
         `was updated by ${clinicDisplayName}.`;
 
-      if (next_due_date) {
+      if (normalizedNextDueDate) {
         notificationMessage +=
           ` A next health schedule was also set.`;
       }
@@ -460,8 +496,10 @@ router.post(
                   serviceType:
                     normalizedServiceType,
 
-                  nextDueDate:
-                    next_due_date || null,
+                    nextDueDate: normalizedNextDueDate || null,
+
+                  nextServiceType:
+                    normalizedNextDueDate ? normalizedNextServiceType : null,
                 },
               });
 
@@ -534,6 +572,7 @@ router.get(
           p.species,
           p.breed,
           p.photo_url,
+          owner_user.full_name AS owner_name,
           EXISTS (
             SELECT 1
             FROM clinic_authorizations ca
@@ -544,6 +583,8 @@ router.get(
         FROM vet_records vr
         INNER JOIN pets p
           ON p.pet_id = vr.pet_id
+        INNER JOIN users owner_user
+          ON owner_user.user_id = p.owner_id
         WHERE vr.clinic_user_id = ?
           AND p.archived_at IS NULL
         ORDER BY
@@ -586,11 +627,10 @@ router.get(
           vr.record_id,
           vr.pet_id,
           DATE_FORMAT(vr.visit_date, '%Y-%m-%d') AS visit_date,
-          vr.service_type,
-          vr.diagnosis,
-          vr.treatment,
-          vr.medication,
-          vr.notes,
+          vr.service_type AS record_service_type,
+          COALESCE(NULLIF(vr.next_service_type, ''), vr.service_type) AS service_type,
+          vr.next_service_type,
+          vr.follow_up_plan,
           DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
           vr.schedule_status,
           vr.completed_at,
@@ -796,6 +836,8 @@ router.get(
             vr.medication,
             vr.notes,
             DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
+            vr.next_service_type,
+            vr.follow_up_plan,
             vr.schedule_status,
             vr.completed_at,
             vr.rescheduled_at,
@@ -875,7 +917,9 @@ router.get(
             p.breed,
             p.photo_url,
 
-            vr.service_type,
+            COALESCE(NULLIF(vr.next_service_type, ''), vr.service_type) AS service_type,
+            vr.next_service_type,
+            vr.follow_up_plan,
             DATE_FORMAT(vr.visit_date, '%Y-%m-%d') AS visit_date,
             DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
             vr.schedule_status,
@@ -1025,6 +1069,8 @@ router.get(
             vr.medication,
             vr.notes,
             DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
+            vr.next_service_type,
+            vr.follow_up_plan,
             vr.schedule_status,
             vr.completed_at,
             vr.rescheduled_at,
@@ -1092,7 +1138,7 @@ router.patch(
           vr.record_id,
           vr.pet_id,
           vr.clinic_user_id,
-          vr.service_type,
+          COALESCE(NULLIF(vr.next_service_type, ''), vr.service_type) AS service_type,
           DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
           vr.schedule_status,
           vr.rescheduled_at,
@@ -1255,7 +1301,7 @@ router.patch(
           vr.record_id,
           vr.pet_id,
           vr.clinic_user_id,
-          vr.service_type,
+          COALESCE(NULLIF(vr.next_service_type, ''), vr.service_type) AS service_type,
           DATE_FORMAT(vr.next_due_date, '%Y-%m-%d') AS next_due_date,
           vr.schedule_status,
           vr.rescheduled_at,
@@ -1409,7 +1455,7 @@ router.patch(
             vr.record_id,
             vr.pet_id,
             vr.clinic_user_id,
-            vr.service_type,
+            COALESCE(NULLIF(vr.next_service_type, ''), vr.service_type) AS service_type,
             vr.next_due_date,
             vr.schedule_status,
             vr.completed_at,

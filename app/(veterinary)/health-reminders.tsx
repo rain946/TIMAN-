@@ -26,6 +26,7 @@ type HealthSchedule = {
   service_type: string;
   visit_date?: string | null;
   next_due_date: string;
+  follow_up_plan?: string | null;
   days_until_due: number | string;
 };
 
@@ -439,6 +440,12 @@ function ReminderCard({
           <Text style={styles.petName}>{reminder.pet_name}</Text>
         </View>
 
+        {reminder.follow_up_plan && (
+          <Text style={styles.followUpPlan} numberOfLines={2}>
+            Planned follow-up: {reminder.follow_up_plan}
+          </Text>
+        )}
+
         <View style={styles.dateRow}>
           <Ionicons name="calendar-outline" size={13} color="#6B7C73" />
 
@@ -823,6 +830,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
     color: "#2E7D6B",
+  },
+  followUpPlan: {
+    marginTop: 5,
+    fontSize: 11,
+    lineHeight: 15,
+    color: "#6B7C73",
   },
 
   dateRow: {

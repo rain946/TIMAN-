@@ -135,7 +135,8 @@ async function getSchedulesForReminder() {
     SELECT
       vr.record_id,
       vr.pet_id,
-      vr.service_type,
+      COALESCE(NULLIF(vr.next_service_type, ''), vr.service_type) AS service_type,
+      vr.follow_up_plan,
       vr.next_due_date,
 
       p.pet_name,

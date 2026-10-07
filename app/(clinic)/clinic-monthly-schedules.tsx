@@ -27,6 +27,7 @@ type ClinicSchedule = {
   breed: string | null;
   photo_url: string | null;
   next_due_date: string;
+  follow_up_plan: string | null;
   booked_date: string;
   completed_date: string | null;
   cancelled_date: string | null;

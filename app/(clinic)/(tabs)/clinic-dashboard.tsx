@@ -458,7 +458,10 @@ function ActivityCard({ activity }: { activity: RecentActivity }) {
       onPress={() =>
         router.push({
           pathname: "/clinic-vet-records",
-          params: { petId: String(activity.pet_id) },
+          params: {
+            petId: String(activity.pet_id),
+            recordId: String(activity.record_id),
+          },
         })
       }
     >

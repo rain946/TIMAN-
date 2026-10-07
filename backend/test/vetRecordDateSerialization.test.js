@@ -88,6 +88,13 @@ test("clinic schedules return only the owner's display name", () => {
   assert.doesNotMatch(section, /owner_user\.(email|contact_number|phone)/);
 });
 
+test("clinic records return only the pet owner's display name", () => {
+  const section = routeSection('"/clinic"', '"/clinic-schedules"');
+
+  assert.match(section, /owner_user\.full_name AS owner_name/);
+  assert.doesNotMatch(section, /owner_user\.(email|contact_number|phone)/);
+});
+
 test("clinic schedules expose the four current-month dashboard filters", () => {
   const section = routeSection(
     '"/clinic-schedules"',
@@ -110,4 +117,23 @@ test("clinic schedules expose date-only fields for calendar filtering", () => {
   assert.match(section, /DATE_FORMAT\(vr\.completed_at, '%Y-%m-%d'\) AS completed_date/);
   assert.match(section, /DATE_FORMAT\(vr\.cancelled_at, '%Y-%m-%d'\) AS cancelled_date/);
   assert.match(section, /DATE_FORMAT\(vr\.rescheduled_at, '%Y-%m-%d'\) AS rescheduled_date/);
+});
+
+test("schedule responses separate next follow-up fields from current visit fields", () => {
+  const clinicSchedules = routeSection(
+    '"/clinic-schedules"',
+    '"/clinic/:petId"',
+  );
+  const ownerOverview = routeSection(
+    '"/owner-health-overview"',
+    '"/owner/:petId"',
+  );
+
+  for (const section of [clinicSchedules, ownerOverview]) {
+    assert.match(
+      section,
+      /COALESCE\(NULLIF\(vr\.next_service_type, ''\), vr\.service_type\) AS service_type/,
+    );
+    assert.match(section, /vr\.follow_up_plan/);
+  }
 });

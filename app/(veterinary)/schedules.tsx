@@ -42,6 +42,8 @@ type VetRecord = {
   medication: string | null;
   notes: string | null;
   next_due_date: string | null;
+  next_service_type: string | null;
+  follow_up_plan: string | null;
 
   schedule_status: "Pending" | "Completed" | "Cancelled";
 
@@ -611,7 +613,7 @@ export default function SchedulesScreen() {
                 <Text style={styles.nextLabel}>NEXT SCHEDULE</Text>
 
                 <Text style={styles.nextService}>
-                  {nextSchedule.service_type}
+                  {getScheduleService(nextSchedule)}
                 </Text>
               </View>
 
@@ -639,12 +641,17 @@ export default function SchedulesScreen() {
             </View>
 
             <Text style={styles.nextClinic}>
-              Scheduled from a {nextSchedule.service_type} veterinary record
+              Planned follow-up from a veterinary record
               {getClinicName(nextSchedule)
                 ? ` by ${getClinicName(nextSchedule)}`
                 : ""}
               .
             </Text>
+            {nextSchedule.follow_up_plan && (
+              <Text style={styles.nextClinic}>
+                Planned follow-up: {nextSchedule.follow_up_plan}
+              </Text>
+            )}
           </View>
         )}
 
@@ -1101,14 +1108,14 @@ function ScheduleCard({
           ]}
         >
           <Ionicons
-            name={getServiceIcon(item.service_type)}
+            name={getServiceIcon(getScheduleService(item))}
             size={22}
             color={getStatusColor(status)}
           />
         </View>
 
         <View style={styles.scheduleInfo}>
-          <Text style={styles.serviceTitle}>{item.service_type}</Text>
+          <Text style={styles.serviceTitle}>{getScheduleService(item)}</Text>
 
           <View style={styles.scheduleDateRow}>
             <Ionicons name="calendar-outline" size={13} color="#6B7C73" />
@@ -1123,6 +1130,12 @@ function ScheduleCard({
       </View>
 
       <View style={styles.scheduleDivider} />
+
+      {item.follow_up_plan && (
+        <Text style={styles.followUpPlan}>
+          Planned follow-up: {item.follow_up_plan}
+        </Text>
+      )}
 
       <View style={styles.sourceRow}>
         <View style={styles.sourceIcon}>
@@ -1207,13 +1220,13 @@ function CancelledScheduleCard({ item }: { item: ScheduleItem }) {
       <View style={styles.scheduleTop}>
         <View style={[styles.serviceIcon, styles.cancelledIcon]}>
           <Ionicons
-            name={getServiceIcon(item.service_type)}
+            name={getServiceIcon(getScheduleService(item))}
             size={22}
             color="#E57373"
           />
         </View>
         <View style={styles.scheduleInfo}>
-          <Text style={styles.serviceTitle}>{item.service_type}</Text>
+          <Text style={styles.serviceTitle}>{getScheduleService(item)}</Text>
           <View style={styles.scheduleDateRow}>
             <Ionicons name="calendar-outline" size={13} color="#6B7C73" />
             <Text style={styles.scheduleDate}>
@@ -1366,6 +1379,10 @@ function formatDateValue(date: Date) {
 
 function getClinicName(record: VetRecord) {
   return record.clinic_name || record.clinic_contact_name || "";
+}
+
+function getScheduleService(record: VetRecord) {
+  return record.next_service_type?.trim() || record.service_type;
 }
 
 function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
@@ -1895,6 +1912,12 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 13,
     backgroundColor: "#CFE8DD",
+  },
+  followUpPlan: {
+    marginBottom: 13,
+    fontSize: 12,
+    lineHeight: 17,
+    color: "#6B7C73",
   },
 
   sourceRow: {

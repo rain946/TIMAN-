@@ -24,10 +24,7 @@ type ClinicScheduleDetails = {
   photo_url: string | null;
   service_type: string;
   next_due_date: string;
-  diagnosis: string | null;
-  treatment: string | null;
-  medication: string | null;
-  notes: string | null;
+  follow_up_plan: string | null;
 };
 
 export default function ClinicScheduleDetailsScreen() {
@@ -159,7 +156,7 @@ export default function ClinicScheduleDetailsScreen() {
           </View>
 
           <View style={styles.detailCard}>
-            <DetailField label="Service" value={schedule.service_type} />
+            <DetailField label="Next Service" value={schedule.service_type} />
             <View style={styles.divider} />
             <DetailField
               label="Scheduled Date"
@@ -167,18 +164,13 @@ export default function ClinicScheduleDetailsScreen() {
             />
             <View style={styles.divider} />
             <DetailField label="Owner" value={schedule.owner_name} />
+            <View style={styles.divider} />
+            <DetailField
+              label="Follow-up Plan"
+              value={schedule.follow_up_plan}
+            />
           </View>
 
-          <Text style={styles.sectionTitle}>Medical Details</Text>
-          <View style={styles.detailCard}>
-            <DetailField label="Diagnosis" value={schedule.diagnosis} />
-            <View style={styles.divider} />
-            <DetailField label="Treatment" value={schedule.treatment} />
-            <View style={styles.divider} />
-            <DetailField label="Medication" value={schedule.medication} />
-            <View style={styles.divider} />
-            <DetailField label="Notes" value={schedule.notes} />
-          </View>
         </ScrollView>
       )}
     </SafeAreaView>
@@ -299,12 +291,6 @@ const styles = StyleSheet.create({
     color: "#2E3A34",
   },
   divider: { height: 1, backgroundColor: "#CFE8DD" },
-  sectionTitle: {
-    marginTop: 24,
-    fontSize: 18,
-    fontWeight: "900",
-    color: "#2E3A34",
-  },
   centerState: {
     flex: 1,
     padding: 25,

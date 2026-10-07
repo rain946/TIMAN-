@@ -34,10 +34,8 @@ type ClinicSchedule = {
   pet_id: number;
   visit_date: string;
   service_type: string;
-  diagnosis: string | null;
-  treatment: string | null;
-  medication: string | null;
-  notes: string | null;
+  next_service_type: string | null;
+  follow_up_plan: string | null;
   next_due_date: string;
   schedule_status: ScheduleStatus;
   completed_at: string | null;
@@ -193,6 +191,7 @@ export default function ClinicSchedulesScreen() {
         return [
           schedule.pet_name,
           schedule.owner_name,
+          schedule.next_service_type,
           schedule.service_type,
           schedule.breed,
           schedule.species,
@@ -490,6 +489,7 @@ function ScheduleCard({
   view: DailyFilter;
 }) {
   const imageUrl = getImageUrl(schedule.photo_url);
+  const nextService = schedule.next_service_type?.trim() || schedule.service_type;
   const timing = getTimingState(schedule.next_due_date);
   const historyTone =
     schedule.schedule_status === "Completed"
@@ -512,20 +512,7 @@ function ScheduleCard({
         : historyTone;
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`View ${schedule.pet_name} schedule details`}
-      style={({ pressed }) => [
-        styles.scheduleCard,
-        pressed && styles.cardPressed,
-      ]}
-      onPress={() =>
-        router.push({
-          pathname: "/(clinic)/clinic-schedule-details",
-          params: { recordId: String(schedule.record_id) },
-        })
-      }
-    >
+    <View style={styles.scheduleCard}>
       <View style={styles.photoContainer}>
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
@@ -538,11 +525,11 @@ function ScheduleCard({
         <Text style={styles.petName} numberOfLines={1}>
           {schedule.pet_name}
         </Text>
+        <Text style={styles.serviceType} numberOfLines={1}>
+          {nextService}
+        </Text>
         <Text style={styles.ownerName} numberOfLines={1}>
           Owner: {schedule.owner_name || "—"}
-        </Text>
-        <Text style={styles.serviceType} numberOfLines={1}>
-          {schedule.service_type}
         </Text>
         <Text style={styles.dueDate}>
           {formatDateOnly(schedule.next_due_date)}
@@ -554,8 +541,7 @@ function ScheduleCard({
         </View>
       </View>
 
-      <Ionicons name="chevron-forward" size={21} color="#6B7C73" />
-    </Pressable>
+    </View>
   );
 }
 
@@ -568,7 +554,7 @@ function EmptyState({
 }) {
   const content = {
     scheduled: {
-      title: "No scheduled visits",
+      title: "No upcoming schedules",
       description: `No pending schedules are due on ${formatDateOnly(selectedDate)}.`,
       icon: "calendar-outline" as const,
     },
@@ -723,8 +709,7 @@ function getTimingState(value: string) {
 
   if (days !== null && days < 0) label = "OVERDUE";
   else if (days === 0) label = "TODAY";
-  else if (days === 1) label = "TOMORROW";
-  else if (days !== null && days <= 7) label = `${days} DAYS`;
+  else if (days !== null && days <= 7) label = "DUE SOON";
 
   return { label, ...tone };
 }
@@ -914,7 +899,6 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  cardPressed: { backgroundColor: "#FFF5E9", opacity: 0.82 },
   photoContainer: {
     width: 62,
     height: 62,

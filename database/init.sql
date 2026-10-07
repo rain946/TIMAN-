@@ -170,6 +170,8 @@ CREATE TABLE IF NOT EXISTS vet_records (
     medication VARCHAR(255) NULL,
     notes TEXT NULL,
     next_due_date DATE NULL,
+    next_service_type VARCHAR(100) NULL,
+    follow_up_plan TEXT NULL,
     schedule_status ENUM(
         'Pending',
         'Completed',

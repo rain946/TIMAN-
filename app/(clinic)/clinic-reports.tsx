@@ -25,9 +25,12 @@ type ClinicReportRecord = {
   pet_name: string;
   species: string;
   breed: string | null;
+  owner_name: string;
   service_type: string;
   visit_date: string;
   next_due_date: string | null;
+  next_service_type: string | null;
+  follow_up_plan: string | null;
   schedule_status: "Pending" | "Completed" | "Cancelled";
   completed_at: string | null;
   cancelled_at: string | null;
@@ -532,30 +535,26 @@ function buildCsv(report: ClinicReport) {
     [],
     ["DETAILS"],
     [
-      "Pet",
+      "Pet Name",
       "Species/Breed",
-      "Service",
-      "Booked Date",
+      "Owner Name",
       "Visit Date",
-      "Scheduled Date",
-      "Status",
-      "Completed Date",
-      "Cancelled Date",
+      "Service Performed",
+      "Next Follow-up Date",
+      "Next Service",
+      "Follow-up Plan",
+      "Follow-up Status",
     ],
     ...report.records.map((record) => [
       record.pet_name,
       [record.species, record.breed].filter(Boolean).join(" / "),
-      record.service_type,
-      formatCsvDateTime(new Date(record.created_at)),
+      record.owner_name,
       record.visit_date?.substring(0, 10) || "",
+      record.service_type,
       record.next_due_date?.substring(0, 10) || "",
-      record.schedule_status,
-      record.completed_at
-        ? formatCsvDateTime(new Date(record.completed_at))
-        : "",
-      record.cancelled_at
-        ? formatCsvDateTime(new Date(record.cancelled_at))
-        : "",
+      record.next_due_date ? record.next_service_type || "" : "",
+      record.next_due_date ? record.follow_up_plan || "" : "",
+      record.next_due_date ? record.schedule_status || "" : "",
     ]),
   ];
 

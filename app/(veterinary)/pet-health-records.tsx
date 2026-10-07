@@ -40,6 +40,8 @@ type VetRecord = {
   notes: string | null;
 
   next_due_date: string | null;
+  next_service_type: string | null;
+  follow_up_plan: string | null;
   schedule_status: "Pending" | "Completed" | "Cancelled" | null;
   completed_at: string | null;
   created_at: string;
@@ -382,83 +384,53 @@ function OwnerRecordCard({
 
       <View style={styles.divider} />
 
-      {record.diagnosis && (
-        <RecordDetail
-          icon="medkit-outline"
-          label="Diagnosis"
-          value={record.diagnosis}
-        />
-      )}
+      <Text style={styles.medicalSectionTitle}>MEDICAL DETAILS</Text>
 
-      {record.treatment && (
-        <RecordDetail
-          icon="medical-outline"
-          label="Treatment / Procedure"
-          value={record.treatment}
-        />
-      )}
+      <RecordDetail
+        icon="medkit-outline"
+        label="Diagnosis"
+        value={record.diagnosis || "—"}
+      />
 
-      {record.medication && (
-        <RecordDetail
-          icon="bandage-outline"
-          label="Medication"
-          value={record.medication}
-        />
-      )}
+      <RecordDetail
+        icon="medical-outline"
+        label="Treatment / Procedure"
+        value={record.treatment || "—"}
+      />
 
-      {record.notes && (
-        <RecordDetail
-          icon="document-text-outline"
-          label="Notes"
-          value={record.notes}
-        />
-      )}
+      <RecordDetail
+        icon="bandage-outline"
+        label="Medication"
+        value={record.medication || "—"}
+      />
+
+      <RecordDetail
+        icon="document-text-outline"
+        label="Notes"
+        value={record.notes || "—"}
+      />
 
       {record.next_due_date && (
-        <View
-          style={[
-            styles.scheduleCard,
-            isCompleted && styles.completedScheduleCard,
-          ]}
-        >
-          <View
-            style={[
-              styles.scheduleIcon,
-              isCompleted && styles.completedScheduleIcon,
-            ]}
-          >
-            <Ionicons
-              name={
-                isCompleted ? "checkmark-done-outline" : "notifications-outline"
-              }
-              size={19}
-              color={isCompleted ? "#81C784" : "#F5A623"}
-            />
+        <View style={styles.followUpSection}>
+          <View style={styles.followUpHeader}>
+            <Text style={styles.followUpTitle}>FOLLOW-UP</Text>
+            {!isCompleted && <DueBadge date={record.next_due_date} />}
           </View>
-
-          <View style={styles.scheduleInfo}>
-            <Text
-              style={[
-                styles.scheduleLabel,
-                isCompleted && styles.completedScheduleLabel,
-              ]}
-            >
-              {isCompleted ? "Completed on" : "Next Due Date"}
-            </Text>
-
-            <Text
-              style={[
-                styles.scheduleDate,
-                isCompleted && styles.completedScheduleDate,
-              ]}
-            >
-              {isCompleted && record.completed_at
-                ? formatDateTime(record.completed_at)
-                : formatDate(record.next_due_date)}
-            </Text>
-          </View>
-
-          {!isCompleted && <DueBadge date={record.next_due_date} />}
+          <RecordDetail
+            icon="calendar-outline"
+            label="Next Due Date"
+            value={formatDate(record.next_due_date)}
+          />
+          <RecordDetail
+            icon="medical-outline"
+            label="Next Service"
+            value={record.next_service_type || "—"}
+          />
+          <RecordDetail
+            icon="document-text-outline"
+            label="Follow-up Plan / Instructions"
+            value={record.follow_up_plan || "—"}
+          />
         </View>
       )}
 
@@ -620,24 +592,6 @@ function formatDate(value: string) {
     month: "short",
     day: "numeric",
     year: "numeric",
-  });
-}
-
-function formatDateTime(value: string) {
-  const normalized = value.includes("T") ? value : value.replace(" ", "T");
-  const date = new Date(normalized);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString(undefined, {
-    timeZone: "Asia/Manila",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
   });
 }
 
@@ -955,6 +909,34 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAD7A0",
     flexDirection: "row",
     alignItems: "center",
+  },
+  followUpSection: {
+    marginTop: 18,
+    padding: 15,
+    borderRadius: 17,
+    backgroundColor: "#FFF5E9",
+    borderWidth: 1,
+    borderColor: "#FAD7A0",
+  },
+  followUpHeader: {
+    marginBottom: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  followUpTitle: {
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+    color: "#2E3A34",
+  },
+  medicalSectionTitle: {
+    marginTop: 15,
+    marginBottom: 3,
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+    color: "#2E3A34",
   },
 
   completedScheduleCard: {
