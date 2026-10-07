@@ -145,8 +145,8 @@ export default function ClinicDashboardScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            tintColor="#243B53"
-            colors={["#243B53"]}
+            tintColor="#2E7D6B"
+            colors={["#2E7D6B"]}
             onRefresh={() => {
               setRefreshing(true);
               loadDashboard(false);
@@ -195,7 +195,7 @@ export default function ClinicDashboardScreen() {
             ]}
             onPress={() => loadDashboard()}
           >
-            <Ionicons name="alert-circle-outline" size={20} color="#E88C7D" />
+            <Ionicons name="alert-circle-outline" size={20} color="#E57373" />
             <View style={styles.errorContent}>
               <Text style={styles.errorText}>{error}</Text>
               <Text style={styles.retryText}>Tap to retry</Text>
@@ -324,7 +324,7 @@ function OverviewCard({
         <Ionicons
           name={icon}
           size={22}
-          color={pending ? "#B55F54" : "#243B53"}
+          color={pending ? "#F5A623" : "#2E7D6B"}
         />
       </View>
       <Text style={styles.overviewValue}>{value}</Text>
@@ -354,7 +354,7 @@ function PendingRequestCard({ request }: { request: PendingRequest }) {
         {photoUrl ? (
           <Image source={{ uri: photoUrl }} style={styles.petPhoto} />
         ) : (
-          <Ionicons name="paw" size={23} color="#243B53" />
+          <Ionicons name="paw" size={23} color="#2E7D6B" />
         )}
       </View>
       <View style={styles.requestInfo}>
@@ -377,7 +377,7 @@ function ActivityCard({ activity }: { activity: RecentActivity }) {
   const content = (
     <>
       <View style={styles.activityIcon}>
-        <Ionicons name="medical-outline" size={21} color="#243B53" />
+        <Ionicons name="medical-outline" size={21} color="#2E7D6B" />
       </View>
       <View style={styles.activityInfo}>
         <Text style={styles.activityTitle} numberOfLines={1}>
@@ -391,7 +391,7 @@ function ActivityCard({ activity }: { activity: RecentActivity }) {
         </Text>
       </View>
       {activity.can_open && (
-        <Ionicons name="chevron-forward" size={18} color="#9AA49E" />
+        <Ionicons name="chevron-forward" size={18} color="#6B7C73" />
       )}
     </>
   );
@@ -449,7 +449,7 @@ function formatActivityTime(value: string) {
 function LoadingCard({ label }: { label: string }) {
   return (
     <View style={styles.loadingCard}>
-      <ActivityIndicator size="small" color="#243B53" />
+      <ActivityIndicator size="small" color="#2E7D6B" />
       <Text style={styles.loadingText}>{label}</Text>
     </View>
   );
@@ -465,7 +465,7 @@ function EmptyCard({
   return (
     <View style={styles.emptyCard}>
       <View style={styles.emptyIcon}>
-        <Ionicons name={icon} size={22} color="#6D7B72" />
+        <Ionicons name={icon} size={22} color="#6B7C73" />
       </View>
       <Text style={styles.emptyText}>{text}</Text>
     </View>
@@ -473,14 +473,14 @@ function EmptyCard({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F6F0E6" },
+  container: { flex: 1, backgroundColor: "#FFF5E9" },
   content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 10, paddingBottom: 48 },
   brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
   brandIcon: {
     width: 38,
     height: 38,
     borderRadius: 13,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -488,13 +488,13 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 17,
     fontWeight: "900",
-    color: "#243B53",
+    color: "#2E7D6B",
     letterSpacing: 0.5,
   },
   brandRole: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#7B887F",
+    color: "#6B7C73",
     letterSpacing: 1.2,
     marginTop: 1,
   },
@@ -502,8 +502,8 @@ const styles = StyleSheet.create({
     minHeight: 172,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#D2E2F0",
-    backgroundColor: "#DCEAF7",
+    borderColor: "#CFE8DD",
+    backgroundColor: "#CFE8DD",
     padding: 19,
     justifyContent: "center",
     overflow: "hidden",
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
     borderRadius: 95,
     right: -42,
     top: -51,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
     opacity: 0.9,
   },
   welcomeCoralShape: {
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     right: 127,
     bottom: 18,
-    backgroundColor: "#E88C7D",
+    backgroundColor: "#E57373",
     opacity: 0.2,
   },
   welcomeVetImage: {
@@ -540,37 +540,37 @@ const styles = StyleSheet.create({
     bottom: -7,
     zIndex: 2,
   },
-  greeting: { fontSize: 16, color: "#7C858D", fontWeight: "600" },
+  greeting: { fontSize: 16, color: "#6B7C73", fontWeight: "600" },
   clinicName: {
     fontSize: 26,
     lineHeight: 32,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
     marginTop: 2,
   },
-  subtitle: { fontSize: 15, color: "#7B887F", marginTop: 5 },
+  subtitle: { fontSize: 15, color: "#6B7C73", marginTop: 5 },
   errorCard: {
     marginTop: 16,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#F1CBC6",
-    backgroundColor: "#FFF1EF",
+    borderColor: "rgba(229, 115, 115, 0.14)",
+    backgroundColor: "#FFF5E9",
     padding: 13,
     flexDirection: "row",
     alignItems: "center",
   },
   errorContent: { flex: 1, marginLeft: 10 },
-  errorText: { fontSize: 14, lineHeight: 20, color: "#B55F54" },
+  errorText: { fontSize: 14, lineHeight: 20, color: "#E57373" },
   retryText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#E88C7D",
+    color: "#E57373",
     marginTop: 3,
   },
   sectionTitle: {
     fontSize: 21,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
     marginTop: 27,
     marginBottom: 13,
   },
@@ -581,30 +581,35 @@ const styles = StyleSheet.create({
     minHeight: 127,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 18,
     padding: 15,
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   overviewIcon: {
     width: 39,
     height: 39,
     borderRadius: 12,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
-  overviewIconPending: { backgroundColor: "#FBE3DE" },
+  overviewIconPending: { backgroundColor: "#FAD7A0" },
   overviewValue: {
     fontSize: 27,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
     marginTop: 10,
   },
-  overviewLabel: { fontSize: 13, color: "#78857D", marginTop: 2 },
+  overviewLabel: { fontSize: 13, color: "#6B7C73", marginTop: 2 },
   unavailableHint: {
     fontSize: 12,
     lineHeight: 17,
-    color: "#88938C",
+    color: "#6B7C73",
     marginTop: 9,
   },
   sectionHeader: {
@@ -614,85 +619,95 @@ const styles = StyleSheet.create({
     marginTop: 28,
     marginBottom: 12,
   },
-  sectionTitleNoMargin: { fontSize: 21, fontWeight: "900", color: "#2B3440" },
-  seeAll: { fontSize: 15, fontWeight: "700", color: "#243B53" },
-  seeAllDisabled: { fontSize: 15, fontWeight: "700", color: "#7C858D" },
+  sectionTitleNoMargin: { fontSize: 21, fontWeight: "900", color: "#2E3A34" },
+  seeAll: { fontSize: 15, fontWeight: "700", color: "#2E7D6B" },
+  seeAllDisabled: { fontSize: 15, fontWeight: "700", color: "#6B7C73" },
   requestCard: {
     minHeight: 78,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 17,
     padding: 13,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 9,
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 7,
+    elevation: 2,
   },
   petAvatar: {
     width: 50,
     height: 50,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
   petPhoto: { width: "100%", height: "100%" },
   requestInfo: { flex: 1, marginLeft: 12, marginRight: 8 },
-  petName: { fontSize: 16, fontWeight: "900", color: "#2B3440" },
-  petDetails: { fontSize: 14, color: "#808C84", marginTop: 2 },
-  requestStatus: { fontSize: 13, color: "#B55F54", marginTop: 5 },
+  petName: { fontSize: 16, fontWeight: "900", color: "#2E3A34" },
+  petDetails: { fontSize: 14, color: "#6B7C73", marginTop: 2 },
+  requestStatus: { fontSize: 13, color: "#F5A623", marginTop: 5 },
   pendingBadge: {
-    backgroundColor: "#FBE3DE",
+    backgroundColor: "#FAD7A0",
     paddingHorizontal: 8,
     paddingVertical: 5,
     borderRadius: 9,
   },
-  pendingText: { fontSize: 11, fontWeight: "800", color: "#B55F54" },
+  pendingText: { fontSize: 11, fontWeight: "800", color: "#F5A623" },
   activityCard: {
     minHeight: 74,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 16,
     padding: 13,
     marginBottom: 9,
     flexDirection: "row",
     alignItems: "center",
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 7,
+    elevation: 2,
   },
   activityIcon: {
     width: 45,
     height: 45,
     borderRadius: 14,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
   activityInfo: { flex: 1, marginLeft: 11 },
-  activityTitle: { fontSize: 16, fontWeight: "800", color: "#29382F" },
+  activityTitle: { fontSize: 16, fontWeight: "800", color: "#2E3A34" },
   activityPet: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#243B53",
+    color: "#2E7D6B",
     marginTop: 3,
   },
-  activityTime: { fontSize: 13, color: "#7C858D", marginTop: 3 },
+  activityTime: { fontSize: 13, color: "#6B7C73", marginTop: 3 },
   loadingCard: {
     minHeight: 88,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
   },
-  loadingText: { fontSize: 14, color: "#7C858D", marginLeft: 9 },
+  loadingText: { fontSize: 14, color: "#6B7C73", marginLeft: 9 },
   emptyCard: {
     minHeight: 102,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -702,11 +717,11 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 14,
-    backgroundColor: "#F0F4F1",
+    backgroundColor: "#FFF5E9",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
-  emptyText: { fontSize: 14, color: "#7C858D", textAlign: "center" },
+  emptyText: { fontSize: 14, color: "#6B7C73", textAlign: "center" },
   pressed: { opacity: 0.72 },
 });

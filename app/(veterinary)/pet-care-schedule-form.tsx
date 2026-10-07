@@ -160,7 +160,7 @@ export default function PetCareScheduleForm() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.center}>
-          <ActivityIndicator color="#243B53" />
+          <ActivityIndicator color="#2E7D6B" />
         </View>
       </SafeAreaView>
     );
@@ -169,7 +169,7 @@ export default function PetCareScheduleForm() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.headerButton}>
-          <Ionicons name="chevron-back" size={27} color="#243B53" />
+          <Ionicons name="chevron-back" size={27} color="#2E7D6B" />
         </Pressable>
         <Text style={styles.headerTitle}>
           {scheduleId ? "Edit Personal Care" : "Add Personal Care"}
@@ -185,7 +185,7 @@ export default function PetCareScheduleForm() {
           contentContainerStyle={styles.content}
         >
           <View style={styles.petCard}>
-            <Ionicons name="paw" size={22} color="#243B53" />
+            <Ionicons name="paw" size={22} color="#2E7D6B" />
             <View>
               <Text style={styles.label}>PET</Text>
               <Text style={styles.petName}>
@@ -226,7 +226,7 @@ export default function PetCareScheduleForm() {
           )}
           <Text style={styles.sectionTitle}>Date</Text>
           <Pressable onPress={openDatePicker} style={styles.inputRow}>
-            <Ionicons name="calendar-outline" size={19} color="#243B53" />
+            <Ionicons name="calendar-outline" size={19} color="#2E7D6B" />
             <Text style={styles.inputValue}>{scheduledDate}</Text>
           </Pressable>
           {showIosDatePicker && Platform.OS === "ios" && (
@@ -319,7 +319,7 @@ function parseDate(value: string) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6"
+    backgroundColor: "#FFF5E9"
   },
   flex: {
     flex: 1
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E7EBE8",
+    borderBottomColor: "#FFF5E9",
   },
   headerButton: {
     width: 42,
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#2B3440"
+    color: "#2E3A34"
   },
   content: {
     padding: 20,
@@ -358,24 +358,24 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 16,
     borderRadius: 17,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
   },
   label: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#758178"
+    color: "#6B7C73"
   },
   petName: {
     marginTop: 2,
     fontSize: 17, fontWeight: "900",
-    color: "#2B3440"
+    color: "#2E3A34"
   },
   sectionTitle: {
     marginTop: 22,
     marginBottom: 10,
     fontSize: 14,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
   options: {
     flexDirection: "row",
@@ -387,17 +387,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     backgroundColor: "#FFF",
   },
   optionSelected: {
-    backgroundColor: "#243B53",
-    borderColor: "#243B53"
+    backgroundColor: "#2E7D6B",
+    borderColor: "#2E7D6B"
   },
   optionText: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#4C6A92"
+    color: "#56B091"
   },
   optionTextSelected: {
     color: "#FFF"
@@ -408,9 +408,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 13,
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     backgroundColor: "#FFF",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
   inputRow: {
     height: 54,
@@ -420,13 +420,13 @@ const styles = StyleSheet.create({
     gap: 10,
     borderRadius: 13,
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     backgroundColor: "#FFF",
   },
   inputValue: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#2B3440"
+    color: "#2E3A34"
   },
   iosPickerCard: {
     marginTop: 8,
@@ -434,14 +434,14 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     backgroundColor: "#FFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
   },
   iosPickerDone: {
     alignSelf: "flex-end",
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: 10,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
   },
   iosPickerDoneText: {
     color: "#FFF",
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     height: 56,
     marginTop: 28,
     borderRadius: 15,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

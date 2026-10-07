@@ -172,7 +172,7 @@ export default function PetsScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={27} color="#243B53" />
+          <Ionicons name="chevron-back" size={27} color="#2E7D6B" />
         </Pressable>
 
         <Text style={styles.headerTitle}>
@@ -186,13 +186,13 @@ export default function PetsScreen() {
           ]}
           onPress={() => router.push("/add-pet")}
         >
-          <Ionicons name="add" size={29} color="#243B53" />
+          <Ionicons name="add" size={29} color="#2E7D6B" />
         </Pressable>
       </View>
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#243B53" />
+          <ActivityIndicator size="large" color="#2E7D6B" />
 
           <Text style={styles.loadingText}>Loading your pets...</Text>
         </View>
@@ -219,7 +219,7 @@ export default function PetsScreen() {
           {pets.length === 0 ? (
             <View style={styles.emptyContainer}>
               <View style={styles.emptyIcon}>
-                <Ionicons name="paw" size={48} color="#4C6A92" />
+                <Ionicons name="paw" size={48} color="#56B091" />
               </View>
 
               <Text style={styles.emptyTitle}>No pets registered yet</Text>
@@ -256,20 +256,20 @@ export default function PetsScreen() {
 
                 const isFound = pet.pet_status === "Found";
 
-                let statusBackground = "#E5F4E8";
+                let statusBackground = "#FFF5E9";
 
-                let statusColor = "#4C6A92";
+                let statusColor = "#56B091";
 
                 if (isMissing) {
-                  statusBackground = "#FBE3DE";
+                  statusBackground = "rgba(229, 115, 115, 0.14)";
 
-                  statusColor = "#B54545";
+                  statusColor = "#E57373";
                 }
 
                 if (isFound) {
-                  statusBackground = "#FFF5DC";
+                  statusBackground = "#FAD7A0";
 
-                  statusColor = "#A36C18";
+                  statusColor = "#E57373";
                 }
 
                 return (
@@ -296,7 +296,7 @@ export default function PetsScreen() {
                           />
                         ) : (
                           <View style={styles.petPlaceholder}>
-                            <Ionicons name="paw" size={36} color="#4C6A92" />
+                            <Ionicons name="paw" size={36} color="#56B091" />
                           </View>
                         )}
                       </View>
@@ -353,7 +353,7 @@ export default function PetsScreen() {
                       <Ionicons
                         name="chevron-forward"
                         size={21}
-                        color="#7C858D"
+                        color="#6B7C73"
                       />
                     </Pressable>
 
@@ -404,7 +404,7 @@ function PetAction({
       ]}
       onPress={onPress}
     >
-      <Ionicons name={icon} size={19} color="#243B53" />
+      <Ionicons name={icon} size={19} color="#2E7D6B" />
 
       <Text style={styles.petActionText}>{label}</Text>
     </Pressable>
@@ -414,7 +414,7 @@ function PetAction({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
   },
 
   header: {
@@ -424,8 +424,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E6E9ED",
-    backgroundColor: "#F6F0E6",
+    borderBottomColor: "#CFE8DD",
+    backgroundColor: "#FFF5E9",
   },
 
   headerButton: {
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 21,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   content: {
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   introSection: {
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
   introTitle: {
     fontSize: 27,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   introDescription: {
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     maxWidth: 350,
     fontSize: 14,
     lineHeight: 20,
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   countRow: {
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   countText: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#405248",
+    color: "#2E3A34",
   },
 
   emptyContainer: {
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     width: 105,
     height: 105,
     borderRadius: 53,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     fontSize: 20,
     fontWeight: "800",
-    color: "#27362C",
+    color: "#2E3A34",
   },
 
   emptyDescription: {
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 14,
     lineHeight: 20,
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   addFirstPetButton: {
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
     height: 51,
     paddingHorizontal: 20,
     borderRadius: 14,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   petCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E1E7E3",
+    borderColor: "#CFE8DD",
     borderRadius: 20,
     overflow: "hidden",
     marginBottom: 16,
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
     height: 92,
     borderRadius: 18,
     overflow: "hidden",
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
   },
 
   petImage: {
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
   },
 
   petInformation: {
@@ -592,13 +592,13 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontSize: 21,
     fontWeight: "900",
-    color: "#213027",
+    color: "#2E3A34",
   },
 
   petBreed: {
     marginTop: 5,
     fontSize: 14,
-    color: "#66756C",
+    color: "#6B7C73",
   },
 
   petDetailsRow: {
@@ -613,14 +613,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     paddingRight: 4,
-    color: "#89938D",
+    color: "#6B7C73",
   },
 
   viewProfileText: {
     marginTop: 8,
     fontSize: 13,
     fontWeight: "700",
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 
   statusBadge: {
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   quickActions: {
     minHeight: 56,
     borderTopWidth: 1,
-    borderTopColor: "#E6E9ED",
+    borderTopColor: "#CFE8DD",
     flexDirection: "row",
     gap: 8,
     paddingHorizontal: 10,
@@ -663,15 +663,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
     borderWidth: 1,
-    borderColor: "#CFE0D4",
+    borderColor: "#CFE8DD",
     borderRadius: 12,
-    backgroundColor: "#F7FBF8",
+    backgroundColor: "#FFF5E9",
   },
 
   petActionText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 
   pressed: {

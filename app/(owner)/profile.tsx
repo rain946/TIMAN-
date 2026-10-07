@@ -250,7 +250,7 @@ export default function ProfileScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#243B53" />
+          <ActivityIndicator size="large" color="#2E7D6B" />
 
           <Text style={styles.loadingProfileText}>Loading profile...</Text>
         </View>
@@ -279,7 +279,7 @@ export default function ProfileScreen() {
                 style={styles.avatarImage}
               />
             ) : (
-              <Ionicons name="person" size={42} color="#243B53" />
+              <Ionicons name="person" size={42} color="#2E7D6B" />
             )}
 
             <View style={styles.cameraButton}>
@@ -292,7 +292,7 @@ export default function ProfileScreen() {
           </Text>
 
           <View style={styles.ownerBadge}>
-            <Ionicons name="paw" size={14} color="#4C6A92" />
+            <Ionicons name="paw" size={14} color="#56B091" />
 
             <Text style={styles.ownerBadgeText}>Pet Owner</Text>
           </View>
@@ -374,7 +374,7 @@ export default function ProfileScreen() {
 
         <View style={styles.securityCard}>
           <View style={styles.securityIcon}>
-            <Ionicons name="shield-checkmark" size={25} color="#243B53" />
+            <Ionicons name="shield-checkmark" size={25} color="#2E7D6B" />
           </View>
 
           <View style={styles.securityContent}>
@@ -397,14 +397,14 @@ export default function ProfileScreen() {
           ]}
           onPress={handleLogout}
         >
-          <Ionicons name="log-out-outline" size={21} color="#E88C7D" />
+          <Ionicons name="log-out-outline" size={21} color="#E57373" />
 
           <Text style={styles.logoutText}>Log Out</Text>
         </Pressable>
 
         <View style={styles.appInfo}>
           <View style={styles.appLogo}>
-            <Ionicons name="paw" size={19} color="#243B53" />
+            <Ionicons name="paw" size={19} color="#2E7D6B" />
 
             <Text style={styles.appName}>TIMAN</Text>
           </View>
@@ -440,7 +440,7 @@ function InfoRow({
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoIcon}>
-        <Ionicons name={icon} size={18} color="#243B53" />
+        <Ionicons name={icon} size={18} color="#64B5F6" />
       </View>
 
       <View style={styles.infoContent}>
@@ -469,7 +469,7 @@ function MenuItem({
       onPress={onPress}
     >
       <View style={styles.menuIcon}>
-        <Ionicons name={icon} size={21} color="#243B53" />
+        <Ionicons name={icon} size={21} color="#2E7D6B" />
       </View>
 
       <View style={styles.menuContent}>
@@ -478,7 +478,7 @@ function MenuItem({
         <Text style={styles.menuDescription}>{description}</Text>
       </View>
 
-      <Ionicons name="chevron-forward" size={18} color="#7C858D" />
+      <Ionicons name="chevron-forward" size={18} color="#6B7C73" />
     </Pressable>
   );
 }
@@ -494,7 +494,7 @@ function MenuDivider() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
   },
 
   header: {
@@ -503,13 +503,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#E6E9ED",
+    borderBottomColor: "#CFE8DD",
   },
 
   headerTitle: {
     fontSize: 21,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   content: {
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   },
 
   profileCard: {
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     borderRadius: 22,
     paddingVertical: 24,
     alignItems: "center",
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "#C9D8E8",
+    borderColor: "#CFE8DD",
   },
 
   avatarImage: {
@@ -552,9 +552,9 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     borderWidth: 2,
-    borderColor: "#DCEAF7",
+    borderColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
   ownerName: {
     fontSize: 24,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
     marginTop: 12,
   },
 
@@ -580,13 +580,13 @@ const styles = StyleSheet.create({
   ownerBadgeText: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#4C6A92",
+    color: "#56B091",
   },
 
   sectionTitle: {
     fontSize: 19,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
     marginTop: 25,
     marginBottom: 11,
   },
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
   infoCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 17,
     paddingHorizontal: 14,
   },
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
     width: 37,
     height: 37,
     borderRadius: 11,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -621,25 +621,25 @@ const styles = StyleSheet.create({
 
   infoLabel: {
     fontSize: 11,
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   infoValue: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#4C6A92",
+    color: "#56B091",
     marginTop: 3,
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#E6E9ED",
+    backgroundColor: "#CFE8DD",
   },
 
   menuCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 17,
     overflow: "hidden",
   },
@@ -652,14 +652,14 @@ const styles = StyleSheet.create({
   },
 
   menuPressed: {
-    backgroundColor: "#F5F8F5",
+    backgroundColor: "#FFF5E9",
   },
 
   menuIcon: {
     width: 42,
     height: 42,
     borderRadius: 13,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -672,23 +672,23 @@ const styles = StyleSheet.create({
   menuTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   menuDescription: {
     fontSize: 12,
-    color: "#7C858D",
+    color: "#6B7C73",
     marginTop: 3,
   },
 
   menuDivider: {
     height: 1,
-    backgroundColor: "#E6E9ED",
+    backgroundColor: "#CFE8DD",
     marginLeft: 67,
   },
 
   securityCard: {
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     borderRadius: 15,
     padding: 14,
     flexDirection: "row",
@@ -712,21 +712,21 @@ const styles = StyleSheet.create({
   securityTitle: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   securityText: {
     fontSize: 11,
     lineHeight: 17,
-    color: "#7C858D",
+    color: "#6B7C73",
     marginTop: 3,
   },
 
   logoutButton: {
     height: 54,
-    backgroundColor: "#FBE3DE",
+    backgroundColor: "rgba(229, 115, 115, 0.14)",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 14,
     marginTop: 22,
     flexDirection: "row",
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#E88C7D",
+    color: "#E57373",
   },
 
   appInfo: {
@@ -756,12 +756,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
     letterSpacing: 1,
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 
   version: {
     fontSize: 10,
-    color: "#7C858D",
+    color: "#6B7C73",
     marginTop: 4,
   },
 
@@ -769,13 +769,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
   },
 
   loadingProfileText: {
     marginTop: 10,
     fontSize: 14,
-    color: "#7C858D",
+    color: "#6B7C73",
     fontWeight: "600",
   },
 

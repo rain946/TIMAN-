@@ -244,13 +244,13 @@ export default function ClinicProfileScreen() {
 
       {loading && !profile ? (
         <View style={styles.stateContainer}>
-          <ActivityIndicator size="large" color="#243B53" />
+          <ActivityIndicator size="large" color="#2E7D6B" />
           <Text style={styles.loadingText}>Loading profile...</Text>
         </View>
       ) : error && !profile ? (
         <View style={styles.stateContainer}>
           <View style={styles.errorIcon}>
-            <Ionicons name="alert-circle-outline" size={30} color="#E88C7D" />
+            <Ionicons name="alert-circle-outline" size={30} color="#E57373" />
           </View>
           <Text style={styles.stateTitle}>Unable to load profile.</Text>
           <Pressable
@@ -272,8 +272,8 @@ export default function ClinicProfileScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#243B53"
-              colors={["#243B53"]}
+              tintColor="#2E7D6B"
+              colors={["#2E7D6B"]}
             />
           }
         >
@@ -286,7 +286,7 @@ export default function ClinicProfileScreen() {
               ]}
               onPress={() => loadProfile(false)}
             >
-              <Ionicons name="alert-circle-outline" size={19} color="#E88C7D" />
+              <Ionicons name="alert-circle-outline" size={19} color="#E57373" />
               <Text style={styles.inlineErrorText}>
                 Unable to refresh profile. Tap to retry.
               </Text>
@@ -328,7 +328,7 @@ export default function ClinicProfileScreen() {
                 "Veterinary Clinic"}
             </Text>
             <View style={styles.roleBadge}>
-              <Ionicons name="medical" size={13} color="#243B53" />
+              <Ionicons name="medical" size={13} color="#2E7D6B" />
               <Text style={styles.roleBadgeText}>Veterinary Clinic</Text>
             </View>
           </View>
@@ -401,7 +401,7 @@ export default function ClinicProfileScreen() {
             ]}
             onPress={handleLogout}
           >
-            <Ionicons name="log-out-outline" size={21} color="#E88C7D" />
+            <Ionicons name="log-out-outline" size={21} color="#E57373" />
             <Text style={styles.logoutText}>Log Out</Text>
           </Pressable>
         </ScrollView>
@@ -433,7 +433,7 @@ function InfoRow({
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoIcon}>
-        <Ionicons name={icon} size={18} color="#243B53" />
+        <Ionicons name={icon} size={18} color="#64B5F6" />
       </View>
       <View style={styles.infoContent}>
         <Text style={styles.infoLabel}>{label}</Text>
@@ -464,13 +464,13 @@ function ActionRow({
       onPress={onPress}
     >
       <View style={styles.actionIcon}>
-        <Ionicons name={icon} size={20} color="#243B53" />
+        <Ionicons name={icon} size={20} color="#2E7D6B" />
       </View>
       <View style={styles.actionContent}>
         <Text style={styles.actionTitle}>{title}</Text>
         <Text style={styles.actionDescription}>{description}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={19} color="#97A199" />
+      <Ionicons name="chevron-forward" size={19} color="#6B7C73" />
     </Pressable>
   );
 }
@@ -480,15 +480,15 @@ function Divider({ inset = false }: { inset?: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F6F0E6" },
+  container: { flex: 1, backgroundColor: "#FFF5E9" },
   header: {
     minHeight: 60,
     paddingHorizontal: 20,
     justifyContent: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#E6E9ED",
+    borderBottomColor: "#CFE8DD",
   },
-  headerTitle: { fontSize: 22, fontWeight: "900", color: "#2B3440" },
+  headerTitle: { fontSize: 22, fontWeight: "900", color: "#2E3A34" },
   content: { width: "100%", maxWidth: 960, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
   stateContainer: {
     flex: 1,
@@ -496,12 +496,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 14, color: "#7C858D" },
+  loadingText: { marginTop: 12, fontSize: 14, color: "#6B7C73" },
   errorIcon: {
     width: 58,
     height: 58,
     borderRadius: 18,
-    backgroundColor: "#FBE3DE",
+    backgroundColor: "rgba(229, 115, 115, 0.14)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -509,14 +509,14 @@ const styles = StyleSheet.create({
     marginTop: 14,
     fontSize: 17,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
   retryButton: {
     minWidth: 112,
     minHeight: 44,
     marginTop: 17,
     borderRadius: 13,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -526,27 +526,27 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     borderRadius: 13,
     paddingHorizontal: 13,
-    backgroundColor: "#FFF1EF",
+    backgroundColor: "#FFF5E9",
     borderWidth: 1,
-    borderColor: "#F1CBC6",
+    borderColor: "rgba(229, 115, 115, 0.14)",
     flexDirection: "row",
     alignItems: "center",
   },
-  inlineErrorText: { flex: 1, marginLeft: 9, fontSize: 12, color: "#B55F54" },
+  inlineErrorText: { flex: 1, marginLeft: 9, fontSize: 12, color: "#E57373" },
   identityCard: {
     minHeight: 232,
     borderRadius: 22,
     padding: 22,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     alignItems: "center",
   },
   clinicIconOuter: {
     width: 92,
     height: 92,
     borderRadius: 29,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 23,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     borderWidth: 2,
     borderColor: "#FFFFFF",
     alignItems: "center",
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 26,
     fontWeight: "900",
-    color: "#24352B",
+    color: "#2E3A34",
     textAlign: "center",
   },
   roleBadge: {
@@ -586,25 +586,25 @@ const styles = StyleSheet.create({
     marginTop: 9,
     borderRadius: 10,
     paddingHorizontal: 10,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
   },
-  roleBadgeText: { fontSize: 11, fontWeight: "900", color: "#243B53" },
+  roleBadgeText: { fontSize: 11, fontWeight: "900", color: "#2E7D6B" },
   sectionTitle: {
     marginTop: 27,
     marginBottom: 12,
     fontSize: 19,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
   infoCard: {
     borderRadius: 19,
     paddingHorizontal: 15,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
   },
   infoRow: {
     minHeight: 72,
@@ -616,7 +616,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 13,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 11,
     fontWeight: "800",
-    color: "#839087",
+    color: "#6B7C73",
     textTransform: "uppercase",
     letterSpacing: 0.35,
   },
@@ -633,15 +633,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 18,
     fontWeight: "700",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
-  divider: { height: 1, backgroundColor: "#EDF0ED" },
+  divider: { height: 1, backgroundColor: "#FFF5E9" },
   dividerInset: { marginLeft: 65 },
   actionCard: {
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     overflow: "hidden",
   },
   actionRow: {
@@ -650,30 +650,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  actionPressed: { backgroundColor: "#F3F8F4" },
+  actionPressed: { backgroundColor: "#FFF5E9" },
   actionIcon: {
     width: 42,
     height: 42,
     borderRadius: 13,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
   actionContent: { flex: 1, marginLeft: 12 },
-  actionTitle: { fontSize: 15, fontWeight: "900", color: "#2B3B31" },
-  actionDescription: { marginTop: 3, fontSize: 11, color: "#7C858D" },
+  actionTitle: { fontSize: 15, fontWeight: "900", color: "#2E3A34" },
+  actionDescription: { marginTop: 3, fontSize: 11, color: "#6B7C73" },
   logoutButton: {
     minHeight: 54,
     marginTop: 28,
     borderRadius: 15,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#ECCFCD",
+    borderColor: "rgba(229, 115, 115, 0.14)",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
-  logoutText: { fontSize: 14, fontWeight: "900", color: "#E88C7D" },
+  logoutText: { fontSize: 14, fontWeight: "900", color: "#E57373" },
   pressed: { opacity: 0.72 },
 });

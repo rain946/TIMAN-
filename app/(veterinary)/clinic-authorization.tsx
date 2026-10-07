@@ -292,7 +292,7 @@ export default function ClinicAuthorizationScreen() {
         <Header />
 
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#243B53" />
+          <ActivityIndicator size="large" color="#2E7D6B" />
 
           <Text style={styles.loadingText}>Loading clinic requests...</Text>
         </View>
@@ -316,7 +316,7 @@ export default function ClinicAuthorizationScreen() {
             <Ionicons
               name="shield-checkmark-outline"
               size={30}
-              color="#243B53"
+              color="#2E7D6B"
             />
           </View>
 
@@ -333,7 +333,7 @@ export default function ClinicAuthorizationScreen() {
         <View style={styles.summaryRow}>
           <View style={styles.summaryCard}>
             <View style={[styles.summaryIcon, styles.pendingSummaryIcon]}>
-              <Ionicons name="time-outline" size={21} color="#98701C" />
+              <Ionicons name="time-outline" size={21} color="#E57373" />
             </View>
 
             <Text style={styles.summaryNumber}>{pendingCount}</Text>
@@ -346,7 +346,7 @@ export default function ClinicAuthorizationScreen() {
               <Ionicons
                 name="checkmark-circle-outline"
                 size={21}
-                color="#243B53"
+                color="#2E7D6B"
               />
             </View>
 
@@ -359,7 +359,7 @@ export default function ClinicAuthorizationScreen() {
         {authorizations.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
-              <Ionicons name="business-outline" size={35} color="#789180" />
+              <Ionicons name="business-outline" size={35} color="#81C784" />
             </View>
 
             <Text style={styles.emptyTitle}>No Clinic Requests</Text>
@@ -439,7 +439,7 @@ export default function ClinicAuthorizationScreen() {
         )}
 
         <View style={styles.securityCard}>
-          <Ionicons name="lock-closed-outline" size={19} color="#243B53" />
+          <Ionicons name="lock-closed-outline" size={19} color="#2E7D6B" />
 
           <Text style={styles.securityText}>
             Clinics cannot access protected veterinary records until you approve
@@ -461,7 +461,7 @@ function Header() {
         ]}
         onPress={() => router.back()}
       >
-        <Ionicons name="chevron-back" size={27} color="#243B53" />
+        <Ionicons name="chevron-back" size={27} color="#2E7D6B" />
       </Pressable>
 
       <Text style={styles.headerTitle}>Clinic Authorization</Text>
@@ -515,7 +515,7 @@ function AuthorizationCard({
           />
         ) : (
           <View style={styles.petPlaceholder}>
-            <Ionicons name="paw" size={25} color="#75947E" />
+            <Ionicons name="paw" size={25} color="#81C784" />
           </View>
         )}
 
@@ -532,7 +532,7 @@ function AuthorizationCard({
 
       <View style={styles.clinicSection}>
         <View style={styles.clinicIcon}>
-          <Ionicons name="medical-outline" size={23} color="#243B53" />
+          <Ionicons name="medical-outline" size={23} color="#2E7D6B" />
         </View>
 
         <View style={styles.clinicInfo}>
@@ -549,7 +549,7 @@ function AuthorizationCard({
       </View>
 
       <View style={styles.dateRow}>
-        <Ionicons name="calendar-outline" size={15} color="#7C858D" />
+        <Ionicons name="calendar-outline" size={15} color="#6B7C73" />
 
         <Text style={styles.dateText}>
           Requested {formatDate(item.requested_at)}
@@ -569,7 +569,7 @@ function AuthorizationCard({
             ]}
             onPress={onDecline}
           >
-            <Ionicons name="close" size={18} color="#E88C7D" />
+            <Ionicons name="close" size={18} color="#E57373" />
 
             <Text style={styles.declineText}>Decline</Text>
           </Pressable>
@@ -611,10 +611,10 @@ function AuthorizationCard({
           onPress={onRevoke}
         >
           {processing ? (
-            <ActivityIndicator size="small" color="#E88C7D" />
+            <ActivityIndicator size="small" color="#E57373" />
           ) : (
             <>
-              <Ionicons name="shield-outline" size={17} color="#E88C7D" />
+              <Ionicons name="shield-outline" size={17} color="#E57373" />
 
               <Text style={styles.revokeText}>Revoke Access</Text>
             </>
@@ -663,10 +663,10 @@ function StatusBadge({ status }: { status: AuthorizationStatus }) {
         size={13}
         color={
           status === "Approved"
-            ? "#243B53"
+            ? "#2E7D6B"
             : status === "Pending"
-              ? "#8B691C"
-              : "#E88C7D"
+              ? "#E57373"
+              : "#E57373"
         }
       />
 
@@ -696,7 +696,7 @@ function formatDate(value: string) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
   },
 
   header: {
@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     borderBottomWidth: 1,
-    borderBottomColor: "#E6E9ED",
+    borderBottomColor: "#CFE8DD",
   },
 
   headerButton: {
@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   content: {
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
 
     fontSize: 12,
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   introCard: {
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 18,
 
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
 
     flexDirection: "row",
     alignItems: "center",
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
   introTitle: {
     fontSize: 16,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   introText: {
@@ -787,7 +787,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 15,
 
-    color: "#607266",
+    color: "#6B7C73",
   },
 
   summaryRow: {
@@ -807,7 +807,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E2E8E3",
+    borderColor: "#CFE8DD",
 
     flexDirection: "row",
     alignItems: "center",
@@ -824,11 +824,11 @@ const styles = StyleSheet.create({
   },
 
   pendingSummaryIcon: {
-    backgroundColor: "#FFF1C9",
+    backgroundColor: "#FAD7A0",
   },
 
   approvedSummaryIcon: {
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
   },
 
   summaryNumber: {
@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: "900",
 
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   summaryLabel: {
@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
 
     fontSize: 9,
 
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   sectionHeader: {
@@ -860,7 +860,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
 
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   countBadge: {
@@ -873,7 +873,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 12,
 
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
 
     alignItems: "center",
     justifyContent: "center",
@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "800",
 
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 
   requestCard: {
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
   },
 
   petSection: {
@@ -910,7 +910,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 17,
 
-    backgroundColor: "#EAF2EB",
+    backgroundColor: "#FFF5E9",
   },
 
   petPlaceholder: {
@@ -919,7 +919,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 17,
 
-    backgroundColor: "#EAF2EB",
+    backgroundColor: "#FFF5E9",
 
     alignItems: "center",
     justifyContent: "center",
@@ -936,7 +936,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "900",
 
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   petBreed: {
@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
 
     fontSize: 9,
 
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   statusBadge: {
@@ -965,35 +965,35 @@ const styles = StyleSheet.create({
   },
 
   pendingBadge: {
-    backgroundColor: "#FFF2CC",
+    backgroundColor: "#FAD7A0",
   },
 
   pendingBadgeText: {
-    color: "#8B691C",
+    color: "#F5A623",
   },
 
   approvedBadge: {
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
   },
 
   approvedBadgeText: {
-    color: "#243B53",
+    color: "#81C784",
   },
 
   declinedBadge: {
-    backgroundColor: "#FBE8E5",
+    backgroundColor: "rgba(229, 115, 115, 0.14)",
   },
 
   declinedBadgeText: {
-    color: "#E88C7D",
+    color: "#E57373",
   },
 
   revokedBadge: {
-    backgroundColor: "#F3E8E7",
+    backgroundColor: "#FFF5E9",
   },
 
   revokedBadgeText: {
-    color: "#E88C7D",
+    color: "#E57373",
   },
 
   divider: {
@@ -1001,7 +1001,7 @@ const styles = StyleSheet.create({
 
     marginVertical: 14,
 
-    backgroundColor: "#E6E9ED",
+    backgroundColor: "#CFE8DD",
   },
 
   clinicSection: {
@@ -1015,7 +1015,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1030,7 +1030,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: "700",
 
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   clinicName: {
@@ -1039,7 +1039,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
 
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   contactName: {
@@ -1047,7 +1047,7 @@ const styles = StyleSheet.create({
 
     fontSize: 8,
 
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   dateRow: {
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 8,
 
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   actionRow: {
@@ -1079,9 +1079,9 @@ const styles = StyleSheet.create({
     borderRadius: 13,
 
     borderWidth: 1,
-    borderColor: "#E5C6C2",
+    borderColor: "rgba(229, 115, 115, 0.14)",
 
-    backgroundColor: "#FFF8F7",
+    backgroundColor: "#FFF5E9",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1094,7 +1094,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "800",
 
-    color: "#E88C7D",
+    color: "#E57373",
   },
 
   approveButton: {
@@ -1103,7 +1103,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 13,
 
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1127,9 +1127,9 @@ const styles = StyleSheet.create({
     borderRadius: 13,
 
     borderWidth: 1,
-    borderColor: "#E3C4C0",
+    borderColor: "rgba(229, 115, 115, 0.14)",
 
-    backgroundColor: "#FFF9F8",
+    backgroundColor: "#FFF5E9",
 
     flexDirection: "row",
     alignItems: "center",
@@ -1142,7 +1142,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "800",
 
-    color: "#E88C7D",
+    color: "#E57373",
   },
 
   disabled: {
@@ -1163,7 +1163,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,
-    borderColor: "#E2E8E3",
+    borderColor: "#CFE8DD",
 
     alignItems: "center",
   },
@@ -1174,7 +1174,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 23,
 
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
 
     alignItems: "center",
     justifyContent: "center",
@@ -1186,7 +1186,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
 
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   emptyText: {
@@ -1199,7 +1199,7 @@ const styles = StyleSheet.create({
 
     textAlign: "center",
 
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   securityCard: {
@@ -1209,7 +1209,7 @@ const styles = StyleSheet.create({
 
     borderRadius: 15,
 
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
 
     flexDirection: "row",
     alignItems: "flex-start",
@@ -1223,6 +1223,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     lineHeight: 15,
 
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 });

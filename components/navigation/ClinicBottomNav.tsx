@@ -15,7 +15,7 @@ export function ClinicTabItem({
   inactiveIcon,
   label,
 }: ClinicTabItemProps) {
-  const color = focused ? "#243B53" : "#7C858D";
+  const color = focused ? "#2E7D6B" : "#6B7C73";
 
   return (
     <View style={styles.tabItemContent}>
@@ -65,12 +65,12 @@ export function ClinicScanTabButton({
 export const clinicBottomNavStyles = StyleSheet.create({
   tabBar: {
     backgroundColor: "#FFFFFF",
-    borderTopColor: "#E6E9ED",
+    borderTopColor: "#CFE8DD",
     borderTopWidth: 1,
     elevation: 8,
     overflow: "visible",
     paddingTop: 6,
-    shadowColor: "#243B53",
+    shadowColor: "#2E7D6B",
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -98,19 +98,19 @@ const styles = StyleSheet.create({
   },
   scanButtonCircle: {
     alignItems: "center",
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     borderRadius: 30,
     elevation: 6,
     height: 60,
     justifyContent: "center",
-    shadowColor: "#243B53",
+    shadowColor: "#2E7D6B",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 5,
     width: 60,
   },
   tabText: {
-    color: "#7C858D",
+    color: "#6B7C73",
     fontSize: 10,
     fontWeight: "600",
     marginTop: 4,
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   activeTabText: {
-    color: "#243B53",
+    color: "#2E7D6B",
     fontWeight: "800",
   },
 });

@@ -152,7 +152,7 @@ export default function VetRecordsScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={27} color="#243B53" />
+          <Ionicons name="chevron-back" size={27} color="#2E7D6B" />
         </Pressable>
         <Text style={styles.headerTitle}>Vet Records</Text>
         <View style={styles.headerSpacer} />
@@ -165,8 +165,8 @@ export default function VetRecordsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            colors={["#243B53"]}
-            tintColor="#243B53"
+            colors={["#2E7D6B"]}
+            tintColor="#2E7D6B"
             onRefresh={() => {
               setRefreshing(true);
               loadRecords(false);
@@ -179,12 +179,12 @@ export default function VetRecordsScreen() {
         </Text>
 
         <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={20} color="#7C858D" />
+          <Ionicons name="search-outline" size={20} color="#6B7C73" />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder="Search records..."
-            placeholderTextColor="#929D96"
+            placeholderTextColor="#6B7C73"
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
@@ -197,7 +197,7 @@ export default function VetRecordsScreen() {
               hitSlop={8}
               onPress={() => setSearch("")}
             >
-              <Ionicons name="close-circle" size={20} color="#7C858D" />
+              <Ionicons name="close-circle" size={20} color="#6B7C73" />
             </Pressable>
           )}
         </View>
@@ -248,7 +248,7 @@ export default function VetRecordsScreen() {
 
         {loading ? (
           <StateCard>
-            <ActivityIndicator color="#243B53" />
+            <ActivityIndicator color="#2E7D6B" />
             <Text style={styles.loadingText}>
               Loading veterinary records...
             </Text>
@@ -256,7 +256,7 @@ export default function VetRecordsScreen() {
         ) : error ? (
           <StateCard>
             <View style={styles.errorIcon}>
-              <Ionicons name="alert-circle-outline" size={28} color="#E88C7D" />
+              <Ionicons name="alert-circle-outline" size={28} color="#E57373" />
             </View>
             <Text style={styles.stateTitle}>
               Unable to load veterinary records.
@@ -278,7 +278,7 @@ export default function VetRecordsScreen() {
               <Ionicons
                 name="document-text-outline"
                 size={29}
-                color="#243B53"
+                color="#2E7D6B"
               />
             </View>
             <Text style={styles.stateTitle}>No veterinary records yet</Text>
@@ -302,7 +302,7 @@ export default function VetRecordsScreen() {
         ) : filteredRecords.length === 0 ? (
           <StateCard>
             <View style={styles.emptyIconMuted}>
-              <Ionicons name="search-outline" size={29} color="#7C858D" />
+              <Ionicons name="search-outline" size={29} color="#6B7C73" />
             </View>
             <Text style={styles.stateTitle}>No matching records</Text>
             <Text style={styles.stateDescription}>
@@ -364,7 +364,7 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
         ) : (
-          <Ionicons name="paw" size={25} color="#243B53" />
+          <Ionicons name="paw" size={25} color="#2E7D6B" />
         )}
       </View>
 
@@ -387,7 +387,7 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
         )}
         <View style={styles.recordBottomRow}>
           <View style={styles.dateRow}>
-            <Ionicons name="calendar-outline" size={14} color="#7C858D" />
+            <Ionicons name="calendar-outline" size={14} color="#6B7C73" />
             <Text style={styles.visitDate}>
               {formatDate(record.visit_date)}
             </Text>
@@ -398,7 +398,7 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
         </View>
       </View>
 
-      <Ionicons name="chevron-forward" size={19} color="#95A099" />
+      <Ionicons name="chevron-forward" size={19} color="#6B7C73" />
     </Pressable>
   );
 }
@@ -418,7 +418,7 @@ function formatDate(value: string) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F6F0E6" },
+  container: { flex: 1, backgroundColor: "#FFF5E9" },
   header: {
     height: 60,
     paddingHorizontal: 18,
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E6E9ED",
+    borderBottomColor: "#CFE8DD",
   },
   backButton: {
     width: 44,
@@ -434,10 +434,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 21, fontWeight: "900", color: "#2B3440" },
+  headerTitle: { fontSize: 21, fontWeight: "900", color: "#2E3A34" },
   headerSpacer: { width: 44, height: 44 },
   content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
-  subtitle: { fontSize: 14, color: "#7C858D" },
+  subtitle: { fontSize: 14, color: "#6B7C73" },
   searchContainer: {
     minHeight: 50,
     marginTop: 17,
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     paddingVertical: 0,
     fontSize: 15,
-    color: "#2B3440",
+    color: "#2E3A34",
   },
   filterRow: { gap: 8, paddingTop: 17, paddingBottom: 4 },
   filterButton: {
@@ -466,10 +466,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
   },
-  filterButtonSelected: { backgroundColor: "#243B53", borderColor: "#243B53" },
-  filterText: { fontSize: 12, fontWeight: "800", color: "#7C858D" },
+  filterButtonSelected: { backgroundColor: "#2E7D6B", borderColor: "#2E7D6B" },
+  filterText: { fontSize: 12, fontWeight: "800", color: "#6B7C73" },
   filterTextSelected: { color: "#FFFFFF" },
   summaryRow: {
     marginTop: 22,
@@ -478,8 +478,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  summaryTitle: { fontSize: 19, fontWeight: "900", color: "#2B3440" },
-  summaryCount: { fontSize: 12, fontWeight: "700", color: "#7C858D" },
+  summaryTitle: { fontSize: 19, fontWeight: "900", color: "#2E3A34" },
+  summaryCount: { fontSize: 12, fontWeight: "700", color: "#6B7C73" },
   recordList: { gap: 10 },
   recordCard: {
     minHeight: 132,
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     padding: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -497,14 +497,14 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
   petPhoto: { width: "100%", height: "100%" },
   recordContent: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 6 },
   recordTopRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#2B3440" },
+  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#2E3A34" },
   serviceBadge: {
     maxWidth: "48%",
     minHeight: 24,
@@ -512,15 +512,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
   },
-  serviceBadgeText: { fontSize: 11, fontWeight: "900", color: "#243B53" },
-  petContext: { marginTop: 4, fontSize: 12, color: "#7C858D" },
+  serviceBadgeText: { fontSize: 11, fontWeight: "900", color: "#2E7D6B" },
+  petContext: { marginTop: 4, fontSize: 12, color: "#6B7C73" },
   diagnosis: {
     marginTop: 7,
     fontSize: 12,
     fontWeight: "700",
-    color: "#4C6A92",
+    color: "#56B091",
   },
   recordBottomRow: {
     marginTop: 10,
@@ -530,8 +530,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dateRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  visitDate: { fontSize: 11, color: "#7C858D" },
-  accessChanged: { fontSize: 11, fontWeight: "800", color: "#B55F54" },
+  visitDate: { fontSize: 11, color: "#6B7C73" },
+  accessChanged: { fontSize: 11, fontWeight: "800", color: "#F5A623" },
   stateCard: {
     minHeight: 245,
     marginTop: 24,
@@ -539,16 +539,16 @@ const styles = StyleSheet.create({
     padding: 25,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 13, color: "#7C858D" },
+  loadingText: { marginTop: 12, fontSize: 13, color: "#6B7C73" },
   emptyIcon: {
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#E8F4EA",
+    backgroundColor: "#FFF5E9",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#E6E9ED",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#FBE3DE",
+    backgroundColor: "rgba(229, 115, 115, 0.14)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     marginTop: 13,
     fontSize: 16,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
     textAlign: "center",
   },
   stateDescription: {
@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontSize: 12,
     lineHeight: 16,
-    color: "#7C858D",
+    color: "#6B7C73",
     textAlign: "center",
   },
   retryButton: {
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     marginTop: 17,
     borderRadius: 12,
     paddingHorizontal: 18,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     borderRadius: 13,
     paddingHorizontal: 18,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -615,11 +615,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#BFD2C4",
+    borderColor: "#CFE8DD",
     paddingHorizontal: 17,
     alignItems: "center",
     justifyContent: "center",
   },
-  resetText: { fontSize: 12, fontWeight: "800", color: "#243B53" },
+  resetText: { fontSize: 12, fontWeight: "800", color: "#2E7D6B" },
   pressed: { opacity: 0.7 },
 });

@@ -122,7 +122,7 @@ export default function AuthorizedPetsScreen() {
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={27} color="#243B53" />
+          <Ionicons name="chevron-back" size={27} color="#2E7D6B" />
         </Pressable>
         <Text style={styles.headerTitle}>Authorized Pets</Text>
         <View style={styles.headerSpacer} />
@@ -135,8 +135,8 @@ export default function AuthorizedPetsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            colors={["#243B53"]}
-            tintColor="#243B53"
+            colors={["#2E7D6B"]}
+            tintColor="#2E7D6B"
             onRefresh={() => {
               setRefreshing(true);
               loadAuthorizedPets(false);
@@ -149,12 +149,12 @@ export default function AuthorizedPetsScreen() {
         </Text>
 
         <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={20} color="#7C858D" />
+          <Ionicons name="search-outline" size={20} color="#6B7C73" />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder="Search pets..."
-            placeholderTextColor="#929D96"
+            placeholderTextColor="#6B7C73"
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
@@ -167,7 +167,7 @@ export default function AuthorizedPetsScreen() {
               hitSlop={8}
               onPress={() => setSearch("")}
             >
-              <Ionicons name="close-circle" size={20} color="#7C858D" />
+              <Ionicons name="close-circle" size={20} color="#6B7C73" />
             </Pressable>
           )}
         </View>
@@ -183,13 +183,13 @@ export default function AuthorizedPetsScreen() {
 
         {loading ? (
           <StateCard>
-            <ActivityIndicator color="#243B53" />
+            <ActivityIndicator color="#2E7D6B" />
             <Text style={styles.loadingText}>Loading authorized pets...</Text>
           </StateCard>
         ) : error ? (
           <StateCard>
             <View style={styles.errorIcon}>
-              <Ionicons name="alert-circle-outline" size={28} color="#E88C7D" />
+              <Ionicons name="alert-circle-outline" size={28} color="#E57373" />
             </View>
             <Text style={styles.stateTitle}>
               Unable to load authorized pets.
@@ -211,7 +211,7 @@ export default function AuthorizedPetsScreen() {
               <Ionicons
                 name="shield-checkmark-outline"
                 size={29}
-                color="#243B53"
+                color="#2E7D6B"
               />
             </View>
             <Text style={styles.stateTitle}>No authorized pets yet</Text>
@@ -233,7 +233,7 @@ export default function AuthorizedPetsScreen() {
         ) : filteredPets.length === 0 ? (
           <StateCard>
             <View style={styles.emptyIconMuted}>
-              <Ionicons name="search-outline" size={29} color="#7C858D" />
+              <Ionicons name="search-outline" size={29} color="#6B7C73" />
             </View>
             <Text style={styles.stateTitle}>No pets found</Text>
             <Text style={styles.stateDescription}>
@@ -270,7 +270,7 @@ function PetCard({ pet }: { pet: AuthorizedPet }) {
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
         ) : (
-          <Ionicons name="paw" size={27} color="#243B53" />
+          <Ionicons name="paw" size={27} color="#2E7D6B" />
         )}
       </View>
 
@@ -284,7 +284,7 @@ function PetCard({ pet }: { pet: AuthorizedPet }) {
         <Text style={styles.petSpecies}>{pet.species}</Text>
         <View style={styles.petMetaRow}>
           <View style={styles.authorizedBadge}>
-            <Ionicons name="checkmark-circle" size={12} color="#243B53" />
+            <Ionicons name="checkmark-circle" size={12} color="#2E7D6B" />
             <Text style={styles.authorizedText}>AUTHORIZED</Text>
           </View>
           {pet.responded_at && (
@@ -295,7 +295,7 @@ function PetCard({ pet }: { pet: AuthorizedPet }) {
         </View>
       </View>
 
-      <Ionicons name="chevron-forward" size={20} color="#95A099" />
+      <Ionicons name="chevron-forward" size={20} color="#6B7C73" />
     </Pressable>
   );
 }
@@ -315,7 +315,7 @@ function formatDate(value: string) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F6F0E6" },
+  container: { flex: 1, backgroundColor: "#FFF5E9" },
   header: {
     height: 60,
     paddingHorizontal: 18,
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E6E9ED",
+    borderBottomColor: "#CFE8DD",
   },
   backButton: {
     width: 44,
@@ -331,10 +331,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 19, fontWeight: "900", color: "#2B3440" },
+  headerTitle: { fontSize: 19, fontWeight: "900", color: "#2E3A34" },
   headerSpacer: { width: 44, height: 44 },
   content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
-  subtitle: { fontSize: 12, color: "#7C858D" },
+  subtitle: { fontSize: 12, color: "#6B7C73" },
   searchContainer: {
     minHeight: 50,
     marginTop: 17,
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     paddingVertical: 0,
     fontSize: 13,
-    color: "#2B3440",
+    color: "#2E3A34",
   },
   resultHeader: {
     marginTop: 24,
@@ -361,8 +361,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  resultTitle: { fontSize: 17, fontWeight: "900", color: "#2B3440" },
-  resultCount: { fontSize: 10, fontWeight: "700", color: "#7C858D" },
+  resultTitle: { fontSize: 17, fontWeight: "900", color: "#2E3A34" },
+  resultCount: { fontSize: 10, fontWeight: "700", color: "#6B7C73" },
   petList: { gap: 10 },
   petCard: {
     minHeight: 128,
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
     padding: 14,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -380,19 +380,19 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 22,
     overflow: "hidden",
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
   petPhoto: { width: "100%", height: "100%" },
   petContent: { flex: 1, minWidth: 0, marginLeft: 13, marginRight: 7 },
-  petName: { fontSize: 16, fontWeight: "900", color: "#2B3440" },
-  petBreed: { marginTop: 3, fontSize: 11, color: "#7C858D" },
+  petName: { fontSize: 16, fontWeight: "900", color: "#2E3A34" },
+  petBreed: { marginTop: 3, fontSize: 11, color: "#6B7C73" },
   petSpecies: {
     marginTop: 2,
     fontSize: 9,
     fontWeight: "700",
-    color: "#7C858D",
+    color: "#6B7C73",
   },
   petMetaRow: {
     marginTop: 10,
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     minHeight: 24,
     borderRadius: 9,
     paddingHorizontal: 7,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -413,10 +413,10 @@ const styles = StyleSheet.create({
   authorizedText: {
     fontSize: 7,
     fontWeight: "900",
-    color: "#243B53",
+    color: "#2E7D6B",
     letterSpacing: 0.3,
   },
-  authorizedDate: { maxWidth: 130, fontSize: 8, color: "#7C858D" },
+  authorizedDate: { maxWidth: 130, fontSize: 8, color: "#6B7C73" },
   stateCard: {
     minHeight: 245,
     marginTop: 24,
@@ -424,16 +424,16 @@ const styles = StyleSheet.create({
     padding: 25,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 11, color: "#7C858D" },
+  loadingText: { marginTop: 12, fontSize: 11, color: "#6B7C73" },
   emptyIcon: {
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#E8F4EA",
+    backgroundColor: "#FFF5E9",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#E6E9ED",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: "#FBE3DE",
+    backgroundColor: "rgba(229, 115, 115, 0.14)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     marginTop: 13,
     fontSize: 14,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
     textAlign: "center",
   },
   stateDescription: {
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontSize: 10,
     lineHeight: 16,
-    color: "#7C858D",
+    color: "#6B7C73",
     textAlign: "center",
   },
   retryButton: {
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     marginTop: 17,
     borderRadius: 12,
     paddingHorizontal: 18,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     marginTop: 18,
     borderRadius: 13,
     paddingHorizontal: 18,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

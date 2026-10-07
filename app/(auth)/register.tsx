@@ -17,6 +17,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
+import {
+  CONTACT_NUMBER_VALIDATION_MESSAGE,
+  GMAIL_VALIDATION_MESSAGE,
+  isValidGmailAddress,
+  isValidPhilippineMobileNumber,
+  normalizeEmail,
+  sanitizePhilippineMobileNumber,
+} from "../../utils/validation";
 
 type UserRole = "owner" | "clinic";
 
@@ -51,6 +59,8 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
+    const normalizedEmail = normalizeEmail(email);
+
     if (
       !fullName.trim() ||
       !email.trim() ||
@@ -62,6 +72,19 @@ export default function RegisterScreen() {
       Alert.alert(
         "Incomplete Information",
         "Please fill in all required fields.",
+      );
+      return;
+    }
+
+    if (!isValidGmailAddress(normalizedEmail)) {
+      Alert.alert("Invalid Email", GMAIL_VALIDATION_MESSAGE);
+      return;
+    }
+
+    if (!isValidPhilippineMobileNumber(contactNumber)) {
+      Alert.alert(
+        "Invalid Contact Number",
+        CONTACT_NUMBER_VALIDATION_MESSAGE,
       );
       return;
     }
@@ -102,9 +125,9 @@ export default function RegisterScreen() {
 
         body: JSON.stringify({
           fullName: fullName.trim(),
-          email: email.trim().toLowerCase(),
+          email: normalizedEmail,
           password: password,
-          contactNumber: contactNumber.trim(),
+          contactNumber,
           address: address.trim(),
 
           role: role,
@@ -172,7 +195,7 @@ export default function RegisterScreen() {
             ]}
             onPress={() => router.back()}
           >
-            <Ionicons name="chevron-back" size={28} color="#243B53" />
+            <Ionicons name="chevron-back" size={28} color="#2E7D6B" />
           </Pressable>
 
           <View style={styles.logoContainer}>
@@ -203,7 +226,7 @@ export default function RegisterScreen() {
               <Ionicons
                 name="paw-outline"
                 size={22}
-                color={role === "owner" ? "#FFFFFF" : "#243B53"}
+                color={role === "owner" ? "#FFFFFF" : "#2E7D6B"}
               />
 
               <Text
@@ -228,7 +251,7 @@ export default function RegisterScreen() {
               <Ionicons
                 name="medical-outline"
                 size={22}
-                color={role === "clinic" ? "#FFFFFF" : "#243B53"}
+                color={role === "clinic" ? "#FFFFFF" : "#2E7D6B"}
               />
 
               <Text
@@ -291,8 +314,11 @@ export default function RegisterScreen() {
             icon="call-outline"
             placeholder="Contact Number"
             value={contactNumber}
-            onChangeText={setContactNumber}
+            onChangeText={(value) =>
+              setContactNumber(sanitizePhilippineMobileNumber(value))
+            }
             keyboardType="phone-pad"
+            maxLength={11}
           />
 
           <InputBox
@@ -308,7 +334,7 @@ export default function RegisterScreen() {
           />
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={21} color="#7C858D" />
+            <Ionicons name="lock-closed-outline" size={21} color="#6B7C73" />
 
             <TextInput
               ref={(input) => {
@@ -317,7 +343,7 @@ export default function RegisterScreen() {
               onFocus={() => handleInputFocus(inputRefs.current.password)}
               style={styles.input}
               placeholder="Password"
-              placeholderTextColor="#7C858D"
+              placeholderTextColor="#6B7C73"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -334,7 +360,7 @@ export default function RegisterScreen() {
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={21}
-                color="#7C858D"
+                color="#6B7C73"
               />
             </Pressable>
           </View>
@@ -343,7 +369,7 @@ export default function RegisterScreen() {
             <Ionicons
               name="shield-checkmark-outline"
               size={21}
-              color="#7C858D"
+              color="#6B7C73"
             />
 
             <TextInput
@@ -355,7 +381,7 @@ export default function RegisterScreen() {
               }
               style={styles.input}
               placeholder="Confirm Password"
-              placeholderTextColor="#7C858D"
+              placeholderTextColor="#6B7C73"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showConfirmPassword}
@@ -372,7 +398,7 @@ export default function RegisterScreen() {
               <Ionicons
                 name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
                 size={21}
-                color="#7C858D"
+                color="#6B7C73"
               />
             </Pressable>
           </View>
@@ -423,12 +449,12 @@ function InputBox({
 } & React.ComponentProps<typeof TextInput>) {
   return (
     <View style={styles.inputContainer}>
-      <Ionicons name={icon} size={21} color="#7C858D" />
+      <Ionicons name={icon} size={21} color="#6B7C73" />
 
       <TextInput
         ref={inputRef}
         style={styles.input}
-        placeholderTextColor="#7C858D"
+        placeholderTextColor="#6B7C73"
         {...props}
       />
     </View>
@@ -438,7 +464,7 @@ function InputBox({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
   },
 
   content: {
@@ -465,7 +491,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 36,
     fontWeight: "900",
-    color: "#243B53",
+    color: "#2E7D6B",
     letterSpacing: 2,
     marginTop: -5,
   },
@@ -479,20 +505,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   subtitle: {
     marginTop: 7,
     textAlign: "center",
-    color: "#7C858D",
+    color: "#6B7C73",
     fontSize: 16,
     lineHeight: 23,
   },
 
   label: {
     fontSize: 16,
-    color: "#2B3440",
+    color: "#2E3A34",
     fontWeight: "600",
     marginBottom: 10,
   },
@@ -507,7 +533,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 65,
     borderWidth: 1.5,
-    borderColor: "#BFD5C5",
+    borderColor: "#CFE8DD",
     borderRadius: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -517,14 +543,14 @@ const styles = StyleSheet.create({
   },
 
   selectedRole: {
-    backgroundColor: "#243B53",
-    borderColor: "#243B53",
+    backgroundColor: "#2E7D6B",
+    borderColor: "#2E7D6B",
   },
 
   roleText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 
   selectedRoleText: {
@@ -535,7 +561,7 @@ const styles = StyleSheet.create({
     minHeight: 57,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 13,
     flexDirection: "row",
     alignItems: "center",
@@ -547,13 +573,13 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 11,
     fontSize: 17,
-    color: "#2B3440",
+    color: "#2E3A34",
     paddingVertical: 15,
   },
 
   signUpButton: {
     height: 58,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     borderRadius: 13,
     justifyContent: "center",
     alignItems: "center",
@@ -587,12 +613,12 @@ const styles = StyleSheet.create({
   },
 
   loginText: {
-    color: "#7C858D",
+    color: "#6B7C73",
     fontSize: 16,
   },
 
   loginLink: {
-    color: "#243B53",
+    color: "#2E7D6B",
     fontSize: 16,
     fontWeight: "700",
     textDecorationLine: "underline",

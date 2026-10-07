@@ -354,7 +354,7 @@ export default function AddPetScreen() {
           disabled={loading}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={27} color="#243B53" />
+          <Ionicons name="chevron-back" size={27} color="#2E7D6B" />
         </Pressable>
 
         <Text style={styles.headerTitle}>Register Pet</Text>
@@ -397,7 +397,7 @@ export default function AddPetScreen() {
                 />
               ) : (
                 <View style={styles.photoPlaceholder}>
-                  <Ionicons name="paw" size={48} color="#4C6A92" />
+                  <Ionicons name="paw" size={48} color="#56B091" />
                 </View>
               )}
 
@@ -563,7 +563,7 @@ export default function AddPetScreen() {
 
           <View style={styles.marksCard}>
             <View style={styles.marksHeader}>
-              <Ionicons name="eye-outline" size={21} color="#243B53" />
+              <Ionicons name="eye-outline" size={21} color="#2E7D6B" />
 
               <Text style={styles.marksLabel}>Distinguishing Features</Text>
             </View>
@@ -575,7 +575,7 @@ export default function AddPetScreen() {
               onFocus={() => handleInputFocus(inputRefs.current.marks)}
               style={styles.marksInput}
               placeholder="Example: White patch on chest, dark spot near left ear..."
-              placeholderTextColor="#7C858D"
+              placeholderTextColor="#6B7C73"
               value={marks}
               onChangeText={setMarks}
               multiline
@@ -591,7 +591,7 @@ export default function AddPetScreen() {
             <Ionicons
               name="information-circle-outline"
               size={23}
-              color="#243B53"
+              color="#64B5F6"
             />
 
             <Text style={styles.infoText}>
@@ -665,14 +665,14 @@ function InputField({
         onPress={onPress}
         disabled={!editable}
       >
-        <Ionicons name={icon} size={20} color="#6C7C72" />
+        <Ionicons name={icon} size={20} color="#6B7C73" />
 
         <TextInput
           ref={inputRef}
           onFocus={onFocus}
           style={styles.input}
           placeholder={placeholder}
-          placeholderTextColor="#A1AAA5"
+          placeholderTextColor="#6B7C73"
           value={value}
           onChangeText={onChangeText}
           editable={editable && !onPress}
@@ -727,7 +727,7 @@ function OptionButton({
       <Ionicons
         name={icon}
         size={18}
-        color={selected ? "#243B53" : "#7C858D"}
+        color={selected ? "#2E7D6B" : "#6B7C73"}
       />
 
       <Text style={[styles.optionText, selected && styles.optionTextSelected]}>
@@ -744,7 +744,7 @@ function FieldDivider() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
   },
 
   header: {
@@ -754,8 +754,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E6E9ED",
-    backgroundColor: "#F6F0E6",
+    borderBottomColor: "#CFE8DD",
+    backgroundColor: "#FFF5E9",
   },
 
   headerButton: {
@@ -768,7 +768,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 19,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   content: {
@@ -789,7 +789,7 @@ const styles = StyleSheet.create({
     width: 135,
     height: 135,
     borderRadius: 68,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     borderWidth: 4,
     borderColor: "#FFFFFF",
   },
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
     borderRadius: 68,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
   },
 
   cameraButton: {
@@ -815,16 +815,16 @@ const styles = StyleSheet.create({
     width: 39,
     height: 39,
     borderRadius: 20,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "#F6F0E6",
+    borderColor: "#FFF5E9",
   },
 
   removePhoto: {
     fontSize: 12,
-    color: "#E88C7D",
+    color: "#E57373",
     fontWeight: "700",
   },
 
@@ -839,7 +839,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
     marginBottom: 13,
     marginTop: 4,
   },
@@ -848,7 +848,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     paddingHorizontal: 16,
     paddingVertical: 5,
     marginBottom: 28,
@@ -861,16 +861,16 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#526159",
+    color: "#2E3A34",
     marginBottom: 9,
   },
 
   inputContainer: {
     minHeight: 48,
     borderRadius: 12,
-    backgroundColor: "#F8FAF8",
+    backgroundColor: "#FFF5E9",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     paddingHorizontal: 13,
     flexDirection: "row",
     alignItems: "center",
@@ -881,12 +881,12 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 46,
     fontSize: 13,
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   fieldDivider: {
     height: 1,
-    backgroundColor: "#E6E9ED",
+    backgroundColor: "#CFE8DD",
   },
 
   optionRow: {
@@ -899,8 +899,8 @@ const styles = StyleSheet.create({
     minHeight: 45,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E0E6E2",
-    backgroundColor: "#F9FAF9",
+    borderColor: "#CFE8DD",
+    backgroundColor: "#FFF5E9",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -909,18 +909,18 @@ const styles = StyleSheet.create({
   },
 
   optionButtonSelected: {
-    borderColor: "#76A886",
-    backgroundColor: "#E8F3EA",
+    borderColor: "#81C784",
+    backgroundColor: "#FFF5E9",
   },
 
   optionText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   optionTextSelected: {
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 
   marksCard: {
@@ -928,7 +928,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     padding: 15,
     marginBottom: 25,
   },
@@ -943,24 +943,24 @@ const styles = StyleSheet.create({
   marksLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#526159",
+    color: "#2E3A34",
   },
 
   marksInput: {
     minHeight: 80,
     fontSize: 13,
     lineHeight: 19,
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   characterCount: {
     alignSelf: "flex-end",
     fontSize: 10,
-    color: "#9AA49E",
+    color: "#6B7C73",
   },
 
   infoCard: {
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     borderRadius: 15,
     padding: 14,
     flexDirection: "row",
@@ -973,13 +973,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 11,
     lineHeight: 17,
-    color: "#627168",
+    color: "#6B7C73",
   },
 
   registerButton: {
     minHeight: 55,
     borderRadius: 15,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

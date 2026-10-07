@@ -39,7 +39,7 @@ export default function MissingPetAlertConsentModal() {
       <View style={styles.overlay}>
         <View style={styles.card}>
           <View style={styles.iconArea}>
-            <Ionicons name="notifications-outline" size={30} color="#243B53" />
+            <Ionicons name="notifications-outline" size={30} color="#2E7D6B" />
             <View style={styles.accentDot} />
           </View>
 
@@ -85,18 +85,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    backgroundColor: "rgba(36, 59, 83, 0.5)",
+    backgroundColor: "rgba(46, 58, 52, 0.45)",
   },
   card: {
     width: "100%",
     maxWidth: 420,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     backgroundColor: "#FFFFFF",
     padding: 22,
     alignItems: "center",
-    shadowColor: "#243B53",
+    shadowColor: "#2E7D6B",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.16,
     shadowRadius: 18,
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     width: 62,
     height: 62,
     borderRadius: 20,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -117,18 +117,18 @@ const styles = StyleSheet.create({
     width: 9,
     height: 9,
     borderRadius: 5,
-    backgroundColor: "#E88C7D",
+    backgroundColor: "#F5A623",
   },
   title: {
     marginTop: 17,
-    color: "#243B53",
+    color: "#2E7D6B",
     fontSize: 22,
     fontWeight: "900",
     textAlign: "center",
   },
   message: {
     marginTop: 9,
-    color: "#7C858D",
+    color: "#6B7C73",
     fontSize: 14,
     lineHeight: 21,
     textAlign: "center",
@@ -148,14 +148,14 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     borderWidth: 1,
-    borderColor: "#243B53",
+    borderColor: "#2E7D6B",
     backgroundColor: "#FFFFFF",
   },
   primaryButton: {
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
   },
   secondaryText: {
-    color: "#243B53",
+    color: "#2E7D6B",
     fontSize: 14,
     fontWeight: "800",
   },

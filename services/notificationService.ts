@@ -10,9 +10,9 @@ const PUSH_TOKEN_STORAGE_KEY = "timan_expo_push_token";
 export const HEALTH_REMINDERS_CHANNEL_ID =
   "pet-health-reminders";
 
-const PUSH_TOKEN_RETRY_DELAYS_MS = [1000, 2500, 5000] as const;
-
 let pushRegistrationPromise: Promise<PushRegistrationResult> | null = null;
+let pushRegistrationAuthToken: string | null = null;
+let pushRegistrationResult: PushRegistrationResult | null = null;
 
 type PushRegistrationResult = {
   success: boolean;
@@ -109,12 +109,6 @@ export async function requestNotificationPermission() {
 
 
 
-function wait(delayMs: number) {
-  return new Promise<void>((resolve) => {
-    setTimeout(resolve, delayMs);
-  });
-}
-
 function isTransientNetworkError(error: unknown) {
   const message =
     error instanceof Error
@@ -126,33 +120,9 @@ function isTransientNetworkError(error: unknown) {
   );
 }
 
-async function getExpoPushTokenWithRetry(projectId: string) {
-  let lastError: unknown;
-
-  for (let attempt = 0; attempt <= PUSH_TOKEN_RETRY_DELAYS_MS.length; attempt += 1) {
-    try {
-      return await Notifications.getExpoPushTokenAsync({ projectId });
-    } catch (error) {
-      lastError = error;
-
-      const retryDelay = PUSH_TOKEN_RETRY_DELAYS_MS[attempt];
-      if (retryDelay === undefined || !isTransientNetworkError(error)) {
-        throw error;
-      }
-
-      console.log(
-        `TIMAN: Expo push token request failed; retrying in ${retryDelay}ms.`,
-        error instanceof Error ? error.message : String(error)
-      );
-
-      await wait(retryDelay);
-    }
-  }
-
-  throw lastError;
-}
-
-async function performPushRegistration(): Promise<PushRegistrationResult> {
+async function performPushRegistration(
+  token: string
+): Promise<PushRegistrationResult> {
   try {
     
     
@@ -196,8 +166,25 @@ async function performPushRegistration(): Promise<PushRegistrationResult> {
     
     
 
-    const pushTokenResult =
-      await getExpoPushTokenWithRetry(projectId);
+    let pushTokenResult: Notifications.ExpoPushToken;
+
+    try {
+      pushTokenResult =
+        await Notifications.getExpoPushTokenAsync({ projectId });
+    } catch (error) {
+      if (isTransientNetworkError(error)) {
+        console.log(
+          "TIMAN: Expo push token request failed because the network is unavailable."
+        );
+
+        return {
+          success: false,
+          message: "Push registration will be retried later.",
+        };
+      }
+
+      throw error;
+    }
 
     const expoPushToken =
       pushTokenResult.data;
@@ -211,20 +198,6 @@ async function performPushRegistration(): Promise<PushRegistrationResult> {
       return {
         success: false,
         message: "Expo push token was not generated.",
-      };
-    }
-
-    
-    
-    
-
-    const token =
-      await AsyncStorage.getItem("token");
-
-    if (!token) {
-      return {
-        success: false,
-        message: "User is not logged in.",
       };
     }
 
@@ -310,6 +283,9 @@ async function performPushRegistration(): Promise<PushRegistrationResult> {
 }
 
 export async function unregisterDevicePushToken() {
+  pushRegistrationAuthToken = null;
+  pushRegistrationResult = null;
+
   try {
     const [authToken, expoPushToken] =
       await Promise.all([
@@ -357,7 +333,29 @@ export function registerDeviceForPushNotifications() {
     return pushRegistrationPromise;
   }
 
-  pushRegistrationPromise = performPushRegistration().finally(() => {
+  pushRegistrationPromise = (async () => {
+    const authToken = await AsyncStorage.getItem("token");
+
+    if (!authToken) {
+      return {
+        success: false,
+        message: "User is not logged in.",
+      };
+    }
+
+    if (
+      pushRegistrationAuthToken === authToken &&
+      pushRegistrationResult
+    ) {
+      return pushRegistrationResult;
+    }
+
+    const result = await performPushRegistration(authToken);
+    pushRegistrationAuthToken = authToken;
+    pushRegistrationResult = result;
+
+    return result;
+  })().finally(() => {
     pushRegistrationPromise = null;
   });
 

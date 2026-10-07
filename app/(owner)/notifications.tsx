@@ -439,7 +439,7 @@ export default function NotificationsScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#243B53" />
+          <ActivityIndicator size="large" color="#2E7D6B" />
 
           <Text style={styles.loadingText}>Loading notifications...</Text>
         </View>
@@ -486,7 +486,7 @@ export default function NotificationsScreen() {
                 ]}
               >
                 {markingAll ? (
-                  <ActivityIndicator size="small" color="#243B53" />
+                  <ActivityIndicator size="small" color="#2E7D6B" />
                 ) : (
                   <Text style={styles.markAllText}>Mark all read</Text>
                 )}
@@ -502,7 +502,7 @@ export default function NotificationsScreen() {
               <Ionicons
                 name="notifications-outline"
                 size={37}
-                color="#243B53"
+                color="#2E7D6B"
               />
             </View>
 
@@ -528,7 +528,7 @@ export default function NotificationsScreen() {
               <Ionicons
                 name={getNotificationIcon(notification.type)}
                 size={23}
-                color="#243B53"
+                color="#2E7D6B"
               />
             </View>
 
@@ -557,7 +557,7 @@ export default function NotificationsScreen() {
                 <View style={styles.actionRow}>
                   <Text style={styles.actionText}>View Request</Text>
 
-                  <Ionicons name="chevron-forward" size={16} color="#243B53" />
+                  <Ionicons name="chevron-forward" size={16} color="#2E7D6B" />
                 </View>
               )}
 
@@ -577,13 +577,13 @@ export default function NotificationsScreen() {
                     ]}
                   >
                     {deletingId === notification.notification_id ? (
-                      <ActivityIndicator size="small" color="#B5483A" />
+                      <ActivityIndicator size="small" color="#E57373" />
                     ) : (
                       <>
                         <Ionicons
                           name="trash-outline"
                           size={14}
-                          color="#B5483A"
+                          color="#E57373"
                         />
 
                         <Text style={styles.deleteText}>Delete</Text>
@@ -603,7 +603,7 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
   },
 
   loadingContainer: {
@@ -615,7 +615,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 12,
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   header: {
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#E6E9ED",
+    borderBottomColor: "#CFE8DD",
   },
 
   backButton: {
@@ -642,12 +642,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   headerSubtitle: {
     fontSize: 9,
-    color: "#7C858D",
+    color: "#6B7C73",
     marginTop: 2,
   },
 
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   unreadBadge: {
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     height: 22,
     paddingHorizontal: 6,
     borderRadius: 11,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
@@ -704,13 +704,13 @@ const styles = StyleSheet.create({
   markAllText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 
   emptyCard: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 18,
     paddingHorizontal: 25,
     paddingVertical: 34,
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 22,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
     marginTop: 14,
   },
 
@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
     position: "relative",
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 18,
     padding: 15,
     marginBottom: 10,
@@ -745,8 +745,8 @@ const styles = StyleSheet.create({
   },
 
   unreadCard: {
-    backgroundColor: "#F3F8F3",
-    borderColor: "#CFE2D2",
+    backgroundColor: "#FFF5E9",
+    borderColor: "#CFE8DD",
   },
 
   unreadDot: {
@@ -756,14 +756,14 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
   },
 
   notificationIcon: {
     width: 46,
     height: 46,
     borderRadius: 14,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -783,24 +783,24 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     fontWeight: "700",
-    color: "#34463A",
+    color: "#2E3A34",
     paddingRight: 8,
   },
 
   unreadTitle: {
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   notificationTime: {
     fontSize: 8,
-    color: "#8A978E",
+    color: "#6B7C73",
   },
 
   notificationMessage: {
     fontSize: 10,
     lineHeight: 16,
-    color: "#68776D",
+    color: "#6B7C73",
     marginTop: 5,
     paddingRight: 8,
   },
@@ -814,7 +814,7 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 10,
     fontWeight: "900",
-    color: "#243B53",
+    color: "#2E7D6B",
     marginRight: 3,
   },
 
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: "#E8C8C3",
+    borderColor: "rgba(229, 115, 115, 0.14)",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
   deleteText: {
     fontSize: 9,
     fontWeight: "800",
-    color: "#B5483A",
+    color: "#E57373",
   },
 
   pressed: {

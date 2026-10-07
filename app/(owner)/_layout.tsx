@@ -18,7 +18,7 @@ export default function OwnerTabsLayout() {
         tabBarItemStyle: [styles.tabBarItem, compact && styles.compactTabBarItem],
 
         sceneStyle: {
-          backgroundColor: "#F6F0E6",
+          backgroundColor: "#FFF5E9",
           width: "100%",
           maxWidth: 680,
           alignSelf: "center",
@@ -108,7 +108,7 @@ function TabItem({
       <Ionicons
         name={focused ? activeIcon : inactiveIcon}
         size={23}
-        color={focused ? "#243B53" : "#7C858D"}
+        color={focused ? "#2E7D6B" : "#6B7C73"}
       />
 
       <Text style={[styles.tabText, focused && styles.activeTabText]}>
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
 
     borderTopWidth: 1,
-    borderTopColor: "#E6E9ED",
+    borderTopColor: "#CFE8DD",
 
     paddingTop: 5,
 
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
 
     elevation: 8,
 
-    shadowColor: "#243B53",
+    shadowColor: "#2E7D6B",
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
@@ -161,11 +161,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 10,
     fontWeight: "600",
-    color: "#7C858D",
+    color: "#6B7C73",
   },
 
   activeTabText: {
-    color: "#243B53",
+    color: "#2E7D6B",
     fontWeight: "800",
   },
 });

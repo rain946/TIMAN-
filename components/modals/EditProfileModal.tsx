@@ -17,6 +17,11 @@ import {
 
 import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
+import {
+  CONTACT_NUMBER_VALIDATION_MESSAGE,
+  isValidPhilippineMobileNumber,
+  sanitizePhilippineMobileNumber,
+} from "../../utils/validation";
 
 type OwnerProfile = {
   user_id: number;
@@ -105,8 +110,11 @@ export default function EditProfileModal({
       return;
     }
 
-    if (cleanContactNumber.length > 20) {
-      Alert.alert("Invalid Contact Number", "Contact number is too long.");
+    if (!isValidPhilippineMobileNumber(cleanContactNumber)) {
+      Alert.alert(
+        "Invalid Contact Number",
+        CONTACT_NUMBER_VALIDATION_MESSAGE,
+      );
       return;
     }
 
@@ -223,7 +231,7 @@ export default function EditProfileModal({
               onPress={handleClose}
               disabled={saving}
             >
-              <Ionicons name="close" size={22} color="#4D5B52" />
+              <Ionicons name="close" size={22} color="#2E3A34" />
             </Pressable>
           </View>
 
@@ -245,7 +253,7 @@ export default function EditProfileModal({
                 <Text style={styles.label}>Clinic Name</Text>
 
                 <View style={styles.inputContainer}>
-                  <Ionicons name="medkit-outline" size={19} color="#243B53" />
+                  <Ionicons name="medkit-outline" size={19} color="#2E7D6B" />
 
                   <TextInput
                     ref={clinicNameInputRef}
@@ -254,7 +262,7 @@ export default function EditProfileModal({
                     value={clinicName}
                     onChangeText={setClinicName}
                     placeholder="Enter clinic name"
-                    placeholderTextColor="#7C858D"
+                    placeholderTextColor="#6B7C73"
                     autoCapitalize="words"
                     editable={!saving}
                     maxLength={150}
@@ -266,7 +274,7 @@ export default function EditProfileModal({
             <Text style={styles.label}>Full Name</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={19} color="#243B53" />
+              <Ionicons name="person-outline" size={19} color="#2E7D6B" />
 
               <TextInput
                 ref={fullNameInputRef}
@@ -275,7 +283,7 @@ export default function EditProfileModal({
                 value={fullName}
                 onChangeText={setFullName}
                 placeholder="Enter full name"
-                placeholderTextColor="#7C858D"
+                placeholderTextColor="#6B7C73"
                 autoCapitalize="words"
                 editable={!saving}
               />
@@ -284,7 +292,7 @@ export default function EditProfileModal({
             <Text style={styles.label}>Email Address</Text>
 
             <View style={[styles.inputContainer, styles.disabledInput]}>
-              <Ionicons name="mail-outline" size={19} color="#7C858D" />
+              <Ionicons name="mail-outline" size={19} color="#6B7C73" />
 
               <TextInput
                 style={[styles.input, styles.disabledInputText]}
@@ -292,7 +300,7 @@ export default function EditProfileModal({
                 editable={false}
               />
 
-              <Ionicons name="lock-closed-outline" size={15} color="#A1AAA5" />
+              <Ionicons name="lock-closed-outline" size={15} color="#6B7C73" />
             </View>
 
             <Text style={styles.helperText}>
@@ -302,19 +310,21 @@ export default function EditProfileModal({
             <Text style={styles.label}>Contact Number</Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="call-outline" size={19} color="#243B53" />
+              <Ionicons name="call-outline" size={19} color="#2E7D6B" />
 
               <TextInput
                 ref={contactInputRef}
                 onFocus={() => handleInputFocus(contactInputRef.current)}
                 style={styles.input}
                 value={contactNumber}
-                onChangeText={setContactNumber}
+                onChangeText={(value) =>
+                  setContactNumber(sanitizePhilippineMobileNumber(value))
+                }
                 placeholder="Enter contact number"
-                placeholderTextColor="#7C858D"
+                placeholderTextColor="#6B7C73"
                 keyboardType="phone-pad"
                 editable={!saving}
-                maxLength={20}
+                maxLength={11}
               />
             </View>
 
@@ -324,7 +334,7 @@ export default function EditProfileModal({
               <Ionicons
                 name="location-outline"
                 size={19}
-                color="#243B53"
+                color="#2E7D6B"
                 style={styles.addressIcon}
               />
 
@@ -335,7 +345,7 @@ export default function EditProfileModal({
                 value={address}
                 onChangeText={setAddress}
                 placeholder="Enter address"
-                placeholderTextColor="#7C858D"
+                placeholderTextColor="#6B7C73"
                 multiline
                 textAlignVertical="top"
                 autoCapitalize="words"
@@ -396,7 +406,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     width: "100%",
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     maxHeight: "90%",
@@ -412,7 +422,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 5,
     borderRadius: 3,
-    backgroundColor: "#D5DCD7",
+    backgroundColor: "#CFE8DD",
     alignSelf: "center",
     marginBottom: 13,
   },
@@ -424,18 +434,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: 1,
-    borderBottomColor: "#E7EBE8",
+    borderBottomColor: "#FFF5E9",
   },
 
   title: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   subtitle: {
     fontSize: 11,
-    color: "#7C858D",
+    color: "#6B7C73",
     marginTop: 3,
   },
 
@@ -443,7 +453,7 @@ const styles = StyleSheet.create({
     width: 39,
     height: 39,
     borderRadius: 20,
-    backgroundColor: "#EEF3EF",
+    backgroundColor: "#FFF5E9",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -457,7 +467,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#34463B",
+    color: "#2E3A34",
     marginBottom: 8,
     marginTop: 15,
   },
@@ -466,7 +476,7 @@ const styles = StyleSheet.create({
     minHeight: 53,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 14,
     paddingHorizontal: 14,
     flexDirection: "row",
@@ -477,21 +487,21 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 13,
-    color: "#26372D",
+    color: "#2E3A34",
     paddingVertical: 12,
   },
 
   disabledInput: {
-    backgroundColor: "#F2F4F2",
+    backgroundColor: "#FFF5E9",
   },
 
   disabledInputText: {
-    color: "#818B85",
+    color: "#6B7C73",
   },
 
   helperText: {
     fontSize: 9,
-    color: "#919B95",
+    color: "#6B7C73",
     marginTop: 6,
     marginLeft: 3,
   },
@@ -521,7 +531,7 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#D7DFD9",
+    borderColor: "#CFE8DD",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -530,14 +540,14 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 12,
     fontWeight: "800",
-    color: "#637067",
+    color: "#6B7C73",
   },
 
   saveButton: {
     flex: 1.5,
     height: 52,
     borderRadius: 14,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

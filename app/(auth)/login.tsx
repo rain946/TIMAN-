@@ -22,6 +22,11 @@ import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
 
 import { registerDeviceForPushNotifications } from "../../services/notificationService";
 import { checkNearbyAlertEnrollmentForSession } from "../../services/nearbyAlertEnrollment";
+import {
+  GMAIL_VALIDATION_MESSAGE,
+  isValidGmailAddress,
+  normalizeEmail,
+} from "../../utils/validation";
 
 type AuthenticatedUser = {
   user_id?: number;
@@ -69,12 +74,19 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail || !password.trim()) {
       Alert.alert(
         "Incomplete Information",
         "Please enter your email and password.",
       );
 
+      return;
+    }
+
+    if (!isValidGmailAddress(normalizedEmail)) {
+      Alert.alert("Invalid Email", GMAIL_VALIDATION_MESSAGE);
       return;
     }
 
@@ -86,7 +98,7 @@ export default function LoginScreen() {
 
     console.log("LOGIN URL:", loginUrl);
 
-    console.log("EMAIL:", email.trim().toLowerCase());
+    console.log("EMAIL:", normalizedEmail);
 
     try {
       setLoading(true);
@@ -101,7 +113,7 @@ export default function LoginScreen() {
         },
 
         body: JSON.stringify({
-          email: email.trim().toLowerCase(),
+          email: normalizedEmail,
 
           password,
         }),
@@ -194,7 +206,7 @@ export default function LoginScreen() {
             disabled={loading}
             onPress={() => router.back()}
           >
-            <Ionicons name="chevron-back" size={28} color="#243B53" />
+            <Ionicons name="chevron-back" size={28} color="#2E7D6B" />
           </Pressable>
 
           <View style={styles.logoContainer}>
@@ -214,14 +226,14 @@ export default function LoginScreen() {
           <Text style={styles.label}>Email</Text>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={21} color="#7C858D" />
+            <Ionicons name="mail-outline" size={21} color="#6B7C73" />
 
             <TextInput
               ref={emailInputRef}
               onFocus={() => handleInputFocus(emailInputRef.current)}
               style={styles.input}
               placeholder="Enter your email"
-              placeholderTextColor="#7C858D"
+              placeholderTextColor="#6B7C73"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -234,14 +246,14 @@ export default function LoginScreen() {
           <Text style={styles.label}>Password</Text>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={21} color="#7C858D" />
+            <Ionicons name="lock-closed-outline" size={21} color="#6B7C73" />
 
             <TextInput
               ref={passwordInputRef}
               onFocus={() => handleInputFocus(passwordInputRef.current)}
               style={styles.input}
               placeholder="Enter your password"
-              placeholderTextColor="#7C858D"
+              placeholderTextColor="#6B7C73"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -262,7 +274,7 @@ export default function LoginScreen() {
               <Ionicons
                 name={showPassword ? "eye-off-outline" : "eye-outline"}
                 size={21}
-                color="#7C858D"
+                color="#6B7C73"
               />
             </Pressable>
           </View>
@@ -303,7 +315,7 @@ export default function LoginScreen() {
             <Ionicons
               name="shield-checkmark-outline"
               size={21}
-              color="#243B53"
+              color="#2E7D6B"
             />
 
             <Text style={styles.roleInfoText}>
@@ -329,14 +341,14 @@ export default function LoginScreen() {
             disabled={loading}
             onPress={() => router.push("/register")}
           >
-            <Ionicons name="person-add-outline" size={20} color="#243B53" />
+            <Ionicons name="person-add-outline" size={20} color="#2E7D6B" />
 
             <Text style={styles.createButtonText}>Create an Account</Text>
           </Pressable>
 
           <View style={styles.securityCard}>
             <View style={styles.securityIcon}>
-              <Ionicons name="lock-closed" size={20} color="#243B53" />
+              <Ionicons name="lock-closed" size={20} color="#2E7D6B" />
             </View>
 
             <View style={styles.securityContent}>
@@ -357,7 +369,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
   },
 
   content: {
@@ -384,7 +396,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 39,
     fontWeight: "900",
-    color: "#243B53",
+    color: "#2E7D6B",
     letterSpacing: 2,
     marginTop: -6,
   },
@@ -398,12 +410,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: "900",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   subtitle: {
     fontSize: 16,
-    color: "#7C858D",
+    color: "#6B7C73",
     lineHeight: 23,
     textAlign: "center",
     marginTop: 7,
@@ -413,7 +425,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#2B3440",
+    color: "#2E3A34",
     marginBottom: 7,
   },
 
@@ -421,7 +433,7 @@ const styles = StyleSheet.create({
     minHeight: 58,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E6E9ED",
+    borderColor: "#CFE8DD",
     borderRadius: 13,
     flexDirection: "row",
     alignItems: "center",
@@ -433,7 +445,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 11,
     fontSize: 17,
-    color: "#2B3440",
+    color: "#2E3A34",
     paddingVertical: 15,
   },
 
@@ -457,12 +469,12 @@ const styles = StyleSheet.create({
   forgotText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 
   loginButton: {
     height: 58,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
@@ -489,7 +501,7 @@ const styles = StyleSheet.create({
   },
 
   roleInfo: {
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     borderRadius: 13,
     padding: 12,
     flexDirection: "row",
@@ -501,7 +513,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     lineHeight: 19,
-    color: "#4C6A92",
+    color: "#56B091",
     marginLeft: 8,
   },
 
@@ -514,19 +526,19 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E6E9ED",
+    backgroundColor: "#CFE8DD",
   },
 
   dividerText: {
     fontSize: 13,
-    color: "#7C858D",
+    color: "#6B7C73",
     marginHorizontal: 10,
   },
 
   createButton: {
     height: 55,
     borderWidth: 1.5,
-    borderColor: "#243B53",
+    borderColor: "#2E7D6B",
     borderRadius: 13,
     flexDirection: "row",
     alignItems: "center",
@@ -535,13 +547,13 @@ const styles = StyleSheet.create({
   },
 
   createButtonText: {
-    color: "#243B53",
+    color: "#2E7D6B",
     fontSize: 16,
     fontWeight: "800",
   },
 
   securityCard: {
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     borderRadius: 15,
     padding: 14,
     flexDirection: "row",
@@ -565,12 +577,12 @@ const styles = StyleSheet.create({
   securityTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#2B3440",
+    color: "#2E3A34",
   },
 
   securityText: {
     fontSize: 13,
-    color: "#718077",
+    color: "#6B7C73",
     lineHeight: 19,
     marginTop: 3,
   },

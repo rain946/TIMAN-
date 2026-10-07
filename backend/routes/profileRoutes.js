@@ -7,6 +7,10 @@ const path = require("path");
 
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
+const {
+  CONTACT_NUMBER_VALIDATION_MESSAGE,
+  isValidPhilippineMobileNumber,
+} = require("../utils/validation");
 
 const router = express.Router();
 
@@ -124,9 +128,10 @@ router.put("/", authMiddleware, async (req, res) => {
       full_name || ""
     ).trim();
 
-    const cleanContactNumber = String(
-      contact_number || ""
-    ).trim();
+    const cleanContactNumber =
+      typeof contact_number === "string"
+        ? contact_number
+        : "";
 
     const cleanAddress = String(
       address || ""
@@ -160,11 +165,10 @@ router.put("/", authMiddleware, async (req, res) => {
       });
     }
 
-    if (cleanContactNumber.length > 20) {
+    if (!isValidPhilippineMobileNumber(cleanContactNumber)) {
       return res.status(400).json({
         success: false,
-        message:
-          "Contact number is too long.",
+        message: CONTACT_NUMBER_VALIDATION_MESSAGE,
       });
     }
 

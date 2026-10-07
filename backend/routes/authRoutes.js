@@ -3,6 +3,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const db = require("../config/db");
+const {
+  CONTACT_NUMBER_VALIDATION_MESSAGE,
+  GMAIL_VALIDATION_MESSAGE,
+  isValidGmailAddress,
+  isValidPhilippineMobileNumber,
+  normalizeEmail,
+} = require("../utils/validation");
 
 const router = express.Router();
 
@@ -38,6 +45,22 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!isValidGmailAddress(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: GMAIL_VALIDATION_MESSAGE,
+      });
+    }
+
+    if (!isValidPhilippineMobileNumber(contactNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: CONTACT_NUMBER_VALIDATION_MESSAGE,
+      });
+    }
+
     
     if (!["owner", "clinic"].includes(role)) {
       return res.status(400).json({
@@ -62,11 +85,6 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    const normalizedEmail = email
-      .trim()
-      .toLowerCase();
-
-    
     const [existingUsers] = await db.query(
       "SELECT user_id FROM users WHERE email = ?",
       [normalizedEmail]
@@ -102,7 +120,7 @@ router.post("/register", async (req, res) => {
         fullName.trim(),
         normalizedEmail,
         hashedPassword,
-        contactNumber.trim(),
+        contactNumber,
         address.trim(),
         role,
         role === "clinic"
@@ -151,9 +169,14 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const normalizedEmail = email
-      .trim()
-      .toLowerCase();
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!isValidGmailAddress(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: GMAIL_VALIDATION_MESSAGE,
+      });
+    }
 
     
     const [users] = await db.query(

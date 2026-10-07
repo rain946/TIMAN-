@@ -62,13 +62,13 @@ export default function NearbyLostPetScreen() {
       </View>
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#243B53" />
+          <ActivityIndicator size="large" color="#2E7D6B" />
           <Text style={styles.loadingText}>Loading missing-pet details...</Text>
         </View>
       ) : pet ? (
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.alertCard}>
-            <Ionicons name="alert-circle" size={30} color="#E88C7D" />
+            <Ionicons name="alert-circle" size={30} color="#E57373" />
             <View style={styles.alertText}>
               <Text style={styles.alertTitle}>{pet.petName} is missing</Text>
               <Text style={styles.alertDescription}>
@@ -82,7 +82,7 @@ export default function NearbyLostPetScreen() {
               <Image source={{ uri: getImageUrl(pet.photoUrl) || undefined }} style={styles.photo} contentFit="cover" />
             ) : (
               <View style={styles.photoPlaceholder}>
-                <Ionicons name="paw" size={44} color="#243B53" />
+                <Ionicons name="paw" size={44} color="#2E7D6B" />
               </View>
             )}
             <Text style={styles.petName}>{pet.petName}</Text>
@@ -98,7 +98,7 @@ export default function NearbyLostPetScreen() {
           </View>
 
           <View style={styles.privacyCard}>
-            <Ionicons name="shield-checkmark-outline" size={22} color="#243B53" />
+            <Ionicons name="shield-checkmark-outline" size={22} color="#2E7D6B" />
             <Text style={styles.privacyText}>
               For privacy, exact finder and owner coordinates are not shown. If you see this pet, scan its TIMAN QR tag to contact the owner.
             </Text>
@@ -106,7 +106,7 @@ export default function NearbyLostPetScreen() {
         </ScrollView>
       ) : (
         <View style={styles.center}>
-          <Ionicons name="shield-checkmark-outline" size={46} color="#243B53" />
+          <Ionicons name="shield-checkmark-outline" size={46} color="#2E7D6B" />
           <Text style={styles.emptyTitle}>Pet details unavailable</Text>
           <Text style={styles.emptyText}>The pet may already have been marked safe.</Text>
         </View>
@@ -125,28 +125,28 @@ function Detail({ label, value }: { label: string; value: string | null }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F6F0E6" },
-  header: { height: 64, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#243B53", borderBottomWidth: 1, borderBottomColor: "#243B53" },
+  container: { flex: 1, backgroundColor: "#FFF5E9" },
+  header: { height: 64, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#2E7D6B", borderBottomWidth: 1, borderBottomColor: "#2E7D6B" },
   headerButton: { width: 42, height: 42, alignItems: "center", justifyContent: "center" },
   headerTitle: { fontSize: 20, fontWeight: "800", color: "#FFFFFF" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 30 },
-  loadingText: { color: "#7C858D", marginTop: 10 },
+  loadingText: { color: "#6B7C73", marginTop: 10 },
   content: { width: "100%", maxWidth: 680, alignSelf: "center", padding: 22, paddingBottom: 50 },
-  alertCard: { backgroundColor: "#FBE3DE", borderRadius: 17, padding: 15, flexDirection: "row", alignItems: "center" },
+  alertCard: { backgroundColor: "rgba(229, 115, 115, 0.14)", borderRadius: 17, padding: 15, flexDirection: "row", alignItems: "center" },
   alertText: { flex: 1, marginLeft: 11 },
-  alertTitle: { fontSize: 16, fontWeight: "900", color: "#E88C7D" },
-  alertDescription: { fontSize: 12, lineHeight: 18, color: "#7C858D", marginTop: 3 },
-  petCard: { backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E6E9ED", borderRadius: 20, padding: 18, marginTop: 16, alignItems: "center", shadowColor: "#243B53", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 10, elevation: 3 },
+  alertTitle: { fontSize: 16, fontWeight: "900", color: "#E57373" },
+  alertDescription: { fontSize: 12, lineHeight: 18, color: "#6B7C73", marginTop: 3 },
+  petCard: { backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#CFE8DD", borderRadius: 20, padding: 18, marginTop: 16, alignItems: "center", shadowColor: "#2E7D6B", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 10, elevation: 3 },
   photo: { width: 130, height: 130, borderRadius: 20 },
-  photoPlaceholder: { width: 130, height: 130, borderRadius: 20, backgroundColor: "#DCEAF7", alignItems: "center", justifyContent: "center" },
-  petName: { fontSize: 24, fontWeight: "900", color: "#2B3440", marginTop: 14 },
-  petMeta: { fontSize: 13, color: "#7C858D", marginTop: 4 },
-  details: { width: "100%", marginTop: 18, borderTopWidth: 1, borderTopColor: "#E6E9ED" },
-  detailRow: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#E6E9ED" },
-  detailLabel: { fontSize: 11, color: "#7C858D" },
-  detailValue: { fontSize: 14, fontWeight: "700", color: "#4C6A92", marginTop: 3 },
-  privacyCard: { backgroundColor: "#DCEAF7", borderRadius: 15, padding: 14, marginTop: 16, flexDirection: "row" },
-  privacyText: { flex: 1, fontSize: 12, lineHeight: 18, color: "#7C858D", marginLeft: 9 },
-  emptyTitle: { fontSize: 18, fontWeight: "900", color: "#2B3440", marginTop: 10 },
-  emptyText: { fontSize: 13, color: "#7C858D", textAlign: "center", marginTop: 5 },
+  photoPlaceholder: { width: 130, height: 130, borderRadius: 20, backgroundColor: "#CFE8DD", alignItems: "center", justifyContent: "center" },
+  petName: { fontSize: 24, fontWeight: "900", color: "#2E3A34", marginTop: 14 },
+  petMeta: { fontSize: 13, color: "#6B7C73", marginTop: 4 },
+  details: { width: "100%", marginTop: 18, borderTopWidth: 1, borderTopColor: "#CFE8DD" },
+  detailRow: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#CFE8DD" },
+  detailLabel: { fontSize: 11, color: "#6B7C73" },
+  detailValue: { fontSize: 14, fontWeight: "700", color: "#56B091", marginTop: 3 },
+  privacyCard: { backgroundColor: "#CFE8DD", borderRadius: 15, padding: 14, marginTop: 16, flexDirection: "row" },
+  privacyText: { flex: 1, fontSize: 12, lineHeight: 18, color: "#6B7C73", marginLeft: 9 },
+  emptyTitle: { fontSize: 18, fontWeight: "900", color: "#2E3A34", marginTop: 10 },
+  emptyText: { fontSize: 13, color: "#6B7C73", textAlign: "center", marginTop: 5 },
 });

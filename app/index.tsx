@@ -66,7 +66,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F0E6",
+    backgroundColor: "#FFF5E9",
     paddingHorizontal: 25,
     paddingTop: 20,
   },
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 58,
     fontWeight: "900",
-    color: "#243B53",
+    color: "#2E7D6B",
     letterSpacing: 2,
   },
 
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 20,
     lineHeight: 28,
-    color: "#4C6A92",
+    color: "#56B091",
     fontWeight: "500",
   },
 
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 230,
     borderRadius: 100,
-    backgroundColor: "#DCEAF7",
+    backgroundColor: "#CFE8DD",
     bottom: 5,
   },
 
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
 
   tagline: {
     alignSelf: "center",
-    backgroundColor: "#4C6A92",
+    backgroundColor: "#56B091",
     paddingVertical: 11,
     paddingHorizontal: 25,
     borderRadius: 25,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
 
   button: {
     height: 58,
-    backgroundColor: "#243B53",
+    backgroundColor: "#2E7D6B",
     borderRadius: 15,
     marginTop: 45,
     flexDirection: "row",
@@ -173,12 +173,12 @@ const styles = StyleSheet.create({
   },
 
   loginText: {
-    color: "#335C46",
+    color: "#2E3A34",
     fontSize: 16,
   },
 
   loginLink: {
-    color: "#243B53",
+    color: "#2E7D6B",
     fontSize: 16,
     fontWeight: "700",
     textDecorationLine: "underline",
@@ -206,6 +206,6 @@ const styles = StyleSheet.create({
 
   bottomHeart: {
     fontSize: 45,
-    color: "#243B53",
+    color: "#2E7D6B",
   },
 });
