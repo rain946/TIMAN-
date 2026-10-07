@@ -21,6 +21,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
 
@@ -805,35 +806,27 @@ export default function PetProfileScreen() {
             )}
           </Pressable>
 
-          <Text style={styles.petName}>{pet.pet_name}</Text>
+          <View style={styles.identityCard}>
+            <Text style={styles.petName}>{pet.pet_name}</Text>
 
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor: getStatusBackground(),
-              },
-            ]}
-          >
             <View
               style={[
-                styles.statusDot,
+                styles.statusBadge,
                 {
-                  backgroundColor: getStatusColor(),
-                },
-              ]}
-            />
-
-            <Text
-              style={[
-                styles.statusText,
-                {
-                  color: getStatusColor(),
+                  backgroundColor: getStatusBackground(),
                 },
               ]}
             >
-              {pet.pet_status.toUpperCase()}
-            </Text>
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: getStatusColor() },
+                ]}
+              />
+              <Text style={[styles.statusText, { color: getStatusColor() }]}>
+                {pet.pet_status.toUpperCase()}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -1349,7 +1342,7 @@ const styles = StyleSheet.create({
   },
 
   petName: {
-    marginTop: 13,
+    marginTop: 0,
     fontSize: 29,
     lineHeight: 36,
     fontWeight: "900",
@@ -1403,11 +1396,29 @@ const styles = StyleSheet.create({
   },
 
   infoCard: {
+    ...timanShadow,
     backgroundColor: "#FFFFFF",
     borderRadius: 17,
     borderWidth: 1,
     borderColor: "#CFE8DD",
     paddingHorizontal: 16,
+  },
+  identityCard: {
+    width: "100%",
+    maxWidth: 360,
+    marginTop: 18,
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#CFE8DD",
+    alignItems: "center",
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
 
   infoRow: {

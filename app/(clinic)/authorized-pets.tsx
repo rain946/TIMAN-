@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../config/api";
 
@@ -365,6 +366,7 @@ const styles = StyleSheet.create({
   resultCount: { fontSize: 10, fontWeight: "700", color: "#6B7C73" },
   petList: { gap: 10 },
   petCard: {
+    ...timanShadow,
     minHeight: 128,
     borderRadius: 19,
     padding: 14,

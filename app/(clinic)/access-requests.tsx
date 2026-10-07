@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../config/api";
 
@@ -397,6 +398,7 @@ const styles = StyleSheet.create({
   filterTextSelected: { color: "#FFFFFF" },
   list: { gap: 10 },
   card: {
+    ...timanShadow,
     minHeight: 122,
     borderRadius: 18,
     padding: 14,

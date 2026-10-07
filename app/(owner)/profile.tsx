@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 import EditProfileModal from "../../components/modals/EditProfileModal";
 import ChangePasswordModal from "../../components/modals/ChangePasswordModal";
 
@@ -521,6 +522,7 @@ const styles = StyleSheet.create({
   },
 
   profileCard: {
+    ...timanShadow,
     backgroundColor: "#CFE8DD",
     borderRadius: 22,
     paddingVertical: 24,

@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { timanColors, timanRadii, timanShadow } from "../timan/theme";
+
 type ClinicTabItemProps = {
   activeIcon: keyof typeof Ionicons.glyphMap;
   focused: boolean;
@@ -15,7 +17,7 @@ export function ClinicTabItem({
   inactiveIcon,
   label,
 }: ClinicTabItemProps) {
-  const color = focused ? "#2E7D6B" : "#6B7C73";
+  const color = focused ? timanColors.primary : timanColors.muted;
 
   return (
     <View style={styles.tabItemContent}>
@@ -56,7 +58,7 @@ export function ClinicScanTabButton({
       ]}
     >
       <View style={styles.scanButtonCircle}>
-        <Ionicons name="scan" size={29} color="#FFFFFF" />
+        <Ionicons name="scan" size={29} color={timanColors.white} />
       </View>
     </Pressable>
   );
@@ -64,16 +66,17 @@ export function ClinicScanTabButton({
 
 export const clinicBottomNavStyles = StyleSheet.create({
   tabBar: {
-    backgroundColor: "#FFFFFF",
-    borderTopColor: "#CFE8DD",
+    marginHorizontal: 12,
+    marginBottom: 8,
+    borderRadius: timanRadii.large,
+    backgroundColor: timanColors.white,
+    borderTopColor: timanColors.lightMint,
     borderTopWidth: 1,
-    elevation: 8,
+    borderWidth: 1,
+    borderColor: timanColors.lightMint,
     overflow: "visible",
     paddingTop: 6,
-    shadowColor: "#2E7D6B",
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
+    ...timanShadow,
   },
   tabBarItem: {
     height: 66,
@@ -98,19 +101,19 @@ const styles = StyleSheet.create({
   },
   scanButtonCircle: {
     alignItems: "center",
-    backgroundColor: "#2E7D6B",
+    backgroundColor: timanColors.primary,
     borderRadius: 30,
     elevation: 6,
     height: 60,
     justifyContent: "center",
-    shadowColor: "#2E7D6B",
+    shadowColor: timanColors.primary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 5,
     width: 60,
   },
   tabText: {
-    color: "#6B7C73",
+    color: timanColors.muted,
     fontSize: 10,
     fontWeight: "600",
     marginTop: 4,
@@ -119,7 +122,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   activeTabText: {
-    color: "#2E7D6B",
+    color: timanColors.primary,
     fontWeight: "800",
   },
 });

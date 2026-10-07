@@ -16,6 +16,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 import { API_URL } from "../../config/api";
 
 type PetStatus = "Safe" | "Missing" | "Found";
@@ -274,6 +275,9 @@ export default function PetsScreen() {
 
                 return (
                   <View key={pet.pet_id} style={styles.petCard}>
+                    <View style={styles.petDecor} pointerEvents="none">
+                      <Ionicons name="paw" size={34} color="#56B091" />
+                    </View>
                     <Pressable
                       style={({ pressed }) => [
                         styles.petMainArea,
@@ -541,12 +545,27 @@ const styles = StyleSheet.create({
   },
 
   petCard: {
+    ...timanShadow,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#CFE8DD",
     borderRadius: 20,
     overflow: "hidden",
     marginBottom: 16,
+    position: "relative",
+  },
+  petDecor: {
+    position: "absolute",
+    right: -10,
+    top: -10,
+    width: 72,
+    height: 72,
+    borderBottomLeftRadius: 42,
+    backgroundColor: "#CFE8DD",
+    opacity: 0.42,
+    alignItems: "center",
+    justifyContent: "center",
+    transform: [{ rotate: "-14deg" }],
   },
 
   petMainArea: {
@@ -557,9 +576,12 @@ const styles = StyleSheet.create({
   },
 
   petImageContainer: {
-    width: 92,
-    height: 92,
-    borderRadius: 18,
+    width: 108,
+    height: 118,
+    borderTopLeftRadius: 26,
+    borderBottomRightRadius: 26,
+    borderTopRightRadius: 14,
+    borderBottomLeftRadius: 14,
     overflow: "hidden",
     backgroundColor: "#CFE8DD",
   },

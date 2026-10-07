@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../config/api";
 
@@ -789,6 +790,7 @@ const styles = StyleSheet.create({
   },
 
   petCard: {
+    ...timanShadow,
     backgroundColor: "#FFFFFF",
 
     borderWidth: 1,

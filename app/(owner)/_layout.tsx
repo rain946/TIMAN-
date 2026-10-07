@@ -1,10 +1,50 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Tabs, usePathname } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { Platform, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+
+import { API_URL } from "../../config/api";
+import {
+  timanColors,
+  timanRadii,
+  timanShadow,
+} from "../../components/timan/theme";
 
 export default function OwnerTabsLayout() {
   const { width } = useWindowDimensions();
   const compact = width < 360;
+  const pathname = usePathname();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setUnreadCount(0);
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/notifications/unread-count`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setUnreadCount(Math.max(0, Number(data.unreadCount) || 0));
+      }
+    } catch (error) {
+      console.log("LOAD UNREAD NOTIFICATION COUNT ERROR:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadUnreadCount();
+  }, [loadUnreadCount, pathname]);
 
   return (
     <Tabs
@@ -18,7 +58,7 @@ export default function OwnerTabsLayout() {
         tabBarItemStyle: [styles.tabBarItem, compact && styles.compactTabBarItem],
 
         sceneStyle: {
-          backgroundColor: "#FFF5E9",
+          backgroundColor: timanColors.cream,
           width: "100%",
           maxWidth: 680,
           alignSelf: "center",
@@ -68,6 +108,7 @@ export default function OwnerTabsLayout() {
               activeIcon="notifications"
               inactiveIcon="notifications-outline"
               label="Alerts"
+              badgeCount={unreadCount}
             />
           ),
         }}
@@ -97,19 +138,31 @@ function TabItem({
   activeIcon,
   inactiveIcon,
   label,
+  badgeCount = 0,
 }: {
   focused: boolean;
   activeIcon: keyof typeof Ionicons.glyphMap;
   inactiveIcon: keyof typeof Ionicons.glyphMap;
   label: string;
+  badgeCount?: number;
 }) {
   return (
     <View style={styles.tabItemContent}>
-      <Ionicons
-        name={focused ? activeIcon : inactiveIcon}
-        size={23}
-        color={focused ? "#2E7D6B" : "#6B7C73"}
-      />
+      <View style={styles.iconContainer}>
+        <Ionicons
+          name={focused ? activeIcon : inactiveIcon}
+          size={23}
+          color={focused ? timanColors.primary : timanColors.muted}
+        />
+
+        {badgeCount > 0 ? (
+          <View style={styles.notificationBadge}>
+            <Text style={styles.notificationBadgeText}>
+              {badgeCount > 99 ? "99+" : badgeCount}
+            </Text>
+          </View>
+        ) : null}
+      </View>
 
       <Text style={[styles.tabText, focused && styles.activeTabText]}>
         {label}
@@ -121,21 +174,19 @@ function TabItem({
 const styles = StyleSheet.create({
   tabBar: {
     height: 78,
-    backgroundColor: "#FFFFFF",
+    marginHorizontal: 12,
+    marginBottom: Platform.OS === "android" ? 8 : 4,
+    borderRadius: timanRadii.large,
+    backgroundColor: timanColors.white,
 
-    borderTopWidth: 1,
-    borderTopColor: "#CFE8DD",
+    borderWidth: 1,
+    borderColor: timanColors.lightMint,
 
     paddingTop: 5,
 
     paddingBottom: Platform.OS === "android" ? 5 : 8,
 
-    elevation: 8,
-
-    shadowColor: "#2E7D6B",
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
+    ...timanShadow,
   },
 
   tabBarItem: {
@@ -157,15 +208,41 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
+  iconContainer: {
+    position: "relative",
+  },
+
+  notificationBadge: {
+    position: "absolute",
+    top: -9,
+    right: -13,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    backgroundColor: timanColors.danger,
+    borderWidth: 2,
+    borderColor: timanColors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  notificationBadgeText: {
+    color: timanColors.white,
+    fontSize: 9,
+    lineHeight: 11,
+    fontWeight: "900",
+  },
+
   tabText: {
     marginTop: 4,
     fontSize: 10,
     fontWeight: "600",
-    color: "#6B7C73",
+    color: timanColors.muted,
   },
 
   activeTabText: {
-    color: "#2E7D6B",
+    color: timanColors.primary,
     fontWeight: "800",
   },
 });

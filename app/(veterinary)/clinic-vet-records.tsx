@@ -16,6 +16,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../config/api";
 
@@ -1001,6 +1002,7 @@ const styles = StyleSheet.create({
   },
 
   recordCard: {
+    ...timanShadow,
     marginBottom: 13,
 
     padding: 16,

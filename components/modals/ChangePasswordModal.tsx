@@ -261,7 +261,7 @@ export default function ChangePasswordModal({
                 disabled={saving}
               >
                 <Ionicons
-                  name={showCurrentPassword ? "eye-off-outline" : "eye-outline"}
+                  name={showCurrentPassword ? "eye-outline" : "eye-off-outline"}
                   size={20}
                   color="#6B7C73"
                 />
@@ -297,7 +297,7 @@ export default function ChangePasswordModal({
                 disabled={saving}
               >
                 <Ionicons
-                  name={showNewPassword ? "eye-off-outline" : "eye-outline"}
+                  name={showNewPassword ? "eye-outline" : "eye-off-outline"}
                   size={20}
                   color="#6B7C73"
                 />
@@ -343,7 +343,7 @@ export default function ChangePasswordModal({
                 disabled={saving}
               >
                 <Ionicons
-                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                  name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
                   size={20}
                   color="#6B7C73"
                 />

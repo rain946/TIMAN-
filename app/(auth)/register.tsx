@@ -199,7 +199,9 @@ export default function RegisterScreen() {
           </Pressable>
 
           <View style={styles.logoContainer}>
-            <Text style={styles.paw}>🐾</Text>
+            <View style={styles.logoMark}>
+              <Ionicons name="paw" size={26} color="#FFFFFF" />
+            </View>
 
             <Text style={styles.logo}>TIMAN</Text>
           </View>
@@ -358,7 +360,7 @@ export default function RegisterScreen() {
               onPress={() => setShowPassword(!showPassword)}
             >
               <Ionicons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                name={showPassword ? "eye-outline" : "eye-off-outline"}
                 size={21}
                 color="#6B7C73"
               />
@@ -396,7 +398,7 @@ export default function RegisterScreen() {
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               <Ionicons
-                name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
                 size={21}
                 color="#6B7C73"
               />
@@ -468,6 +470,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 620,
+    alignSelf: "center",
     paddingHorizontal: 27,
     paddingBottom: 40,
   },
@@ -484,8 +489,18 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  paw: {
-    fontSize: 32,
+  logoMark: {
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: "#2E7D6B",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 9,
+    elevation: 4,
   },
 
   logo: {
@@ -567,6 +582,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 15,
     marginBottom: 13,
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
 
   input: {

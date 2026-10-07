@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL } from "../../config/api";
 
@@ -660,6 +661,7 @@ const styles = StyleSheet.create({
   },
 
   summaryCard: {
+    ...timanShadow,
     flex: 1,
     minHeight: 108,
     paddingVertical: 12,

@@ -15,6 +15,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 import { API_URL } from "../../config/api";
 
 type NotificationItem = {
@@ -734,6 +735,7 @@ const styles = StyleSheet.create({
   },
 
   notificationCard: {
+    ...timanShadow,
     position: "relative",
     backgroundColor: "#FFFFFF",
     borderWidth: 1,

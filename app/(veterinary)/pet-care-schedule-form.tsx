@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 import { API_URL } from "../../config/api";
 
 const CARE_TYPES = ["Grooming", "Bath", "Nail Trimming", "Other"] as const;
@@ -353,6 +354,7 @@ const styles = StyleSheet.create({
     paddingBottom: 50
   },
   petCard: {
+    ...timanShadow,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,

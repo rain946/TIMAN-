@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../../config/api";
 
@@ -311,6 +312,10 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
       ]}
       onPress={openRecordContext}
     >
+      <View style={styles.timelineRail}>
+        <View style={styles.timelineDot} />
+        <View style={styles.timelineLine} />
+      </View>
       <View style={styles.photoContainer}>
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
@@ -420,6 +425,7 @@ const styles = StyleSheet.create({
   summaryCount: { fontSize: 12, fontWeight: "700", color: "#6B7C73" },
   recordList: { gap: 10 },
   recordCard: {
+    ...timanShadow,
     minHeight: 132,
     borderRadius: 19,
     padding: 14,
@@ -428,6 +434,26 @@ const styles = StyleSheet.create({
     borderColor: "#CFE8DD",
     flexDirection: "row",
     alignItems: "center",
+  },
+  timelineRail: {
+    width: 18,
+    alignSelf: "stretch",
+    alignItems: "center",
+  },
+  timelineDot: {
+    width: 12,
+    height: 12,
+    marginTop: 13,
+    borderRadius: 6,
+    backgroundColor: "#2E7D6B",
+    borderWidth: 3,
+    borderColor: "#CFE8DD",
+  },
+  timelineLine: {
+    flex: 1,
+    width: 2,
+    marginTop: 5,
+    backgroundColor: "#CFE8DD",
   },
   cardPressed: { opacity: 0.74, transform: [{ scale: 0.99 }] },
   photoContainer: {

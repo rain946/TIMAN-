@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 import { useCallback, useState } from "react";
 
 import { API_URL } from "../../config/api";
@@ -604,6 +605,9 @@ function PetCard({ pet, onPress }: { pet: Pet; onPress: () => void }) {
       style={({ pressed }) => [styles.petCard, pressed && styles.pressed]}
       onPress={onPress}
     >
+      <View style={styles.petCardAccent} pointerEvents="none">
+        <Ionicons name="paw" size={28} color="#56B091" />
+      </View>
       <View style={styles.petImageContainer}>
         {imageSource ? (
           <Image
@@ -1155,6 +1159,7 @@ const styles = StyleSheet.create({
   },
 
   petCard: {
+    ...timanShadow,
     minHeight: 105,
     borderRadius: 18,
     padding: 12,
@@ -1169,12 +1174,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
+    position: "relative",
+    overflow: "hidden",
+  },
+
+  petCardAccent: {
+    position: "absolute",
+    right: -14,
+    bottom: -18,
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    backgroundColor: "#E7F3ED",
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0.65,
   },
 
   petImageContainer: {
-    width: 78,
-    height: 78,
-    borderRadius: 16,
+    width: 88,
+    height: 88,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 14,
+    borderBottomRightRadius: 28,
+    borderBottomLeftRadius: 14,
     backgroundColor: "#FFF5E9",
     overflow: "hidden",
   },

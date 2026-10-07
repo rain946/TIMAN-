@@ -4,6 +4,7 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 import { API_URL, getImageUrl } from "../../config/api";
 
 type ArchivedPet = {
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
   loadingText: { marginTop: 12, fontSize: 14, color: "#6B7C73" },
   emptyTitle: { marginTop: 14, fontSize: 19, fontWeight: "900", color: "#2E3A34" },
   emptyText: { marginTop: 6, fontSize: 14, color: "#6B7C73" },
-  card: { minHeight: 108, padding: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#CFE8DD", borderRadius: 18, flexDirection: "row", alignItems: "center" },
+  card: { ...timanShadow, minHeight: 108, padding: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#CFE8DD", borderRadius: 18, flexDirection: "row", alignItems: "center" },
   photo: { width: 72, height: 72, borderRadius: 18, backgroundColor: "#CFE8DD", alignItems: "center", justifyContent: "center" },
   info: { flex: 1, marginLeft: 13 },
   name: { fontSize: 18, fontWeight: "900", color: "#2E3A34" },

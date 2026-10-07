@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../../config/api";
 
@@ -427,6 +428,10 @@ function PendingRequestCard({ request }: { request: PendingRequest }) {
 function ActivityCard({ activity }: { activity: RecentActivity }) {
   const content = (
     <>
+      <View style={styles.activityTimeline} pointerEvents="none">
+        <View style={styles.activityTimelineDot} />
+        <View style={styles.activityTimelineLine} />
+      </View>
       <View style={styles.activityIcon}>
         <Ionicons name="medical-outline" size={21} color="#2E7D6B" />
       </View>
@@ -677,6 +682,7 @@ const styles = StyleSheet.create({
   seeAll: { fontSize: 15, fontWeight: "700", color: "#2E7D6B" },
   seeAllDisabled: { fontSize: 15, fontWeight: "700", color: "#6B7C73" },
   requestCard: {
+    ...timanShadow,
     minHeight: 78,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
@@ -728,6 +734,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 7,
     elevation: 2,
+    position: "relative",
+    paddingLeft: 25,
+  },
+  activityTimeline: {
+    position: "absolute",
+    left: 8,
+    top: 0,
+    bottom: 0,
+    width: 10,
+    alignItems: "center",
+  },
+  activityTimelineDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    backgroundColor: "#56B091",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    zIndex: 1,
+  },
+  activityTimelineLine: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: "#CFE8DD",
   },
   activityIcon: {
     width: 45,

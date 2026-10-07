@@ -2,6 +2,8 @@ import { router, Tabs } from "expo-router";
 import { Platform, StyleSheet, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { timanColors } from "../../../components/timan/theme";
+
 import {
   ClinicScanTabButton,
   ClinicTabItem,
@@ -114,7 +116,7 @@ export default function ClinicTabsLayout() {
 
 const styles = StyleSheet.create({
   scene: {
-    backgroundColor: "#FFF5E9",
+    backgroundColor: timanColors.cream,
   },
   webScene: {
     width: "100%",
@@ -127,7 +129,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderLeftColor: "#CFE8DD",
-    borderRightColor: "#CFE8DD",
+    borderLeftColor: timanColors.lightMint,
+    borderRightColor: timanColors.lightMint,
   },
 });

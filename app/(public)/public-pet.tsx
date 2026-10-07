@@ -183,7 +183,7 @@ export default function PublicPetScreen() {
         </View>
 
         {pet.status === "Missing" && (
-          <>
+          <View style={styles.actionPanel}>
             <Text style={styles.sectionTitle}>Found This Pet?</Text>
 
             <Pressable
@@ -209,7 +209,7 @@ export default function PublicPetScreen() {
 
               <Text style={styles.foundButtonText}>Report Pet Found</Text>
             </Pressable>
-          </>
+          </View>
         )}
 
         <View style={styles.privacyCard}>
@@ -294,6 +294,9 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    width: "100%",
+    maxWidth: 680,
+    alignSelf: "center",
     paddingHorizontal: 22,
     paddingBottom: 45,
   },
@@ -305,6 +308,8 @@ const styles = StyleSheet.create({
     marginTop: 18,
     flexDirection: "row",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#56B091",
   },
 
   verifiedContent: {
@@ -313,13 +318,14 @@ const styles = StyleSheet.create({
   },
 
   verifiedTitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
     color: "#2E3A34",
   },
 
   verifiedText: {
-    fontSize: 9,
+    fontSize: 11,
+    lineHeight: 16,
     color: "#6B7C73",
     marginTop: 2,
   },
@@ -330,6 +336,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#CFE8DD",
     marginTop: 15,
+    borderWidth: 1,
+    borderColor: "#CFE8DD",
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   },
 
   petImage: {
@@ -369,7 +382,7 @@ const styles = StyleSheet.create({
   },
 
   petBreed: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#6B7C73",
     marginTop: 3,
   },
@@ -399,14 +412,14 @@ const styles = StyleSheet.create({
   },
 
   alertTitle: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "900",
     color: "#E57373",
   },
 
   alertText: {
-    fontSize: 10,
-    lineHeight: 16,
+    fontSize: 12,
+    lineHeight: 18,
     color: "#E57373",
     marginTop: 4,
   },
@@ -449,13 +462,13 @@ const styles = StyleSheet.create({
 
   infoLabel: {
     flex: 1,
-    fontSize: 11,
+    fontSize: 13,
     color: "#6B7C73",
     marginLeft: 10,
   },
 
   infoValue: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
     color: "#2E3A34",
   },
@@ -483,8 +496,8 @@ const styles = StyleSheet.create({
   markText: {
     flex: 1,
     marginLeft: 10,
-    fontSize: 11,
-    lineHeight: 17,
+    fontSize: 13,
+    lineHeight: 19,
     color: "#6B7C73",
   },
 
@@ -518,19 +531,19 @@ const styles = StyleSheet.create({
   },
 
   ownerLabel: {
-    fontSize: 8,
+    fontSize: 11,
     color: "#6B7C73",
   },
 
   ownerName: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "800",
     color: "#2E3A34",
     marginTop: 2,
   },
 
   ownerPrivacy: {
-    fontSize: 8,
+    fontSize: 10,
     color: "#6B7C73",
     marginTop: 2,
   },
@@ -543,6 +556,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+  },
+
+  actionPanel: {
+    marginTop: 24,
+    padding: 16,
+    borderRadius: 24,
+    backgroundColor: "#E7F3ED",
+    borderWidth: 1,
+    borderColor: "#CFE8DD",
   },
 
   contactButtonText: {
@@ -584,14 +606,14 @@ const styles = StyleSheet.create({
   },
 
   privacyTitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
     color: "#2E3A34",
   },
 
   privacyText: {
-    fontSize: 9,
-    lineHeight: 15,
+    fontSize: 11,
+    lineHeight: 17,
     color: "#6B7C73",
     marginTop: 3,
   },

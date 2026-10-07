@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL } from "../../config/api";
 
@@ -201,10 +202,14 @@ export default function ClinicReportsScreen() {
           />
         }
       >
-        <Text style={styles.introTitle}>Reporting Period</Text>
-        <Text style={styles.introText}>
-          Review scheduled, completed, and cancelled treatments for your clinic.
-        </Text>
+        <View style={styles.reportHero}>
+          <View style={styles.reportHeroIcon}>
+            <Ionicons name="stats-chart" size={24} color="#FFFFFF" />
+          </View>
+          <Text style={styles.introTitle}>Reporting Period</Text>
+          <Text style={styles.introText}>
+            Review scheduled, completed, and cancelled treatments for your clinic.
+          </Text>
 
         <View style={styles.periodOptions}>
           {PERIOD_OPTIONS.map((option) => {
@@ -243,6 +248,7 @@ export default function ClinicReportsScreen() {
               {formatDate(selectedPeriod.endDate)}
             </Text>
           </View>
+        </View>
         </View>
 
         {loading && !report ? (
@@ -372,7 +378,12 @@ function SummaryCard({
   background: string;
 }) {
   return (
-    <View style={styles.summaryCard}>
+    <View
+      style={[
+        styles.summaryCard,
+        label === "Booked" && styles.summaryCardPrimary,
+      ]}
+    >
       <View style={[styles.summaryIcon, { backgroundColor: background }]}>
         <Ionicons name={icon} size={20} color={color} />
       </View>
@@ -624,6 +635,22 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 48,
   },
+  reportHero: {
+    padding: 18,
+    borderRadius: 22,
+    backgroundColor: "#CFE8DD",
+    borderWidth: 1,
+    borderColor: "#56B091",
+  },
+  reportHeroIcon: {
+    width: 46,
+    height: 46,
+    marginBottom: 12,
+    borderRadius: 15,
+    backgroundColor: "#2E7D6B",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   introTitle: {
     fontSize: 22,
     fontWeight: "900",
@@ -734,9 +761,11 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#2E3A34",
   },
-  summaryRow: { flexDirection: "row", gap: 8 },
+  summaryRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   summaryCard: {
-    flex: 1,
+    ...timanShadow,
+    flexGrow: 1,
+    flexBasis: "45%",
     minHeight: 125,
     paddingHorizontal: 8,
     paddingVertical: 13,
@@ -746,6 +775,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+  },
+  summaryCardPrimary: {
+    flexBasis: "100%",
+    minHeight: 105,
+    flexDirection: "row",
+    gap: 14,
+    backgroundColor: "#E7F3ED",
   },
   summaryIcon: {
     width: 38,

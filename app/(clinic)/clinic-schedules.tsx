@@ -22,6 +22,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../config/api";
 
@@ -531,13 +532,17 @@ function ScheduleCard({
         <Text style={styles.ownerName} numberOfLines={1}>
           Owner: {schedule.owner_name || "—"}
         </Text>
-        <Text style={styles.dueDate}>
-          {formatDateOnly(schedule.next_due_date)}
-        </Text>
-        <View
-          style={[styles.timingBadge, { backgroundColor: badge.backgroundColor }]}
-        >
-          <Text style={[styles.timingBadgeText, { color: badge.color }]}>{badge.label}</Text>
+        <View style={styles.scheduleMetaRow}>
+          <Text style={styles.dueDate}>
+            {formatDateOnly(schedule.next_due_date)}
+          </Text>
+          <View
+            style={[styles.timingBadge, { backgroundColor: badge.backgroundColor }]}
+          >
+            <Text style={[styles.timingBadgeText, { color: badge.color }]}>
+              {badge.label}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -884,6 +889,7 @@ const styles = StyleSheet.create({
   listCount: { fontSize: 12, fontWeight: "700", color: "#6B7C73" },
   scheduleList: { gap: 11 },
   scheduleCard: {
+    ...timanShadow,
     minHeight: 136,
     paddingHorizontal: 15,
     paddingVertical: 14,
@@ -919,10 +925,15 @@ const styles = StyleSheet.create({
     color: "#2E3A34",
   },
   dueDate: { marginTop: 3, fontSize: 12, color: "#6B7C73" },
+  scheduleMetaRow: {
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
   timingBadge: {
-    alignSelf: "flex-start",
     minHeight: 23,
-    marginTop: 9,
     borderRadius: 9,
     paddingHorizontal: 8,
     alignItems: "center",

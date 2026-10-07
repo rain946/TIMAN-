@@ -23,6 +23,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
 
@@ -845,6 +846,7 @@ const styles = StyleSheet.create({
   },
 
   formCard: {
+    ...timanShadow,
     backgroundColor: "#FFFFFF",
     borderRadius: 18,
     borderWidth: 1,

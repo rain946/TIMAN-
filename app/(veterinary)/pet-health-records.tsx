@@ -16,6 +16,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../config/api";
 
@@ -348,6 +349,10 @@ function OwnerRecordCard({
 
   return (
     <View style={styles.recordCard}>
+      <View style={styles.timelineTrack} pointerEvents="none">
+        <View style={styles.timelineMarker} />
+        <View style={styles.timelineStem} />
+      </View>
       <View style={styles.recordHeader}>
         <View style={styles.serviceIcon}>
           <Ionicons
@@ -785,12 +790,37 @@ const styles = StyleSheet.create({
   },
 
   recordCard: {
+    ...timanShadow,
+    position: "relative",
+    paddingLeft: 48,
     marginBottom: 14,
     padding: 17,
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#CFE8DD",
+  },
+  timelineTrack: {
+    position: "absolute",
+    left: 16,
+    top: 18,
+    bottom: 18,
+    width: 16,
+    alignItems: "center",
+  },
+  timelineMarker: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: "#2E7D6B",
+    borderWidth: 3,
+    borderColor: "#CFE8DD",
+  },
+  timelineStem: {
+    flex: 1,
+    width: 2,
+    marginTop: 5,
+    backgroundColor: "#CFE8DD",
   },
 
   recordHeader: {

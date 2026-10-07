@@ -21,6 +21,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { timanShadow } from "../../components/timan/theme";
 
 import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
@@ -476,7 +477,7 @@ export default function AddVetRecordScreen() {
 
           <SectionTitle title="Next Follow-up" />
 
-          <View style={styles.formCard}>
+          <View style={[styles.formCard, styles.followUpCard]}>
             <FieldLabel title="Next Due Date" />
 
             <Pressable
@@ -887,6 +888,7 @@ const styles = StyleSheet.create({
   },
 
   formCard: {
+    ...timanShadow,
     padding: 16,
 
     borderRadius: 18,
@@ -895,6 +897,12 @@ const styles = StyleSheet.create({
 
     borderWidth: 1,
     borderColor: "#CFE8DD",
+  },
+  followUpCard: {
+    backgroundColor: "#CFE8DD",
+    borderColor: "#56B091",
+    borderLeftWidth: 6,
+    paddingLeft: 18,
   },
 
   labelRow: {
