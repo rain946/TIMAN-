@@ -31,12 +31,9 @@ type ClinicVetRecord = {
   can_open: boolean;
 };
 
-const ALL_SERVICES = "All";
-
 export default function VetRecordsScreen() {
   const [records, setRecords] = useState<ClinicVetRecord[]>([]);
   const [search, setSearch] = useState("");
-  const [serviceFilter, setServiceFilter] = useState(ALL_SERVICES);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
@@ -94,25 +91,10 @@ export default function VetRecordsScreen() {
     }, [loadRecords]),
   );
 
-  const serviceTypes = useMemo(
-    () => [
-      ALL_SERVICES,
-      ...Array.from(
-        new Set(
-          records.map((record) => record.service_type?.trim()).filter(Boolean),
-        ),
-      ).sort((a, b) => a.localeCompare(b)),
-    ],
-    [records],
-  );
-
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const filteredRecords = useMemo(
     () =>
       records.filter((record) => {
-        const matchesService =
-          serviceFilter === ALL_SERVICES ||
-          record.service_type === serviceFilter;
         const matchesSearch =
           !normalizedSearch ||
           [
@@ -127,17 +109,15 @@ export default function VetRecordsScreen() {
               .includes(normalizedSearch),
           );
 
-        return matchesService && matchesSearch;
+        return matchesSearch;
       }),
-    [normalizedSearch, records, serviceFilter],
+    [normalizedSearch, records],
   );
 
-  const hasActiveFilters =
-    normalizedSearch.length > 0 || serviceFilter !== ALL_SERVICES;
+  const hasActiveFilters = normalizedSearch.length > 0;
 
   const resetFilters = () => {
     setSearch("");
-    setServiceFilter(ALL_SERVICES);
   };
 
   return (
@@ -201,40 +181,6 @@ export default function VetRecordsScreen() {
             </Pressable>
           )}
         </View>
-
-        {!loading && !error && records.length > 0 && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterRow}
-          >
-            {serviceTypes.map((service) => {
-              const selected = serviceFilter === service;
-              return (
-                <Pressable
-                  key={service}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  style={({ pressed }) => [
-                    styles.filterButton,
-                    selected && styles.filterButtonSelected,
-                    pressed && styles.pressed,
-                  ]}
-                  onPress={() => setServiceFilter(service)}
-                >
-                  <Text
-                    style={[
-                      styles.filterText,
-                      selected && styles.filterTextSelected,
-                    ]}
-                  >
-                    {service}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        )}
 
         {!loading && !error && records.length > 0 && (
           <View style={styles.summaryRow}>
@@ -340,7 +286,10 @@ function RecordCard({ record }: { record: ClinicVetRecord }) {
     if (record.can_open) {
       router.push({
         pathname: "/clinic-vet-records",
-        params: { petId: String(record.pet_id) },
+        params: {
+          petId: String(record.pet_id),
+          recordId: String(record.record_id),
+        },
       });
       return;
     }
@@ -457,20 +406,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#2E3A34",
   },
-  filterRow: { gap: 8, paddingTop: 17, paddingBottom: 4 },
-  filterButton: {
-    minHeight: 40,
-    borderRadius: 13,
-    paddingHorizontal: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#CFE8DD",
-  },
-  filterButtonSelected: { backgroundColor: "#2E7D6B", borderColor: "#2E7D6B" },
-  filterText: { fontSize: 12, fontWeight: "800", color: "#6B7C73" },
-  filterTextSelected: { color: "#FFFFFF" },
   summaryRow: {
     marginTop: 22,
     marginBottom: 12,

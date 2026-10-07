@@ -4,6 +4,7 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Image,
   Pressable,
   RefreshControl,
@@ -43,7 +44,8 @@ type DashboardData = {
     clinic_name: string | null;
   };
   overview: {
-    booked: number;
+    added: number;
+    completed: number;
     cancelled: number;
     rescheduled: number;
   };
@@ -58,7 +60,8 @@ const EMPTY_DASHBOARD: DashboardData = {
     clinic_name: null,
   },
   overview: {
-    booked: 0,
+    added: 0,
+    completed: 0,
     cancelled: 0,
     rescheduled: 0,
   },
@@ -131,6 +134,15 @@ export default function ClinicDashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       loadDashboard();
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => true,
+      );
+
+      return () => {
+        subscription.remove();
+      };
     }, [loadDashboard]),
   );
 
@@ -207,19 +219,48 @@ export default function ClinicDashboardScreen() {
         <View style={styles.overviewRow}>
           <OverviewCard
             icon="calendar-outline"
-            value={loading ? "—" : String(dashboard.overview.booked)}
+            value={loading ? "—" : String(dashboard.overview.added)}
             label="Booked"
+            onPress={() =>
+              router.push({
+                pathname: "/(clinic)/clinic-monthly-schedules",
+                params: { filter: "added" },
+              })
+            }
+          />
+          <OverviewCard
+            icon="checkmark-circle-outline"
+            value={loading ? "—" : String(dashboard.overview.completed)}
+            label="Completed"
+            onPress={() =>
+              router.push({
+                pathname: "/(clinic)/clinic-monthly-schedules",
+                params: { filter: "completed" },
+              })
+            }
           />
           <OverviewCard
             icon="close-circle-outline"
             value={loading ? "—" : String(dashboard.overview.cancelled)}
             label="Cancelled"
             pending
+            onPress={() =>
+              router.push({
+                pathname: "/(clinic)/clinic-monthly-schedules",
+                params: { filter: "cancelled" },
+              })
+            }
           />
           <OverviewCard
             icon="calendar-number-outline"
             value={loading ? "—" : String(dashboard.overview.rescheduled)}
             label="Rescheduled"
+            onPress={() =>
+              router.push({
+                pathname: "/(clinic)/clinic-monthly-schedules",
+                params: { filter: "rescheduled" },
+              })
+            }
           />
         </View>
 
@@ -310,14 +351,24 @@ function OverviewCard({
   value,
   label,
   pending = false,
+  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   value: string;
   label: string;
   pending?: boolean;
+  onPress: () => void;
 }) {
   return (
-    <View style={styles.overviewCard}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`View ${label.toLowerCase()} schedules this month`}
+      style={({ pressed }) => [
+        styles.overviewCard,
+        pressed && styles.pressed,
+      ]}
+      onPress={onPress}
+    >
       <View
         style={[styles.overviewIcon, pending && styles.overviewIconPending]}
       >
@@ -329,7 +380,7 @@ function OverviewCard({
       </View>
       <Text style={styles.overviewValue}>{value}</Text>
       <Text style={styles.overviewLabel}>{label}</Text>
-    </View>
+    </Pressable>
   );
 }
 

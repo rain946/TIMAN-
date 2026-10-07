@@ -45,7 +45,7 @@ router.get("/", authMiddleware, async (req, res) => {
       });
     }
 
-    const [[bookedCountRows], [rescheduledCountRows], [cancelledCountRows], [pendingRequests], [recentActivity]] =
+    const [[addedCountRows], [completedCountRows], [rescheduledCountRows], [cancelledCountRows], [pendingRequests], [recentActivity]] =
       await Promise.all([
         db.query(
           `
@@ -54,8 +54,22 @@ router.get("/", authMiddleware, async (req, res) => {
           INNER JOIN pets p ON p.pet_id = vr.pet_id
           WHERE vr.clinic_user_id = ?
             AND p.archived_at IS NULL
-            AND vr.next_due_date >= ${philippineMonthStart}
-            AND vr.next_due_date < ${philippineNextMonthStart}
+            AND vr.next_due_date IS NOT NULL
+            AND vr.created_at >= ${philippineMonthStart}
+            AND vr.created_at < ${philippineNextMonthStart}
+          `,
+          [clinicUserId]
+        ),
+        db.query(
+          `
+          SELECT COUNT(*) AS total
+          FROM vet_records vr
+          INNER JOIN pets p ON p.pet_id = vr.pet_id
+          WHERE vr.clinic_user_id = ?
+            AND p.archived_at IS NULL
+            AND vr.schedule_status = 'Completed'
+            AND vr.completed_at >= ${philippineMonthStart}
+            AND vr.completed_at < ${philippineNextMonthStart}
           `,
           [clinicUserId]
         ),
@@ -141,7 +155,8 @@ router.get("/", authMiddleware, async (req, res) => {
         clinic_name: clinic.clinic_name,
       },
       overview: {
-        booked: Number(bookedCountRows[0]?.total || 0),
+        added: Number(addedCountRows[0]?.total || 0),
+        completed: Number(completedCountRows[0]?.total || 0),
         cancelled: Number(cancelledCountRows[0]?.total || 0),
         rescheduled: Number(rescheduledCountRows[0]?.total || 0),
       },

@@ -1,10 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router, useFocusEffect, useSegments } from "expo-router";
+import DateTimePicker, {
+  DateTimePickerAndroid,
+} from "@react-native-community/datetimepicker";
+import {
+  router,
+  useFocusEffect,
+  useSegments,
+} from "expo-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -18,6 +26,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL, getImageUrl } from "../../config/api";
 
 type ScheduleStatus = "Pending" | "Completed" | "Cancelled";
+type TimingCategory = "Overdue" | "Today" | "Due Soon" | "Upcoming";
+type DailyFilter = "scheduled" | "completed" | "cancelled" | "rescheduled";
 
 type ClinicSchedule = {
   record_id: number;
@@ -33,22 +43,40 @@ type ClinicSchedule = {
   completed_at: string | null;
   created_at: string;
   pet_name: string;
+  owner_name: string;
   species: string;
   breed: string | null;
   photo_url: string | null;
   can_open: boolean;
+  is_added_this_month: boolean;
+  is_completed_this_month: boolean;
+  is_cancelled_this_month: boolean;
+  is_rescheduled_this_month: boolean;
+  booked_date: string;
+  completed_date: string | null;
+  cancelled_date: string | null;
+  rescheduled_date: string | null;
 };
 
-const STATUSES: ScheduleStatus[] = ["Pending", "Completed", "Cancelled"];
+const DAILY_CARDS: {
+  filter: DailyFilter;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { filter: "scheduled", label: "Scheduled", icon: "calendar-outline" },
+  { filter: "completed", label: "Completed", icon: "checkmark-circle-outline" },
+  { filter: "cancelled", label: "Cancelled", icon: "close-circle-outline" },
+  { filter: "rescheduled", label: "Rescheduled", icon: "calendar-number-outline" },
+];
 
 export default function ClinicSchedulesScreen() {
   const segments = useSegments();
-  const isTabScreen = segments.some(
-    (segment) => String(segment) === "(tabs)",
-  );
+  const isTabScreen = segments.some((segment) => String(segment) === "(tabs)");
   const [schedules, setSchedules] = useState<ClinicSchedule[]>([]);
-  const [selectedStatus, setSelectedStatus] =
-    useState<ScheduleStatus>("Pending");
+  const [selectedDailyFilter, setSelectedDailyFilter] =
+    useState<DailyFilter>("scheduled");
+  const [selectedDate, setSelectedDate] = useState(getManilaTodayDateOnly);
+  const [showIosDatePicker, setShowIosDatePicker] = useState(false);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -91,7 +119,6 @@ export default function ClinicSchedulesScreen() {
         router.replace("/login");
         return;
       }
-
       if (!response.ok || !data.success) {
         throw new Error(data.message || "Unable to load schedules.");
       }
@@ -109,31 +136,55 @@ export default function ClinicSchedulesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      loadSchedules();
+      void loadSchedules();
     }, [loadSchedules]),
   );
 
-  const counts = useMemo(
-    () =>
-      STATUSES.reduce(
-        (result, status) => ({
-          ...result,
-          [status]: schedules.filter(
-            (schedule) => schedule.schedule_status === status,
-          ).length,
-        }),
-        {} as Record<ScheduleStatus, number>,
-      ),
-    [schedules],
+  const dailyCounts = useMemo(
+    () => ({
+      scheduled: schedules.filter(
+        (schedule) =>
+          schedule.schedule_status === "Pending" &&
+          schedule.next_due_date === selectedDate,
+      ).length,
+      completed: schedules.filter(
+        (schedule) => schedule.completed_date === selectedDate,
+      ).length,
+      cancelled: schedules.filter(
+        (schedule) => schedule.cancelled_date === selectedDate,
+      ).length,
+      rescheduled: schedules.filter(
+        (schedule) => schedule.rescheduled_date === selectedDate,
+      ).length,
+    }),
+    [schedules, selectedDate],
   );
 
   const normalizedSearch = search.trim().toLocaleLowerCase();
   const statusSchedules = useMemo(
-    () =>
-      schedules.filter(
-        (schedule) => schedule.schedule_status === selectedStatus,
-      ),
-    [schedules, selectedStatus],
+    () => {
+      if (selectedDailyFilter === "scheduled") {
+        return schedules.filter(
+          (schedule) =>
+            schedule.schedule_status === "Pending" &&
+            schedule.next_due_date === selectedDate,
+        );
+      }
+      if (selectedDailyFilter === "completed") {
+        return schedules.filter(
+          (schedule) => schedule.completed_date === selectedDate,
+        );
+      }
+      if (selectedDailyFilter === "cancelled") {
+        return schedules.filter(
+          (schedule) => schedule.cancelled_date === selectedDate,
+        );
+      }
+      return schedules.filter(
+        (schedule) => schedule.rescheduled_date === selectedDate,
+      );
+    },
+    [schedules, selectedDailyFilter, selectedDate],
   );
   const visibleSchedules = useMemo(
     () =>
@@ -141,9 +192,10 @@ export default function ClinicSchedulesScreen() {
         if (!normalizedSearch) return true;
         return [
           schedule.pet_name,
+          schedule.owner_name,
+          schedule.service_type,
           schedule.breed,
           schedule.species,
-          schedule.service_type,
         ].some((value) =>
           String(value || "")
             .toLocaleLowerCase()
@@ -155,8 +207,25 @@ export default function ClinicSchedulesScreen() {
 
   const refresh = useCallback(() => {
     setRefreshing(true);
-    loadSchedules(false);
+    void loadSchedules(false);
   }, [loadSchedules]);
+
+  const openCalendar = () => {
+    const current = dateFromDateOnly(selectedDate) || new Date();
+    if (Platform.OS === "ios") {
+      setShowIosDatePicker(true);
+      return;
+    }
+    DateTimePickerAndroid.open({
+      value: current,
+      mode: "date",
+      onChange: (event, date) => {
+        if (event.type === "set" && date) {
+          setSelectedDate(formatDateValue(date));
+        }
+      },
+    });
+  };
 
   const showSearchEmpty =
     statusSchedules.length > 0 && visibleSchedules.length === 0;
@@ -195,7 +264,7 @@ export default function ClinicSchedulesScreen() {
         }
       >
         <Text style={styles.subtitle}>
-          Pet care schedules managed by your clinic
+          Pet health schedules managed by your clinic
         </Text>
 
         <View style={styles.searchContainer}>
@@ -204,7 +273,7 @@ export default function ClinicSchedulesScreen() {
             accessibilityLabel="Search schedules"
             value={search}
             onChangeText={setSearch}
-            placeholder="Search schedules..."
+            placeholder="Search pet or owner..."
             placeholderTextColor="#6B7C73"
             style={styles.searchInput}
             returnKeyType="search"
@@ -220,41 +289,88 @@ export default function ClinicSchedulesScreen() {
           )}
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabs}
-        >
-          {STATUSES.map((status) => {
-            const selected = selectedStatus === status;
-            return (
+        {!loading && !error && (
+          <View style={styles.calendarSection}>
+            <Text style={styles.calendarLabel}>View schedules by date</Text>
+            <View style={styles.calendarRow}>
               <Pressable
-                key={status}
                 accessibilityRole="button"
-                accessibilityState={{ selected }}
+                accessibilityLabel="Choose schedule date"
                 style={({ pressed }) => [
-                  styles.tab,
-                  selected && styles.tabSelected,
+                  styles.calendarButton,
                   pressed && styles.pressed,
                 ]}
-                onPress={() => setSelectedStatus(status)}
+                onPress={openCalendar}
               >
-                <Text
-                  style={[styles.tabText, selected && styles.tabTextSelected]}
-                >
-                  {status === "Pending" ? "Booked" : status} ({counts[status]})
+                <Ionicons name="calendar-outline" size={20} color="#2E7D6B" />
+                <Text style={styles.calendarDate}>
+                  {formatDateOnly(selectedDate)}
                 </Text>
+                <Ionicons name="chevron-down" size={18} color="#6B7C73" />
               </Pressable>
-            );
-          })}
-        </ScrollView>
+              {selectedDate !== getManilaTodayDateOnly() && (
+                <Pressable
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.todayButton,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={() => setSelectedDate(getManilaTodayDateOnly())}
+                >
+                  <Text style={styles.todayButtonText}>Today</Text>
+                </Pressable>
+              )}
+            </View>
+            {showIosDatePicker && Platform.OS === "ios" && (
+              <View style={styles.iosPickerCard}>
+                <DateTimePicker
+                  value={dateFromDateOnly(selectedDate) || new Date()}
+                  mode="date"
+                  display="spinner"
+                  onChange={(_, date) =>
+                    date && setSelectedDate(formatDateValue(date))
+                  }
+                />
+                <Pressable
+                  style={styles.iosPickerDone}
+                  onPress={() => setShowIosDatePicker(false)}
+                >
+                  <Text style={styles.iosPickerDoneText}>Done</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        )}
+
+        {!loading && !error ? (
+          <>
+            <Text style={styles.todayTitle}>
+              {selectedDate === getManilaTodayDateOnly()
+                ? "Today"
+                : formatDateOnly(selectedDate)}
+            </Text>
+            <View style={styles.summaryGrid}>
+              {DAILY_CARDS.map((item) => (
+                <StatusCard
+                  key={item.filter}
+                  filter={item.filter}
+                  label={item.label}
+                  icon={item.icon}
+                  count={dailyCounts[item.filter]}
+                  selected={selectedDailyFilter === item.filter}
+                  onPress={() => setSelectedDailyFilter(item.filter)}
+                />
+              ))}
+            </View>
+          </>
+        ) : null}
 
         {!loading && !error && (
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryTitle}>
-              {selectedStatus === "Pending" ? "Booked" : selectedStatus} Schedules
+          <View style={styles.listHeader}>
+            <Text style={styles.listTitle}>
+              {getListTitle(selectedDailyFilter, selectedDate)}
             </Text>
-            <Text style={styles.summaryCount}>
+            <Text style={styles.listCount}>
               {visibleSchedules.length}{" "}
               {visibleSchedules.length === 1 ? "schedule" : "schedules"}
             </Text>
@@ -278,7 +394,7 @@ export default function ClinicSchedulesScreen() {
                 styles.retryButton,
                 pressed && styles.pressed,
               ]}
-              onPress={() => loadSchedules()}
+              onPress={() => void loadSchedules()}
             >
               <Text style={styles.retryText}>Retry</Text>
             </Pressable>
@@ -301,13 +417,17 @@ export default function ClinicSchedulesScreen() {
             </Pressable>
           </StateCard>
         ) : visibleSchedules.length === 0 ? (
-          <EmptyState status={selectedStatus} />
+          <EmptyState
+            filter={selectedDailyFilter}
+            selectedDate={selectedDate}
+          />
         ) : (
           <View style={styles.scheduleList}>
             {visibleSchedules.map((schedule) => (
               <ScheduleCard
                 key={schedule.record_id}
                 schedule={schedule}
+                view={selectedDailyFilter}
               />
             ))}
           </View>
@@ -317,118 +437,157 @@ export default function ClinicSchedulesScreen() {
   );
 }
 
-function ScheduleCard({
-  schedule,
+function StatusCard({
+  filter,
+  label,
+  icon,
+  count,
+  selected,
+  onPress,
 }: {
-  schedule: ClinicSchedule;
+  filter: DailyFilter;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  count: number;
+  selected: boolean;
+  onPress: () => void;
 }) {
-  const imageUrl = getImageUrl(schedule.photo_url);
-  const dueState = getDueState(schedule.next_due_date);
-  const petContext = [schedule.breed, schedule.species]
-    .filter(Boolean)
-    .join(" • ");
-
+  const tone = getDailyTone(filter);
   return (
-    <View style={styles.scheduleCard}>
-      <View style={styles.cardMain}>
-        <View style={styles.photoContainer}>
-          {imageUrl ? (
-            <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
-          ) : (
-            <Ionicons name="paw" size={25} color="#2E7D6B" />
-          )}
-        </View>
-
-        <View style={styles.cardContent}>
-          <View style={styles.cardTopRow}>
-            <Text style={styles.petName} numberOfLines={1}>
-              {schedule.pet_name}
-            </Text>
-            <StatusBadge status={schedule.schedule_status} />
-          </View>
-          <Text style={styles.petContext} numberOfLines={1}>
-            {petContext}
-          </Text>
-          <Text style={styles.serviceType}>{schedule.service_type}</Text>
-          <View style={styles.dueRow}>
-            <Ionicons name="calendar-outline" size={14} color="#6B7C73" />
-            <Text style={styles.dueDate}>
-              {schedule.schedule_status === "Pending" ? "Due " : "Scheduled "}
-              {formatDateOnly(schedule.next_due_date)}
-            </Text>
-            {schedule.schedule_status === "Pending" && (
-              <View
-                style={[
-                  styles.dueBadge,
-                  { backgroundColor: dueState.backgroundColor },
-                ]}
-              >
-                <Text style={[styles.dueBadgeText, { color: dueState.color }]}>
-                  {dueState.label}
-                </Text>
-              </View>
-            )}
-          </View>
-          {schedule.schedule_status === "Completed" &&
-            schedule.completed_at && (
-              <Text style={styles.completedAt}>
-                Completed {formatDateTime(schedule.completed_at)}
-              </Text>
-            )}
-          {!schedule.can_open && (
-            <Text style={styles.accessChanged}>Current access has changed</Text>
-          )}
-        </View>
-
-      </View>
-
-    </View>
-  );
-}
-
-function StatusBadge({ status }: { status: ScheduleStatus }) {
-  return (
-    <View
-      style={[
-        styles.statusBadge,
-        status === "Pending" && styles.pendingBadge,
-        status === "Completed" && styles.completedBadge,
-        status === "Cancelled" && styles.cancelledBadge,
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.summaryCard,
+        selected && {
+          backgroundColor: tone.backgroundColor,
+          borderColor: tone.color,
+        },
+        pressed && styles.pressed,
       ]}
     >
-      <Text
-        style={[
-          styles.statusBadgeText,
-          status === "Pending" && styles.pendingBadgeText,
-          status === "Completed" && styles.completedBadgeText,
-          status === "Cancelled" && styles.cancelledBadgeText,
-        ]}
-      >
-        {status === "Pending" ? "BOOKED" : status.toUpperCase()}
+      <View style={styles.summaryTopRow}>
+        <View
+          style={[styles.summaryIcon, { backgroundColor: tone.backgroundColor }]}
+        >
+          <Ionicons name={icon} size={20} color={tone.color} />
+        </View>
+        <Text style={styles.summaryValue}>{count}</Text>
+      </View>
+      <Text style={[styles.summaryLabel, selected && { color: tone.color }]}>
+        {label}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
-function EmptyState({ status }: { status: ScheduleStatus }) {
+function ScheduleCard({
+  schedule,
+  view,
+}: {
+  schedule: ClinicSchedule;
+  view: DailyFilter;
+}) {
+  const imageUrl = getImageUrl(schedule.photo_url);
+  const timing = getTimingState(schedule.next_due_date);
+  const historyTone =
+    schedule.schedule_status === "Completed"
+      ? { label: "COMPLETED", color: "#2E7D6B", backgroundColor: "#CFE8DD" }
+      : {
+          label: "CANCELLED",
+          color: "#E57373",
+          backgroundColor: "rgba(229, 115, 115, 0.14)",
+        };
+  const rescheduledTone = {
+    label: "RESCHEDULED",
+    color: "#F5A623",
+    backgroundColor: "#FAD7A0",
+  };
+  const badge =
+    view === "rescheduled"
+      ? rescheduledTone
+      : schedule.schedule_status === "Pending"
+        ? timing
+        : historyTone;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`View ${schedule.pet_name} schedule details`}
+      style={({ pressed }) => [
+        styles.scheduleCard,
+        pressed && styles.cardPressed,
+      ]}
+      onPress={() =>
+        router.push({
+          pathname: "/(clinic)/clinic-schedule-details",
+          params: { recordId: String(schedule.record_id) },
+        })
+      }
+    >
+      <View style={styles.photoContainer}>
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
+        ) : (
+          <Ionicons name="paw" size={25} color="#2E7D6B" />
+        )}
+      </View>
+
+      <View style={styles.cardContent}>
+        <Text style={styles.petName} numberOfLines={1}>
+          {schedule.pet_name}
+        </Text>
+        <Text style={styles.ownerName} numberOfLines={1}>
+          Owner: {schedule.owner_name || "—"}
+        </Text>
+        <Text style={styles.serviceType} numberOfLines={1}>
+          {schedule.service_type}
+        </Text>
+        <Text style={styles.dueDate}>
+          {formatDateOnly(schedule.next_due_date)}
+        </Text>
+        <View
+          style={[styles.timingBadge, { backgroundColor: badge.backgroundColor }]}
+        >
+          <Text style={[styles.timingBadgeText, { color: badge.color }]}>{badge.label}</Text>
+        </View>
+      </View>
+
+      <Ionicons name="chevron-forward" size={21} color="#6B7C73" />
+    </Pressable>
+  );
+}
+
+function EmptyState({
+  filter,
+  selectedDate,
+}: {
+  filter: DailyFilter;
+  selectedDate: string;
+}) {
   const content = {
-    Pending: {
-      title: "No booked schedules",
-      description:
-        "New follow-up schedules created from veterinary records will appear here.",
+    scheduled: {
+      title: "No scheduled visits",
+      description: `No pending schedules are due on ${formatDateOnly(selectedDate)}.`,
       icon: "calendar-outline" as const,
     },
-    Completed: {
-      title: "No completed schedules yet",
-      description: "Completed follow-up schedules will appear here.",
+    completed: {
+      title: "No completed schedules",
+      description: `No schedules were completed on ${formatDateOnly(selectedDate)}.`,
       icon: "checkmark-circle-outline" as const,
     },
-    Cancelled: {
+    cancelled: {
       title: "No cancelled schedules",
-      description: "Cancelled schedule history will appear here.",
+      description: `No schedules were cancelled on ${formatDateOnly(selectedDate)}.`,
       icon: "close-circle-outline" as const,
     },
-  }[status];
+    rescheduled: {
+      title: "No rescheduled schedules",
+      description: `No schedules were rescheduled on ${formatDateOnly(selectedDate)}.`,
+      icon: "calendar-number-outline" as const,
+    },
+  }[filter];
 
   return (
     <StateCard>
@@ -445,51 +604,135 @@ function StateCard({ children }: { children: React.ReactNode }) {
   return <View style={styles.stateCard}>{children}</View>;
 }
 
-function parseDateOnly(value: string) {
-  const [year, month, day] = value.slice(0, 10).split("-").map(Number);
-  if (!year || !month || !day) return null;
-  const date = new Date(year, month - 1, day);
-  return Number.isNaN(date.getTime()) ? null : date;
+function parseDateParts(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(
+    String(value || "").slice(0, 10),
+  );
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const validationDate = new Date(year, month - 1, day);
+  if (
+    validationDate.getFullYear() !== year ||
+    validationDate.getMonth() !== month - 1 ||
+    validationDate.getDate() !== day
+  ) {
+    return null;
+  }
+  return { year, month, day };
 }
 
-function getDueState(value: string) {
-  const dueDate = parseDateOnly(value);
-  if (!dueDate)
-    return { label: "SCHEDULED", color: "#2E7D6B", backgroundColor: "#CFE8DD" };
+function getListTitle(
+  filter: DailyFilter,
+  selectedDate: string,
+) {
+  const dateLabel =
+    selectedDate === getManilaTodayDateOnly()
+      ? "Today"
+      : formatDateOnly(selectedDate);
+  if (filter === "scheduled") return `Scheduled ${dateLabel}`;
+  if (filter === "completed") return `Completed ${dateLabel}`;
+  if (filter === "cancelled") return `Cancelled ${dateLabel}`;
+  return `Rescheduled ${dateLabel}`;
+}
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const days = Math.round((dueDate.getTime() - today.getTime()) / 86_400_000);
+function getManilaTodayDateOnly() {
+  const parts = getManilaTodayParts();
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+}
 
-  if (days < 0)
-    return { label: "OVERDUE", color: "#E57373", backgroundColor: "rgba(229, 115, 115, 0.14)" };
-  if (days === 0)
-    return { label: "TODAY", color: "#F5A623", backgroundColor: "rgba(229, 115, 115, 0.14)" };
-  if (days <= 30)
+function dateFromDateOnly(value: string) {
+  const parts = parseDateParts(value);
+  return parts ? new Date(parts.year, parts.month - 1, parts.day) : null;
+}
+
+function formatDateValue(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function getManilaTodayParts() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(
+    parts.map((part) => [part.type, part.value]),
+  );
+  return {
+    year: Number(values.year),
+    month: Number(values.month),
+    day: Number(values.day),
+  };
+}
+
+function getDaysUntilDue(value: string) {
+  const due = parseDateParts(value);
+  if (!due) return null;
+  const today = getManilaTodayParts();
+  const dueDay = Date.UTC(due.year, due.month - 1, due.day) / 86_400_000;
+  const todayDay =
+    Date.UTC(today.year, today.month - 1, today.day) / 86_400_000;
+  return Math.round(dueDay - todayDay);
+}
+
+function getTimingCategory(value: string): TimingCategory {
+  const days = getDaysUntilDue(value);
+  if (days === null || days > 7) return "Upcoming";
+  if (days < 0) return "Overdue";
+  if (days === 0) return "Today";
+  return "Due Soon";
+}
+
+function getCategoryTone(category: TimingCategory) {
+  if (category === "Overdue") {
     return {
-      label: `${days} DAYS`,
-      color: "#F5A623",
+      color: "#E57373",
       backgroundColor: "rgba(229, 115, 115, 0.14)",
     };
-  return { label: "SCHEDULED", color: "#2E7D6B", backgroundColor: "#CFE8DD" };
+  }
+  if (category === "Today" || category === "Due Soon") {
+    return { color: "#F5A623", backgroundColor: "#FAD7A0" };
+  }
+  return { color: "#2E7D6B", backgroundColor: "#CFE8DD" };
+}
+
+function getDailyTone(filter: DailyFilter) {
+  if (filter === "cancelled") {
+    return {
+      color: "#E57373",
+      backgroundColor: "rgba(229, 115, 115, 0.14)",
+    };
+  }
+  if (filter === "completed") {
+    return { color: "#2E7D6B", backgroundColor: "#CFE8DD" };
+  }
+  if (filter === "rescheduled") {
+    return { color: "#64B5F6", backgroundColor: "rgba(100, 181, 246, 0.16)" };
+  }
+  return { color: "#F5A623", backgroundColor: "#FAD7A0" };
+}
+
+function getTimingState(value: string) {
+  const days = getDaysUntilDue(value);
+  const category = getTimingCategory(value);
+  const tone = getCategoryTone(category);
+  let label = "UPCOMING";
+
+  if (days !== null && days < 0) label = "OVERDUE";
+  else if (days === 0) label = "TODAY";
+  else if (days === 1) label = "TOMORROW";
+  else if (days !== null && days <= 7) label = `${days} DAYS`;
+
+  return { label, ...tone };
 }
 
 function formatDateOnly(value: string) {
-  const date = parseDateOnly(value);
-  if (!date) return "Date unavailable";
-  return date.toLocaleDateString([], {
-    timeZone: "Asia/Manila",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function formatDateTime(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Date unavailable";
-  return date.toLocaleDateString([], {
-    timeZone: "Asia/Manila",
+  const parts = parseDateParts(value);
+  if (!parts) return "Date unavailable";
+  return new Date(parts.year, parts.month - 1, parts.day).toLocaleDateString([], {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -515,7 +758,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 21, fontWeight: "900", color: "#2E3A34" },
   headerSpacer: { width: 44, height: 44 },
-  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
+  content: {
+    width: "100%",
+    maxWidth: 1180,
+    alignSelf: "center",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 45,
+  },
   subtitle: { fontSize: 14, color: "#6B7C73" },
   searchContainer: {
     minHeight: 50,
@@ -536,42 +786,133 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#2E3A34",
   },
-  tabs: { gap: 8, paddingTop: 17, paddingBottom: 4 },
-  tab: {
-    minHeight: 42,
-    borderRadius: 13,
+  calendarSection: { marginTop: 17 },
+  calendarLabel: {
+    marginBottom: 8,
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#6B7C73",
+  },
+  calendarRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  calendarButton: {
+    flex: 1,
+    minHeight: 50,
     paddingHorizontal: 14,
+    borderRadius: 15,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#CFE8DD",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  calendarDate: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#2E3A34",
+  },
+  todayButton: {
+    minHeight: 50,
+    paddingHorizontal: 13,
+    borderRadius: 14,
+    backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
+  },
+  todayButtonText: { fontSize: 12, fontWeight: "900", color: "#2E7D6B" },
+  iosPickerCard: {
+    marginTop: 8,
+    padding: 10,
+    borderRadius: 15,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#CFE8DD",
   },
-  tabSelected: { backgroundColor: "#2E7D6B", borderColor: "#2E7D6B" },
-  tabText: { fontSize: 12, fontWeight: "800", color: "#6B7C73" },
-  tabTextSelected: { color: "#FFFFFF" },
-  summaryRow: {
+  iosPickerDone: {
+    alignSelf: "flex-end",
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 10,
+    backgroundColor: "#2E7D6B",
+  },
+  iosPickerDoneText: { color: "#FFFFFF", fontSize: 12, fontWeight: "900" },
+  summaryGrid: {
+    marginTop: 12,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  todayTitle: {
+    marginTop: 20,
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#2E3A34",
+  },
+  summaryCard: {
+    flexBasis: "46%",
+    flexGrow: 1,
+    minWidth: 0,
+    minHeight: 104,
+    padding: 14,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#CFE8DD",
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  summaryTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  summaryIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  summaryValue: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#2E3A34",
+  },
+  summaryLabel: {
+    marginTop: 11,
+    fontSize: 13,
+    fontWeight: "900",
+    color: "#6B7C73",
+  },
+  listHeader: {
     marginTop: 22,
     marginBottom: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  summaryTitle: { fontSize: 19, fontWeight: "900", color: "#2E3A34" },
-  summaryCount: { fontSize: 12, fontWeight: "700", color: "#6B7C73" },
+  listTitle: { fontSize: 19, fontWeight: "900", color: "#2E3A34" },
+  listCount: { fontSize: 12, fontWeight: "700", color: "#6B7C73" },
   scheduleList: { gap: 11 },
   scheduleCard: {
+    minHeight: 136,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
     borderRadius: 19,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#CFE8DD",
-    overflow: "hidden",
-  },
-  cardMain: {
-    minHeight: 142,
-    padding: 14,
     flexDirection: "row",
     alignItems: "center",
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 1,
   },
   cardPressed: { backgroundColor: "#FFF5E9", opacity: 0.82 },
   photoContainer: {
@@ -584,53 +925,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   petPhoto: { width: "100%", height: "100%" },
-  cardContent: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 6 },
-  cardTopRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#2E3A34" },
-  petContext: { marginTop: 3, fontSize: 12, color: "#6B7C73" },
+  cardContent: { flex: 1, minWidth: 0, marginLeft: 13, marginRight: 8 },
+  petName: { fontSize: 17, fontWeight: "900", color: "#2E3A34" },
+  ownerName: { marginTop: 2, fontSize: 12, color: "#6B7C73" },
   serviceType: {
     marginTop: 8,
     fontSize: 14,
     fontWeight: "800",
     color: "#2E3A34",
   },
-  dueRow: {
-    marginTop: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 5,
-  },
-  dueDate: { fontSize: 11, color: "#6B7C73" },
-  dueBadge: {
-    minHeight: 21,
-    borderRadius: 8,
-    paddingHorizontal: 7,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dueBadgeText: { fontSize: 11, fontWeight: "900" },
-  statusBadge: {
+  dueDate: { marginTop: 3, fontSize: 12, color: "#6B7C73" },
+  timingBadge: {
+    alignSelf: "flex-start",
     minHeight: 23,
+    marginTop: 9,
     borderRadius: 9,
     paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",
   },
-  statusBadgeText: { fontSize: 11, fontWeight: "900" },
-  pendingBadge: { backgroundColor: "#FAD7A0" },
-  pendingBadgeText: { color: "#F5A623" },
-  completedBadge: { backgroundColor: "#CFE8DD" },
-  completedBadgeText: { color: "#81C784" },
-  cancelledBadge: { backgroundColor: "rgba(229, 115, 115, 0.14)" },
-  cancelledBadgeText: { color: "#E57373" },
-  completedAt: { marginTop: 7, fontSize: 11, color: "#81C784" },
-  accessChanged: {
-    marginTop: 7,
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#F5A623",
-  },
+  timingBadgeText: { fontSize: 10, fontWeight: "900" },
   stateCard: {
     minHeight: 245,
     marginTop: 12,

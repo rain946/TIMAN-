@@ -55,10 +55,13 @@ type VetRecord = {
 export default function ClinicVetRecordsScreen() {
   const params = useLocalSearchParams<{
     petId?: string;
+    recordId?: string;
     scanAccessToken?: string;
   }>();
 
   const petId = params.petId;
+  const recordId = Number(params.recordId);
+  const showsSingleRecord = Number.isInteger(recordId) && recordId > 0;
   const scanAccessToken = params.scanAccessToken || "";
   const hasScanAccess = Boolean(scanAccessToken);
 
@@ -163,6 +166,10 @@ export default function ClinicVetRecordsScreen() {
 
     loadRecords(false);
   };
+
+  const visibleRecords = showsSingleRecord
+    ? records.filter((record) => record.record_id === recordId)
+    : records;
 
   const completeSchedule = async (record: VetRecord) => {
     try {
@@ -318,7 +325,9 @@ export default function ClinicVetRecordsScreen() {
             )}
 
             <View style={styles.petInfo}>
-              <Text style={styles.petLabel}>Veterinary History</Text>
+              <Text style={styles.petLabel}>
+                {showsSingleRecord ? "Veterinary Record" : "Veterinary History"}
+              </Text>
 
               <Text style={styles.petName}>{pet.pet_name}</Text>
 
@@ -326,7 +335,7 @@ export default function ClinicVetRecordsScreen() {
             </View>
 
             <View style={styles.recordCount}>
-              <Text style={styles.recordNumber}>{records.length}</Text>
+              <Text style={styles.recordNumber}>{visibleRecords.length}</Text>
 
               <Text style={styles.recordCountLabel}>Records</Text>
             </View>
@@ -353,18 +362,20 @@ export default function ClinicVetRecordsScreen() {
         </Pressable>}
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Medical History</Text>
+          <Text style={styles.sectionTitle}>
+            {showsSingleRecord ? "Record Details" : "Medical History"}
+          </Text>
 
-          {records.length > 0 && (
+          {visibleRecords.length > 0 && (
             <View style={styles.totalBadge}>
               <Text style={styles.totalBadgeText}>
-                {records.length} {records.length === 1 ? "record" : "records"}
+                {visibleRecords.length} {visibleRecords.length === 1 ? "record" : "records"}
               </Text>
             </View>
           )}
         </View>
 
-        {records.length === 0 ? (
+        {visibleRecords.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
               <Ionicons
@@ -395,11 +406,11 @@ export default function ClinicVetRecordsScreen() {
             </Pressable>}
           </View>
         ) : (
-          records.map((record, index) => (
+          visibleRecords.map((record, index) => (
             <VetRecordCard
               key={record.record_id}
               record={record}
-              isLatest={index === 0}
+              isLatest={!showsSingleRecord && index === 0}
               onComplete={
                 hasScanAccess
                   ? () => confirmCompleteSchedule(record)

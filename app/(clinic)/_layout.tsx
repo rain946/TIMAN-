@@ -11,6 +11,8 @@ export default function ClinicLayout() {
       <Stack.Screen name="authorized-pets" />
       <Stack.Screen name="clinic-pet" />
       <Stack.Screen name="clinic-schedules" />
+      <Stack.Screen name="clinic-monthly-schedules" />
+      <Stack.Screen name="clinic-schedule-details" />
       <Stack.Screen name="clinic-reports" />
     </Stack>
   );
