@@ -1,9 +1,10 @@
+import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
 
 import {
-  Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,6 +12,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -29,6 +31,9 @@ import {
 type UserRole = "owner" | "clinic";
 
 export default function RegisterScreen() {
+  const { width, height } = useWindowDimensions();
+  const petHeroHeight = Math.min(Math.max(height * 0.27, 210), 270);
+  const petHeroWidth = Math.min(width * 0.96, 595);
   const inputRefs = useRef<Record<string, TextInput | null>>({});
   const {
     scrollViewRef,
@@ -182,12 +187,32 @@ export default function RegisterScreen() {
           scrollEventThrottle={16}
           contentContainerStyle={[
             styles.content,
+            { width: Math.min(width, 620) },
             keyboardContentContainerStyle,
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
+          <View style={styles.backgroundDecorations} pointerEvents="none">
+            <View style={styles.topMintShape} />
+            <View style={styles.topMintLayer} />
+            <View style={styles.sideCreamShape} />
+            <View style={styles.bottomMintShape} />
+            <Ionicons
+              name="paw"
+              size={24}
+              color="rgba(46, 125, 107, 0.15)"
+              style={styles.topPaw}
+            />
+            <Ionicons
+              name="paw"
+              size={20}
+              color="rgba(250, 183, 98, 0.34)"
+              style={styles.bottomPaw}
+            />
+          </View>
+
           <Pressable
             style={({ pressed }) => [
               styles.backButton,
@@ -198,12 +223,12 @@ export default function RegisterScreen() {
             <Ionicons name="chevron-back" size={28} color="#2E7D6B" />
           </Pressable>
 
-          <View style={styles.logoContainer}>
-            <View style={styles.logoMark}>
-              <Ionicons name="paw" size={26} color="#FFFFFF" />
-            </View>
-
-            <Text style={styles.logo}>TIMAN</Text>
+          <View style={styles.branding} pointerEvents="none">
+            <Image
+              source={require("../../assets/images/timan-wordmark.png")}
+              style={styles.wordmark}
+              resizeMode="contain"
+            />
           </View>
 
           <View style={styles.header}>
@@ -212,6 +237,29 @@ export default function RegisterScreen() {
             <Text style={styles.subtitle}>
               Join TIMAN and keep your pet&apos;s records in one place.
             </Text>
+          </View>
+
+          <View
+            style={[styles.petHeroStage, { height: petHeroHeight }]}
+            pointerEvents="none"
+          >
+            <View style={styles.foliageLeft}>
+              <View style={[styles.leaf, styles.leafLeftOne]} />
+              <View style={[styles.leaf, styles.leafLeftTwo]} />
+              <View style={[styles.leaf, styles.leafLeftThree]} />
+            </View>
+            <View style={styles.foliageRight}>
+              <View style={[styles.leaf, styles.leafRightOne]} />
+              <View style={[styles.leaf, styles.leafRightTwo]} />
+              <View style={[styles.leaf, styles.leafRightThree]} />
+            </View>
+            <Image
+              source={require("../../assets/images/timan-multi-pet-hero.png")}
+              style={{ width: petHeroWidth, height: petHeroHeight }}
+              resizeMode="contain"
+              accessible
+              accessibilityLabel="A dog, cat, rabbit, parrot, guinea pig, and tortoise"
+            />
           </View>
 
           <Text style={styles.label}>I am a</Text>
@@ -336,7 +384,13 @@ export default function RegisterScreen() {
           />
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={21} color="#6B7C73" />
+            <View style={styles.inputIcon}>
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#2E7D6B"
+              />
+            </View>
 
             <TextInput
               ref={(input) => {
@@ -368,11 +422,13 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={21}
-              color="#6B7C73"
-            />
+            <View style={styles.inputIcon}>
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={20}
+                color="#2E7D6B"
+              />
+            </View>
 
             <TextInput
               ref={(input) => {
@@ -451,7 +507,9 @@ function InputBox({
 } & React.ComponentProps<typeof TextInput>) {
   return (
     <View style={styles.inputContainer}>
-      <Ionicons name={icon} size={21} color="#6B7C73" />
+      <View style={styles.inputIcon}>
+        <Ionicons name={icon} size={20} color="#2E7D6B" />
+      </View>
 
       <TextInput
         ref={inputRef}
@@ -470,91 +528,230 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    width: "100%",
-    maxWidth: 620,
+    flexGrow: 1,
+    boxSizing: "border-box",
     alignSelf: "center",
-    paddingHorizontal: 27,
-    paddingBottom: 40,
+    paddingBottom: 36,
+    position: "relative",
+    overflow: "hidden",
+  },
+
+  backgroundDecorations: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
+  },
+
+  topMintShape: {
+    position: "absolute",
+    width: 265,
+    height: 230,
+    borderRadius: 120,
+    right: -105,
+    top: -112,
+    backgroundColor: "#CFE8DD",
+    transform: [{ rotate: "18deg" }],
+  },
+
+  topMintLayer: {
+    position: "absolute",
+    width: 170,
+    height: 165,
+    borderRadius: 86,
+    right: -63,
+    top: -84,
+    backgroundColor: "rgba(86, 176, 145, 0.35)",
+    transform: [{ rotate: "-12deg" }],
+  },
+
+  sideCreamShape: {
+    position: "absolute",
+    width: 150,
+    height: 230,
+    borderRadius: 80,
+    left: -112,
+    top: 310,
+    backgroundColor: "rgba(250, 215, 160, 0.62)",
+    transform: [{ rotate: "-18deg" }],
+  },
+
+  bottomMintShape: {
+    position: "absolute",
+    width: 310,
+    height: 250,
+    borderRadius: 150,
+    right: -150,
+    bottom: -145,
+    backgroundColor: "rgba(207, 232, 221, 0.7)",
+    transform: [{ rotate: "21deg" }],
+  },
+
+  topPaw: {
+    position: "absolute",
+    left: 24,
+    top: 108,
+    transform: [{ rotate: "-18deg" }],
+  },
+
+  bottomPaw: {
+    position: "absolute",
+    right: 24,
+    bottom: 86,
+    transform: [{ rotate: "17deg" }],
   },
 
   backButton: {
-    width: 45,
-    height: 45,
-    justifyContent: "center",
-    marginTop: 5,
-  },
-
-  logoContainer: {
-    alignItems: "center",
-    marginTop: 5,
-  },
-
-  logoMark: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: "#2E7D6B",
+    position: "absolute",
+    left: 14,
+    top: 5,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255, 255, 255, 0.76)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#2E3A34",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 9,
-    elevation: 4,
+    zIndex: 5,
   },
 
-  logo: {
-    fontSize: 36,
-    fontWeight: "900",
-    color: "#2E7D6B",
-    letterSpacing: 2,
-    marginTop: -5,
+  branding: {
+    alignItems: "center",
+    paddingTop: 12,
+    zIndex: 1,
+  },
+
+  wordmark: {
+    width: 190,
+    height: 62,
   },
 
   header: {
     alignItems: "center",
-    marginTop: 18,
-    marginBottom: 25,
+    marginTop: 1,
+    marginBottom: 7,
+    zIndex: 1,
   },
 
   title: {
     fontSize: 30,
-    fontWeight: "800",
-    color: "#2E3A34",
+    lineHeight: 36,
+    fontWeight: "900",
+    color: "#0B6658",
   },
 
   subtitle: {
-    marginTop: 7,
+    marginTop: 5,
     textAlign: "center",
     color: "#6B7C73",
-    fontSize: 16,
-    lineHeight: 23,
+    fontSize: 14.5,
+    lineHeight: 20,
+    paddingHorizontal: 20,
+    maxWidth: 390,
+  },
+
+  petHeroStage: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    position: "relative",
+    marginBottom: 8,
+    zIndex: 1,
+  },
+
+  foliageLeft: {
+    position: "absolute",
+    left: -22,
+    bottom: 10,
+    width: 100,
+    height: 125,
+    zIndex: 0,
+  },
+
+  foliageRight: {
+    position: "absolute",
+    right: -22,
+    bottom: 7,
+    width: 100,
+    height: 125,
+    zIndex: 0,
+  },
+
+  leaf: {
+    position: "absolute",
+    width: 30,
+    height: 70,
+    borderTopLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    backgroundColor: "#2E7D6B",
+  },
+
+  leafLeftOne: {
+    left: 5,
+    bottom: 0,
+    transform: [{ rotate: "-24deg" }],
+  },
+
+  leafLeftTwo: {
+    left: 35,
+    bottom: 23,
+    backgroundColor: "#56B091",
+    transform: [{ rotate: "17deg" }, { scale: 0.82 }],
+  },
+
+  leafLeftThree: {
+    left: 63,
+    bottom: -3,
+    backgroundColor: "#CFE8DD",
+    transform: [{ rotate: "38deg" }, { scale: 0.86 }],
+  },
+
+  leafRightOne: {
+    right: 5,
+    bottom: 0,
+    transform: [{ rotate: "28deg" }],
+  },
+
+  leafRightTwo: {
+    right: 35,
+    bottom: 23,
+    backgroundColor: "#56B091",
+    transform: [{ rotate: "-17deg" }, { scale: 0.82 }],
+  },
+
+  leafRightThree: {
+    right: 63,
+    bottom: -3,
+    backgroundColor: "#CFE8DD",
+    transform: [{ rotate: "-38deg" }, { scale: 0.86 }],
   },
 
   label: {
     fontSize: 16,
     color: "#2E3A34",
-    fontWeight: "600",
-    marginBottom: 10,
+    fontWeight: "800",
+    marginHorizontal: 20,
+    marginBottom: 9,
+    zIndex: 1,
   },
 
   roleContainer: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 20,
+    gap: 12,
+    marginHorizontal: 20,
+    marginBottom: 18,
+    zIndex: 1,
   },
 
   roleButton: {
     flex: 1,
-    height: 65,
+    minWidth: 0,
+    height: 62,
     borderWidth: 1.5,
-    borderColor: "#CFE8DD",
-    borderRadius: 14,
+    borderColor: "#2E7D6B",
+    borderRadius: 18,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
   },
 
   selectedRole: {
@@ -573,37 +770,55 @@ const styles = StyleSheet.create({
   },
 
   inputContainer: {
-    minHeight: 57,
-    backgroundColor: "#FFFFFF",
+    minHeight: 62,
+    backgroundColor: "rgba(255, 255, 255, 0.96)",
     borderWidth: 1,
     borderColor: "#CFE8DD",
-    borderRadius: 13,
+    borderRadius: 18,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 15,
-    marginBottom: 13,
+    paddingHorizontal: 9,
+    marginHorizontal: 20,
+    marginBottom: 11,
     shadowColor: "#2E3A34",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 1,
+    zIndex: 1,
+  },
+
+  inputIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#E7F3ED",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   input: {
     flex: 1,
     marginLeft: 11,
-    fontSize: 17,
+    fontSize: 16,
     color: "#2E3A34",
-    paddingVertical: 15,
+    paddingVertical: 13,
   },
 
   signUpButton: {
     height: 58,
     backgroundColor: "#2E7D6B",
-    borderRadius: 13,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
+    marginHorizontal: 20,
+    marginTop: 8,
+    shadowColor: "#2E7D6B",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
+    zIndex: 1,
   },
 
   buttonPressed: {
@@ -629,7 +844,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 22,
+    marginTop: 14,
+    zIndex: 1,
   },
 
   loginText: {

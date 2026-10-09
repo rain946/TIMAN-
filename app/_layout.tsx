@@ -3,6 +3,7 @@ import { router, Stack } from "expo-router";
 import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { AppDialogProvider } from "../components/dialogs/AppDialog";
 import MissingPetAlertConsentModal from "../components/modals/MissingPetAlertConsentModal";
 import { registerDeviceForPushNotifications } from "../services/notificationService";
 import { checkNearbyAlertEnrollmentForSession } from "../services/nearbyAlertEnrollment";
@@ -448,12 +449,12 @@ export default function RootLayout() {
 
 
   return (
-    <>
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
+    <AppDialogProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
       <Stack.Screen name="index" />
 
       <Stack.Screen name="(auth)/login" />
@@ -489,6 +490,10 @@ export default function RootLayout() {
 
       <Stack.Screen
         name="(veterinary)/pet-care-schedule-form"
+      />
+
+      <Stack.Screen
+        name="(veterinary)/personal-care-history"
       />
 
       <Stack.Screen
@@ -528,9 +533,9 @@ export default function RootLayout() {
         name="(veterinary)/health-reminders"
       />
 
-    </Stack>
-    <MissingPetAlertConsentModal />
-    </>
+      </Stack>
+      <MissingPetAlertConsentModal />
+    </AppDialogProvider>
   );
 
 }

@@ -1,10 +1,11 @@
+import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
 
 import {
-  Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,6 +13,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -57,6 +59,9 @@ function startPostLoginSetup(token: string, user: AuthenticatedUser) {
 }
 
 export default function LoginScreen() {
+  const { width, height } = useWindowDimensions();
+  const petImageHeight = Math.min(Math.max(height * 0.25, 210), 250);
+  const petImageWidth = Math.min(width * 0.94, 489);
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const {
@@ -64,7 +69,7 @@ export default function LoginScreen() {
     handleInputFocus,
     handleScroll,
     keyboardContentContainerStyle,
-  } = useKeyboardAwareScroll(40);
+  } = useKeyboardAwareScroll(32);
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
@@ -72,7 +77,6 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
-
   const handleLogin = async () => {
     const normalizedEmail = normalizeEmail(email);
 
@@ -197,169 +201,186 @@ export default function LoginScreen() {
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
-          <Pressable
-            style={({ pressed }) => [
-              styles.backButton,
+          <View style={styles.pageMintShape} pointerEvents="none" />
+          <View style={styles.pageGreenShape} pointerEvents="none" />
 
-              pressed && styles.buttonPressed,
-            ]}
-            disabled={loading}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="chevron-back" size={28} color="#2E7D6B" />
-          </Pressable>
+          <View style={styles.hero}>
+            <View style={styles.heroMintShape} pointerEvents="none" />
+            <View style={styles.heroMintLayer} pointerEvents="none" />
+            <View style={styles.heroAccentShape} pointerEvents="none" />
+            <Ionicons
+              name="paw"
+              size={22}
+              color="rgba(46, 125, 107, 0.2)"
+              style={styles.heroPawLeft}
+            />
+            <Ionicons
+              name="paw"
+              size={17}
+              color="rgba(86, 176, 145, 0.3)"
+              style={styles.heroPawRight}
+            />
+            <Pressable
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.buttonPressed,
+              ]}
+              disabled={loading}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={26} color="#2E7D6B" />
+            </Pressable>
 
-          <View style={styles.logoContainer}>
-            <View style={styles.logoMark}>
-              <Ionicons name="paw" size={26} color="#FFFFFF" />
+            <View style={styles.heroBranding} pointerEvents="none">
+              <Image
+                source={require("../../assets/images/timan-wordmark.png")}
+                style={styles.heroWordmark}
+                resizeMode="contain"
+              />
+              <Text style={styles.heroSystemTitle}>
+                Pet Identification and{"\n"}Veterinary Monitoring System
+              </Text>
+              <View style={styles.heroDivider} />
+              <Text style={styles.heroCommunityText}>
+                A safer community{"\n"}for every pet
+              </Text>
             </View>
 
-            <Text style={styles.logo}>TIMAN</Text>
+            <View
+              style={[styles.petStage, { height: petImageHeight }]}
+              pointerEvents="none"
+            >
+              <Image
+                source={require("../../assets/images/timan-multi-pet-hero.png")}
+                style={[
+                  styles.heroPets,
+                  { width: petImageWidth, height: petImageHeight },
+                ]}
+                resizeMode="contain"
+                accessible
+                accessibilityLabel="A group of companion pets"
+              />
+            </View>
           </View>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>Welcome Back</Text>
+          <View style={styles.loginCard}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Welcome to TIMAN!</Text>
+              <Text style={styles.subtitle}>
+                Log in to continue to your account
+              </Text>
+            </View>
 
-            <Text style={styles.subtitle}>
-              Log in to continue managing your pet&apos;s care and records.
-            </Text>
-          </View>
+            <View style={styles.inputContainer}>
+              <View style={styles.inputIcon}>
+                <Ionicons name="mail-outline" size={20} color="#2E7D6B" />
+              </View>
+              <View style={styles.inputTextBlock}>
+                <Text style={styles.inputLabel}>Email</Text>
+                <TextInput
+                  ref={emailInputRef}
+                  onFocus={() => handleInputFocus(emailInputRef.current)}
+                  style={styles.input}
+                  placeholder="Enter your email"
+                  placeholderTextColor="#9AA7A1"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!loading}
+                />
+              </View>
+            </View>
 
-          <Text style={styles.label}>Email</Text>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={21} color="#6B7C73" />
-
-            <TextInput
-              ref={emailInputRef}
-              onFocus={() => handleInputFocus(emailInputRef.current)}
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor="#6B7C73"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!loading}
-            />
-          </View>
-
-          <Text style={styles.label}>Password</Text>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={21} color="#6B7C73" />
-
-            <TextInput
-              ref={passwordInputRef}
-              onFocus={() => handleInputFocus(passwordInputRef.current)}
-              style={styles.input}
-              placeholder="Enter your password"
-              placeholderTextColor="#6B7C73"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!loading}
-            />
+            <View style={styles.inputContainer}>
+              <View style={styles.inputIcon}>
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#2E7D6B"
+                />
+              </View>
+              <View style={styles.inputTextBlock}>
+                <Text style={styles.inputLabel}>Password</Text>
+                <TextInput
+                  ref={passwordInputRef}
+                  onFocus={() => handleInputFocus(passwordInputRef.current)}
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#9AA7A1"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!loading}
+                />
+              </View>
+              <Pressable
+                disabled={loading}
+                style={({ pressed }) => [
+                  styles.eyeButton,
+                  pressed && styles.buttonPressed,
+                  loading && styles.disabledButton,
+                ]}
+                onPress={() => setShowPassword((current) => !current)}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={21}
+                  color="#6B7C73"
+                />
+              </Pressable>
+            </View>
 
             <Pressable
               disabled={loading}
               style={({ pressed }) => [
-                styles.eyeButton,
+                styles.forgotButton,
                 pressed && styles.buttonPressed,
+              ]}
+              onPress={() =>
+                Alert.alert(
+                  "Forgot Password",
+                  "Password reset will be connected next.",
+                )
+              }
+            >
+              <Text style={styles.forgotText}>Forgot password?</Text>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.loginButton,
+                pressed && !loading && styles.buttonPressed,
                 loading && styles.disabledButton,
               ]}
-              onPress={() => setShowPassword((current) => !current)}
+              onPress={handleLogin}
+              disabled={loading}
             >
-              <Ionicons
-                name={showPassword ? "eye-outline" : "eye-off-outline"}
-                size={21}
-                color="#6B7C73"
-              />
+              <Text style={styles.loginButtonText}>
+                {loading ? "Logging In..." : "Login"}
+              </Text>
             </Pressable>
-          </View>
 
-          <Pressable
-            disabled={loading}
-            style={({ pressed }) => [
-              styles.forgotContainer,
-              pressed && styles.buttonPressed,
-            ]}
-            onPress={() =>
-              Alert.alert(
-                "Forgot Password",
-                "Password reset will be connected next.",
-              )
-            }
-          >
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.loginButton,
-
-              pressed && !loading && styles.buttonPressed,
-
-              loading && styles.disabledButton,
-            ]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            <Text style={styles.loginButtonText}>
-              {loading ? "Logging In..." : "Log In"}
-            </Text>
-          </Pressable>
-
-          <View style={styles.roleInfo}>
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={21}
-              color="#2E7D6B"
-            />
-
-            <Text style={styles.roleInfoText}>
-              TIMAN will automatically open your Pet Owner or Clinic Staff
-              account.
-            </Text>
-          </View>
-
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-
-            <Text style={styles.dividerText}>New to TIMAN?</Text>
-
-            <View style={styles.divider} />
-          </View>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.createButton,
-
-              pressed && styles.buttonPressed,
-            ]}
-            disabled={loading}
-            onPress={() => router.push("/register")}
-          >
-            <Ionicons name="person-add-outline" size={20} color="#2E7D6B" />
-
-            <Text style={styles.createButtonText}>Create an Account</Text>
-          </Pressable>
-
-          <View style={styles.securityCard}>
-            <View style={styles.securityIcon}>
-              <Ionicons name="lock-closed" size={20} color="#2E7D6B" />
+            <View style={styles.orRow}>
+              <View style={styles.orLine} />
+              <Text style={styles.orText}>OR</Text>
+              <View style={styles.orLine} />
             </View>
 
-            <View style={styles.securityContent}>
-              <Text style={styles.securityTitle}>Secure Account Access</Text>
-
-              <Text style={styles.securityText}>
-                Your account is protected using secure authentication and
-                encrypted passwords.
+            <View style={styles.signUpRow}>
+              <Text style={styles.signUpPrompt}>
+                Don&apos;t have an account?{" "}
               </Text>
+              <Pressable
+                disabled={loading}
+                style={({ pressed }) => pressed && styles.buttonPressed}
+                onPress={() => router.push("/register")}
+              >
+                <Text style={styles.signUpLink}>Sign Up</Text>
+              </Pressable>
             </View>
           </View>
         </ScrollView>
@@ -375,110 +396,216 @@ const styles = StyleSheet.create({
   },
 
   content: {
+    flexGrow: 1,
     width: "100%",
     maxWidth: 520,
     alignSelf: "center",
-    paddingHorizontal: 27,
-    paddingBottom: 40,
+    position: "relative",
+    overflow: "hidden",
   },
 
-  backButton: {
-    width: 45,
-    height: 45,
-    justifyContent: "center",
-    marginTop: 5,
-  },
-
-  logoContainer: {
+  heroBranding: {
+    width: "100%",
     alignItems: "center",
-    marginTop: 12,
+    paddingTop: 22,
+    paddingBottom: 7,
+    zIndex: 2,
   },
-
-  logoMark: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: "#2E7D6B",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#2E3A34",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 9,
-    elevation: 4,
+  heroWordmark: {
+    width: 190,
+    height: 62,
   },
-
-  logo: {
-    fontSize: 39,
-    fontWeight: "900",
-    color: "#2E7D6B",
-    letterSpacing: 2,
-    marginTop: -6,
-  },
-
-  header: {
-    alignItems: "center",
-    marginTop: 14,
-    marginBottom: 22,
-  },
-
-  title: {
-    fontSize: 30,
-    fontWeight: "900",
-    color: "#2E3A34",
-  },
-
-  subtitle: {
-    fontSize: 16,
-    color: "#6B7C73",
-    lineHeight: 23,
+  heroSystemTitle: {
+    marginTop: 1,
     textAlign: "center",
-    marginTop: 7,
-    paddingHorizontal: 15,
-  },
-
-  label: {
-    fontSize: 16,
+    fontSize: 13.5,
+    lineHeight: 18,
     fontWeight: "700",
-    color: "#2E3A34",
-    marginBottom: 7,
+    color: "#456158",
+  },
+  heroDivider: {
+    width: 38,
+    height: 3,
+    borderRadius: 2,
+    marginTop: 8,
+    backgroundColor: "#56B091",
+  },
+  heroCommunityText: {
+    marginTop: 5,
+    textAlign: "center",
+    lineHeight: 17,
+    fontSize: 12.5,
+    fontWeight: "700",
+    color: "#2E7D6B",
   },
 
-  inputContainer: {
-    minHeight: 58,
+  hero: {
+    width: "100%",
+    alignItems: "center",
+    overflow: "hidden",
+    position: "relative",
+    backgroundColor: "#FFF5E9",
+    zIndex: 2,
+  },
+  heroMintShape: {
+    position: "absolute",
+    width: 285,
+    height: 250,
+    borderRadius: 120,
+    right: -92,
+    top: -92,
+    backgroundColor: "#CFE8DD",
+    transform: [{ rotate: "18deg" }],
+  },
+  heroMintLayer: {
+    position: "absolute",
+    width: 190,
+    height: 170,
+    borderRadius: 90,
+    right: -65,
+    top: -72,
+    backgroundColor: "rgba(86, 176, 145, 0.34)",
+    transform: [{ rotate: "-12deg" }],
+  },
+  heroAccentShape: {
+    position: "absolute",
+    width: 145,
+    height: 185,
+    borderRadius: 72,
+    left: -88,
+    bottom: 20,
+    backgroundColor: "#FAD7A0",
+    opacity: 0.58,
+    transform: [{ rotate: "-22deg" }],
+  },
+  heroPawLeft: {
+    position: "absolute",
+    left: 25,
+    top: 82,
+    transform: [{ rotate: "-18deg" }],
+  },
+  heroPawRight: {
+    position: "absolute",
+    right: 28,
+    top: 61,
+    transform: [{ rotate: "16deg" }],
+  },
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(255,255,255,0.72)",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    top: 7,
+    left: 14,
+    zIndex: 3,
+  },
+  petStage: {
+    width: "100%",
+    alignItems: "center",
+    position: "relative",
+    zIndex: 2,
+  },
+  heroPets: {
+    position: "absolute",
+    bottom: 10,
+    alignSelf: "center",
+    zIndex: 3,
+  },
+  pageMintShape: {
+    position: "absolute",
+    right: -90,
+    bottom: 52,
+    width: 210,
+    height: 280,
+    borderRadius: 105,
+    backgroundColor: "rgba(207, 232, 221, 0.65)",
+    transform: [{ rotate: "22deg" }],
+    zIndex: 0,
+  },
+  pageGreenShape: {
+    position: "absolute",
+    left: -105,
+    bottom: -70,
+    width: 230,
+    height: 235,
+    borderRadius: 115,
+    backgroundColor: "rgba(86, 176, 145, 0.18)",
+    transform: [{ rotate: "-20deg" }],
+    zIndex: 0,
+  },
+  loginCard: {
+    width: "92%",
+    maxWidth: 478,
+    boxSizing: "border-box",
+    alignSelf: "center",
+    marginTop: -24,
+    marginBottom: 24,
+    paddingHorizontal: 22,
+    paddingTop: 24,
+    paddingBottom: 22,
+    borderRadius: 30,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
+    borderColor: "rgba(207, 232, 221, 0.9)",
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 7,
+    zIndex: 5,
+  },
+  header: { alignItems: "center", marginBottom: 16 },
+  title: {
+    fontSize: 27,
+    fontWeight: "900",
+    color: "#0B6658",
+  },
+  subtitle: {
+    fontSize: 14.5,
+    color: "#6B7C73",
+    marginTop: 5,
+  },
+  inputContainer: {
+    minHeight: 66,
+    backgroundColor: "#F9FCFA",
+    borderWidth: 1,
     borderColor: "#CFE8DD",
-    borderRadius: 13,
+    borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 15,
-    marginBottom: 13,
-    shadowColor: "#2E3A34",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
-
-  input: {
-    flex: 1,
-    marginLeft: 11,
-    fontSize: 17,
-    color: "#2E3A34",
-    paddingVertical: 15,
-  },
-
-  forgotContainer: {
-    alignSelf: "flex-end",
-    marginTop: -5,
-    marginBottom: 14,
-    minHeight: 44,
-    paddingHorizontal: 4,
+  inputIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#E7F3ED",
     alignItems: "center",
     justifyContent: "center",
   },
-
+  input: {
+    width: "100%",
+    fontSize: 15,
+    color: "#2E3A34",
+    paddingVertical: 2,
+    paddingHorizontal: 0,
+  },
+  inputTextBlock: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: "center",
+  },
+  inputLabel: {
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: "700",
+    color: "#2E3A34",
+    marginBottom: 2,
+  },
   eyeButton: {
     minWidth: 44,
     minHeight: 44,
@@ -487,17 +614,31 @@ const styles = StyleSheet.create({
   },
 
   forgotText: {
-    fontSize: 15,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "800",
     color: "#2E7D6B",
   },
-
+  forgotButton: {
+    minHeight: 32,
+    alignSelf: "flex-end",
+    justifyContent: "center",
+    marginTop: -5,
+    marginBottom: 4,
+  },
   loginButton: {
-    height: 58,
+    height: 56,
     backgroundColor: "#2E7D6B",
-    borderRadius: 13,
+    borderRadius: 20,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 9,
+    marginTop: 0,
+    shadowColor: "#2E7D6B",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
   },
 
   loginButtonText: {
@@ -520,90 +661,35 @@ const styles = StyleSheet.create({
     ],
   },
 
-  roleInfo: {
-    backgroundColor: "#CFE8DD",
-    borderRadius: 13,
-    padding: 12,
+  signUpRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 14,
+    justifyContent: "center",
+    marginTop: 10,
   },
-
-  roleInfoText: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 19,
-    color: "#56B091",
-    marginLeft: 8,
+  signUpPrompt: {
+    fontSize: 14,
+    color: "#6B7C73",
   },
-
-  dividerContainer: {
+  signUpLink: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#2E7D6B",
+  },
+  orRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
+    gap: 12,
+    marginTop: 12,
   },
-
-  divider: {
+  orLine: {
     flex: 1,
     height: 1,
     backgroundColor: "#CFE8DD",
   },
-
-  dividerText: {
-    fontSize: 13,
-    color: "#6B7C73",
-    marginHorizontal: 10,
-  },
-
-  createButton: {
-    height: 55,
-    borderWidth: 1.5,
-    borderColor: "#2E7D6B",
-    borderRadius: 13,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-  },
-
-  createButtonText: {
-    color: "#2E7D6B",
-    fontSize: 16,
+  orText: {
+    fontSize: 12,
     fontWeight: "800",
-  },
-
-  securityCard: {
-    backgroundColor: "#CFE8DD",
-    borderRadius: 15,
-    padding: 14,
-    flexDirection: "row",
-    marginTop: 18,
-  },
-
-  securityIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  securityContent: {
-    flex: 1,
-    marginLeft: 10,
-  },
-
-  securityTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#2E3A34",
-  },
-
-  securityText: {
-    fontSize: 13,
     color: "#6B7C73",
-    lineHeight: 19,
-    marginTop: 3,
   },
 });

@@ -1,3 +1,4 @@
+import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker, {
@@ -7,7 +8,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -33,6 +33,7 @@ export default function PetCareScheduleForm() {
     petId?: string;
     petName?: string;
     scheduleId?: string;
+    scope?: "occurrence" | "series";
   }>();
   const petId = Number(params.petId);
   const scheduleId = params.scheduleId ? Number(params.scheduleId) : null;
@@ -40,11 +41,13 @@ export default function PetCareScheduleForm() {
     useState<(typeof CARE_TYPES)[number]>("Grooming");
   const [customCareName, setCustomCareName] = useState("");
   const [scheduledDate, setScheduledDate] = useState(formatDate(new Date()));
+  const [scheduledTime, setScheduledTime] = useState("09:00");
   const [repeatType, setRepeatType] = useState("None");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(Boolean(scheduleId));
   const [saving, setSaving] = useState(false);
   const [showIosDatePicker, setShowIosDatePicker] = useState(false);
+  const [showIosTimePicker, setShowIosTimePicker] = useState(false);
 
   useEffect(() => {
     if (!scheduleId || !petId) return;
@@ -73,6 +76,7 @@ export default function PetCareScheduleForm() {
           setCustomCareName(item.care_type);
         }
         setScheduledDate(item.scheduled_date);
+        setScheduledTime(item.scheduled_time || "09:00");
         setRepeatType(item.repeat_type);
         setNotes(item.notes || "");
       } catch (error) {
@@ -99,6 +103,23 @@ export default function PetCareScheduleForm() {
       minimumDate: startOfToday(),
       onChange: (event, date) =>
         event.type === "set" && date && setScheduledDate(formatDate(date)),
+    });
+  };
+
+  const openTimePicker = () => {
+    const [hours, minutes] = scheduledTime.split(":").map(Number);
+    const current = new Date();
+    current.setHours(hours || 0, minutes || 0, 0, 0);
+    if (Platform.OS === "ios") {
+      setShowIosTimePicker(true);
+      return;
+    }
+    DateTimePickerAndroid.open({
+      value: current,
+      mode: "time",
+      onChange: (event, date) =>
+        event.type === "set" && date &&
+        setScheduledTime(`${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`),
     });
   };
 
@@ -134,8 +155,10 @@ export default function PetCareScheduleForm() {
             care_type: careType,
             custom_care_name: customCareName.trim(),
             scheduled_date: scheduledDate,
+            scheduled_time: scheduledTime,
             repeat_type: repeatType,
             notes: notes.trim(),
+            scope: params.scope || "occurrence",
           }),
         },
       );
@@ -249,6 +272,26 @@ export default function PetCareScheduleForm() {
               </Pressable>
             </View>
           )}
+          <Text style={styles.sectionTitle}>Time</Text>
+          <Pressable onPress={openTimePicker} style={styles.inputRow}>
+            <Ionicons name="time-outline" size={19} color="#2E7D6B" />
+            <Text style={styles.inputValue}>{formatTime(scheduledTime)}</Text>
+          </Pressable>
+          {showIosTimePicker && Platform.OS === "ios" && (
+            <View style={styles.iosPickerCard}>
+              <DateTimePicker
+                value={timeFromValue(scheduledTime)}
+                mode="time"
+                display="spinner"
+                onChange={(_, date) =>
+                  date && setScheduledTime(`${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`)
+                }
+              />
+              <Pressable style={styles.iosPickerDone} onPress={() => setShowIosTimePicker(false)}>
+                <Text style={styles.iosPickerDoneText}>Done</Text>
+              </Pressable>
+            </View>
+          )}
           <Text style={styles.sectionTitle}>Repeat</Text>
           <View style={styles.options}>
             {REPEATS.map((item) => (
@@ -315,6 +358,15 @@ function formatDate(date: Date) {
 function parseDate(value: string) {
   const [y, m, d] = value.split("-").map(Number);
   return y && m && d ? new Date(y, m - 1, d) : null;
+}
+function timeFromValue(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours || 0, minutes || 0, 0, 0);
+  return date;
+}
+function formatTime(value: string) {
+  return timeFromValue(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 const styles = StyleSheet.create({

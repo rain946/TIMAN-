@@ -1,3 +1,4 @@
+import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -10,7 +11,6 @@ import { useRef, useState } from "react";
 
 import {
   ActivityIndicator,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -132,7 +132,7 @@ export default function AddPetScreen() {
   };
 
   const pickImage = () => {
-    Alert.alert("Add Pet Photo", "Choose where to get the pet photo.", [
+    Alert.alert("Add Pet Photo", "Choose where to get your pet photo.", [
       {
         text: "Take Photo",
         onPress: () => {

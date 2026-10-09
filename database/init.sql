@@ -172,6 +172,9 @@ CREATE TABLE IF NOT EXISTS vet_records (
     next_due_date DATE NULL,
     next_service_type VARCHAR(100) NULL,
     follow_up_plan TEXT NULL,
+    schedule_kind ENUM('reminder', 'appointment') NOT NULL DEFAULT 'reminder',
+    appointment_at DATETIME NULL,
+    reminder_snoozed_until DATETIME NULL,
     schedule_status ENUM(
         'Pending',
         'Completed',
@@ -400,7 +403,11 @@ CREATE TABLE IF NOT EXISTS pet_care_schedules (
     pet_id INT NOT NULL,
     care_type VARCHAR(100) NOT NULL,
     scheduled_date DATE NOT NULL,
+    scheduled_time TIME NULL,
     repeat_type ENUM('None', 'Weekly', 'Monthly') NOT NULL DEFAULT 'None',
+    series_id CHAR(36) NULL,
+    recurrence_anchor_date DATE NULL,
+    series_status ENUM('Active', 'Cancelled') NOT NULL DEFAULT 'Active',
     notes VARCHAR(500) NULL,
     status ENUM('Pending', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending',
     previous_schedule_id INT NULL,
@@ -418,6 +425,29 @@ CREATE TABLE IF NOT EXISTS pet_care_schedules (
     UNIQUE KEY unique_next_care_occurrence (previous_schedule_id),
     INDEX idx_pet_care_owner_status_date (owner_id, status, scheduled_date),
     INDEX idx_pet_care_pet (pet_id)
+);
+
+CREATE TABLE IF NOT EXISTS appointment_change_requests (
+    request_id INT AUTO_INCREMENT PRIMARY KEY,
+    record_id INT NOT NULL,
+    owner_id INT NOT NULL,
+    clinic_user_id INT NOT NULL,
+    request_type ENUM('reschedule', 'cancel') NOT NULL,
+    reason VARCHAR(500) NOT NULL,
+    original_schedule DATETIME NOT NULL,
+    proposed_schedule DATETIME NULL,
+    status ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending',
+    reviewed_by INT NULL,
+    reviewed_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (record_id) REFERENCES vet_records(record_id) ON DELETE CASCADE,
+    FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (clinic_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(user_id) ON DELETE SET NULL,
+    INDEX idx_appointment_request_owner (owner_id, status, created_at),
+    INDEX idx_appointment_request_clinic (clinic_user_id, status, created_at),
+    INDEX idx_appointment_request_record (record_id, status)
 );
 
 CREATE TABLE IF NOT EXISTS pet_care_reminder_logs (

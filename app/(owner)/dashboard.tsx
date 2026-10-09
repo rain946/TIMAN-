@@ -1,9 +1,9 @@
+import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useFocusEffect } from "expo-router";
 import {
   ActivityIndicator,
-  Alert,
   BackHandler,
   Image,
   ImageSourcePropType,

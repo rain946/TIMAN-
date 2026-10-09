@@ -118,12 +118,13 @@ const notifyClinicOfOwnerScheduleChange = async ({
   serviceType,
   action,
   nextDueDate,
+  reason,
 }) => {
   const rescheduled = action === "rescheduled";
   const title = rescheduled ? "Treatment Rescheduled" : "Treatment Cancelled";
   const message = rescheduled
     ? `${petName}'s ${serviceType} treatment was rescheduled to ${nextDueDate}.`
-    : `${petName}'s ${serviceType} treatment was cancelled by the owner.`;
+    : `${petName}'s ${serviceType} treatment was cancelled by the owner. Reason: ${reason}`;
 
   try {
     await db.query(
@@ -161,6 +162,7 @@ const notifyClinicOfOwnerScheduleChange = async ({
             petId,
             serviceType,
             nextDueDate: nextDueDate || null,
+            reason: reason || null,
           },
           pushTokenId: tokenRow.push_token_id,
           userId: clinicUserId,
@@ -262,7 +264,6 @@ router.post(
         typeof next_service_type === "string" ? next_service_type.trim() : "";
       const normalizedFollowUpPlan =
         typeof follow_up_plan === "string" ? follow_up_plan.trim() : "";
-
       if (normalizedNextDueDate && !parseDateOnly(normalizedNextDueDate)) {
         return res.status(400).json({
           success: false,
@@ -935,8 +936,7 @@ router.get(
             ON vr.pet_id = p.pet_id
 
           WHERE p.owner_id = ?
-            AND vr.next_due_date
-                IS NOT NULL
+            AND vr.next_due_date IS NOT NULL
             AND vr.schedule_status =
                 'Pending'
 
@@ -961,7 +961,7 @@ router.get(
 
         if (days < 0) {
           overdue.push(schedule);
-        } else if (days <= 7) {
+        } else if (days <= 30) {
           dueSoon.push(schedule);
         } else {
           upcoming.push(schedule);
@@ -1124,11 +1124,20 @@ router.patch(
     try {
       const recordId = Number(req.params.recordId);
       const ownerId = req.user.userId;
+      const reason =
+        typeof req.body.reason === "string" ? req.body.reason.trim() : "";
 
       if (!Number.isInteger(recordId) || recordId <= 0) {
         return res.status(400).json({
           success: false,
           message: "Invalid veterinary record ID.",
+        });
+      }
+      if (reason.length < 5 || reason.length > 500) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Please provide a cancellation reason between 5 and 500 characters.",
         });
       }
 
@@ -1238,6 +1247,7 @@ router.patch(
         petName: schedule.pet_name,
         serviceType: schedule.service_type,
         action: "cancelled",
+        reason,
       });
 
       return res.json({
@@ -1344,6 +1354,13 @@ router.patch(
           message: "This schedule has already been rescheduled and can no longer be changed.",
         });
       }
+      if (schedule.next_due_date < getPhilippineToday()) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "Overdue schedules can no longer be rescheduled. Please contact the clinic.",
+        });
+      }
       if (schedule.next_due_date === nextDueDate) {
         return res.status(400).json({
           success: false,
@@ -1372,8 +1389,9 @@ router.patch(
             AND vr.next_due_date IS NOT NULL
             AND vr.schedule_status = 'Pending'
             AND vr.rescheduled_at IS NULL
+            AND DATE(vr.next_due_date) >= ?
           `,
-          [nextDueDate, recordId, ownerId]
+          [nextDueDate, recordId, ownerId, getPhilippineToday()]
         );
 
         if (result.affectedRows === 0) {

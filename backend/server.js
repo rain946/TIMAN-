@@ -57,6 +57,22 @@ app.use(
   })
 );
 
+app.use((error, req, res, next) => {
+  if (
+    error instanceof SyntaxError &&
+    error.status === 400 &&
+    Object.prototype.hasOwnProperty.call(error, "body")
+  ) {
+    console.warn("INVALID API JSON BODY:", req.method, req.originalUrl);
+    return res.status(400).json({
+      success: false,
+      message: "The request body is not valid JSON.",
+    });
+  }
+
+  return next(error);
+});
+
 // =====================================================
 // STATIC UPLOADS
 // =====================================================

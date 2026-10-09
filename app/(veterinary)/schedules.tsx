@@ -1,3 +1,4 @@
+import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -6,11 +7,11 @@ import {
   type DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -18,10 +19,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { timanShadow } from "../../components/timan/theme";
+import {
+  timanColors,
+  timanRadii,
+  timanShadow,
+  timanSpacing,
+} from "../../components/timan/theme";
 
 import { API_URL, getImageUrl } from "../../config/api";
 
@@ -45,7 +52,6 @@ type VetRecord = {
   next_due_date: string | null;
   next_service_type: string | null;
   follow_up_plan: string | null;
-
   schedule_status: "Pending" | "Completed" | "Cancelled";
 
   completed_at: string | null;
@@ -61,6 +67,8 @@ type ScheduleItem = VetRecord & {
 };
 
 type ScheduleStatus = "Overdue" | "Due Soon" | "Upcoming";
+type ScheduleTab = "Medical" | "Personal Care";
+type MedicalFilter = "All" | ScheduleStatus;
 
 type PersonalCareSchedule = {
   care_schedule_id: number;
@@ -68,7 +76,9 @@ type PersonalCareSchedule = {
   pet_name: string;
   care_type: string;
   scheduled_date: string;
+  scheduled_time?: string | null;
   repeat_type: "None" | "Weekly" | "Monthly";
+  series_id?: string | null;
   notes: string | null;
   status: "Pending" | "Completed" | "Cancelled";
   completed_at: string | null;
@@ -88,8 +98,16 @@ export default function SchedulesScreen() {
   const [personalCare, setPersonalCare] = useState<PersonalCareSchedule[]>([]);
 
   const [loading, setLoading] = useState(true);
-
   const [refreshing, setRefreshing] = useState(false);
+
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [activeTab, setActiveTab] = useState<ScheduleTab>("Medical");
+  const [medicalFilter, setMedicalFilter] = useState<MedicalFilter>("All");
+
+  const [updatingCareId, setUpdatingCareId] = useState<number | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const tabsOffsetRef = useRef(0);
 
   const [updatingScheduleId, setUpdatingScheduleId] = useState<number | null>(
     null,
@@ -97,10 +115,13 @@ export default function SchedulesScreen() {
 
   const [iosRescheduleSchedule, setIosRescheduleSchedule] =
     useState<ScheduleItem | null>(null);
-
   const [iosRescheduleDate, setIosRescheduleDate] = useState<Date>(() =>
     getTomorrowStart(),
   );
+  const [cancelSchedule, setCancelSchedule] = useState<ScheduleItem | null>(
+    null,
+  );
+  const [cancelReason, setCancelReason] = useState("");
 
   const loadSchedules = useCallback(
     async (showLoading = true) => {
@@ -116,6 +137,7 @@ export default function SchedulesScreen() {
         if (showLoading) {
           setLoading(true);
         }
+        setLoadError(null);
 
         const token = await AsyncStorage.getItem("token");
 
@@ -152,9 +174,11 @@ export default function SchedulesScreen() {
         console.log("OWNER SCHEDULE RESPONSE:", data);
 
         if (!response.ok) {
+          const message = data.message || "Unable to load pet schedules.";
+          setLoadError(message);
           Alert.alert(
             "Unable to Load",
-            data.message || "Unable to load pet schedules.",
+            message,
           );
 
           return;
@@ -184,9 +208,15 @@ export default function SchedulesScreen() {
       } catch (error) {
         console.log("LOAD SCHEDULE ERROR:", error);
 
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to connect to the TIMAN server.";
+        setLoadError(message);
+
         Alert.alert(
           "Connection Error",
-          "Unable to connect to the TIMAN server.",
+          message,
         );
       } finally {
         setLoading(false);
@@ -212,7 +242,11 @@ export default function SchedulesScreen() {
   const updatePersonalCare = async (
     schedule: PersonalCareSchedule,
     action: "complete" | "cancel",
+    scope?: "occurrence" | "series",
   ) => {
+    if (updatingCareId !== null) return;
+    setUpdatingCareId(schedule.care_schedule_id);
+
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -225,8 +259,10 @@ export default function SchedulesScreen() {
           method: "PATCH",
           headers: {
             Accept: "application/json",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body: action === "cancel" ? JSON.stringify({ scope }) : undefined,
         },
       );
       const data = await response.json();
@@ -244,7 +280,56 @@ export default function SchedulesScreen() {
         "Unable to Update",
         error instanceof Error ? error.message : "Please try again.",
       );
+    } finally {
+      setUpdatingCareId(null);
     }
+  };
+
+  const openPersonalCareEditor = (
+    item: PersonalCareSchedule,
+    scope: "occurrence" | "series" = "occurrence",
+  ) => {
+    router.push({
+      pathname: "/(veterinary)/pet-care-schedule-form",
+      params: {
+        petId: String(item.pet_id),
+        petName: item.pet_name,
+        scheduleId: String(item.care_schedule_id),
+        scope,
+      },
+    });
+  };
+
+  const choosePersonalCareEditScope = (item: PersonalCareSchedule) => {
+    if (item.repeat_type === "None") return openPersonalCareEditor(item);
+    Alert.alert(
+      "Reschedule Recurring Care",
+      "Should this change apply only to this occurrence or to the recurring series?",
+      [
+        { text: "Keep", style: "cancel" },
+        { text: "This Occurrence", onPress: () => openPersonalCareEditor(item, "occurrence") },
+        { text: "Entire Series", onPress: () => openPersonalCareEditor(item, "series") },
+      ],
+    );
+  };
+
+  const confirmPersonalCareCancel = (item: PersonalCareSchedule) => {
+    if (item.repeat_type === "None") {
+      Alert.alert("Cancel Personal Care?", "This reminder will remain in history.", [
+        { text: "Keep", style: "cancel" },
+        { text: "Cancel Schedule", style: "destructive", onPress: () => void updatePersonalCare(item, "cancel", "occurrence") },
+      ]);
+      return;
+    }
+    Alert.alert(
+      "Cancel Recurring Care?",
+      "Cancel only this occurrence or stop the entire recurring series? Cancelled care remains in history.",
+      [
+        { text: "Keep", style: "cancel" },
+        { text: "This Occurrence", onPress: () => void updatePersonalCare(item, "cancel", "occurrence") },
+        { text: "Entire Series", style: "destructive", onPress: () => void updatePersonalCare(item, "cancel", "series") },
+      ],
+    );
   };
 
   const updateSchedule = useCallback(
@@ -252,17 +337,16 @@ export default function SchedulesScreen() {
       schedule: ScheduleItem,
       action: "cancel" | "reschedule",
       nextDueDate?: string,
+      cancellationReason?: string,
     ) => {
       if (updatingScheduleId !== null) return;
       setUpdatingScheduleId(schedule.record_id);
-
       try {
         const token = await AsyncStorage.getItem("token");
         if (!token) {
           router.replace("/login");
           return;
         }
-
         const response = await fetch(
           `${API_URL}/vet-records/${schedule.record_id}/${action}`,
           {
@@ -275,7 +359,7 @@ export default function SchedulesScreen() {
             body:
               action === "reschedule"
                 ? JSON.stringify({ next_due_date: nextDueDate })
-                : undefined,
+                : JSON.stringify({ reason: cancellationReason }),
           },
         );
         const responseText = await response.text();
@@ -285,7 +369,6 @@ export default function SchedulesScreen() {
         } catch {
           data = { message: responseText };
         }
-
         if (response.status === 401) {
           router.replace("/login");
           return;
@@ -293,7 +376,6 @@ export default function SchedulesScreen() {
         if (!response.ok || !data.success) {
           throw new Error(data.message || `Unable to ${action} the schedule.`);
         }
-
         await loadSchedules(false);
         Alert.alert(
           action === "cancel" ? "Schedule Cancelled" : "Treatment Rescheduled",
@@ -320,22 +402,33 @@ export default function SchedulesScreen() {
         );
         return;
       }
-
-      Alert.alert(
-        "Cancel Schedule?",
-        "Are you sure you want to cancel this scheduled treatment?",
-        [
-          { text: "Keep Schedule", style: "cancel" },
-          {
-            text: "Cancel Schedule",
-            style: "destructive",
-            onPress: () => void updateSchedule(schedule, "cancel"),
-          },
-        ],
-      );
+      setCancelReason("");
+      setCancelSchedule(schedule);
     },
-    [updateSchedule],
+    [],
   );
+
+  const closeCancelDialog = useCallback(() => {
+    if (updatingScheduleId !== null) return;
+    setCancelSchedule(null);
+    setCancelReason("");
+  }, [updatingScheduleId]);
+
+  const submitCancellation = useCallback(() => {
+    if (!cancelSchedule || updatingScheduleId !== null) return;
+    const reason = cancelReason.trim();
+    if (reason.length < 5) {
+      Alert.alert(
+        "Reason Required",
+        "Please enter a short reason for the clinic (at least 5 characters).",
+      );
+      return;
+    }
+    const schedule = cancelSchedule;
+    setCancelSchedule(null);
+    setCancelReason("");
+    void updateSchedule(schedule, "cancel", undefined, reason);
+  }, [cancelReason, cancelSchedule, updateSchedule, updatingScheduleId]);
 
   const confirmReschedule = useCallback(
     (schedule: ScheduleItem, selectedDate: Date) => {
@@ -363,10 +456,8 @@ export default function SchedulesScreen() {
         setIosRescheduleSchedule(schedule);
         return;
       }
-
       const tomorrow = getTomorrowStart();
       const initialDate = getInitialRescheduleDate(schedule.next_due_date);
-
       DateTimePickerAndroid.open({
         value: initialDate,
         mode: "date",
@@ -449,12 +540,38 @@ export default function SchedulesScreen() {
   const pendingPersonalCare = personalCare.filter(
     (item) => item.status === "Pending",
   );
-  const personalCareHistory = personalCare.filter(
-    (item) => item.status !== "Pending",
-  );
-
   const nextSchedule =
     schedules.find((item) => item.daysRemaining >= 0) || null;
+
+  const filteredMedicalSchedules = useMemo(() => {
+    if (medicalFilter === "Overdue") return overdue;
+    if (medicalFilter === "Due Soon") return dueSoon;
+    if (medicalFilter === "Upcoming") return upcoming;
+    return schedules;
+  }, [dueSoon, medicalFilter, overdue, schedules, upcoming]);
+
+  const openMedicalFilter = (filter: MedicalFilter) => {
+    setActiveTab("Medical");
+    setMedicalFilter(filter);
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({
+        y: Math.max(tabsOffsetRef.current - timanSpacing.md, 0),
+        animated: true,
+      });
+    });
+  };
+
+  const openMedicalList = () => openMedicalFilter("All");
+
+  const openPersonalCareHistory = () => {
+    router.push({
+      pathname: "/(veterinary)/personal-care-history",
+      params: {
+        petId: String(petId),
+        petName: pet?.pet_name || "",
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -475,6 +592,7 @@ export default function SchedulesScreen() {
       <Header />
 
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
         refreshControl={
@@ -499,9 +617,13 @@ export default function SchedulesScreen() {
             <View style={styles.petInfo}>
               <Text style={styles.petLabel}>Health Schedule</Text>
 
-              <Text style={styles.petName}>{pet.pet_name}</Text>
+              <Text numberOfLines={1} style={styles.petName}>
+                {pet.pet_name}
+              </Text>
 
-              <Text style={styles.petDetails}>{pet.breed || pet.species}</Text>
+              <Text numberOfLines={1} style={styles.petDetails}>
+                {pet.breed || pet.species}
+              </Text>
             </View>
 
             <View style={styles.calendarIcon}>
@@ -510,26 +632,103 @@ export default function SchedulesScreen() {
           </View>
         )}
 
+        {loadError && (
+          <View style={styles.loadErrorCard}>
+            <Ionicons name="cloud-offline-outline" size={21} color={timanColors.danger} />
+            <View style={styles.loadErrorInfo}>
+              <Text style={styles.loadErrorTitle}>Couldn&apos;t refresh schedules</Text>
+              <Text style={styles.loadErrorText}>{loadError}</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void loadSchedules()}
+              style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </Pressable>
+          </View>
+        )}
+
+        <View
+          onLayout={(event) => {
+            tabsOffsetRef.current = event.nativeEvent.layout.y;
+          }}
+          style={styles.tabs}
+        >
+          {(["Medical", "Personal Care"] as ScheduleTab[]).map((tab) => {
+            const selected = activeTab === tab;
+            return (
+              <Pressable
+                accessibilityRole="tab"
+                accessibilityState={{ selected }}
+                key={tab}
+                onPress={() => setActiveTab(tab)}
+                style={({ pressed }) => [
+                  styles.tabButton,
+                  selected && styles.tabButtonSelected,
+                  pressed && styles.tabButtonPressed,
+                ]}
+              >
+                <Ionicons
+                  name={tab === "Medical" ? "medical-outline" : "heart-outline"}
+                  size={18}
+                  color={selected ? timanColors.white : timanColors.muted}
+                />
+                <Text style={[styles.tabText, selected && styles.tabTextSelected]}>
+                  {tab}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {activeTab === "Medical" && (
+          <MedicalOverview
+            dueSoonCount={dueSoon.length}
+          nextSchedule={nextSchedule}
+          onSelectFilter={openMedicalFilter}
+          onViewAll={openMedicalList}
+          selectedFilter={medicalFilter}
+            overdueCount={overdue.length}
+            upcomingCount={upcoming.length}
+          />
+        )}
+
+        {activeTab === "Personal Care" && (
+          <>
+
         <View style={styles.personalHeaderRow}>
-          <View>
+          <View style={styles.personalHeading}>
             <Text style={styles.personalEyebrow}>OWNER-CREATED</Text>
             <Text style={styles.personalTitle}>Personal Care</Text>
           </View>
-          <Pressable
-            style={({ pressed }) => [
-              styles.addCareButton,
-              pressed && styles.pressed,
-            ]}
-            onPress={() =>
-              router.push({
-                pathname: "/(veterinary)/pet-care-schedule-form",
-                params: { petId: String(petId), petName: pet?.pet_name || "" },
-              })
-            }
-          >
-            <Ionicons name="add" size={18} color="#FFFFFF" />
-            <Text style={styles.addCareText}>Add Pet Care</Text>
-          </Pressable>
+          <View style={styles.personalHeaderActions}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.addCareButton,
+                pressed && styles.pressed,
+              ]}
+              onPress={() =>
+                router.push({
+                  pathname: "/(veterinary)/pet-care-schedule-form",
+                  params: { petId: String(petId), petName: pet?.pet_name || "" },
+                })
+              }
+            >
+              <Ionicons name="add" size={18} color="#FFFFFF" />
+              <Text style={styles.addCareText}>Add Pet Care</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="link"
+              onPress={openPersonalCareHistory}
+              style={({ pressed }) => [
+                styles.historyTextLinkPressable,
+                pressed && styles.historyTextLinkPressed,
+              ]}
+            >
+              <Text style={styles.historyTextLink}>Personal Care History</Text>
+            </Pressable>
+          </View>
         </View>
 
         {pendingPersonalCare.length === 0 ? (
@@ -541,18 +740,11 @@ export default function SchedulesScreen() {
         ) : (
           pendingPersonalCare.map((item) => (
             <PersonalCareCard
+              actionsDisabled={updatingCareId !== null}
               key={item.care_schedule_id}
               item={item}
-              onEdit={() =>
-                router.push({
-                  pathname: "/(veterinary)/pet-care-schedule-form",
-                  params: {
-                    petId: String(item.pet_id),
-                    petName: item.pet_name,
-                    scheduleId: String(item.care_schedule_id),
-                  },
-                })
-              }
+              updating={updatingCareId === item.care_schedule_id}
+              onEdit={() => choosePersonalCareEditScope(item)}
               onComplete={() =>
                 Alert.alert(
                   "Mark Personal Care Done?",
@@ -566,45 +758,21 @@ export default function SchedulesScreen() {
                   ],
                 )
               }
-              onCancel={() =>
-                Alert.alert(
-                  "Cancel Personal Care?",
-                  "This reminder will remain in history.",
-                  [
-                    { text: "Keep", style: "cancel" },
-                    {
-                      text: "Cancel Schedule",
-                      style: "destructive",
-                      onPress: () => void updatePersonalCare(item, "cancel"),
-                    },
-                  ],
-                )
-              }
+              onCancel={() => confirmPersonalCareCancel(item)}
             />
           ))
         )}
 
-        {personalCareHistory.length > 0 && (
-          <View style={styles.personalHistory}>
-            <Text style={styles.personalHistoryTitle}>
-              Personal Care History
-            </Text>
-            {personalCareHistory.map((item) => (
-              <PersonalCareHistoryCard
-                key={item.care_schedule_id}
-                item={item}
-              />
-            ))}
-          </View>
+          </>
         )}
 
-        <View style={styles.medicalHeader}>
+        <View style={[styles.medicalHeader, styles.hidden]}>
           <Text style={styles.medicalEyebrow}>CLINIC-CREATED</Text>
           <Text style={styles.medicalTitle}>Veterinary / Medical</Text>
         </View>
 
         {nextSchedule && (
-          <View style={styles.nextCard}>
+          <View style={[styles.nextCard, styles.hidden]}>
             <View style={styles.nextTop}>
               <View style={styles.nextIcon}>
                 <Ionicons name="notifications" size={21} color="#F5A623" />
@@ -656,7 +824,7 @@ export default function SchedulesScreen() {
           </View>
         )}
 
-        <View style={styles.summaryRow}>
+        <View style={[styles.summaryRow, styles.hidden]}>
           <SummaryCard
             icon="alert-circle-outline"
             number={overdue.length}
@@ -682,7 +850,7 @@ export default function SchedulesScreen() {
           />
         </View>
 
-        <View style={styles.infoCard}>
+        <View style={[styles.infoCard, styles.hidden]}>
           <Ionicons
             name="information-circle-outline"
             size={20}
@@ -696,17 +864,43 @@ export default function SchedulesScreen() {
           </Text>
         </View>
 
-        {schedules.length === 0 && (
+        {activeTab === "Medical" && (
+          <View style={styles.medicalListHeader}>
+            <View style={styles.medicalListTitleRow}>
+              <View>
+                <Text style={styles.medicalListTitle}>
+                  {medicalFilter === "All" ? "Medical schedules" : medicalFilter}
+                </Text>
+                <Text style={styles.medicalListSubtitle}>
+                  {filteredMedicalSchedules.length} active{" "}
+                  {filteredMedicalSchedules.length === 1 ? "schedule" : "schedules"}
+                </Text>
+              </View>
+              <View style={styles.medicalListCount}>
+                <Text style={styles.medicalListCountText}>
+                  {filteredMedicalSchedules.length}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {activeTab === "Medical" && filteredMedicalSchedules.length === 0 && (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
               <Ionicons name="calendar-outline" size={36} color="#56B091" />
             </View>
 
-            <Text style={styles.emptyTitle}>No Active Schedules</Text>
+            <Text style={styles.emptyTitle}>
+              {medicalFilter === "All"
+                ? "No Active Schedules"
+                : `No ${medicalFilter} Schedules`}
+            </Text>
 
             <Text style={styles.emptyText}>
-              There are currently no pending health schedules for this pet.
-              Completed schedules can be viewed in Health Records.
+              {medicalFilter === "All"
+                ? "There are currently no pending health schedules for this pet. Completed schedules can be viewed in Health Records."
+                : `There are no medical schedules in the ${medicalFilter.toLowerCase()} category.`}
             </Text>
 
             <Pressable
@@ -738,7 +932,9 @@ export default function SchedulesScreen() {
           </View>
         )}
 
-        {overdue.length > 0 && (
+        {activeTab === "Medical" &&
+          (medicalFilter === "All" || medicalFilter === "Overdue") &&
+          overdue.length > 0 && (
           <ScheduleSection
             title="Overdue"
             subtitle="These schedules have passed their due date."
@@ -751,7 +947,9 @@ export default function SchedulesScreen() {
           />
         )}
 
-        {dueSoon.length > 0 && (
+        {activeTab === "Medical" &&
+          (medicalFilter === "All" || medicalFilter === "Due Soon") &&
+          dueSoon.length > 0 && (
           <ScheduleSection
             title="Due Soon"
             subtitle="Due today or within the next 30 days."
@@ -764,7 +962,9 @@ export default function SchedulesScreen() {
           />
         )}
 
-        {upcoming.length > 0 && (
+        {activeTab === "Medical" &&
+          (medicalFilter === "All" || medicalFilter === "Upcoming") &&
+          upcoming.length > 0 && (
           <ScheduleSection
             title="Upcoming"
             subtitle="Future pet health schedules."
@@ -777,7 +977,7 @@ export default function SchedulesScreen() {
           />
         )}
 
-        {cancelledSchedules.length > 0 && (
+        {activeTab === "Medical" && medicalFilter === "All" && cancelledSchedules.length > 0 && (
           <View style={styles.scheduleSection}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionTitleRow}>
@@ -805,7 +1005,7 @@ export default function SchedulesScreen() {
           </View>
         )}
 
-        {schedules.length > 0 && (
+        {activeTab === "Medical" && schedules.length > 0 && (
           <View style={styles.reminderCard}>
             <View style={styles.reminderIcon}>
               <Ionicons
@@ -835,9 +1035,7 @@ export default function SchedulesScreen() {
       >
         <View style={styles.modalBackdrop}>
           <View style={styles.rescheduleModal}>
-            <Text style={styles.rescheduleModalTitle}>
-              Reschedule Treatment
-            </Text>
+            <Text style={styles.rescheduleModalTitle}>Reschedule Treatment</Text>
             <Text style={styles.rescheduleDateLabel}>Current</Text>
             <Text style={styles.rescheduleDateValue}>
               {iosRescheduleSchedule
@@ -891,6 +1089,78 @@ export default function SchedulesScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={cancelSchedule !== null}
+        onRequestClose={closeCancelDialog}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={styles.modalBackdrop}
+        >
+          <View style={styles.rescheduleModal}>
+            <View style={styles.cancelModalIcon}>
+              <Ionicons name="close-circle-outline" size={24} color="#C94C4C" />
+            </View>
+            <Text style={styles.rescheduleModalTitle}>Cancel Schedule?</Text>
+            <Text style={styles.cancelModalDescription}>
+              Tell the clinic why you need to cancel this scheduled treatment.
+            </Text>
+            <Text style={styles.cancelReasonLabel}>Reason</Text>
+            <TextInput
+              accessibilityLabel="Cancellation reason"
+              editable={updatingScheduleId === null}
+              maxLength={500}
+              multiline
+              onChangeText={setCancelReason}
+              placeholder="Enter your reason for cancellation"
+              placeholderTextColor="#8A9891"
+              style={styles.cancelReasonInput}
+              textAlignVertical="top"
+              value={cancelReason}
+            />
+            <Text style={styles.cancelReasonHint}>
+              This reason will be included in the clinic notification.
+            </Text>
+            <View style={styles.modalActions}>
+              <Pressable
+                accessibilityRole="button"
+                disabled={updatingScheduleId !== null}
+                onPress={closeCancelDialog}
+                style={({ pressed }) => [
+                  styles.modalCancelButton,
+                  updatingScheduleId !== null && styles.actionDisabled,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.modalCancelText}>Keep Schedule</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{
+                  disabled: cancelReason.trim().length < 5,
+                }}
+                disabled={
+                  cancelReason.trim().length < 5 ||
+                  updatingScheduleId !== null
+                }
+                onPress={submitCancellation}
+                style={({ pressed }) => [
+                  styles.cancelConfirmButton,
+                  (cancelReason.trim().length < 5 ||
+                    updatingScheduleId !== null) &&
+                    styles.actionDisabled,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.cancelConfirmText}>Cancel Schedule</Text>
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -917,11 +1187,15 @@ function Header() {
 
 function PersonalCareCard({
   item,
+  updating,
+  actionsDisabled,
   onEdit,
   onComplete,
   onCancel,
 }: {
   item: PersonalCareSchedule;
+  updating: boolean;
+  actionsDisabled: boolean;
   onEdit: () => void;
   onComplete: () => void;
   onCancel: () => void;
@@ -935,7 +1209,8 @@ function PersonalCareCard({
         <View style={styles.personalCardInfo}>
           <Text style={styles.personalCareType}>{item.care_type}</Text>
           <Text style={styles.personalCareDate}>
-            {formatDate(item.scheduled_date)} ·{" "}
+            {formatDate(item.scheduled_date)}
+            {item.scheduled_time ? ` · ${formatTime(item.scheduled_time)}` : ""} ·{" "}
             {item.repeat_type === "None" ? "One Time" : item.repeat_type}
           </Text>
         </View>
@@ -945,14 +1220,48 @@ function PersonalCareCard({
       </View>
       {item.notes && <Text style={styles.personalNotes}>{item.notes}</Text>}
       <View style={styles.personalActions}>
-        <Pressable onPress={onEdit} style={styles.personalSecondaryButton}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: actionsDisabled }}
+          disabled={actionsDisabled}
+          onPress={onEdit}
+          style={({ pressed }) => [
+            styles.personalSecondaryButton,
+            actionsDisabled && styles.actionDisabled,
+            pressed && styles.pressed,
+          ]}
+        >
           <Text style={styles.personalSecondaryText}>Edit</Text>
         </Pressable>
-        <Pressable onPress={onCancel} style={styles.personalSecondaryButton}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: actionsDisabled }}
+          disabled={actionsDisabled}
+          onPress={onCancel}
+          style={({ pressed }) => [
+            styles.personalSecondaryButton,
+            actionsDisabled && styles.actionDisabled,
+            pressed && styles.pressed,
+          ]}
+        >
           <Text style={styles.personalCancelText}>Cancel</Text>
         </Pressable>
-        <Pressable onPress={onComplete} style={styles.personalDoneButton}>
-          <Ionicons name="checkmark" size={16} color="#FFF" />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ busy: updating, disabled: actionsDisabled }}
+          disabled={actionsDisabled}
+          onPress={onComplete}
+          style={({ pressed }) => [
+            styles.personalDoneButton,
+            actionsDisabled && styles.actionDisabled,
+            pressed && styles.pressed,
+          ]}
+        >
+          {updating ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Ionicons name="checkmark" size={16} color="#FFF" />
+          )}
           <Text style={styles.personalDoneText}>Mark Done</Text>
         </Pressable>
       </View>
@@ -960,23 +1269,95 @@ function PersonalCareCard({
   );
 }
 
-function PersonalCareHistoryCard({ item }: { item: PersonalCareSchedule }) {
+function MedicalOverview({
+  dueSoonCount,
+  nextSchedule,
+  onSelectFilter,
+  onViewAll,
+  overdueCount,
+  selectedFilter,
+  upcomingCount,
+}: {
+  dueSoonCount: number;
+  nextSchedule: ScheduleItem | null;
+  onSelectFilter: (filter: MedicalFilter) => void;
+  onViewAll: () => void;
+  overdueCount: number;
+  selectedFilter: MedicalFilter;
+  upcomingCount: number;
+}) {
   return (
-    <View style={styles.personalHistoryCard}>
-      <View>
-        <Text style={styles.personalHistoryCare}>{item.care_type}</Text>
-        <Text style={styles.personalHistoryDate}>
-          {formatDate(item.scheduled_date)}
-        </Text>
+    <View style={styles.overviewCard}>
+      <View style={styles.overviewHeader}>
+        <View style={styles.overviewHeadingCopy}>
+          <Text style={styles.overviewEyebrow}>MEDICAL OVERVIEW</Text>
+          <Text style={styles.overviewTitle}>Schedule summary</Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onViewAll}
+          style={({ pressed }) => [styles.viewAllButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.viewAllText}>View All</Text>
+          <Ionicons name="arrow-forward" size={15} color={timanColors.primary} />
+        </Pressable>
       </View>
-      <Text
-        style={[
-          styles.personalHistoryStatus,
-          item.status === "Cancelled" && styles.personalHistoryCancelled,
-        ]}
-      >
-        {item.status}
-      </Text>
+
+      {nextSchedule ? (
+        <View style={styles.overviewNextCard}>
+          <View style={styles.overviewNextIcon}>
+            <Ionicons name="calendar-outline" size={21} color={timanColors.warning} />
+          </View>
+          <View style={styles.overviewNextInfo}>
+            <Text style={styles.overviewNextLabel}>NEXT MEDICAL SCHEDULE</Text>
+            <Text numberOfLines={1} style={styles.overviewNextTitle}>
+              {getScheduleService(nextSchedule)}
+            </Text>
+            <Text style={styles.overviewNextMeta}>
+              {formatDate(nextSchedule.next_due_date)}
+              {getClinicName(nextSchedule) ? ` · ${getClinicName(nextSchedule)}` : ""}
+            </Text>
+          </View>
+          <StatusBadge item={nextSchedule} status={getScheduleStatus(nextSchedule)} />
+        </View>
+      ) : (
+        <View style={styles.noNextSchedule}>
+          <Ionicons name="checkmark-circle-outline" size={20} color={timanColors.secondary} />
+          <Text style={styles.noNextScheduleText}>
+            No upcoming medical schedule is currently recorded.
+          </Text>
+        </View>
+      )}
+
+      <View style={styles.summaryRow}>
+        <SummaryCard
+          background="rgba(229, 115, 115, 0.14)"
+          icon="alert-circle-outline"
+          iconColor={timanColors.danger}
+          label="Overdue"
+          number={overdueCount}
+          onPress={() => onSelectFilter("Overdue")}
+          selected={selectedFilter === "Overdue"}
+        />
+        <SummaryCard
+          background="rgba(245, 166, 35, 0.16)"
+          icon="time-outline"
+          iconColor={timanColors.warning}
+          label="Due Soon"
+          number={dueSoonCount}
+          onPress={() => onSelectFilter("Due Soon")}
+          selected={selectedFilter === "Due Soon"}
+        />
+        <SummaryCard
+          background={timanColors.lightMint}
+          icon="calendar-outline"
+          iconColor={timanColors.primary}
+          label="Upcoming"
+          number={upcomingCount}
+          onPress={() => onSelectFilter("Upcoming")}
+          selected={selectedFilter === "Upcoming"}
+        />
+      </View>
     </View>
   );
 }
@@ -987,15 +1368,29 @@ function SummaryCard({
   label,
   background,
   iconColor,
+  onPress,
+  selected = false,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   number: number;
   label: string;
   background: string;
   iconColor: string;
+  onPress?: () => void;
+  selected?: boolean;
 }) {
   return (
-    <View style={styles.summaryCard}>
+    <Pressable
+      accessibilityRole={onPress ? "button" : undefined}
+      accessibilityState={onPress ? { selected } : undefined}
+      disabled={!onPress}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.summaryCard,
+        selected && styles.summaryCardSelected,
+        pressed && styles.summaryCardPressed,
+      ]}
+    >
       <View
         style={[
           styles.summaryIcon,
@@ -1010,7 +1405,7 @@ function SummaryCard({
       <Text style={styles.summaryNumber}>{number}</Text>
 
       <Text style={styles.summaryLabel}>{label}</Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -1138,6 +1533,10 @@ function ScheduleCard({
         </Text>
       )}
 
+      {item.notes && (
+        <Text style={styles.clinicalNotes}>Clinical notes: {item.notes}</Text>
+      )}
+
       <View style={styles.sourceRow}>
         <View style={styles.sourceIcon}>
           <Ionicons name="medical-outline" size={15} color="#2E7D6B" />
@@ -1146,14 +1545,23 @@ function ScheduleCard({
         <View style={styles.sourceInfo}>
           <Text style={styles.sourceLabel}>Based on veterinary record</Text>
 
-          <Text style={styles.sourceText}>
-            Visit: {formatDate(item.visit_date)}
+          <Text numberOfLines={2} style={styles.sourceText}>
+            {item.visit_date
+              ? `Visit: ${formatDate(item.visit_date)}`
+              : "Visit date unavailable"}
             {getClinicName(item) ? ` • ${getClinicName(item)}` : ""}
           </Text>
         </View>
       </View>
 
-      {item.rescheduled_at ? (
+      {item.daysRemaining < 0 ? (
+        <View style={styles.lockedScheduleBadge}>
+          <Ionicons name="lock-closed-outline" size={16} color="#C94C4C" />
+          <Text style={styles.overdueLockedText}>
+            Overdue schedules can no longer be rescheduled
+          </Text>
+        </View>
+      ) : item.rescheduled_at ? (
         <View style={styles.lockedScheduleBadge}>
           <Ionicons name="lock-closed-outline" size={16} color="#6B7C73" />
           <Text style={styles.lockedScheduleText}>
@@ -1173,7 +1581,11 @@ function ScheduleCard({
             ]}
             onPress={onReschedule}
           >
-            <Ionicons name="calendar-outline" size={16} color="#2E7D6B" />
+            {updating ? (
+              <ActivityIndicator size="small" color="#2E7D6B" />
+            ) : (
+              <Ionicons name="calendar-outline" size={16} color="#2E7D6B" />
+            )}
             <Text style={styles.rescheduleButtonText}>Reschedule</Text>
           </Pressable>
           {canCancel ? (
@@ -1261,21 +1673,21 @@ function StatusBadge({
   if (status === "Overdue") {
     const days = Math.abs(item.daysRemaining);
 
-    text = days === 1 ? "1 day late" : `${days} days late`;
+    text = days === 1 ? "1 day overdue" : `${days} days overdue`;
   }
 
   if (status === "Due Soon") {
     if (item.daysRemaining === 0) {
-      text = "Today";
+      text = "Due today";
     } else if (item.daysRemaining === 1) {
-      text = "Tomorrow";
+      text = "1 day";
     } else {
       text = `${item.daysRemaining} days`;
     }
   }
 
   if (status === "Upcoming") {
-    text = "Scheduled";
+    text = item.daysRemaining === 1 ? "1 day" : `${item.daysRemaining} days`;
   }
 
   return (
@@ -1313,12 +1725,6 @@ function getTomorrowStart() {
   const tomorrow = getTodayStart();
   tomorrow.setDate(tomorrow.getDate() + 1);
   return tomorrow;
-}
-
-function getInitialRescheduleDate(currentValue: string) {
-  const tomorrow = getTomorrowStart();
-  const currentDate = parseDatabaseDate(currentValue);
-  return currentDate && currentDate > tomorrow ? currentDate : tomorrow;
 }
 
 function parseDatabaseDate(value: string) {
@@ -1371,11 +1777,24 @@ function formatDate(value: string) {
   });
 }
 
+function formatTime(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours || 0, minutes || 0, 0, 0);
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
 function formatDateValue(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function getInitialRescheduleDate(currentValue: string) {
+  const tomorrow = getTomorrowStart();
+  const currentDate = parseDatabaseDate(currentValue);
+  return currentDate && currentDate > tomorrow ? currentDate : tomorrow;
 }
 
 function getClinicName(record: VetRecord) {
@@ -1384,6 +1803,12 @@ function getClinicName(record: VetRecord) {
 
 function getScheduleService(record: VetRecord) {
   return record.next_service_type?.trim() || record.service_type;
+}
+
+function getScheduleStatus(item: ScheduleItem): ScheduleStatus {
+  if (item.daysRemaining < 0) return "Overdue";
+  if (item.daysRemaining <= 30) return "Due Soon";
+  return "Upcoming";
 }
 
 function getServiceIcon(service: string): keyof typeof Ionicons.glyphMap {
@@ -1431,7 +1856,7 @@ function getStatusBackground(status: ScheduleStatus) {
       return "rgba(229, 115, 115, 0.14)";
 
     case "Due Soon":
-      return "rgba(229, 115, 115, 0.14)";
+      return "rgba(245, 166, 35, 0.16)";
 
     case "Upcoming":
       return "#CFE8DD";
@@ -1441,8 +1866,160 @@ function getStatusBackground(status: ScheduleStatus) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF5E9",
+    backgroundColor: timanColors.cream,
   },
+
+  hidden: { display: "none" },
+
+  loadErrorCard: {
+    marginTop: timanSpacing.md,
+    padding: timanSpacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: timanSpacing.sm,
+    borderWidth: 1,
+    borderColor: "#F2C9C5",
+    borderRadius: timanRadii.card,
+    backgroundColor: "#FFF8F6",
+  },
+  loadErrorInfo: { flex: 1 },
+  loadErrorTitle: { fontSize: 13, fontWeight: "900", color: timanColors.dark },
+  loadErrorText: { marginTop: 2, fontSize: 11, lineHeight: 16, color: timanColors.muted },
+  retryButton: {
+    minHeight: 42,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    borderRadius: timanRadii.control,
+    backgroundColor: timanColors.primary,
+  },
+  retryButtonText: { fontSize: 12, fontWeight: "900", color: timanColors.white },
+
+  overviewCard: {
+    ...timanShadow,
+    marginTop: timanSpacing.lg,
+    padding: timanSpacing.lg,
+    borderRadius: timanRadii.large,
+    borderWidth: 1,
+    borderColor: timanColors.lightMint,
+    backgroundColor: timanColors.white,
+  },
+  overviewHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: timanSpacing.md,
+  },
+  overviewHeadingCopy: { flex: 1 },
+  overviewEyebrow: {
+    fontSize: 9,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+    color: timanColors.secondary,
+  },
+  overviewTitle: { marginTop: 3, fontSize: 19, fontWeight: "900", color: timanColors.dark },
+  viewAllButton: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    paddingHorizontal: 11,
+    borderRadius: timanRadii.control,
+    backgroundColor: "#EAF5F0",
+  },
+  viewAllText: { fontSize: 12, fontWeight: "900", color: timanColors.primary },
+  overviewNextCard: {
+    marginTop: timanSpacing.lg,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 12,
+    borderRadius: timanRadii.card,
+    backgroundColor: "#FFF8EC",
+    borderWidth: 1,
+    borderColor: timanColors.softAccent,
+  },
+  overviewNextIcon: {
+    width: 42,
+    height: 42,
+    flexShrink: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 13,
+    backgroundColor: "rgba(245, 166, 35, 0.14)",
+  },
+  overviewNextInfo: { flex: 1, minWidth: 0 },
+  overviewNextLabel: { fontSize: 8, fontWeight: "900", letterSpacing: 0.6, color: "#B46A10" },
+  overviewNextTitle: { marginTop: 2, fontSize: 14, fontWeight: "900", color: timanColors.dark },
+  overviewNextMeta: { marginTop: 3, fontSize: 10, lineHeight: 14, color: timanColors.muted },
+  noNextSchedule: {
+    marginTop: timanSpacing.lg,
+    minHeight: 54,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
+    paddingHorizontal: 13,
+    borderRadius: timanRadii.card,
+    backgroundColor: "#EAF5F0",
+  },
+  noNextScheduleText: { flex: 1, fontSize: 12, lineHeight: 17, color: timanColors.muted },
+
+  tabs: {
+    marginTop: timanSpacing.xl,
+    padding: 4,
+    flexDirection: "row",
+    gap: 4,
+    borderRadius: timanRadii.card,
+    backgroundColor: "#E7EFEA",
+  },
+  tabButton: {
+    minHeight: 48,
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    borderRadius: timanRadii.control,
+  },
+  tabButtonSelected: { backgroundColor: timanColors.primary },
+  tabButtonPressed: { opacity: 0.76 },
+  tabText: { fontSize: 13, fontWeight: "800", color: timanColors.muted },
+  tabTextSelected: { color: timanColors.white },
+
+  medicalListHeader: { marginTop: timanSpacing.lg },
+  filterRow: { flexDirection: "row", flexWrap: "wrap", gap: 7 },
+  filterChip: {
+    minHeight: 42,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 13,
+    borderRadius: timanRadii.pill,
+    borderWidth: 1,
+    borderColor: timanColors.lightMint,
+    backgroundColor: timanColors.white,
+  },
+  filterChipSelected: { borderColor: timanColors.primary, backgroundColor: timanColors.primary },
+  filterChipPressed: { opacity: 0.72 },
+  filterText: { fontSize: 11, fontWeight: "800", color: timanColors.muted },
+  filterTextSelected: { color: timanColors.white },
+  medicalListTitleRow: {
+    marginTop: timanSpacing.xl,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  medicalListTitle: { fontSize: 20, fontWeight: "900", color: timanColors.dark },
+  medicalListSubtitle: { marginTop: 3, fontSize: 12, color: timanColors.muted },
+  medicalListCount: {
+    minWidth: 30,
+    height: 30,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 15,
+    backgroundColor: timanColors.lightMint,
+  },
+  medicalListCountText: { fontSize: 12, fontWeight: "900", color: timanColors.primary },
 
   center: {
     flex: 1,
@@ -1491,9 +2068,26 @@ const styles = StyleSheet.create({
   personalHeaderRow: {
     marginTop: 22,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
+    gap: 12,
   },
+  personalHeading: { marginTop: 4 },
+  personalHeaderActions: { alignItems: "center", gap: 7 },
+  historyTextLinkPressable: {
+    minHeight: 36,
+    justifyContent: "center",
+    paddingHorizontal: 2,
+  },
+  historyTextLink: {
+    color: timanColors.primary,
+    fontSize: 11,
+    lineHeight: 18,
+    fontWeight: "900",
+    textAlign: "center",
+    textDecorationLine: "underline",
+  },
+  historyTextLinkPressed: { opacity: 0.55 },
   personalEyebrow: {
     fontSize: 9,
     fontWeight: "900",
@@ -1507,7 +2101,7 @@ const styles = StyleSheet.create({
     color: "#2E3A34",
   },
   addCareButton: {
-    minHeight: 42,
+    minHeight: 44,
     paddingHorizontal: 13,
     borderRadius: 12,
     backgroundColor: "#2E7D6B",
@@ -1560,7 +2154,7 @@ const styles = StyleSheet.create({
   },
   personalActions: { marginTop: 13, flexDirection: "row", gap: 7 },
   personalSecondaryButton: {
-    minHeight: 38,
+    minHeight: 44,
     paddingHorizontal: 13,
     borderRadius: 11,
     borderWidth: 1,
@@ -1572,7 +2166,7 @@ const styles = StyleSheet.create({
   personalCancelText: { fontSize: 11, fontWeight: "800", color: "#E57373" },
   personalDoneButton: {
     flex: 1,
-    minHeight: 38,
+    minHeight: 44,
     borderRadius: 11,
     backgroundColor: "#2E7D6B",
     flexDirection: "row",
@@ -1581,21 +2175,42 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   personalDoneText: { fontSize: 11, fontWeight: "900", color: "#FFF" },
-  personalHistory: { marginTop: 16 },
-  personalHistoryTitle: { fontSize: 13, fontWeight: "900", color: "#56B091" },
-  personalHistoryCard: {
-    marginTop: 8,
-    padding: 12,
-    borderRadius: 13,
-    backgroundColor: "#FFF5E9",
+  personalHistoryLink: {
+    ...timanShadow,
+    minHeight: 76,
+    marginTop: 16,
+    padding: 13,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: "#CFE8DD",
+    backgroundColor: "#FFFFFF",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
   },
-  personalHistoryCare: { fontSize: 12, fontWeight: "800", color: "#2E3A34" },
-  personalHistoryDate: { marginTop: 2, fontSize: 10, color: "#6B7C73" },
-  personalHistoryStatus: { fontSize: 10, fontWeight: "900", color: "#2E7D6B" },
-  personalHistoryCancelled: { color: "#E57373" },
+  personalHistoryIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: "#CFE8DD",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  personalHistoryInfo: { flex: 1, marginLeft: 12 },
+  personalHistoryTitle: { fontSize: 14, fontWeight: "900", color: "#2E3A34" },
+  personalHistorySummary: {
+    marginTop: 4,
+    fontSize: 11,
+    lineHeight: 16,
+    color: "#6B7C73",
+  },
+  personalHistoryArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    backgroundColor: "#EAF5F0",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   medicalHeader: { marginTop: 30, marginBottom: 4 },
   medicalEyebrow: {
     fontSize: 9,
@@ -1636,6 +2251,7 @@ const styles = StyleSheet.create({
 
   petInfo: {
     flex: 1,
+    minWidth: 0,
     marginLeft: 14,
   },
 
@@ -1769,6 +2385,16 @@ const styles = StyleSheet.create({
     borderColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  summaryCardSelected: {
+    borderColor: timanColors.primary,
+    backgroundColor: "#F4FAF7",
+  },
+
+  summaryCardPressed: {
+    opacity: 0.76,
+    transform: [{ scale: 0.98 }],
   },
 
   summaryIcon: {
@@ -1921,6 +2547,15 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     color: "#6B7C73",
   },
+  clinicalNotes: {
+    marginBottom: 13,
+    padding: 10,
+    borderRadius: 11,
+    backgroundColor: timanColors.cream,
+    fontSize: 12,
+    lineHeight: 17,
+    color: timanColors.muted,
+  },
 
   sourceRow: {
     flexDirection: "row",
@@ -1982,7 +2617,7 @@ const styles = StyleSheet.create({
 
   rescheduleButton: {
     flex: 1,
-    minHeight: 42,
+    minHeight: 44,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#2E7D6B",
@@ -2001,7 +2636,7 @@ const styles = StyleSheet.create({
 
   cancelButton: {
     flex: 1,
-    minHeight: 42,
+    minHeight: 44,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#E57373",
@@ -2032,9 +2667,11 @@ const styles = StyleSheet.create({
   },
 
   rescheduleOnlyText: {
+    flex: 1,
     fontSize: 12,
-    fontWeight: "800",
-    color: "#F5A623",
+    lineHeight: 17,
+    fontWeight: "700",
+    color: "#8A5A19",
   },
 
   actionDisabled: {
@@ -2134,6 +2771,77 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
 
+  cancelModalIcon: {
+    width: 46,
+    height: 46,
+    marginBottom: 12,
+    borderRadius: 23,
+    backgroundColor: "rgba(201, 76, 76, 0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  cancelModalDescription: {
+    marginTop: -7,
+    marginBottom: 16,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#6B7C73",
+  },
+
+  cancelReasonLabel: {
+    marginBottom: 7,
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#2E3A34",
+  },
+
+  cancelReasonInput: {
+    minHeight: 104,
+    maxHeight: 160,
+    borderWidth: 1,
+    borderColor: "#CFE8DD",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: "#FFFFFF",
+    fontSize: 15,
+    lineHeight: 21,
+    color: "#2E3A34",
+  },
+
+  cancelReasonHint: {
+    marginTop: 7,
+    fontSize: 12,
+    lineHeight: 17,
+    color: "#6B7C73",
+  },
+
+  cancelConfirmButton: {
+    flex: 1.5,
+    minHeight: 44,
+    borderRadius: 12,
+    backgroundColor: "#C94C4C",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 8,
+  },
+
+  cancelConfirmText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
+
+  overdueLockedText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: "800",
+    color: "#C94C4C",
+    textAlign: "center",
+  },
   completedSection: {
     marginTop: 28,
   },

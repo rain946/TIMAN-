@@ -1,3 +1,4 @@
+import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
@@ -7,7 +8,6 @@ import { useCallback, useRef, useState } from "react";
 
 import {
   ActivityIndicator,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -1636,13 +1636,13 @@ const styles = StyleSheet.create({
   },
 
   notSafeButton: {
-    backgroundColor: "#CFE8DD",
-    borderColor: "#CFE8DD",
+    backgroundColor: "rgba(229, 115, 115, 0.12)",
+    borderColor: "rgba(229, 115, 115, 0.35)",
   },
 
   notSafeButtonSelected: {
-    backgroundColor: "#81C784",
-    borderColor: "#81C784",
+    backgroundColor: "#E57373",
+    borderColor: "#E57373",
   },
 
   conditionButtonText: {
@@ -1652,7 +1652,7 @@ const styles = StyleSheet.create({
   },
 
   notSafeButtonText: {
-    color: "#81C784",
+    color: "#E57373",
   },
 
   conditionButtonTextSelected: {

@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 
 type ConsentPresenter = () => Promise<boolean>;
 

@@ -123,6 +123,7 @@ export default function ClinicSchedulesScreen() {
       }
 
       setSchedules(Array.isArray(data.schedules) ? data.schedules : []);
+
     } catch (loadError) {
       console.log("CLINIC SCHEDULES ERROR:", loadError);
       setError(true);
@@ -350,17 +351,23 @@ export default function ClinicSchedulesScreen() {
                 : formatDateOnly(selectedDate)}
             </Text>
             <View style={styles.summaryGrid}>
-              {DAILY_CARDS.map((item) => (
-                <StatusCard
-                  key={item.filter}
-                  filter={item.filter}
-                  label={item.label}
-                  icon={item.icon}
-                  count={dailyCounts[item.filter]}
-                  selected={selectedDailyFilter === item.filter}
-                  onPress={() => setSelectedDailyFilter(item.filter)}
-                />
-              ))}
+              {[DAILY_CARDS.slice(0, 2), DAILY_CARDS.slice(2, 4)].map(
+                (row, rowIndex) => (
+                  <View key={rowIndex} style={styles.summaryRow}>
+                    {row.map((item) => (
+                      <StatusCard
+                        key={item.filter}
+                        filter={item.filter}
+                        label={item.label}
+                        icon={item.icon}
+                        count={dailyCounts[item.filter]}
+                        selected={selectedDailyFilter === item.filter}
+                        onPress={() => setSelectedDailyFilter(item.filter)}
+                      />
+                    ))}
+                  </View>
+                ),
+              )}
             </View>
           </>
         ) : null}
@@ -460,10 +467,7 @@ function StatusCard({
       onPress={onPress}
       style={({ pressed }) => [
         styles.summaryCard,
-        selected && {
-          backgroundColor: tone.backgroundColor,
-          borderColor: tone.color,
-        },
+        selected && { borderColor: tone.color },
         pressed && styles.pressed,
       ]}
     >
@@ -475,7 +479,10 @@ function StatusCard({
         </View>
         <Text style={styles.summaryValue}>{count}</Text>
       </View>
-      <Text style={[styles.summaryLabel, selected && { color: tone.color }]}>
+      <Text
+        numberOfLines={1}
+        style={[styles.summaryLabel, selected && { color: tone.color }]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -829,8 +836,10 @@ const styles = StyleSheet.create({
   iosPickerDoneText: { color: "#FFFFFF", fontSize: 12, fontWeight: "900" },
   summaryGrid: {
     marginTop: 12,
+    gap: 12,
+  },
+  summaryRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: 12,
   },
   todayTitle: {
@@ -840,10 +849,9 @@ const styles = StyleSheet.create({
     color: "#2E3A34",
   },
   summaryCard: {
-    flexBasis: "46%",
-    flexGrow: 1,
+    flex: 1,
     minWidth: 0,
-    minHeight: 104,
+    height: 104,
     padding: 14,
     borderRadius: 18,
     backgroundColor: "#FFFFFF",
@@ -874,9 +882,12 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     marginTop: 11,
+    width: "100%",
     fontSize: 13,
+    lineHeight: 16,
     fontWeight: "900",
     color: "#6B7C73",
+    textAlign: "left",
   },
   listHeader: {
     marginTop: 22,
