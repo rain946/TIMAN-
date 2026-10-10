@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
     pet_id INT NULL,
     authorization_id INT NULL,
+    record_id INT NULL,
 
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -151,6 +152,10 @@ CREATE TABLE IF NOT EXISTS notifications (
 
     INDEX idx_notifications_created (
         created_at
+    ),
+
+    INDEX idx_notifications_record (
+        record_id
     )
 );
 
@@ -182,6 +187,7 @@ CREATE TABLE IF NOT EXISTS vet_records (
     ) NOT NULL DEFAULT 'Pending',
     completed_at DATETIME NULL,
     cancelled_at DATETIME NULL,
+    cancellation_reason VARCHAR(500) NULL,
     rescheduled_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 

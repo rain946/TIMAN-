@@ -205,6 +205,93 @@ async function getOwnerPushTokens(userId) {
   return rows;
 }
 
+async function processClinicDailyScheduleSummaries() {
+  try {
+    const [clinics] = await db.query(
+      `
+      SELECT
+        u.user_id AS clinic_user_id,
+        COUNT(vr.record_id) AS schedule_count
+      FROM users u
+      INNER JOIN vet_records vr
+        ON vr.clinic_user_id = u.user_id
+      INNER JOIN pets p
+        ON p.pet_id = vr.pet_id
+      WHERE u.role = 'clinic'
+        AND vr.schedule_status = 'Pending'
+        AND vr.next_due_date = DATE(
+          CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')
+        )
+        AND p.archived_at IS NULL
+      GROUP BY u.user_id
+      HAVING COUNT(vr.record_id) > 0
+      `,
+    );
+
+    console.log(
+      `TIMAN: ${clinics.length} clinic daily schedule summary notification(s) require checking.`,
+    );
+
+    for (const clinic of clinics) {
+      const clinicUserId = Number(clinic.clinic_user_id);
+      const scheduleCount = Number(clinic.schedule_count) || 0;
+      const [existing] = await db.query(
+        `
+        SELECT notification_id
+        FROM notifications
+        WHERE user_id = ?
+          AND type = 'clinic_daily_schedule_summary'
+          AND DATE(created_at) = DATE(
+            CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')
+          )
+        LIMIT 1
+        `,
+        [clinicUserId],
+      );
+
+      if (existing.length > 0) continue;
+
+      const title = "Today's Clinic Schedule";
+      const message = `You have ${scheduleCount} scheduled ${
+        scheduleCount === 1 ? "treatment" : "treatments"
+      } today.`;
+
+      await saveInboxNotification({
+        userId: clinicUserId,
+        petId: null,
+        type: "clinic_daily_schedule_summary",
+        title,
+        message,
+      });
+
+      const tokens = await getOwnerPushTokens(clinicUserId);
+      for (const token of tokens) {
+        await sendExpoPushNotification({
+          to: token.expo_push_token,
+          pushTokenId: token.push_token_id,
+          userId: clinicUserId,
+          title,
+          body: message,
+          data: {
+            type: "clinic_daily_schedule_summary",
+            scheduleCount,
+            scheduleDate: new Intl.DateTimeFormat("en-CA", {
+              timeZone: "Asia/Manila",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }).format(new Date()),
+            title,
+            message,
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error("TIMAN CLINIC DAILY SCHEDULE SUMMARY ERROR:", error);
+  }
+}
+
 async function processPersonalCareReminders() {
   try {
     const [schedules] = await db.query(
@@ -440,6 +527,7 @@ function startReminderScheduler() {
   cron.schedule(
     "0 8 * * *",
     async () => {
+      await processClinicDailyScheduleSummaries();
       await processHealthReminders();
       await processPersonalCareReminders();
     },
@@ -449,6 +537,7 @@ function startReminderScheduler() {
   );
 
   setTimeout(() => {
+    processClinicDailyScheduleSummaries();
     processHealthReminders();
     processPersonalCareReminders();
   }, 5000);
@@ -458,6 +547,7 @@ module.exports = {
   startReminderScheduler,
   processHealthReminders,
   processPersonalCareReminders,
+  processClinicDailyScheduleSummaries,
 };
 
 // Keep scheduler exports at the end of the module.

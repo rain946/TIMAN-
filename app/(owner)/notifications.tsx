@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
 import {
   ActivityIndicator,
@@ -15,7 +16,6 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import { timanShadow } from "../../components/timan/theme";
 import { API_URL } from "../../config/api";
 
 type NotificationItem = {
@@ -26,12 +26,19 @@ type NotificationItem = {
   message: string;
   pet_id: number | null;
   authorization_id: number | null;
+  record_id?: number | null;
+  event_date?: string | null;
+  cancellation_reason?: string | null;
   is_read: boolean;
   created_at: string;
   pet_name?: string | null;
 };
 
-export default function NotificationsScreen() {
+export default function NotificationsScreen({
+  showOnlyNewWhenAvailable = true,
+}: {
+  showOnlyNewWhenAvailable?: boolean;
+}) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -277,6 +284,33 @@ export default function NotificationsScreen() {
         router.push("/clinic-dashboard");
         break;
 
+      case "schedule_cancelled":
+        Alert.alert(
+          notification.title,
+          getScheduleNotificationDetails(notification),
+          [{ text: "Close" }],
+          { cancelable: true },
+        );
+        break;
+
+      case "schedule_rescheduled":
+        Alert.alert(
+          notification.title,
+          getScheduleNotificationDetails(notification),
+          [{ text: "Close" }],
+          { cancelable: true },
+        );
+        break;
+
+      case "clinic_daily_schedule_summary":
+        Alert.alert(
+          notification.title,
+          notification.message,
+          [{ text: "Close" }],
+          { cancelable: true },
+        );
+        break;
+
       case "vet_record_added":
         if (!notification.pet_id) {
           Alert.alert(
@@ -291,12 +325,16 @@ export default function NotificationsScreen() {
           pathname: "/(veterinary)/pet-health-records",
           params: {
             petId: String(notification.pet_id),
+            ...(notification.record_id
+              ? { recordId: String(notification.record_id) }
+              : { notificationCreatedAt: notification.created_at }),
           },
         });
 
         break;
 
       case "pet_qr_scanned":
+      case "pet_qr_scan":
       case "lost_pet_scan":
         if (!notification.pet_id) {
           Alert.alert(
@@ -346,6 +384,23 @@ export default function NotificationsScreen() {
           },
         });
 
+        break;
+
+      case "personal_care_reminder":
+        if (!notification.pet_id) {
+          Alert.alert(
+            "Pet Error",
+            "This personal care reminder is not connected to a pet.",
+          );
+          return;
+        }
+        router.push({
+          pathname: "/(veterinary)/personal-care-history",
+          params: {
+            petId: String(notification.pet_id),
+            petName: notification.pet_name || "",
+          },
+        });
         break;
 
       default:
@@ -418,6 +473,7 @@ export default function NotificationsScreen() {
         return "medical-outline";
 
       case "pet_qr_scanned":
+      case "pet_qr_scan":
       case "lost_pet_scan":
         return "qr-code-outline";
 
@@ -429,12 +485,29 @@ export default function NotificationsScreen() {
       case "health_reminder":
         return "calendar-outline";
 
+      case "schedule_cancelled":
+        return "close-circle-outline";
+
+      case "schedule_rescheduled":
+        return "calendar-outline";
+
+      case "personal_care_reminder":
+        return "paw-outline";
+
+      case "clinic_daily_schedule_summary":
+        return "calendar-number-outline";
+
       default:
         return "notifications-outline";
     }
   };
 
-  const unreadCount = notifications.filter((item) => !item.is_read).length;
+  const unreadNotifications = notifications.filter((item) => !item.is_read);
+  const unreadCount = unreadNotifications.length;
+  const visibleNotifications =
+    showOnlyNewWhenAvailable && unreadCount > 0
+      ? unreadNotifications
+      : notifications;
 
   if (loading) {
     return (
@@ -467,7 +540,9 @@ export default function NotificationsScreen() {
       >
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
-            <Text style={styles.sectionTitle}>Recent</Text>
+            <Text style={styles.sectionTitle}>
+              {showOnlyNewWhenAvailable && unreadCount > 0 ? "New" : "Recent"}
+            </Text>
 
             {unreadCount > 0 && (
               <View style={styles.unreadBadge}>
@@ -497,7 +572,7 @@ export default function NotificationsScreen() {
           </View>
         </View>
 
-        {notifications.length === 0 && (
+        {visibleNotifications.length === 0 && (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
               <Ionicons
@@ -511,94 +586,138 @@ export default function NotificationsScreen() {
           </View>
         )}
 
-        {notifications.map((notification) => (
-          <Pressable
+        {visibleNotifications.map((notification) => (
+          <View
             key={notification.notification_id}
-            onPress={() => handleNotificationPress(notification)}
-            style={({ pressed }) => [
-              styles.notificationCard,
-
-              !notification.is_read && styles.unreadCard,
-
-              pressed && styles.pressed,
+            style={[
+              styles.notificationShell,
+              !notification.is_read && styles.unreadShell,
             ]}
           >
-            {!notification.is_read && <View style={styles.unreadDot} />}
+            <ReanimatedSwipeable
+              enabled={notification.is_read}
+              friction={1.5}
+              rightThreshold={40}
+              dragOffsetFromRightEdge={16}
+              overshootRight={false}
+              childrenContainerStyle={styles.swipeChildren}
+              containerStyle={[
+                styles.swipeContainer,
+                !notification.is_read && styles.unreadSwipeContainer,
+              ]}
+              renderRightActions={
+                notification.is_read
+                  ? (_progress, _translation, swipeableMethods) => (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Delete notification"
+                        disabled={deletingId === notification.notification_id}
+                        onPress={() => {
+                          swipeableMethods.close();
+                          setTimeout(
+                            () => handleDeleteNotification(notification),
+                            180,
+                          );
+                        }}
+                        style={({ pressed }) => [
+                          styles.swipeDeleteAction,
+                          pressed && styles.swipeDeletePressed,
+                        ]}
+                      >
+                        {deletingId === notification.notification_id ? (
+                          <ActivityIndicator size="small" color="#FFFFFF" />
+                        ) : (
+                          <Ionicons
+                            name="trash-outline"
+                            size={22}
+                            color="#FFFFFF"
+                          />
+                        )}
+                      </Pressable>
+                    )
+                  : undefined
+              }
+            >
+              <Pressable
+                onPress={() => handleNotificationPress(notification)}
+                style={({ pressed }) => [
+                  styles.notificationCard,
 
-            <View style={styles.notificationIcon}>
-              <Ionicons
-                name={getNotificationIcon(notification.type)}
-                size={23}
-                color="#2E7D6B"
-              />
-            </View>
+                  !notification.is_read && styles.unreadCard,
 
-            <View style={styles.notificationContent}>
-              <View style={styles.notificationTop}>
-                <Text
-                  style={[
-                    styles.notificationTitle,
+                  pressed && styles.notificationPressed,
+                ]}
+              >
+                {!notification.is_read && <View style={styles.unreadDot} />}
 
-                    !notification.is_read && styles.unreadTitle,
-                  ]}
-                >
-                  {notification.title}
-                </Text>
-
-                <Text style={styles.notificationTime}>
-                  {formatNotificationTime(notification.created_at)}
-                </Text>
-              </View>
-
-              <Text style={styles.notificationMessage}>
-                {notification.message}
-              </Text>
-
-              {notification.type === "clinic_access_request" && (
-                <View style={styles.actionRow}>
-                  <Text style={styles.actionText}>View Request</Text>
-
-                  <Ionicons name="chevron-forward" size={16} color="#2E7D6B" />
+                <View style={styles.notificationIcon}>
+                  <Ionicons
+                    name={getNotificationIcon(notification.type)}
+                    size={23}
+                    color="#2E7D6B"
+                  />
                 </View>
-              )}
 
-              {notification.is_read && (
-                <View style={styles.deleteRow}>
-                  <Pressable
-                    disabled={deletingId === notification.notification_id}
-                    onPress={(event) => {
-                      event.stopPropagation();
+                <View style={styles.notificationContent}>
+                  <View style={styles.notificationTop}>
+                    <Text
+                      style={[
+                        styles.notificationTitle,
 
-                      handleDeleteNotification(notification);
-                    }}
-                    style={({ pressed }) => [
-                      styles.deleteButton,
+                        !notification.is_read && styles.unreadTitle,
+                      ]}
+                    >
+                      {notification.title}
+                    </Text>
 
-                      pressed && styles.pressed,
-                    ]}
-                  >
-                    {deletingId === notification.notification_id ? (
-                      <ActivityIndicator size="small" color="#E57373" />
-                    ) : (
-                      <>
-                        <Ionicons
-                          name="trash-outline"
-                          size={14}
-                          color="#E57373"
-                        />
+                    <Text style={styles.notificationTime}>
+                      {formatNotificationTime(notification.created_at)}
+                    </Text>
+                  </View>
 
-                        <Text style={styles.deleteText}>Delete</Text>
-                      </>
-                    )}
-                  </Pressable>
+                  <Text style={styles.notificationMessage}>
+                    {notification.message}
+                  </Text>
                 </View>
-              )}
-            </View>
-          </Pressable>
+              </Pressable>
+            </ReanimatedSwipeable>
+          </View>
         ))}
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function getScheduleNotificationDetails(notification: NotificationItem) {
+  const details = [notification.message.trim()];
+  const reason = notification.cancellation_reason?.trim();
+
+  if (
+    notification.type === "schedule_cancelled" &&
+    reason &&
+    !notification.message.toLocaleLowerCase().includes("reason:")
+  ) {
+    details.push(`Reason: ${reason}`);
+  }
+
+  if (notification.event_date) {
+    const date = new Date(`${notification.event_date}T00:00:00`);
+    if (!Number.isNaN(date.getTime())) {
+      const label =
+        notification.type === "schedule_cancelled"
+          ? "Cancelled on"
+          : "Rescheduled on";
+      details.push(
+        `${label}: ${date.toLocaleDateString([], {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })}`,
+      );
+    }
+  }
+
+  return details.filter(Boolean).join("\n\n");
 }
 
 const styles = StyleSheet.create({
@@ -734,21 +853,45 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
 
-  notificationCard: {
-    ...timanShadow,
-    position: "relative",
+  notificationShell: {
+    marginBottom: 10,
+    borderRadius: 18,
     backgroundColor: "#FFFFFF",
+  },
+
+  unreadShell: {
+    backgroundColor: "#FFF5E9",
+  },
+
+  swipeContainer: {
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: "#CFE8DD",
-    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
+  },
+
+  swipeChildren: {
+    backgroundColor: "#FFFFFF",
+  },
+
+  unreadSwipeContainer: {
+    backgroundColor: "#FFF5E9",
+  },
+
+  notificationCard: {
+    position: "relative",
+    backgroundColor: "#FFFFFF",
     padding: 15,
-    marginBottom: 10,
     flexDirection: "row",
   },
 
   unreadCard: {
     backgroundColor: "#FFF5E9",
-    borderColor: "#CFE8DD",
+  },
+
+  notificationPressed: {
+    opacity: 0.72,
   },
 
   unreadDot: {
@@ -807,47 +950,22 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
 
-  actionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 9,
-  },
-
-  actionText: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#2E7D6B",
-    marginRight: 3,
-  },
-
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
 
-  deleteRow: {
-    marginTop: 10,
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-
-  deleteButton: {
-    minHeight: 30,
-    paddingHorizontal: 9,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: "rgba(229, 115, 115, 0.14)",
-    flexDirection: "row",
+  swipeDeleteAction: {
+    width: 76,
+    height: "100%",
+    backgroundColor: "#E57373",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
   },
 
-  deleteText: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: "#E57373",
+  swipeDeletePressed: {
+    backgroundColor: "#D95F5F",
   },
 
   pressed: {

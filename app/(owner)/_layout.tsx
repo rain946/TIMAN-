@@ -16,7 +16,12 @@ export default function OwnerTabsLayout() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const compact = width < 360;
-  const bottomInset = Math.max(insets.bottom, 6);
+  const bottomInset = Math.max(
+    insets.bottom,
+    Platform.OS === "android" ? 10 : 8,
+  );
+  const tabBarHeight = compact ? 76 : 80;
+  const tabItemHeight = compact ? 64 : 68;
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -54,18 +59,25 @@ export default function OwnerTabsLayout() {
       screenOptions={{
         headerShown: false,
 
-        tabBarShowLabel: false,
+        tabBarHideOnKeyboard: true,
+
+        tabBarShowLabel: true,
+
+        tabBarActiveTintColor: timanColors.primary,
+
+        tabBarInactiveTintColor: timanColors.muted,
+
+        tabBarLabelStyle: styles.tabLabel,
 
         tabBarStyle: [
           styles.tabBar,
-          compact && styles.compactTabBar,
           {
-            height: (compact ? 66 : 72) + bottomInset,
-            paddingBottom: bottomInset,
+            bottom: bottomInset,
+            height: tabBarHeight,
           },
         ],
 
-        tabBarItemStyle: [styles.tabBarItem, compact && styles.compactTabBarItem],
+        tabBarItemStyle: [styles.tabBarItem, { height: tabItemHeight }],
 
         sceneStyle: {
           backgroundColor: timanColors.cream,
@@ -85,7 +97,6 @@ export default function OwnerTabsLayout() {
               focused={focused}
               activeIcon="home"
               inactiveIcon="home-outline"
-              label="Home"
             />
           ),
         }}
@@ -101,7 +112,6 @@ export default function OwnerTabsLayout() {
               focused={focused}
               activeIcon="paw"
               inactiveIcon="paw-outline"
-              label="Pets"
             />
           ),
         }}
@@ -111,13 +121,13 @@ export default function OwnerTabsLayout() {
         name="notifications"
         options={{
           title: "Notification",
+          tabBarLabel: "Notification",
 
           tabBarIcon: ({ focused }) => (
             <TabItem
               focused={focused}
               activeIcon="notifications"
               inactiveIcon="notifications-outline"
-              label="Notification"
               badgeCount={unreadCount}
             />
           ),
@@ -134,7 +144,6 @@ export default function OwnerTabsLayout() {
               focused={focused}
               activeIcon="person"
               inactiveIcon="person-outline"
-              label="Profile"
             />
           ),
         }}
@@ -147,60 +156,54 @@ function TabItem({
   focused,
   activeIcon,
   inactiveIcon,
-  label,
   badgeCount = 0,
 }: {
   focused: boolean;
   activeIcon: keyof typeof Ionicons.glyphMap;
   inactiveIcon: keyof typeof Ionicons.glyphMap;
-  label: string;
   badgeCount?: number;
 }) {
   return (
-    <View style={styles.tabItemContent}>
-      <View style={styles.iconContainer}>
-        <Ionicons
-          name={focused ? activeIcon : inactiveIcon}
-          size={23}
-          color={focused ? timanColors.primary : timanColors.muted}
-        />
+    <View style={styles.iconContainer}>
+      <Ionicons
+        name={focused ? activeIcon : inactiveIcon}
+        size={23}
+        color={focused ? timanColors.primary : timanColors.muted}
+      />
 
-        {badgeCount > 0 ? (
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationBadgeText}>
-              {badgeCount > 99 ? "99+" : badgeCount}
-            </Text>
-          </View>
-        ) : null}
-      </View>
-
-      <Text
-        numberOfLines={1}
-        style={[styles.tabText, focused && styles.activeTabText]}
-      >
-        {label}
-      </Text>
+      {badgeCount > 0 ? (
+        <View style={styles.notificationBadge}>
+          <Text style={styles.notificationBadgeText}>
+            {badgeCount > 99 ? "99+" : badgeCount}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   tabBar: {
-    width: "94%",
+    position: "absolute",
+    left: 12,
+    right: 12,
+    width: undefined,
     maxWidth: 640,
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginHorizontal: 0,
-    marginBottom: Platform.OS === "android" ? 7 : 4,
+    marginBottom: 0,
     borderRadius: timanRadii.large,
     backgroundColor: timanColors.white,
 
     borderWidth: 1,
     borderColor: timanColors.lightMint,
 
-    paddingTop: 5,
+    overflow: "visible",
+    paddingTop: 6,
+    paddingBottom: 6,
     paddingHorizontal: 6,
 
     ...timanShadow,
@@ -208,27 +211,11 @@ const styles = StyleSheet.create({
 
   tabBarItem: {
     flex: 1,
-    height: 66,
     minWidth: 0,
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: 0,
     paddingHorizontal: 0,
-  },
-
-  compactTabBar: {
-    paddingTop: 2,
-  },
-
-  compactTabBarItem: {
-    height: 62,
-  },
-
-  tabItemContent: {
-    flex: 1,
-    width: 72,
-    alignItems: "center",
-    justifyContent: "center",
   },
 
   iconContainer: {
@@ -261,18 +248,12 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  tabText: {
-    marginTop: 4,
-    minWidth: 72,
+  tabLabel: {
     textAlign: "center",
     fontSize: 10,
-    lineHeight: 12,
+    lineHeight: 14,
     fontWeight: "600",
-    color: timanColors.muted,
-  },
-
-  activeTabText: {
-    color: timanColors.primary,
-    fontWeight: "800",
+    marginTop: 2,
+    marginBottom: 1,
   },
 });

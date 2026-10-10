@@ -95,6 +95,16 @@ test("clinic records return only the pet owner's display name", () => {
   assert.doesNotMatch(section, /owner_user\.(email|contact_number|phone)/);
 });
 
+test("clinic pet folders only return records created by the signed-in clinic", () => {
+  const section = routeSection(
+    '"/clinic/:petId"',
+    '"/owner-health-overview"',
+  );
+
+  assert.match(section, /WHERE vr\.pet_id = \?\s+AND vr\.clinic_user_id = \?/);
+  assert.match(section, /\[petId, clinicUserId\]/);
+});
+
 test("clinic schedules expose the four current-month dashboard filters", () => {
   const section = routeSection(
     '"/clinic-schedules"',

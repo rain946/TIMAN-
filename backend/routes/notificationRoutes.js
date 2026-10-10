@@ -33,15 +33,41 @@ router.get(
           n.message,
           n.pet_id,
           n.authorization_id,
+          COALESCE(
+            n.record_id,
+            CASE
+              WHEN n.type = 'vet_record_added' THEN (
+                SELECT vr_new.record_id
+                FROM vet_records vr_new
+                WHERE vr_new.pet_id = n.pet_id
+                ORDER BY
+                  ABS(TIMESTAMPDIFF(SECOND, vr_new.created_at, n.created_at)),
+                  vr_new.record_id DESC
+                LIMIT 1
+              )
+              ELSE NULL
+            END
+          ) AS record_id,
           n.is_read,
           n.created_at,
 
-          p.pet_name
+          p.pet_name,
+          vr.cancellation_reason,
+          CASE
+            WHEN n.type = 'schedule_cancelled'
+              THEN DATE_FORMAT(vr.cancelled_at, '%Y-%m-%d')
+            WHEN n.type = 'schedule_rescheduled'
+              THEN DATE_FORMAT(vr.rescheduled_at, '%Y-%m-%d')
+            ELSE NULL
+          END AS event_date
 
         FROM notifications n
 
         LEFT JOIN pets p
           ON n.pet_id = p.pet_id
+
+        LEFT JOIN vet_records vr
+          ON n.record_id = vr.record_id
 
         WHERE n.user_id = ?
 

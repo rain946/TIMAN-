@@ -367,8 +367,15 @@ export default function ClinicProfileScreen() {
             />
           </View>
 
-          <Text style={styles.sectionTitle}>Reports</Text>
+          <Text style={styles.sectionTitle}>Clinic Management</Text>
           <View style={styles.actionCard}>
+            <ActionRow
+              icon="document-text-outline"
+              title="Veterinary Records"
+              description="View records created for authorized pets"
+              onPress={() => router.push("/(clinic)/(tabs)/vet-records")}
+            />
+            <Divider inset />
             <ActionRow
               icon="bar-chart-outline"
               title="Clinic Reports"
@@ -490,7 +497,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#CFE8DD",
   },
   headerTitle: { fontSize: 22, fontWeight: "900", color: "#2E3A34" },
-  content: { width: "100%", maxWidth: 960, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 48 },
+  content: { width: "100%", maxWidth: 960, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 160 },
   stateContainer: {
     flex: 1,
     paddingHorizontal: 24,

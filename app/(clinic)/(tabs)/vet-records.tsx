@@ -33,9 +33,22 @@ type ClinicVetRecord = {
   can_open: boolean;
 };
 
+type PetRecordFolder = {
+  petId: number;
+  petName: string;
+  ownerName: string;
+  species: string;
+  breed: string | null;
+  photoUrl: string | null;
+  records: ClinicVetRecord[];
+};
+
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
 export default function VetRecordsScreen() {
   const [records, setRecords] = useState<ClinicVetRecord[]>([]);
   const [search, setSearch] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
@@ -94,9 +107,15 @@ export default function VetRecordsScreen() {
   );
 
   const normalizedSearch = search.trim().toLocaleLowerCase();
-  const filteredRecords = useMemo(
-    () =>
-      records.filter((record) => {
+  const availableLetters = useMemo(
+    () => new Set(records.map((record) => getNameInitial(record.pet_name))),
+    [records],
+  );
+
+  const filteredRecords = useMemo(() => {
+    return records.filter((record) => {
+        const matchesLetter =
+          !selectedLetter || getNameInitial(record.pet_name) === selectedLetter;
         const matchesSearch =
           !normalizedSearch ||
           [
@@ -112,15 +131,42 @@ export default function VetRecordsScreen() {
               .includes(normalizedSearch),
           );
 
-        return matchesSearch;
-      }),
-    [normalizedSearch, records],
-  );
+        return matchesLetter && matchesSearch;
+      });
+  }, [normalizedSearch, records, selectedLetter]);
 
-  const hasActiveFilters = normalizedSearch.length > 0;
+  const recordFolders = useMemo(() => {
+    const folders = new Map<number, PetRecordFolder>();
+
+    filteredRecords.forEach((record) => {
+      const current = folders.get(record.pet_id);
+      if (current) {
+        current.records.push(record);
+        return;
+      }
+
+      folders.set(record.pet_id, {
+        petId: record.pet_id,
+        petName: record.pet_name,
+        ownerName: record.owner_name,
+        species: record.species,
+        breed: record.breed,
+        photoUrl: record.photo_url,
+        records: [record],
+      });
+    });
+
+    return Array.from(folders.values()).sort((left, right) =>
+      left.petName.localeCompare(right.petName),
+    );
+  }, [filteredRecords]);
+
+  const hasActiveFilters =
+    normalizedSearch.length > 0 || selectedLetter !== null;
 
   const resetFilters = () => {
     setSearch("");
+    setSelectedLetter(null);
   };
 
   return (
@@ -165,7 +211,9 @@ export default function VetRecordsScreen() {
           <Ionicons name="search-outline" size={20} color="#6B7C73" />
           <TextInput
             value={search}
-            onChangeText={setSearch}
+            onChangeText={(value) => {
+              setSearch(value);
+            }}
             placeholder="Search records..."
             placeholderTextColor="#6B7C73"
             autoCapitalize="none"
@@ -187,10 +235,16 @@ export default function VetRecordsScreen() {
 
         {!loading && !error && records.length > 0 && (
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryTitle}>Veterinary Records</Text>
+            <View>
+              <Text style={styles.summaryTitle}>Pet Record Folders</Text>
+              {selectedLetter ? (
+                <Text style={styles.activeLetterText}>
+                  Names beginning with {selectedLetter}
+                </Text>
+              ) : null}
+            </View>
             <Text style={styles.summaryCount}>
-              {filteredRecords.length}{" "}
-              {filteredRecords.length === 1 ? "record" : "records"}
+              {recordFolders.length} {recordFolders.length === 1 ? "pet" : "pets"}
             </Text>
           </View>
         )}
@@ -248,7 +302,7 @@ export default function VetRecordsScreen() {
               </Text>
             </Pressable>
           </StateCard>
-        ) : filteredRecords.length === 0 ? (
+        ) : recordFolders.length === 0 ? (
           <StateCard>
             <View style={styles.emptyIconMuted}>
               <Ionicons name="search-outline" size={29} color="#6B7C73" />
@@ -271,10 +325,66 @@ export default function VetRecordsScreen() {
             )}
           </StateCard>
         ) : (
-          <View style={styles.recordList}>
-            {filteredRecords.map((record) => (
-              <RecordCard key={record.record_id} record={record} />
-            ))}
+          <View style={styles.recordsBrowser}>
+            <View style={styles.folderList}>
+              {recordFolders.map((folder) => (
+                <PetFolder key={folder.petId} folder={folder} />
+              ))}
+            </View>
+
+            <View style={styles.alphabetRail}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Show all pet names"
+                onPress={() => {
+                  setSelectedLetter(null);
+                }}
+                style={({ pressed }) => [
+                  styles.letterButton,
+                  selectedLetter === null && styles.letterButtonSelected,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.letterText,
+                    selectedLetter === null && styles.letterTextSelected,
+                  ]}
+                >
+                  All
+                </Text>
+              </Pressable>
+              {ALPHABET.map((letter) => {
+                const available = availableLetters.has(letter);
+                const selected = selectedLetter === letter;
+                return (
+                  <Pressable
+                    key={letter}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Show pet names beginning with ${letter}`}
+                    disabled={!available}
+                    onPress={() => {
+                      setSelectedLetter(letter);
+                    }}
+                    style={({ pressed }) => [
+                      styles.letterButton,
+                      selected && styles.letterButtonSelected,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.letterText,
+                        !available && styles.letterTextDisabled,
+                        selected && styles.letterTextSelected,
+                      ]}
+                    >
+                      {letter}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
         )}
       </ScrollView>
@@ -282,80 +392,60 @@ export default function VetRecordsScreen() {
   );
 }
 
-function RecordCard({ record }: { record: ClinicVetRecord }) {
-  const imageUrl = getImageUrl(record.photo_url);
+function PetFolder({
+  folder,
+}: {
+  folder: PetRecordFolder;
+}) {
+  const imageUrl = getImageUrl(folder.photoUrl);
+  const canOpen = folder.records.some((record) => record.can_open);
 
-  const openRecordContext = () => {
-    if (record.can_open) {
-      router.push({
-        pathname: "/clinic-vet-records",
-        params: {
-          petId: String(record.pet_id),
-          recordId: String(record.record_id),
-        },
-      });
-      return;
-    }
-
+  const openFolder = () => {
     router.push({
-      pathname: "/clinic-pet",
-      params: { petId: String(record.pet_id) },
+      pathname: canOpen ? "/clinic-vet-records" : "/clinic-pet",
+      params: { petId: String(folder.petId) },
     });
   };
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      style={({ pressed }) => [
-        styles.recordCard,
-        pressed && styles.cardPressed,
-      ]}
-      onPress={openRecordContext}
-    >
-      <View style={styles.timelineRail}>
-        <View style={styles.timelineDot} />
-        <View style={styles.timelineLine} />
-      </View>
-      <View style={styles.photoContainer}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
-        ) : (
-          <Ionicons name="paw" size={25} color="#2E7D6B" />
-        )}
-      </View>
-
-      <View style={styles.recordContent}>
-        <View style={styles.recordTopRow}>
-          <Text style={styles.petName} numberOfLines={1}>
-            {record.pet_name}
-          </Text>
-          <View style={styles.serviceBadge}>
-            <Text style={styles.serviceBadgeText}>{record.service_type}</Text>
-          </View>
+    <View style={styles.folderCard}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Open ${folder.petName}'s veterinary record folder`}
+        style={({ pressed }) => [
+          styles.folderHeader,
+          pressed && styles.cardPressed,
+        ]}
+        onPress={openFolder}
+      >
+        <View style={styles.folderIcon}>
+          <Ionicons name="folder" size={27} color="#2E7D6B" />
         </View>
-        <Text style={styles.petContext} numberOfLines={1}>
-          Owner: {record.owner_name || "—"}
-        </Text>
-        {record.diagnosis && (
-          <Text style={styles.diagnosis} numberOfLines={1}>
-            {record.diagnosis}
-          </Text>
-        )}
-        <View style={styles.recordBottomRow}>
-          <View style={styles.dateRow}>
-            <Ionicons name="calendar-outline" size={14} color="#6B7C73" />
-            <Text style={styles.visitDate}>
-              {formatDate(record.visit_date)}
-            </Text>
-          </View>
-          {!record.can_open && (
-            <Text style={styles.accessChanged}>Access changed</Text>
+        <View style={styles.folderPhotoContainer}>
+          {imageUrl ? (
+            <Image source={{ uri: imageUrl }} style={styles.petPhoto} />
+          ) : (
+            <Ionicons name="paw" size={22} color="#2E7D6B" />
           )}
         </View>
-      </View>
-
-      <Ionicons name="chevron-forward" size={19} color="#6B7C73" />
-    </Pressable>
+        <View style={styles.folderContent}>
+          <Text style={styles.folderName} numberOfLines={1}>
+            {folder.petName}
+          </Text>
+          <Text style={styles.folderOwner} numberOfLines={1}>
+            Owner: {folder.ownerName || "—"}
+          </Text>
+          <Text style={styles.folderMeta} numberOfLines={1}>
+            {[folder.species, folder.breed].filter(Boolean).join(" • ")}
+          </Text>
+        </View>
+        <Ionicons
+          name="chevron-forward"
+          size={19}
+          color="#6B7C73"
+        />
+      </Pressable>
+    </View>
   );
 }
 
@@ -363,15 +453,9 @@ function StateCard({ children }: { children: React.ReactNode }) {
   return <View style={styles.stateCard}>{children}</View>;
 }
 
-function formatDate(value: string) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || "").slice(0, 10));
-  if (!match) return "Date unavailable";
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-  return date.toLocaleDateString([], {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+function getNameInitial(value: string) {
+  const initial = value.trim().charAt(0).toLocaleUpperCase();
+  return /^[A-Z]$/.test(initial) ? initial : "#";
 }
 
 const styles = StyleSheet.create({
@@ -422,80 +506,72 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   summaryTitle: { fontSize: 19, fontWeight: "900", color: "#2E3A34" },
+  activeLetterText: {
+    marginTop: 2,
+    fontSize: 11,
+    color: "#2E7D6B",
+  },
   summaryCount: { fontSize: 12, fontWeight: "700", color: "#6B7C73" },
-  recordList: { gap: 10 },
-  recordCard: {
-    ...timanShadow,
-    minHeight: 132,
-    borderRadius: 19,
-    padding: 14,
+  recordsBrowser: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  folderList: { flex: 1, minWidth: 0, gap: 10 },
+  alphabetRail: {
+    width: 32,
+    borderRadius: 16,
+    paddingVertical: 5,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#CFE8DD",
+    alignItems: "center",
+  },
+  letterButton: {
+    width: 28,
+    minHeight: 19,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  letterButtonSelected: { backgroundColor: "#2E7D6B" },
+  letterText: { fontSize: 9, fontWeight: "800", color: "#2E7D6B" },
+  letterTextSelected: { color: "#FFFFFF" },
+  letterTextDisabled: { color: "#B8C8C0" },
+  folderCard: {
+    ...timanShadow,
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#CFE8DD",
+    overflow: "hidden",
+  },
+  folderHeader: {
+    minHeight: 104,
+    padding: 13,
     flexDirection: "row",
     alignItems: "center",
   },
-  timelineRail: {
-    width: 18,
-    alignSelf: "stretch",
-    alignItems: "center",
+  folderIcon: {
+    width: 36,
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
-  timelineDot: {
-    width: 12,
-    height: 12,
-    marginTop: 13,
-    borderRadius: 6,
-    backgroundColor: "#2E7D6B",
-    borderWidth: 3,
-    borderColor: "#CFE8DD",
-  },
-  timelineLine: {
-    flex: 1,
-    width: 2,
-    marginTop: 5,
-    backgroundColor: "#CFE8DD",
-  },
-  cardPressed: { opacity: 0.74, transform: [{ scale: 0.99 }] },
-  photoContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+  folderPhotoContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     overflow: "hidden",
     backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
   },
+  folderContent: { flex: 1, minWidth: 0, marginLeft: 10, marginRight: 6 },
+  folderName: { fontSize: 17, fontWeight: "900", color: "#2E3A34" },
+  folderOwner: { marginTop: 3, fontSize: 11, color: "#6B7C73" },
+  folderMeta: { marginTop: 4, fontSize: 11, color: "#56B091" },
+  cardPressed: { opacity: 0.74, transform: [{ scale: 0.99 }] },
   petPhoto: { width: "100%", height: "100%" },
-  recordContent: { flex: 1, minWidth: 0, marginLeft: 12, marginRight: 6 },
-  recordTopRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  petName: { flex: 1, fontSize: 17, fontWeight: "900", color: "#2E3A34" },
-  serviceBadge: {
-    maxWidth: "48%",
-    minHeight: 24,
-    borderRadius: 9,
-    paddingHorizontal: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#CFE8DD",
-  },
-  serviceBadgeText: { fontSize: 11, fontWeight: "900", color: "#2E7D6B" },
-  petContext: { marginTop: 4, fontSize: 12, color: "#6B7C73" },
-  diagnosis: {
-    marginTop: 7,
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#56B091",
-  },
-  recordBottomRow: {
-    marginTop: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  dateRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  visitDate: { fontSize: 11, color: "#6B7C73" },
-  accessChanged: { fontSize: 11, fontWeight: "800", color: "#F5A623" },
   stateCard: {
     minHeight: 245,
     marginTop: 24,

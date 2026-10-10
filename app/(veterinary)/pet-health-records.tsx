@@ -54,9 +54,16 @@ type VetRecord = {
 export default function VetRecordsScreen() {
   const params = useLocalSearchParams<{
     petId?: string;
+    recordId?: string;
+    notificationCreatedAt?: string;
   }>();
 
   const petId = params.petId;
+  const hasRecordId = Boolean(params.recordId?.trim());
+  const hasRequestedRecord = Boolean(
+    params.recordId?.trim() || params.notificationCreatedAt?.trim(),
+  );
+  const requestedRecordId = Number(params.recordId);
 
   const [pet, setPet] = useState<Pet | null>(null);
 
@@ -91,15 +98,22 @@ export default function VetRecordsScreen() {
           return;
         }
 
-        const response = await fetch(`${API_URL}/vet-records/owner/${petId}`, {
-          method: "GET",
+        const recordQuery = hasRecordId
+          ? `?recordId=${encodeURIComponent(String(params.recordId))}`
+          : "";
 
-          headers: {
-            Accept: "application/json",
+        const response = await fetch(
+          `${API_URL}/vet-records/owner/${petId}${recordQuery}`,
+          {
+            method: "GET",
 
-            Authorization: `Bearer ${token}`,
+            headers: {
+              Accept: "application/json",
+
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         const text = await response.text();
 
@@ -141,7 +155,7 @@ export default function VetRecordsScreen() {
         setRefreshing(false);
       }
     },
-    [petId],
+    [hasRecordId, params.recordId, petId],
   );
 
   useFocusEffect(
@@ -158,7 +172,15 @@ export default function VetRecordsScreen() {
     loadRecords(false);
   };
 
-  const upcomingCount = records.filter((record) => {
+  const visibleRecords = hasRecordId
+    ? records.filter(
+        (record) => Number(record.record_id) === requestedRecordId,
+      )
+    : params.notificationCreatedAt
+      ? findRecordClosestToNotification(records, params.notificationCreatedAt)
+      : records;
+
+  const upcomingCount = visibleRecords.filter((record) => {
     if (!record.next_due_date || record.schedule_status !== "Pending") {
       return false;
     }
@@ -181,7 +203,7 @@ export default function VetRecordsScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Header />
+        <Header singleRecord={hasRequestedRecord} />
 
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#2E7D6B" />
@@ -194,7 +216,7 @@ export default function VetRecordsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header />
+      <Header singleRecord={hasRequestedRecord} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -230,70 +252,81 @@ export default function VetRecordsScreen() {
           </View>
         )}
 
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryCard}>
-            <View
-              style={[
-                styles.summaryIcon,
-                {
-                  backgroundColor: "#CFE8DD",
-                },
-              ]}
-            >
-              <Ionicons
-                name="document-text-outline"
-                size={20}
-                color="#2E7D6B"
-              />
+        {!hasRequestedRecord && (
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryCard}>
+              <View
+                style={[
+                  styles.summaryIcon,
+                  {
+                    backgroundColor: "#CFE8DD",
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="document-text-outline"
+                  size={20}
+                  color="#2E7D6B"
+                />
+              </View>
+
+              <View>
+                <Text style={styles.summaryNumber}>{visibleRecords.length}</Text>
+
+                <Text style={styles.summaryLabel}>Total Records</Text>
+              </View>
             </View>
 
-            <View>
-              <Text style={styles.summaryNumber}>{records.length}</Text>
+            <View style={styles.summaryCard}>
+              <View
+                style={[
+                  styles.summaryIcon,
+                  {
+                    backgroundColor: "rgba(229, 115, 115, 0.14)",
+                  },
+                ]}
+              >
+                <Ionicons name="calendar-outline" size={20} color="#F5A623" />
+              </View>
 
-              <Text style={styles.summaryLabel}>Total Records</Text>
+              <View>
+                <Text style={styles.summaryNumber}>{upcomingCount}</Text>
+
+                <Text style={styles.summaryLabel}>Upcoming</Text>
+              </View>
             </View>
           </View>
-
-          <View style={styles.summaryCard}>
-            <View
-              style={[
-                styles.summaryIcon,
-                {
-                  backgroundColor: "rgba(229, 115, 115, 0.14)",
-                },
-              ]}
-            >
-              <Ionicons name="calendar-outline" size={20} color="#F5A623" />
-            </View>
-
-            <View>
-              <Text style={styles.summaryNumber}>{upcomingCount}</Text>
-
-              <Text style={styles.summaryLabel}>Upcoming</Text>
-            </View>
-          </View>
-        </View>
+        )}
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Veterinary History</Text>
+          <Text style={styles.sectionTitle}>
+            {hasRequestedRecord
+              ? "New Veterinary Record"
+              : "Veterinary History"}
+          </Text>
 
-          {records.length > 0 && (
+          {!hasRequestedRecord && visibleRecords.length > 0 && (
             <Text style={styles.recordCountText}>
-              {records.length} {records.length === 1 ? "record" : "records"}
+              {visibleRecords.length}{" "}
+              {visibleRecords.length === 1 ? "record" : "records"}
             </Text>
           )}
         </View>
 
-        {records.length === 0 ? (
+        {visibleRecords.length === 0 ? (
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
               <Ionicons name="medical-outline" size={35} color="#56B091" />
             </View>
 
-            <Text style={styles.emptyTitle}>No Health Records Yet</Text>
+            <Text style={styles.emptyTitle}>
+              {hasRequestedRecord
+                ? "Veterinary Record Not Found"
+                : "No Health Records Yet"}
+            </Text>
           </View>
         ) : (
-          records.map((record, index) => (
+          visibleRecords.map((record, index) => (
             <OwnerRecordCard
               key={record.record_id}
               record={record}
@@ -315,7 +348,7 @@ export default function VetRecordsScreen() {
   );
 }
 
-function Header() {
+function Header({ singleRecord = false }: { singleRecord?: boolean }) {
   return (
     <View style={styles.header}>
       <Pressable
@@ -328,7 +361,9 @@ function Header() {
         <Ionicons name="chevron-back" size={27} color="#2E7D6B" />
       </Pressable>
 
-      <Text style={styles.headerTitle}>Health Records</Text>
+      <Text style={styles.headerTitle}>
+        {singleRecord ? "Veterinary Record" : "Health Records"}
+      </Text>
 
       <View style={styles.headerButton} />
     </View>
@@ -584,6 +619,47 @@ function parseDatabaseDate(value: string) {
   }
 
   return new Date(year, month - 1, day);
+}
+
+function findRecordClosestToNotification(
+  records: VetRecord[],
+  notificationCreatedAt: string,
+) {
+  if (records.length === 0) {
+    return [];
+  }
+
+  const notificationTime = parseDatabaseTimestamp(notificationCreatedAt);
+
+  if (notificationTime === null) {
+    return [records[0]];
+  }
+
+  const closestRecord = records.reduce((closest, current) => {
+    const closestTime = parseDatabaseTimestamp(closest.created_at);
+    const currentTime = parseDatabaseTimestamp(current.created_at);
+
+    if (currentTime === null) {
+      return closest;
+    }
+
+    if (closestTime === null) {
+      return current;
+    }
+
+    return Math.abs(currentTime - notificationTime) <
+      Math.abs(closestTime - notificationTime)
+      ? current
+      : closest;
+  });
+
+  return [closestRecord];
+}
+
+function parseDatabaseTimestamp(value: string) {
+  const timestamp = new Date(value.replace(" ", "T")).getTime();
+
+  return Number.isNaN(timestamp) ? null : timestamp;
 }
 
 function formatDate(value: string) {

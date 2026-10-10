@@ -122,16 +122,20 @@ export default function ClinicMonthlySchedulesScreen() {
                 key={item.key}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}
-                style={[styles.summaryCard, active && { borderColor: item.color, backgroundColor: item.backgroundColor }]}
+                style={({ pressed }) => [
+                  styles.summaryCard,
+                  active && { borderColor: item.color },
+                  pressed && styles.summaryCardPressed,
+                ]}
                 onPress={() => setSelectedFilter(item.key)}
               >
                 <View style={styles.summaryTopRow}>
                   <View style={[styles.summaryIcon, { backgroundColor: item.backgroundColor }]}>
-                    <Ionicons name={item.icon} size={20} color={item.color} />
+                    <Ionicons name={item.icon} size={23} color={item.color} />
                   </View>
                   <Text style={styles.summaryValue}>{loading ? "—" : counts[item.key]}</Text>
                 </View>
-                <Text style={[styles.summaryLabel, active && { color: item.color }]}>{item.label}</Text>
+                <Text style={styles.summaryLabel} numberOfLines={1}>{item.label}</Text>
               </Pressable>
             );
           })}
@@ -221,11 +225,12 @@ const styles = StyleSheet.create({
   content: { width: "100%", maxWidth: 1180, alignSelf: "center", padding: 20, paddingBottom: 48 },
   subtitle: { fontSize: 14, color: "#6B7C73" },
   summaryGrid: { marginTop: 17, flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  summaryCard: { flexBasis: "46%", flexGrow: 1, minWidth: 0, minHeight: 104, padding: 14, borderRadius: 18, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#CFE8DD", elevation: 1 },
+  summaryCard: { flexBasis: "46%", flexGrow: 1, minWidth: 0, height: 116, paddingHorizontal: 15, paddingVertical: 14, borderRadius: 18, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#CFE8DD", elevation: 1 },
+  summaryCardPressed: { opacity: 0.78 },
   summaryTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  summaryIcon: { width: 35, height: 35, borderRadius: 11, alignItems: "center", justifyContent: "center" },
-  summaryValue: { fontSize: 24, fontWeight: "900", color: "#2E3A34" },
-  summaryLabel: { marginTop: 11, fontSize: 13, fontWeight: "900", color: "#6B7C73" },
+  summaryIcon: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  summaryValue: { fontSize: 28, fontWeight: "900", color: "#2E3A34", textAlign: "right" },
+  summaryLabel: { marginTop: 12, fontSize: 13, fontWeight: "700", color: "#6B7C73", textAlign: "left" },
   listHeader: { marginTop: 22, marginBottom: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   listTitle: { fontSize: 19, fontWeight: "900", color: "#2E3A34" },
   listCount: { fontSize: 12, fontWeight: "700", color: "#6B7C73" },

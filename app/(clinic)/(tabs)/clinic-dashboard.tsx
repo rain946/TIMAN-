@@ -217,52 +217,58 @@ export default function ClinicDashboardScreen() {
         )}
 
         <SectionTitle title="This Month" />
-        <View style={styles.overviewRow}>
-          <OverviewCard
-            icon="calendar-outline"
-            value={loading ? "—" : String(dashboard.overview.added)}
-            label="Booked"
-            onPress={() =>
-              router.push({
-                pathname: "/(clinic)/clinic-monthly-schedules",
-                params: { filter: "added" },
-              })
-            }
-          />
-          <OverviewCard
-            icon="checkmark-circle-outline"
-            value={loading ? "—" : String(dashboard.overview.completed)}
-            label="Completed"
-            onPress={() =>
-              router.push({
-                pathname: "/(clinic)/clinic-monthly-schedules",
-                params: { filter: "completed" },
-              })
-            }
-          />
-          <OverviewCard
-            icon="close-circle-outline"
-            value={loading ? "—" : String(dashboard.overview.cancelled)}
-            label="Cancelled"
-            pending
-            onPress={() =>
-              router.push({
-                pathname: "/(clinic)/clinic-monthly-schedules",
-                params: { filter: "cancelled" },
-              })
-            }
-          />
-          <OverviewCard
-            icon="calendar-number-outline"
-            value={loading ? "—" : String(dashboard.overview.rescheduled)}
-            label="Rescheduled"
-            onPress={() =>
-              router.push({
-                pathname: "/(clinic)/clinic-monthly-schedules",
-                params: { filter: "rescheduled" },
-              })
-            }
-          />
+        <View style={styles.overviewGrid}>
+          <View style={styles.overviewRow}>
+            <OverviewCard
+              icon="calendar-outline"
+              value={loading ? "—" : String(dashboard.overview.added)}
+              label="Booked"
+              onPress={() =>
+                router.push({
+                  pathname: "/(clinic)/clinic-monthly-schedules",
+                  params: { filter: "added" },
+                })
+              }
+            />
+            <OverviewCard
+              icon="checkmark-circle-outline"
+              value={loading ? "—" : String(dashboard.overview.completed)}
+              label="Completed"
+              onPress={() =>
+                router.push({
+                  pathname: "/(clinic)/clinic-monthly-schedules",
+                  params: { filter: "completed" },
+                })
+              }
+            />
+          </View>
+
+          <View style={styles.overviewRow}>
+            <OverviewCard
+              icon="close-circle-outline"
+              value={loading ? "—" : String(dashboard.overview.cancelled)}
+              label="Cancelled"
+              tone="cancelled"
+              onPress={() =>
+                router.push({
+                  pathname: "/(clinic)/clinic-monthly-schedules",
+                  params: { filter: "cancelled" },
+                })
+              }
+            />
+            <OverviewCard
+              icon="calendar-number-outline"
+              value={loading ? "—" : String(dashboard.overview.rescheduled)}
+              label="Rescheduled"
+              tone="rescheduled"
+              onPress={() =>
+                router.push({
+                  pathname: "/(clinic)/clinic-monthly-schedules",
+                  params: { filter: "rescheduled" },
+                })
+              }
+            />
+          </View>
         </View>
 
         <SectionHeader
@@ -351,36 +357,49 @@ function OverviewCard({
   icon,
   value,
   label,
-  pending = false,
+  tone = "default",
   onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   value: string;
   label: string;
-  pending?: boolean;
+  tone?: "default" | "cancelled" | "rescheduled";
   onPress: () => void;
 }) {
+  const iconBadgeStyle =
+    tone === "cancelled"
+      ? styles.overviewIconCancelled
+      : tone === "rescheduled"
+        ? styles.overviewIconRescheduled
+        : styles.overviewIconDefault;
+  const iconColor =
+    tone === "cancelled"
+      ? "#E57373"
+      : tone === "rescheduled"
+        ? "#4D8FCB"
+        : "#2E7D6B";
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`View ${label.toLowerCase()} schedules this month`}
       style={({ pressed }) => [
         styles.overviewCard,
-        pressed && styles.pressed,
+        pressed && styles.overviewCardPressed,
       ]}
       onPress={onPress}
     >
-      <View
-        style={[styles.overviewIcon, pending && styles.overviewIconPending]}
-      >
-        <Ionicons
-          name={icon}
-          size={22}
-          color={pending ? "#F5A623" : "#2E7D6B"}
-        />
+      <View style={styles.overviewTopRow}>
+        <View style={[styles.overviewIcon, iconBadgeStyle]}>
+          <Ionicons name={icon} size={23} color={iconColor} />
+        </View>
+
+        <Text style={styles.overviewValue}>{value}</Text>
       </View>
-      <Text style={styles.overviewValue}>{value}</Text>
-      <Text style={styles.overviewLabel}>{label}</Text>
+
+      <Text style={styles.overviewLabel} numberOfLines={1}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -533,7 +552,7 @@ function EmptyCard({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF5E9" },
-  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 10, paddingBottom: 48 },
+  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 10, paddingBottom: 110 },
   brandRow: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
   brandIcon: {
     width: 38,
@@ -633,38 +652,53 @@ const styles = StyleSheet.create({
     marginTop: 27,
     marginBottom: 13,
   },
-  overviewRow: { flexDirection: "row", flexWrap: "wrap", gap: 11 },
+  overviewGrid: { gap: 11 },
+  overviewRow: { flexDirection: "row", gap: 11 },
   overviewCard: {
     flex: 1,
-    minWidth: 150,
-    minHeight: 127,
+    minWidth: 0,
+    height: 116,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#CFE8DD",
     borderRadius: 18,
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
     shadowColor: "#2E3A34",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
   },
+  overviewCardPressed: { opacity: 0.82, transform: [{ scale: 0.99 }] },
+  overviewTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   overviewIcon: {
-    width: 39,
-    height: 39,
-    borderRadius: 12,
-    backgroundColor: "#CFE8DD",
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
-  overviewIconPending: { backgroundColor: "#FAD7A0" },
+  overviewIconDefault: { backgroundColor: "#CFE8DD" },
+  overviewIconCancelled: { backgroundColor: "rgba(229, 115, 115, 0.14)" },
+  overviewIconRescheduled: { backgroundColor: "rgba(100, 181, 246, 0.16)" },
   overviewValue: {
-    fontSize: 27,
+    fontSize: 28,
     fontWeight: "900",
     color: "#2E3A34",
-    marginTop: 10,
+    textAlign: "right",
   },
-  overviewLabel: { fontSize: 13, color: "#6B7C73", marginTop: 2 },
+  overviewLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#6B7C73",
+    marginTop: 12,
+    textAlign: "left",
+  },
   unavailableHint: {
     fontSize: 12,
     lineHeight: 17,

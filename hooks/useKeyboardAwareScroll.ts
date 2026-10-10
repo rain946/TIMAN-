@@ -8,11 +8,12 @@ import {
   TextInput,
 } from "react-native";
 
-const VISIBILITY_MARGIN = 32;
+const DEFAULT_VISIBILITY_MARGIN = 32;
 const LAYOUT_SETTLE_DELAY_MS = 80;
 
 export function useKeyboardAwareScroll(
-  normalBottomPadding: number
+  normalBottomPadding: number,
+  visibilityMargin = DEFAULT_VISIBILITY_MARGIN,
 ) {
   const scrollViewRef = useRef<ScrollView>(null);
   const focusedInputRef = useRef<TextInput>(null);
@@ -60,12 +61,12 @@ export function useKeyboardAwareScroll(
             );
             const overlap =
               inputBottom +
-              VISIBILITY_MARGIN -
+              visibilityMargin -
               effectiveBottom;
 
             if (overlap > 0) {
               const scrollDistance =
-                overlap + VISIBILITY_MARGIN / 2;
+                overlap + visibilityMargin / 2;
 
               setExtraScrollSpace((current) =>
                 Math.max(current, scrollDistance)
@@ -86,7 +87,7 @@ export function useKeyboardAwareScroll(
         );
       }
     );
-  }, []);
+  }, [visibilityMargin]);
 
   const scheduleReveal = useCallback(() => {
     clearSettleTimer();

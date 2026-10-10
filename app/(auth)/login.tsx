@@ -60,8 +60,8 @@ function startPostLoginSetup(token: string, user: AuthenticatedUser) {
 
 export default function LoginScreen() {
   const { width, height } = useWindowDimensions();
-  const petImageHeight = Math.min(Math.max(height * 0.25, 210), 250);
-  const petImageWidth = Math.min(width * 0.94, 489);
+  const petImageHeight = Math.min(Math.max(height * 0.255, 210), 242);
+  const petImageWidth = Math.min(width - 32, 456);
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const {
@@ -69,7 +69,7 @@ export default function LoginScreen() {
     handleInputFocus,
     handleScroll,
     keyboardContentContainerStyle,
-  } = useKeyboardAwareScroll(32);
+  } = useKeyboardAwareScroll(40, 96);
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
@@ -187,7 +187,8 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -201,9 +202,6 @@ export default function LoginScreen() {
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.pageMintShape} pointerEvents="none" />
-          <View style={styles.pageGreenShape} pointerEvents="none" />
-
           <View style={styles.hero}>
             <View style={styles.heroMintShape} pointerEvents="none" />
             <View style={styles.heroMintLayer} pointerEvents="none" />
@@ -251,14 +249,14 @@ export default function LoginScreen() {
               pointerEvents="none"
             >
               <Image
-                source={require("../../assets/images/timan-multi-pet-hero.png")}
+                source={require("../../assets/images/timan-login-multi-pet-hero-v2.png")}
                 style={[
                   styles.heroPets,
                   { width: petImageWidth, height: petImageHeight },
                 ]}
                 resizeMode="contain"
                 accessible
-                accessibilityLabel="A group of companion pets"
+                accessibilityLabel="A dog, cat, rabbit, parrot, guinea pig, and turtle surrounded by flowers and leaves"
               />
             </View>
           </View>
@@ -324,7 +322,10 @@ export default function LoginScreen() {
                   pressed && styles.buttonPressed,
                   loading && styles.disabledButton,
                 ]}
-                onPress={() => setShowPassword((current) => !current)}
+                onPress={() => {
+                  setShowPassword((current) => !current);
+                  handleInputFocus(passwordInputRef.current);
+                }}
               >
                 <Ionicons
                   name={showPassword ? "eye-outline" : "eye-off-outline"}
@@ -401,19 +402,20 @@ const styles = StyleSheet.create({
     maxWidth: 520,
     alignSelf: "center",
     position: "relative",
-    overflow: "hidden",
+    paddingHorizontal: 16,
+    paddingTop: 4,
   },
 
   heroBranding: {
     width: "100%",
     alignItems: "center",
-    paddingTop: 22,
-    paddingBottom: 7,
+    paddingTop: 16,
+    paddingBottom: 0,
     zIndex: 2,
   },
   heroWordmark: {
-    width: 190,
-    height: 62,
+    width: 168,
+    height: 54,
   },
   heroSystemTitle: {
     marginTop: 1,
@@ -445,62 +447,68 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
     backgroundColor: "#FFF5E9",
+    borderRadius: 34,
     zIndex: 2,
   },
   heroMintShape: {
     position: "absolute",
-    width: 285,
-    height: 250,
-    borderRadius: 120,
-    right: -92,
-    top: -92,
+    width: 250,
+    height: 220,
+    borderRadius: 110,
+    right: -98,
+    top: -96,
     backgroundColor: "#CFE8DD",
     transform: [{ rotate: "18deg" }],
   },
   heroMintLayer: {
     position: "absolute",
-    width: 190,
-    height: 170,
-    borderRadius: 90,
-    right: -65,
-    top: -72,
+    width: 168,
+    height: 150,
+    borderRadius: 82,
+    right: -62,
+    top: -76,
     backgroundColor: "rgba(86, 176, 145, 0.34)",
     transform: [{ rotate: "-12deg" }],
   },
   heroAccentShape: {
     position: "absolute",
-    width: 145,
-    height: 185,
+    width: 132,
+    height: 172,
     borderRadius: 72,
-    left: -88,
-    bottom: 20,
+    left: -86,
+    bottom: 4,
     backgroundColor: "#FAD7A0",
-    opacity: 0.58,
+    opacity: 0.52,
     transform: [{ rotate: "-22deg" }],
   },
   heroPawLeft: {
     position: "absolute",
-    left: 25,
-    top: 82,
+    left: 30,
+    top: 72,
     transform: [{ rotate: "-18deg" }],
   },
   heroPawRight: {
     position: "absolute",
-    right: 28,
-    top: 61,
+    right: 30,
+    top: 65,
     transform: [{ rotate: "16deg" }],
   },
   backButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(255,255,255,0.72)",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.88)",
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    top: 7,
-    left: 14,
+    top: 10,
+    left: 10,
     zIndex: 3,
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   petStage: {
     width: "100%",
@@ -510,79 +518,59 @@ const styles = StyleSheet.create({
   },
   heroPets: {
     position: "absolute",
-    bottom: 10,
+    bottom: 0,
     alignSelf: "center",
     zIndex: 3,
   },
-  pageMintShape: {
-    position: "absolute",
-    right: -90,
-    bottom: 52,
-    width: 210,
-    height: 280,
-    borderRadius: 105,
-    backgroundColor: "rgba(207, 232, 221, 0.65)",
-    transform: [{ rotate: "22deg" }],
-    zIndex: 0,
-  },
-  pageGreenShape: {
-    position: "absolute",
-    left: -105,
-    bottom: -70,
-    width: 230,
-    height: 235,
-    borderRadius: 115,
-    backgroundColor: "rgba(86, 176, 145, 0.18)",
-    transform: [{ rotate: "-20deg" }],
-    zIndex: 0,
-  },
   loginCard: {
-    width: "92%",
-    maxWidth: 478,
-    boxSizing: "border-box",
+    width: "100%",
     alignSelf: "center",
-    marginTop: -24,
+    marginTop: -16,
     marginBottom: 24,
-    paddingHorizontal: 22,
-    paddingTop: 24,
-    paddingBottom: 22,
-    borderRadius: 30,
+    paddingHorizontal: 20,
+    paddingTop: 26,
+    paddingBottom: 24,
+    borderRadius: 28,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "rgba(207, 232, 221, 0.9)",
+    borderColor: "rgba(207, 232, 221, 0.82)",
     shadowColor: "#2E3A34",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
-    elevation: 7,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.11,
+    shadowRadius: 22,
+    elevation: 6,
     zIndex: 5,
   },
-  header: { alignItems: "center", marginBottom: 16 },
+  header: { alignItems: "center", marginBottom: 20 },
   title: {
-    fontSize: 27,
+    fontSize: 28,
+    lineHeight: 34,
     fontWeight: "900",
     color: "#0B6658",
+    textAlign: "center",
   },
   subtitle: {
-    fontSize: 14.5,
+    fontSize: 14,
+    lineHeight: 20,
     color: "#6B7C73",
-    marginTop: 5,
+    marginTop: 4,
+    textAlign: "center",
   },
   inputContainer: {
-    minHeight: 66,
+    minHeight: 64,
     backgroundColor: "#F9FCFA",
     borderWidth: 1,
     borderColor: "#CFE8DD",
-    borderRadius: 20,
+    borderRadius: 18,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    paddingHorizontal: 9,
+    marginBottom: 12,
   },
   inputIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#E7F3ED",
     alignItems: "center",
     justifyContent: "center",
@@ -596,7 +584,7 @@ const styles = StyleSheet.create({
   },
   inputTextBlock: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 11,
     justifyContent: "center",
   },
   inputLabel: {
@@ -622,13 +610,13 @@ const styles = StyleSheet.create({
     minHeight: 32,
     alignSelf: "flex-end",
     justifyContent: "center",
-    marginTop: -5,
-    marginBottom: 4,
+    marginTop: -6,
+    marginBottom: 8,
   },
   loginButton: {
     height: 56,
     backgroundColor: "#2E7D6B",
-    borderRadius: 20,
+    borderRadius: 18,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -665,7 +653,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 10,
+    marginTop: 12,
   },
   signUpPrompt: {
     fontSize: 14,
@@ -680,7 +668,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    marginTop: 12,
+    marginTop: 16,
   },
   orLine: {
     flex: 1,

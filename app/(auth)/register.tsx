@@ -12,7 +12,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -31,16 +30,13 @@ import {
 type UserRole = "owner" | "clinic";
 
 export default function RegisterScreen() {
-  const { width, height } = useWindowDimensions();
-  const petHeroHeight = Math.min(Math.max(height * 0.27, 210), 270);
-  const petHeroWidth = Math.min(width * 0.96, 595);
   const inputRefs = useRef<Record<string, TextInput | null>>({});
   const {
     scrollViewRef,
     handleInputFocus,
     handleScroll,
     keyboardContentContainerStyle,
-  } = useKeyboardAwareScroll(40);
+  } = useKeyboardAwareScroll(40, 104);
   const [role, setRole] = useState<UserRole>("owner");
 
   const [fullName, setFullName] = useState("");
@@ -180,6 +176,7 @@ export default function RegisterScreen() {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           ref={scrollViewRef}
@@ -187,7 +184,6 @@ export default function RegisterScreen() {
           scrollEventThrottle={16}
           contentContainerStyle={[
             styles.content,
-            { width: Math.min(width, 620) },
             keyboardContentContainerStyle,
           ]}
           showsVerticalScrollIndicator={false}
@@ -239,30 +235,8 @@ export default function RegisterScreen() {
             </Text>
           </View>
 
-          <View
-            style={[styles.petHeroStage, { height: petHeroHeight }]}
-            pointerEvents="none"
-          >
-            <View style={styles.foliageLeft}>
-              <View style={[styles.leaf, styles.leafLeftOne]} />
-              <View style={[styles.leaf, styles.leafLeftTwo]} />
-              <View style={[styles.leaf, styles.leafLeftThree]} />
-            </View>
-            <View style={styles.foliageRight}>
-              <View style={[styles.leaf, styles.leafRightOne]} />
-              <View style={[styles.leaf, styles.leafRightTwo]} />
-              <View style={[styles.leaf, styles.leafRightThree]} />
-            </View>
-            <Image
-              source={require("../../assets/images/timan-multi-pet-hero.png")}
-              style={{ width: petHeroWidth, height: petHeroHeight }}
-              resizeMode="contain"
-              accessible
-              accessibilityLabel="A dog, cat, rabbit, parrot, guinea pig, and tortoise"
-            />
-          </View>
-
-          <Text style={styles.label}>I am a</Text>
+          <View style={styles.formCard}>
+            <Text style={styles.label}>I am a</Text>
 
           <View style={styles.roleContainer}>
             <Pressable
@@ -317,6 +291,7 @@ export default function RegisterScreen() {
           </View>
 
           <InputBox
+            label="Full Name"
             inputRef={(input) => {
               inputRefs.current.fullName = input;
             }}
@@ -330,6 +305,7 @@ export default function RegisterScreen() {
 
           {role === "clinic" && (
             <InputBox
+              label="Clinic Name"
               inputRef={(input) => {
                 inputRefs.current.clinicName = input;
               }}
@@ -343,6 +319,7 @@ export default function RegisterScreen() {
           )}
 
           <InputBox
+            label="Email"
             inputRef={(input) => {
               inputRefs.current.email = input;
             }}
@@ -357,6 +334,7 @@ export default function RegisterScreen() {
           />
 
           <InputBox
+            label="Contact Number"
             inputRef={(input) => {
               inputRefs.current.contactNumber = input;
             }}
@@ -372,6 +350,7 @@ export default function RegisterScreen() {
           />
 
           <InputBox
+            label="Address"
             inputRef={(input) => {
               inputRefs.current.address = input;
             }}
@@ -392,26 +371,32 @@ export default function RegisterScreen() {
               />
             </View>
 
-            <TextInput
-              ref={(input) => {
-                inputRefs.current.password = input;
-              }}
-              onFocus={() => handleInputFocus(inputRefs.current.password)}
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#6B7C73"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-            />
+            <View style={styles.inputTextBlock}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <TextInput
+                ref={(input) => {
+                  inputRefs.current.password = input;
+                }}
+                onFocus={() => handleInputFocus(inputRefs.current.password)}
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor="#9AA7A1"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+              />
+            </View>
 
             <Pressable
               style={({ pressed }) => [
                 styles.eyeButton,
                 pressed && styles.buttonPressed,
               ]}
-              onPress={() => setShowPassword(!showPassword)}
+              onPress={() => {
+                setShowPassword(!showPassword);
+                handleInputFocus(inputRefs.current.password);
+              }}
             >
               <Ionicons
                 name={showPassword ? "eye-outline" : "eye-off-outline"}
@@ -430,28 +415,34 @@ export default function RegisterScreen() {
               />
             </View>
 
-            <TextInput
-              ref={(input) => {
-                inputRefs.current.confirmPassword = input;
-              }}
-              onFocus={() =>
-                handleInputFocus(inputRefs.current.confirmPassword)
-              }
-              style={styles.input}
-              placeholder="Confirm Password"
-              placeholderTextColor="#6B7C73"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showConfirmPassword}
-              autoCapitalize="none"
-            />
+            <View style={styles.inputTextBlock}>
+              <Text style={styles.inputLabel}>Confirm Password</Text>
+              <TextInput
+                ref={(input) => {
+                  inputRefs.current.confirmPassword = input;
+                }}
+                onFocus={() =>
+                  handleInputFocus(inputRefs.current.confirmPassword)
+                }
+                style={styles.input}
+                placeholder="Re-enter your password"
+                placeholderTextColor="#9AA7A1"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+                autoCapitalize="none"
+              />
+            </View>
 
             <Pressable
               style={({ pressed }) => [
                 styles.eyeButton,
                 pressed && styles.buttonPressed,
               ]}
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              onPress={() => {
+                setShowConfirmPassword(!showConfirmPassword);
+                handleInputFocus(inputRefs.current.confirmPassword);
+              }}
             >
               <Ionicons
                 name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
@@ -491,6 +482,7 @@ export default function RegisterScreen() {
               <Text style={styles.loginLink}>Log In</Text>
             </Pressable>
           </View>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -499,10 +491,12 @@ export default function RegisterScreen() {
 
 function InputBox({
   icon,
+  label,
   inputRef,
   ...props
 }: {
   icon: keyof typeof Ionicons.glyphMap;
+  label: string;
   inputRef?: (input: TextInput | null) => void;
 } & React.ComponentProps<typeof TextInput>) {
   return (
@@ -511,12 +505,15 @@ function InputBox({
         <Ionicons name={icon} size={20} color="#2E7D6B" />
       </View>
 
-      <TextInput
-        ref={inputRef}
-        style={styles.input}
-        placeholderTextColor="#6B7C73"
-        {...props}
-      />
+      <View style={styles.inputTextBlock}>
+        <Text style={styles.inputLabel}>{label}</Text>
+        <TextInput
+          ref={inputRef}
+          style={styles.input}
+          placeholderTextColor="#9AA7A1"
+          {...props}
+        />
+      </View>
     </View>
   );
 }
@@ -529,11 +526,12 @@ const styles = StyleSheet.create({
 
   content: {
     flexGrow: 1,
-    boxSizing: "border-box",
+    width: "100%",
+    maxWidth: 520,
     alignSelf: "center",
-    paddingBottom: 36,
+    paddingHorizontal: 16,
+    paddingTop: 4,
     position: "relative",
-    overflow: "hidden",
   },
 
   backgroundDecorations: {
@@ -568,8 +566,8 @@ const styles = StyleSheet.create({
     width: 150,
     height: 230,
     borderRadius: 80,
-    left: -112,
-    top: 310,
+    left: -116,
+    top: 330,
     backgroundColor: "rgba(250, 215, 160, 0.62)",
     transform: [{ rotate: "-18deg" }],
   },
@@ -601,40 +599,46 @@ const styles = StyleSheet.create({
 
   backButton: {
     position: "absolute",
-    left: 14,
-    top: 5,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(255, 255, 255, 0.76)",
+    left: 10,
+    top: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.88)",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 5,
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
 
   branding: {
     alignItems: "center",
-    paddingTop: 12,
+    paddingTop: 10,
     zIndex: 1,
   },
 
   wordmark: {
-    width: 190,
-    height: 62,
+    width: 168,
+    height: 54,
   },
 
   header: {
     alignItems: "center",
-    marginTop: 1,
-    marginBottom: 7,
+    marginTop: 0,
+    marginBottom: 4,
     zIndex: 1,
   },
 
   title: {
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 29,
+    lineHeight: 35,
     fontWeight: "900",
     color: "#0B6658",
+    textAlign: "center",
   },
 
   subtitle: {
@@ -643,107 +647,49 @@ const styles = StyleSheet.create({
     color: "#6B7C73",
     fontSize: 14.5,
     lineHeight: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     maxWidth: 390,
   },
 
-  petHeroStage: {
+  formCard: {
     width: "100%",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    position: "relative",
-    marginBottom: 8,
-    zIndex: 1,
-  },
-
-  foliageLeft: {
-    position: "absolute",
-    left: -22,
-    bottom: 10,
-    width: 100,
-    height: 125,
-    zIndex: 0,
-  },
-
-  foliageRight: {
-    position: "absolute",
-    right: -22,
-    bottom: 7,
-    width: 100,
-    height: 125,
-    zIndex: 0,
-  },
-
-  leaf: {
-    position: "absolute",
-    width: 30,
-    height: 70,
-    borderTopLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    backgroundColor: "#2E7D6B",
-  },
-
-  leafLeftOne: {
-    left: 5,
-    bottom: 0,
-    transform: [{ rotate: "-24deg" }],
-  },
-
-  leafLeftTwo: {
-    left: 35,
-    bottom: 23,
-    backgroundColor: "#56B091",
-    transform: [{ rotate: "17deg" }, { scale: 0.82 }],
-  },
-
-  leafLeftThree: {
-    left: 63,
-    bottom: -3,
-    backgroundColor: "#CFE8DD",
-    transform: [{ rotate: "38deg" }, { scale: 0.86 }],
-  },
-
-  leafRightOne: {
-    right: 5,
-    bottom: 0,
-    transform: [{ rotate: "28deg" }],
-  },
-
-  leafRightTwo: {
-    right: 35,
-    bottom: 23,
-    backgroundColor: "#56B091",
-    transform: [{ rotate: "-17deg" }, { scale: 0.82 }],
-  },
-
-  leafRightThree: {
-    right: 63,
-    bottom: -3,
-    backgroundColor: "#CFE8DD",
-    transform: [{ rotate: "-38deg" }, { scale: 0.86 }],
+    alignSelf: "center",
+    marginTop: 18,
+    marginBottom: 24,
+    paddingHorizontal: 18,
+    paddingTop: 22,
+    paddingBottom: 18,
+    borderRadius: 28,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(207, 232, 221, 0.82)",
+    shadowColor: "#2E3A34",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.11,
+    shadowRadius: 22,
+    elevation: 6,
+    zIndex: 2,
   },
 
   label: {
     fontSize: 16,
     color: "#2E3A34",
     fontWeight: "800",
-    marginHorizontal: 20,
-    marginBottom: 9,
+    marginBottom: 10,
     zIndex: 1,
   },
 
   roleContainer: {
     flexDirection: "row",
     gap: 12,
-    marginHorizontal: 20,
-    marginBottom: 18,
+    marginBottom: 20,
     zIndex: 1,
   },
 
   roleButton: {
     flex: 1,
     minWidth: 0,
-    height: 62,
+    minHeight: 64,
     borderWidth: 1.5,
     borderColor: "#2E7D6B",
     borderRadius: 18,
@@ -751,7 +697,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.92)",
+    backgroundColor: "#F9FCFA",
   },
 
   selectedRole: {
@@ -770,21 +716,15 @@ const styles = StyleSheet.create({
   },
 
   inputContainer: {
-    minHeight: 62,
-    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    minHeight: 66,
+    backgroundColor: "#F9FCFA",
     borderWidth: 1,
     borderColor: "#CFE8DD",
     borderRadius: 18,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 9,
-    marginHorizontal: 20,
-    marginBottom: 11,
-    shadowColor: "#2E3A34",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
+    marginBottom: 12,
     zIndex: 1,
   },
 
@@ -798,11 +738,25 @@ const styles = StyleSheet.create({
   },
 
   input: {
+    width: "100%",
+    fontSize: 15,
+    color: "#2E3A34",
+    paddingVertical: 2,
+    paddingHorizontal: 0,
+  },
+
+  inputTextBlock: {
     flex: 1,
     marginLeft: 11,
-    fontSize: 16,
+    justifyContent: "center",
+  },
+
+  inputLabel: {
+    fontSize: 13.5,
+    lineHeight: 18,
+    fontWeight: "700",
     color: "#2E3A34",
-    paddingVertical: 13,
+    marginBottom: 1,
   },
 
   signUpButton: {
@@ -811,8 +765,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 20,
-    marginTop: 8,
+    marginTop: 6,
     shadowColor: "#2E7D6B",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.2,
@@ -837,14 +790,14 @@ const styles = StyleSheet.create({
   signUpText: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "800",
   },
 
   loginContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 14,
+    marginTop: 12,
     zIndex: 1,
   },
 

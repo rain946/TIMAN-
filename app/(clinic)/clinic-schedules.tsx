@@ -6,9 +6,10 @@ import DateTimePicker, {
 import {
   router,
   useFocusEffect,
+  useLocalSearchParams,
   useSegments,
 } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -54,6 +55,7 @@ type ClinicSchedule = {
   booked_date: string;
   completed_date: string | null;
   cancelled_date: string | null;
+  cancellation_reason: string | null;
   rescheduled_date: string | null;
 };
 
@@ -69,6 +71,11 @@ const DAILY_CARDS: {
 ];
 
 export default function ClinicSchedulesScreen() {
+  const params = useLocalSearchParams<{
+    date?: string;
+    filter?: string;
+    recordId?: string;
+  }>();
   const segments = useSegments();
   const isTabScreen = segments.some((segment) => String(segment) === "(tabs)");
   const [schedules, setSchedules] = useState<ClinicSchedule[]>([]);
@@ -77,10 +84,25 @@ export default function ClinicSchedulesScreen() {
   const [selectedDate, setSelectedDate] = useState(getManilaTodayDateOnly);
   const [showIosDatePicker, setShowIosDatePicker] = useState(false);
   const [search, setSearch] = useState("");
+  const [focusedRecordId, setFocusedRecordId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
   const requestInFlight = useRef(false);
+
+  useEffect(() => {
+    const requestedFilter = normalizeDailyFilter(params.filter);
+    const requestedDate = normalizeDateOnly(params.date);
+    const requestedRecordId = Number(params.recordId);
+
+    if (requestedFilter) setSelectedDailyFilter(requestedFilter);
+    if (requestedDate) setSelectedDate(requestedDate);
+    setFocusedRecordId(
+      Number.isInteger(requestedRecordId) && requestedRecordId > 0
+        ? requestedRecordId
+        : null,
+    );
+  }, [params.date, params.filter, params.recordId]);
 
   const loadSchedules = useCallback(async (showLoading = true) => {
     if (requestInFlight.current) {
@@ -189,6 +211,9 @@ export default function ClinicSchedulesScreen() {
   const visibleSchedules = useMemo(
     () =>
       statusSchedules.filter((schedule) => {
+        if (focusedRecordId && schedule.record_id !== focusedRecordId) {
+          return false;
+        }
         if (!normalizedSearch) return true;
         return [
           schedule.pet_name,
@@ -203,7 +228,7 @@ export default function ClinicSchedulesScreen() {
             .includes(normalizedSearch),
         );
       }),
-    [normalizedSearch, statusSchedules],
+    [focusedRecordId, normalizedSearch, statusSchedules],
   );
 
   const refresh = useCallback(() => {
@@ -362,7 +387,10 @@ export default function ClinicSchedulesScreen() {
                         icon={item.icon}
                         count={dailyCounts[item.filter]}
                         selected={selectedDailyFilter === item.filter}
-                        onPress={() => setSelectedDailyFilter(item.filter)}
+                        onPress={() => {
+                          setFocusedRecordId(null);
+                          setSelectedDailyFilter(item.filter);
+                        }}
                       />
                     ))}
                   </View>
@@ -551,6 +579,15 @@ function ScheduleCard({
             </Text>
           </View>
         </View>
+        {view === "cancelled" ? (
+          <View style={styles.reasonBox}>
+            <Text style={styles.reasonLabel}>Cancellation reason</Text>
+            <Text style={styles.reasonText}>
+              {schedule.cancellation_reason?.trim() ||
+                "Reason not available for this earlier cancellation."}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
     </View>
@@ -633,6 +670,19 @@ function getListTitle(
   if (filter === "completed") return `Completed ${dateLabel}`;
   if (filter === "cancelled") return `Cancelled ${dateLabel}`;
   return `Rescheduled ${dateLabel}`;
+}
+
+function normalizeDailyFilter(value?: string): DailyFilter | null {
+  return value === "scheduled" ||
+    value === "completed" ||
+    value === "cancelled" ||
+    value === "rescheduled"
+    ? value
+    : null;
+}
+
+function normalizeDateOnly(value?: string) {
+  return value && parseDateParts(value) ? value.slice(0, 10) : null;
 }
 
 function getManilaTodayDateOnly() {
@@ -761,7 +811,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 45,
+    paddingBottom: 110,
   },
   subtitle: { fontSize: 14, color: "#6B7C73" },
   searchContainer: {
@@ -942,6 +992,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
+  },
+  reasonBox: {
+    marginTop: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: "rgba(229, 115, 115, 0.10)",
+  },
+  reasonLabel: {
+    fontSize: 9,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    color: "#E57373",
+  },
+  reasonText: {
+    marginTop: 3,
+    fontSize: 12,
+    lineHeight: 17,
+    color: "#2E3A34",
   },
   timingBadge: {
     minHeight: 23,

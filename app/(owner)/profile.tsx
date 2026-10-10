@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     maxWidth: 680,
     alignSelf: "center",
     paddingHorizontal: 22,
-    paddingBottom: 24,
+    paddingBottom: 110,
   },
 
   profileCard: {
@@ -594,23 +594,25 @@ const styles = StyleSheet.create({
   },
 
   infoCard: {
+    ...timanShadow,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#CFE8DD",
-    borderRadius: 17,
-    paddingHorizontal: 14,
+    borderRadius: 19,
+    paddingHorizontal: 15,
   },
 
   infoRow: {
-    minHeight: 62,
+    minHeight: 72,
+    paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
   },
 
   infoIcon: {
-    width: 37,
-    height: 37,
-    borderRadius: 11,
+    width: 40,
+    height: 40,
+    borderRadius: 13,
     backgroundColor: "#CFE8DD",
     alignItems: "center",
     justifyContent: "center",
@@ -618,24 +620,29 @@ const styles = StyleSheet.create({
 
   infoContent: {
     flex: 1,
-    marginLeft: 11,
+    minWidth: 0,
+    marginLeft: 12,
   },
 
   infoLabel: {
     fontSize: 11,
+    fontWeight: "800",
     color: "#6B7C73",
+    textTransform: "uppercase",
+    letterSpacing: 0.35,
   },
 
   infoValue: {
+    marginTop: 4,
     fontSize: 14,
+    lineHeight: 18,
     fontWeight: "700",
-    color: "#56B091",
-    marginTop: 3,
+    color: "#2E3A34",
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#CFE8DD",
+    backgroundColor: "#FFF5E9",
   },
 
   menuCard: {

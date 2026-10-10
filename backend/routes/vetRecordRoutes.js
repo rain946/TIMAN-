@@ -113,6 +113,7 @@ const getPhilippineToday = () => {
 
 const notifyClinicOfOwnerScheduleChange = async ({
   clinicUserId,
+  recordId,
   petId,
   petName,
   serviceType,
@@ -130,11 +131,11 @@ const notifyClinicOfOwnerScheduleChange = async ({
     await db.query(
       `
       INSERT INTO notifications (
-        user_id, type, title, message, pet_id, authorization_id, is_read
+        user_id, type, title, message, pet_id, authorization_id, record_id, is_read
       )
-      VALUES (?, ?, ?, ?, ?, NULL, FALSE)
+      VALUES (?, ?, ?, ?, ?, NULL, ?, FALSE)
       `,
-      [clinicUserId, `schedule_${action}`, title, message, petId]
+      [clinicUserId, `schedule_${action}`, title, message, petId, recordId]
     );
   } catch (error) {
     console.error("CLINIC SCHEDULE NOTIFICATION ERROR:", error);
@@ -160,9 +161,13 @@ const notifyClinicOfOwnerScheduleChange = async ({
           data: {
             type: `schedule_${action}`,
             petId,
+            recordId,
             serviceType,
             nextDueDate: nextDueDate || null,
             reason: reason || null,
+            eventDate: getPhilippineToday(),
+            title,
+            message,
           },
           pushTokenId: tokenRow.push_token_id,
           userId: clinicUserId,
@@ -429,9 +434,10 @@ router.post(
             message,
             pet_id,
             authorization_id,
+            record_id,
             is_read
           )
-          VALUES (?, ?, ?, ?, ?, NULL, FALSE)
+          VALUES (?, ?, ?, ?, ?, NULL, ?, FALSE)
           `,
           [
             pet.owner_id,
@@ -439,6 +445,7 @@ router.post(
             notificationTitle,
             notificationMessage,
             petId,
+            recordId,
           ]
         );
 
@@ -639,6 +646,7 @@ router.get(
           DATE_FORMAT(vr.created_at, '%Y-%m-%d') AS booked_date,
           DATE_FORMAT(vr.completed_at, '%Y-%m-%d') AS completed_date,
           DATE_FORMAT(vr.cancelled_at, '%Y-%m-%d') AS cancelled_date,
+          vr.cancellation_reason,
           DATE_FORMAT(vr.rescheduled_at, '%Y-%m-%d') AS rescheduled_date,
           p.pet_name,
           p.species,
@@ -856,12 +864,13 @@ router.get(
                u.user_id
 
           WHERE vr.pet_id = ?
+            AND vr.clinic_user_id = ?
 
           ORDER BY
             vr.visit_date DESC,
             vr.record_id DESC
           `,
-          [petId]
+          [petId, clinicUserId]
         );
 
       return res.json({
@@ -1015,6 +1024,15 @@ router.get(
       const ownerId =
         req.user.userId;
 
+      const rawRecordId = req.query.recordId;
+      const hasRecordFilter =
+        rawRecordId !== undefined &&
+        rawRecordId !== null &&
+        String(rawRecordId).trim() !== "";
+      const recordId = hasRecordFilter
+        ? Number(rawRecordId)
+        : null;
+
 
       if (
         !Number.isInteger(petId) ||
@@ -1023,6 +1041,16 @@ router.get(
         return res.status(400).json({
           success: false,
           message: "Invalid pet ID.",
+        });
+      }
+
+      if (
+        hasRecordFilter &&
+        (!Number.isInteger(recordId) || Number(recordId) <= 0)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid veterinary record ID.",
         });
       }
 
@@ -1088,12 +1116,15 @@ router.get(
                u.user_id
 
           WHERE vr.pet_id = ?
+            ${hasRecordFilter ? "AND vr.record_id = ?" : ""}
 
           ORDER BY
             vr.visit_date DESC,
             vr.record_id DESC
           `,
-          [petId]
+          hasRecordFilter
+            ? [petId, recordId]
+            : [petId]
         );
 
       return res.json({
@@ -1133,6 +1164,7 @@ router.patch(
           message: "Invalid veterinary record ID.",
         });
       }
+
       if (reason.length < 5 || reason.length > 500) {
         return res.status(400).json({
           success: false,
@@ -1220,6 +1252,7 @@ router.patch(
         SET
           vr.schedule_status = 'Cancelled',
           vr.completed_at = NULL,
+          vr.cancellation_reason = ?,
           vr.cancelled_at = CONVERT_TZ(
             UTC_TIMESTAMP(),
             '+00:00',
@@ -1231,7 +1264,7 @@ router.patch(
           AND vr.schedule_status = 'Pending'
           AND vr.rescheduled_at IS NULL
         `,
-        [recordId, ownerId]
+        [reason, recordId, ownerId]
       );
 
       if (result.affectedRows === 0) {
@@ -1243,6 +1276,7 @@ router.patch(
 
       await notifyClinicOfOwnerScheduleChange({
         clinicUserId: schedule.clinic_user_id,
+        recordId: schedule.record_id,
         petId: schedule.pet_id,
         petName: schedule.pet_name,
         serviceType: schedule.service_type,
@@ -1413,6 +1447,7 @@ router.patch(
 
       await notifyClinicOfOwnerScheduleChange({
         clinicUserId: schedule.clinic_user_id,
+        recordId: schedule.record_id,
         petId: schedule.pet_id,
         petName: schedule.pet_name,
         serviceType: schedule.service_type,

@@ -2,8 +2,9 @@ import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
 import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { AppDialogProvider } from "../components/dialogs/AppDialog";
+import { AppAlert, AppDialogProvider } from "../components/dialogs/AppDialog";
 import MissingPetAlertConsentModal from "../components/modals/MissingPetAlertConsentModal";
 import { registerDeviceForPushNotifications } from "../services/notificationService";
 import { checkNearbyAlertEnrollmentForSession } from "../services/nearbyAlertEnrollment";
@@ -31,6 +32,8 @@ const VALID_NOTIFICATION_TYPES = [
   "vet_record_added",
   "schedule_cancelled",
   "schedule_rescheduled",
+  "personal_care_reminder",
+  "clinic_daily_schedule_summary",
 ];
 
 
@@ -105,6 +108,18 @@ function handleNotificationNavigation(
       ? String(rawPetId).trim()
       : null;
 
+  const rawRecordId =
+    data?.recordId ??
+    data?.record_id ??
+    null;
+
+  const recordId =
+    rawRecordId !== null &&
+    rawRecordId !== undefined &&
+    String(rawRecordId).trim() !== ""
+      ? String(rawRecordId).trim()
+      : null;
+
   console.log(
     "TIMAN NOTIFICATION TYPE:",
     type
@@ -144,6 +159,32 @@ function handleNotificationNavigation(
       },
     });
 
+    return;
+  }
+
+  if (type === "personal_care_reminder") {
+    if (!petId) return;
+    router.push({
+      pathname: "/(veterinary)/personal-care-history",
+      params: {
+        petId,
+        petName: typeof data?.petName === "string" ? data.petName : "",
+      },
+    });
+    return;
+  }
+
+  if (type === "clinic_daily_schedule_summary") {
+    AppAlert.alert(
+      typeof data?.title === "string"
+        ? data.title
+        : "Today's Clinic Schedule",
+      typeof data?.message === "string"
+        ? data.message
+        : `You have ${Number(data?.scheduleCount) || 0} scheduled treatments today.`,
+      [{ text: "Close" }],
+      { cancelable: true },
+    );
     return;
   }
 
@@ -188,9 +229,9 @@ function handleNotificationNavigation(
 
 
   if (type === "vet_record_added") {
-    if (!petId) {
+    if (!petId || !recordId) {
       console.log(
-        "TIMAN: Vet record notification ignored because petId is missing."
+        "TIMAN: Vet record notification ignored because petId or recordId is missing."
       );
 
       return;
@@ -200,6 +241,7 @@ function handleNotificationNavigation(
       pathname: "/(veterinary)/pet-health-records",
       params: {
         petId,
+        recordId,
       },
     });
 
@@ -207,7 +249,25 @@ function handleNotificationNavigation(
   }
 
   if (type === "schedule_cancelled" || type === "schedule_rescheduled") {
-    router.push("/(clinic)/(tabs)/clinic-schedule-tab");
+    const title =
+      typeof data?.title === "string"
+        ? data.title
+        : type === "schedule_cancelled"
+          ? "Treatment Cancelled"
+          : "Treatment Rescheduled";
+    const messageParts = [
+      typeof data?.message === "string" ? data.message : "",
+    ];
+    if (!messageParts[0] && typeof data?.reason === "string") {
+      messageParts.push(`Reason: ${data.reason}`);
+    }
+    AppAlert.alert(
+      title,
+      messageParts.filter(Boolean).join("\n\n") ||
+        "The schedule update details are available in Notifications.",
+      [{ text: "Close" }],
+      { cancelable: true },
+    );
     return;
   }
 
@@ -449,12 +509,13 @@ export default function RootLayout() {
 
 
   return (
-    <AppDialogProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppDialogProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
       <Stack.Screen name="index" />
 
       <Stack.Screen name="(auth)/login" />
@@ -533,9 +594,10 @@ export default function RootLayout() {
         name="(veterinary)/health-reminders"
       />
 
-      </Stack>
-      <MissingPetAlertConsentModal />
-    </AppDialogProvider>
+        </Stack>
+        <MissingPetAlertConsentModal />
+      </AppDialogProvider>
+    </GestureHandlerRootView>
   );
 
 }
