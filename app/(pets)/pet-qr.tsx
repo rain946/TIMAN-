@@ -19,7 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { timanShadow } from "../../components/timan/theme";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
-import { API_URL, getImageUrl } from "../../config/api";
+import { API_URL, SERVER_URL, getImageUrl } from "../../config/api";
 
 type Pet = {
   pet_id: number;
@@ -215,13 +215,9 @@ export default function PetQRScreen() {
 
   const petCode = `PET-${String(pet.pet_id).padStart(4, "0")}`;
 
-  const PUBLIC_WEB_URL =
-    "https://pin-courts-probably-philip.trycloudflare.com";
-
   const publicProfileUrl = pet.qr_code
-    ? `${PUBLIC_WEB_URL}/public/pet/${encodeURIComponent(pet.qr_code)}`
+    ? `${SERVER_URL}/public/pet/${encodeURIComponent(pet.qr_code)}`
     : null;
-
   return (
     <SafeAreaView style={styles.container}>
       <Header />
