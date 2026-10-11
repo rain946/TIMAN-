@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
 
   loadingText: {
     marginTop: 12,
-    fontSize: 12,
+    fontSize: 14,
     color: "#6B7C73",
   },
 
@@ -804,13 +804,14 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "900",
     color: "#2E3A34",
   },
 
   headerSubtitle: {
-    fontSize: 9,
+    fontSize: 13,
+    lineHeight: 18,
     color: "#6B7C73",
     marginTop: 2,
   },
@@ -837,7 +838,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 21,
     fontWeight: "900",
     color: "#2E3A34",
   },
@@ -855,7 +856,7 @@ const styles = StyleSheet.create({
 
   unreadBadgeText: {
     color: "#FFFFFF",
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: "900",
   },
 
@@ -866,7 +867,7 @@ const styles = StyleSheet.create({
   },
 
   markAllText: {
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: "800",
     color: "#2E7D6B",
   },
@@ -891,7 +892,7 @@ const styles = StyleSheet.create({
   },
 
   emptyTitle: {
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: "900",
     color: "#2E3A34",
     marginTop: 14,
@@ -970,7 +971,8 @@ const styles = StyleSheet.create({
 
   notificationTitle: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 16,
+    lineHeight: 21,
     fontWeight: "700",
     color: "#2E3A34",
     paddingRight: 8,
@@ -982,13 +984,14 @@ const styles = StyleSheet.create({
   },
 
   notificationTime: {
-    fontSize: 8,
+    fontSize: 12,
+    lineHeight: 17,
     color: "#6B7C73",
   },
 
   notificationMessage: {
-    fontSize: 10,
-    lineHeight: 16,
+    fontSize: 14,
+    lineHeight: 20,
     color: "#6B7C73",
     marginTop: 5,
     paddingRight: 8,
