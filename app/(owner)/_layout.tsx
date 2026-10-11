@@ -1,16 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Tabs, usePathname } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
 import { Platform, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { API_URL } from "../../config/api";
 import {
   timanColors,
   timanRadii,
   timanShadow,
 } from "../../components/timan/theme";
+import { useUnreadNotificationCount } from "../../hooks/useUnreadNotificationCount";
 
 export default function OwnerTabsLayout() {
   const insets = useSafeAreaInsets();
@@ -23,36 +21,7 @@ export default function OwnerTabsLayout() {
   const tabBarHeight = compact ? 76 : 80;
   const tabItemHeight = compact ? 64 : 68;
   const pathname = usePathname();
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const loadUnreadCount = useCallback(async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setUnreadCount(0);
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/notifications/unread-count`, {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setUnreadCount(Math.max(0, Number(data.unreadCount) || 0));
-      }
-    } catch (error) {
-      console.log("LOAD UNREAD NOTIFICATION COUNT ERROR:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadUnreadCount();
-  }, [loadUnreadCount, pathname]);
+  const unreadCount = useUnreadNotificationCount(pathname);
 
   return (
     <Tabs

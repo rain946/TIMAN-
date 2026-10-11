@@ -328,7 +328,9 @@ export async function unregisterDevicePushToken() {
   }
 }
 
-export function registerDeviceForPushNotifications() {
+export function registerDeviceForPushNotifications(
+  options: { force?: boolean } = {},
+) {
   if (pushRegistrationPromise) {
     return pushRegistrationPromise;
   }
@@ -344,15 +346,16 @@ export function registerDeviceForPushNotifications() {
     }
 
     if (
+      !options.force &&
       pushRegistrationAuthToken === authToken &&
-      pushRegistrationResult
+      pushRegistrationResult?.success
     ) {
       return pushRegistrationResult;
     }
 
     const result = await performPushRegistration(authToken);
-    pushRegistrationAuthToken = authToken;
-    pushRegistrationResult = result;
+    pushRegistrationAuthToken = result.success ? authToken : null;
+    pushRegistrationResult = result.success ? result : null;
 
     return result;
   })().finally(() => {

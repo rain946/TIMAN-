@@ -1,12 +1,13 @@
 import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
 import {
   ActivityIndicator,
+  AppState,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -17,6 +18,12 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../config/api";
+import {
+  notifyNotificationDataChanged,
+  subscribeToNotificationRefresh,
+} from "../../services/notificationRefresh";
+
+const ACTIVE_REFRESH_INTERVAL_MS = 20_000;
 
 type NotificationItem = {
   notification_id: number;
@@ -48,8 +55,11 @@ export default function NotificationsScreen({
   const [markingAll, setMarkingAll] = useState(false);
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const latestLoadRequest = useRef(0);
 
-  const loadNotifications = useCallback(async () => {
+  const loadNotifications = useCallback(async (silent = false) => {
+    const requestId = ++latestLoadRequest.current;
+
     try {
       const token = await AsyncStorage.getItem("token");
 
@@ -74,25 +84,56 @@ export default function NotificationsScreen({
         throw new Error(data.message || "Unable to load notifications.");
       }
 
-      setNotifications(
-        Array.isArray(data.notifications) ? data.notifications : [],
-      );
+      if (requestId === latestLoadRequest.current) {
+        setNotifications(
+          Array.isArray(data.notifications) ? data.notifications : [],
+        );
+      }
     } catch (error: any) {
       console.log("LOAD NOTIFICATIONS ERROR:", error);
 
-      Alert.alert(
-        "Unable to Load",
-        error?.message || "Unable to load notifications.",
-      );
+      if (!silent && requestId === latestLoadRequest.current) {
+        Alert.alert(
+          "Unable to Load",
+          error?.message || "Unable to load notifications.",
+        );
+      }
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (requestId === latestLoadRequest.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, []);
 
-  useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
+  useFocusEffect(
+    useCallback(() => {
+      void loadNotifications();
+
+      const unsubscribe = subscribeToNotificationRefresh(() => {
+        void loadNotifications(true);
+      });
+      const appStateSubscription = AppState.addEventListener(
+        "change",
+        (nextState) => {
+          if (nextState === "active") {
+            void loadNotifications(true);
+          }
+        },
+      );
+      const interval = setInterval(() => {
+        if (AppState.currentState === "active") {
+          void loadNotifications(true);
+        }
+      }, ACTIVE_REFRESH_INTERVAL_MS);
+
+      return () => {
+        unsubscribe();
+        appStateSubscription.remove();
+        clearInterval(interval);
+      };
+    }, [loadNotifications]),
+  );
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -134,6 +175,7 @@ export default function NotificationsScreen({
             : item,
         ),
       );
+      notifyNotificationDataChanged();
 
       return true;
     } catch (error) {
@@ -176,6 +218,7 @@ export default function NotificationsScreen({
           is_read: true,
         })),
       );
+      notifyNotificationDataChanged();
     } catch (error: any) {
       console.log("MARK ALL READ ERROR:", error);
 
@@ -221,6 +264,7 @@ export default function NotificationsScreen({
       setNotifications((current) =>
         current.filter((item) => item.notification_id !== notificationId),
       );
+      notifyNotificationDataChanged();
     } catch (error: any) {
       console.log("DELETE NOTIFICATION ERROR:", error);
 

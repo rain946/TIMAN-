@@ -2,11 +2,13 @@ import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
 import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AppState } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { AppAlert, AppDialogProvider } from "../components/dialogs/AppDialog";
 import MissingPetAlertConsentModal from "../components/modals/MissingPetAlertConsentModal";
 import { registerDeviceForPushNotifications } from "../services/notificationService";
+import { notifyNotificationDataChanged } from "../services/notificationRefresh";
 import { checkNearbyAlertEnrollmentForSession } from "../services/nearbyAlertEnrollment";
 
 
@@ -328,6 +330,7 @@ function handleNotificationNavigation(
 export default function RootLayout() {
   const initialResponseHandled =
     useRef(false);
+  const lastHandledResponseId = useRef<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -364,6 +367,17 @@ export default function RootLayout() {
       console.log("TIMAN STARTUP SERVICE REFRESH ERROR:", error);
     });
 
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      (nextState) => {
+        if (nextState === "active") {
+          void refreshAuthenticatedServices().catch((error) => {
+            console.log("TIMAN RESUME SERVICE REFRESH ERROR:", error);
+          });
+        }
+      },
+    );
+
 
 
 
@@ -376,6 +390,20 @@ export default function RootLayout() {
             return;
           }
 
+          const responseId = response.notification.request.identifier;
+          if (
+            responseId &&
+            lastHandledResponseId.current === responseId
+          ) {
+            return;
+          }
+          lastHandledResponseId.current = responseId || null;
+          void Notifications.clearLastNotificationResponseAsync().catch(
+            (error) => {
+              console.log("TIMAN CLEAR NOTIFICATION RESPONSE ERROR:", error);
+            },
+          );
+
           const data =
             response.notification
               .request.content.data as
@@ -385,6 +413,8 @@ export default function RootLayout() {
           console.log(
             "TIMAN: Notification response received."
           );
+
+          notifyNotificationDataChanged();
 
 
           if (
@@ -404,6 +434,26 @@ export default function RootLayout() {
           );
         }
       );
+
+    const receivedSubscription =
+      Notifications.addNotificationReceivedListener(() => {
+        if (isMounted) {
+          notifyNotificationDataChanged();
+        }
+      });
+
+    const pushTokenSubscription =
+      Notifications.addPushTokenListener(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        void registerDeviceForPushNotifications({ force: true }).catch(
+          (error) => {
+            console.log("TIMAN PUSH TOKEN REFRESH ERROR:", error);
+          },
+        );
+      });
 
 
 
@@ -432,6 +482,25 @@ export default function RootLayout() {
 
             return;
           }
+
+          const responseId = response.notification.request.identifier;
+          if (
+            responseId &&
+            lastHandledResponseId.current === responseId
+          ) {
+            void Notifications.clearLastNotificationResponseAsync().catch(
+              (error) => {
+                console.log("TIMAN CLEAR NOTIFICATION RESPONSE ERROR:", error);
+              },
+            );
+            return;
+          }
+          lastHandledResponseId.current = responseId || null;
+          void Notifications.clearLastNotificationResponseAsync().catch(
+            (error) => {
+              console.log("TIMAN CLEAR NOTIFICATION RESPONSE ERROR:", error);
+            },
+          );
 
           const data =
             response.notification
@@ -501,6 +570,9 @@ export default function RootLayout() {
       isMounted = false;
 
       subscription.remove();
+      receivedSubscription.remove();
+      pushTokenSubscription.remove();
+      appStateSubscription.remove();
     };
   }, []);
 

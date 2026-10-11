@@ -218,17 +218,6 @@ export default function LoginScreen() {
               color="rgba(86, 176, 145, 0.3)"
               style={styles.heroPawRight}
             />
-            <Pressable
-              style={({ pressed }) => [
-                styles.backButton,
-                pressed && styles.buttonPressed,
-              ]}
-              disabled={loading}
-              onPress={() => router.back()}
-            >
-              <Ionicons name="chevron-back" size={26} color="#2E7D6B" />
-            </Pressable>
-
             <View style={styles.heroBranding} pointerEvents="none">
               <Image
                 source={require("../../assets/images/timan-wordmark.png")}
@@ -492,23 +481,6 @@ const styles = StyleSheet.create({
     right: 30,
     top: 65,
     transform: [{ rotate: "16deg" }],
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.88)",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "absolute",
-    top: 10,
-    left: 10,
-    zIndex: 3,
-    shadowColor: "#2E3A34",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
   },
   petStage: {
     width: "100%",
