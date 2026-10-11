@@ -2027,9 +2027,13 @@ const styles = StyleSheet.create({
   },
 
   loadingText: {
+    width: "100%",
     marginTop: 12,
+    paddingHorizontal: 16,
     fontSize: 15,
+    lineHeight: 21,
     color: "#6B7C73",
+    textAlign: "center",
   },
 
   header: {

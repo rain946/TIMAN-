@@ -860,9 +860,13 @@ const styles = StyleSheet.create({
   },
 
   loadingText: {
+    width: "100%",
     fontSize: 14,
+    lineHeight: 20,
     color: "#6B7C73",
     marginTop: 12,
+    paddingHorizontal: 16,
+    textAlign: "center",
   },
 
   emptyPetContainer: {

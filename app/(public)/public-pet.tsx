@@ -169,7 +169,10 @@ export default function PublicPetScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.stateContainer}>
           {loading ? (
-            <ActivityIndicator color="#2E7D6B" />
+            <>
+              <ActivityIndicator size="large" color="#2E7D6B" />
+              <Text style={styles.loadingText}>Loading pet details...</Text>
+            </>
           ) : (
             <Text style={styles.stateText}>{errorMessage}</Text>
           )}
@@ -406,6 +409,16 @@ const styles = StyleSheet.create({
   stateText: {
     color: "#6B7C73",
     fontSize: 13,
+    textAlign: "center",
+  },
+
+  loadingText: {
+    width: "100%",
+    marginTop: 12,
+    paddingHorizontal: 16,
+    color: "#6B7C73",
+    fontSize: 14,
+    lineHeight: 20,
     textAlign: "center",
   },
 

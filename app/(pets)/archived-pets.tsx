@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 21, fontWeight: "900", color: "#2E3A34" },
   content: { width: "100%", maxWidth: 680, alignSelf: "center", padding: 20, gap: 12, flexGrow: 1 },
   center: { flex: 1, minHeight: 280, alignItems: "center", justifyContent: "center", padding: 24 },
-  loadingText: { marginTop: 12, fontSize: 14, color: "#6B7C73" },
+  loadingText: { width: "100%", marginTop: 12, paddingHorizontal: 16, fontSize: 14, lineHeight: 20, color: "#6B7C73", textAlign: "center" },
   emptyTitle: { marginTop: 14, fontSize: 19, fontWeight: "900", color: "#2E3A34" },
   emptyText: { marginTop: 6, fontSize: 14, color: "#6B7C73" },
   card: { ...timanShadow, minHeight: 108, padding: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#CFE8DD", borderRadius: 18, flexDirection: "row", alignItems: "center" },

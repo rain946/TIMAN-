@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   headerButton: { width: 42, height: 42, alignItems: "center", justifyContent: "center" },
   headerTitle: { fontSize: 20, fontWeight: "800", color: "#FFFFFF" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 30 },
-  loadingText: { color: "#6B7C73", marginTop: 10 },
+  loadingText: { width: "100%", color: "#6B7C73", marginTop: 10, paddingHorizontal: 16, fontSize: 14, lineHeight: 20, textAlign: "center" },
   content: { width: "100%", maxWidth: 680, alignSelf: "center", padding: 22, paddingBottom: 50 },
   alertCard: { backgroundColor: "rgba(229, 115, 115, 0.14)", borderRadius: 17, padding: 15, flexDirection: "row", alignItems: "center" },
   alertText: { flex: 1, marginLeft: 11 },

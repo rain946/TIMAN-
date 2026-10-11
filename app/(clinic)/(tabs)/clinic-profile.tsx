@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 14, color: "#6B7C73" },
+  loadingText: { width: "100%", marginTop: 12, paddingHorizontal: 16, fontSize: 14, lineHeight: 20, color: "#6B7C73", textAlign: "center" },
   errorIcon: {
     width: 58,
     height: 58,

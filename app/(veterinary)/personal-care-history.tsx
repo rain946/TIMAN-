@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  loadingText: { marginTop: 12, fontSize: 14, color: "#6B7C73" },
+  loadingText: { width: "100%", marginTop: 12, paddingHorizontal: 16, fontSize: 14, lineHeight: 20, color: "#6B7C73", textAlign: "center" },
   content: {
     width: "100%",
     maxWidth: 680,

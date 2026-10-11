@@ -184,7 +184,8 @@ export default function PetCareScheduleForm() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.center}>
-          <ActivityIndicator color="#2E7D6B" />
+          <ActivityIndicator size="large" color="#2E7D6B" />
+          <Text style={styles.loadingText}>Loading schedule...</Text>
         </View>
       </SafeAreaView>
     );
@@ -380,7 +381,17 @@ const styles = StyleSheet.create({
   center: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    paddingHorizontal: 24
+  },
+  loadingText: {
+    width: "100%",
+    marginTop: 12,
+    paddingHorizontal: 16,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#6B7C73",
+    textAlign: "center"
   },
   header: {
     height: 60,

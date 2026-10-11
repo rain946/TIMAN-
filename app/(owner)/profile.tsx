@@ -779,13 +779,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFF5E9",
+    paddingHorizontal: 24,
   },
 
   loadingProfileText: {
+    width: "100%",
     marginTop: 10,
+    paddingHorizontal: 16,
     fontSize: 14,
+    lineHeight: 20,
     color: "#6B7C73",
     fontWeight: "600",
+    textAlign: "center",
   },
 
   pressed: {

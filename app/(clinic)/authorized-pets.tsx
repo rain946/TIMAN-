@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 11, color: "#6B7C73" },
+  loadingText: { width: "100%", marginTop: 12, paddingHorizontal: 16, fontSize: 11, lineHeight: 17, color: "#6B7C73", textAlign: "center" },
   emptyIcon: {
     width: 56,
     height: 56,

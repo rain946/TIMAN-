@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loadingText: { marginTop: 12, fontSize: 13, color: "#6B7C73" },
+  loadingText: { width: "100%", marginTop: 12, paddingHorizontal: 16, fontSize: 13, lineHeight: 19, color: "#6B7C73", textAlign: "center" },
   stateTitle: {
     marginTop: 12,
     fontSize: 14,

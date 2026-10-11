@@ -147,7 +147,10 @@ export default function ClinicMonthlySchedulesScreen() {
         </View>
 
         {loading ? (
-          <View style={styles.stateCard}><ActivityIndicator color="#2E7D6B" /></View>
+          <View style={styles.stateCard}>
+            <ActivityIndicator color="#2E7D6B" />
+            <Text style={styles.loadingText}>Loading monthly schedules...</Text>
+          </View>
         ) : error ? (
           <View style={styles.stateCard}>
             <Ionicons name="alert-circle-outline" size={30} color="#E57373" />
@@ -244,6 +247,7 @@ const styles = StyleSheet.create({
   serviceType: { marginTop: 8, fontSize: 14, fontWeight: "800", color: "#2E3A34" },
   activityDate: { marginTop: 4, fontSize: 12, color: "#6B7C73" },
   stateCard: { minHeight: 230, padding: 24, borderRadius: 19, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#CFE8DD", alignItems: "center", justifyContent: "center" },
+  loadingText: { width: "100%", marginTop: 12, paddingHorizontal: 16, fontSize: 13, lineHeight: 19, color: "#6B7C73", textAlign: "center" },
   emptyIcon: { width: 56, height: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   stateTitle: { marginTop: 13, fontSize: 16, fontWeight: "900", color: "#2E3A34", textAlign: "center" },
   stateText: { marginTop: 6, fontSize: 12, color: "#6B7C73", textAlign: "center" },

@@ -647,12 +647,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 24,
   },
 
   loadingText: {
+    width: "100%",
     marginTop: 11,
+    paddingHorizontal: 16,
     fontSize: 11,
+    lineHeight: 17,
     color: "#6B7C73",
+    textAlign: "center",
   },
 
   summaryRow: {

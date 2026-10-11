@@ -773,12 +773,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 24,
   },
 
   loadingText: {
+    width: "100%",
     marginTop: 12,
+    paddingHorizontal: 16,
     fontSize: 14,
+    lineHeight: 20,
     color: "#6B7C73",
+    textAlign: "center",
   },
 
   header: {
