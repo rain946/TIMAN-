@@ -337,7 +337,9 @@ export default function ClinicAuthorizationScreen() {
 
             <Text style={styles.summaryNumber}>{pendingCount}</Text>
 
-            <Text style={styles.summaryLabel}>Pending</Text>
+            <Text style={styles.summaryLabel} maxFontSizeMultiplier={1.15}>
+              Pending
+            </Text>
           </View>
 
           <View style={styles.summaryCard}>
@@ -351,7 +353,9 @@ export default function ClinicAuthorizationScreen() {
 
             <Text style={styles.summaryNumber}>{approvedCount}</Text>
 
-            <Text style={styles.summaryLabel}>Approved</Text>
+            <Text style={styles.summaryLabel} maxFontSizeMultiplier={1.15}>
+              Approved
+            </Text>
           </View>
         </View>
 
@@ -391,10 +395,7 @@ export default function ClinicAuthorizationScreen() {
 
             {approvedCount > 0 && (
               <>
-                <SectionHeader
-                  title="Authorized Clinics"
-                  count={approvedCount}
-                />
+                <SectionHeader title="Authorized Clinics" />
 
                 {authorizations
                   .filter((item) => item.status === "Approved")
@@ -669,7 +670,12 @@ function StatusBadge({ status }: { status: AuthorizationStatus }) {
         }
       />
 
-      <Text style={[styles.statusText, textStyle]}>{status}</Text>
+      <Text
+        style={[styles.statusText, textStyle]}
+        maxFontSizeMultiplier={1.15}
+      >
+        {status}
+      </Text>
     </View>
   );
 }
@@ -800,7 +806,7 @@ const styles = StyleSheet.create({
     flex: 1,
 
     paddingVertical: 14,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
 
     borderRadius: 17,
 
@@ -844,7 +850,8 @@ const styles = StyleSheet.create({
     marginLeft: 5,
 
     flexShrink: 0,
-    fontSize: 12,
+    paddingRight: 3,
+    fontSize: 11,
     lineHeight: 16,
 
     color: "#6B7C73",
@@ -953,8 +960,8 @@ const styles = StyleSheet.create({
   },
 
   statusBadge: {
-    minWidth: 78,
-    paddingHorizontal: 8,
+    minWidth: 88,
+    paddingHorizontal: 10,
     paddingVertical: 5,
 
     borderRadius: 20,
@@ -968,9 +975,12 @@ const styles = StyleSheet.create({
   },
 
   statusText: {
+    minWidth: 48,
+    paddingRight: 2,
     fontSize: 11,
     lineHeight: 14,
     fontWeight: "800",
+    textAlign: "center",
   },
 
   pendingBadge: {
