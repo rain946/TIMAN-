@@ -57,7 +57,7 @@ const escapeHtml = (value) => {
 };
 
 function buildPublicImageUrl(req, photoUrl) {
-  if (photoUrl === null || photoUrl === undefined) {
+  if (!photoUrl) {
     return null;
   }
 
