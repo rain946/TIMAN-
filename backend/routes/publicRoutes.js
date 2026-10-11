@@ -56,6 +56,24 @@ const escapeHtml = (value) => {
     .replaceAll("'", "&#039;");
 };
 
+function buildPublicImageUrl(req, photoUrl) {
+  if (photoUrl === null || photoUrl === undefined) {
+    return null;
+  }
+
+  const value = String(photoUrl).trim();
+  if (!value) {
+    return null;
+  }
+
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
+  }
+
+  const cleanPath = value.startsWith("/") ? value : `/${value}`;
+  return `${req.protocol}://${req.get("host")}${cleanPath}`;
+}
+
 
 
 
@@ -282,8 +300,9 @@ router.get("/public/pet/:qrCode", async (req, res) => {
       pet.owner_contact || ""
     );
 
-    const photoUrl = pet.photo_url
-      ? escapeHtml(pet.photo_url)
+    const publicPhotoUrl = buildPublicImageUrl(req, pet.photo_url);
+    const photoUrl = publicPhotoUrl
+      ? escapeHtml(publicPhotoUrl)
       : null;
 
     const petId =
@@ -706,11 +725,18 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                       class="photo"
                       src="${photoUrl}"
                       alt="${petName}"
+                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                     />
+                    <div
+                      class="photo-placeholder"
+                      style="display: none;"
+                    >
+                      &#128062;
+                    </div>
                   `
                   : `
                     <div class="photo-placeholder">
-                      🐾
+                      &#128062;
                     </div>
                   `
               }
@@ -1603,3 +1629,4 @@ router.post(
 );
 
 module.exports = router;
+module.exports.buildPublicImageUrl = buildPublicImageUrl;
