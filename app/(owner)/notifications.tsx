@@ -41,11 +41,7 @@ type NotificationItem = {
   pet_name?: string | null;
 };
 
-export default function NotificationsScreen({
-  showOnlyNewWhenAvailable = true,
-}: {
-  showOnlyNewWhenAvailable?: boolean;
-}) {
+export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -547,10 +543,7 @@ export default function NotificationsScreen({
 
   const unreadNotifications = notifications.filter((item) => !item.is_read);
   const unreadCount = unreadNotifications.length;
-  const visibleNotifications =
-    showOnlyNewWhenAvailable && unreadCount > 0
-      ? unreadNotifications
-      : notifications;
+  const visibleNotifications = notifications;
 
   if (loading) {
     return (
@@ -584,7 +577,7 @@ export default function NotificationsScreen({
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
             <Text style={styles.sectionTitle}>
-              {showOnlyNewWhenAvailable && unreadCount > 0 ? "New" : "Recent"}
+              Recent
             </Text>
 
             {unreadCount > 0 && (
