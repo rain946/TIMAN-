@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: "800",
     color: "#2E3A34",
   },
@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
 
-    fontSize: 12,
+    fontSize: 14,
     color: "#6B7C73",
   },
 
@@ -775,7 +775,7 @@ const styles = StyleSheet.create({
   },
 
   introTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "900",
     color: "#2E3A34",
   },
@@ -783,8 +783,8 @@ const styles = StyleSheet.create({
   introText: {
     marginTop: 4,
 
-    fontSize: 10,
-    lineHeight: 15,
+    fontSize: 13,
+    lineHeight: 19,
 
     color: "#6B7C73",
   },
@@ -799,7 +799,8 @@ const styles = StyleSheet.create({
   summaryCard: {
     flex: 1,
 
-    padding: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
 
     borderRadius: 17,
 
@@ -842,7 +843,9 @@ const styles = StyleSheet.create({
   summaryLabel: {
     marginLeft: 5,
 
-    fontSize: 9,
+    flexShrink: 0,
+    fontSize: 12,
+    lineHeight: 16,
 
     color: "#6B7C73",
   },
@@ -856,7 +859,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "900",
 
     color: "#2E3A34",
@@ -879,7 +882,7 @@ const styles = StyleSheet.create({
   },
 
   countText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "800",
 
     color: "#2E7D6B",
@@ -927,13 +930,14 @@ const styles = StyleSheet.create({
 
   petInfo: {
     flex: 1,
+    minWidth: 0,
 
     marginLeft: 11,
     marginRight: 7,
   },
 
   petName: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: "900",
 
     color: "#2E3A34",
@@ -942,12 +946,14 @@ const styles = StyleSheet.create({
   petBreed: {
     marginTop: 3,
 
-    fontSize: 9,
+    fontSize: 12,
+    lineHeight: 16,
 
     color: "#6B7C73",
   },
 
   statusBadge: {
+    minWidth: 78,
     paddingHorizontal: 8,
     paddingVertical: 5,
 
@@ -955,12 +961,15 @@ const styles = StyleSheet.create({
 
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
 
     gap: 4,
   },
 
   statusText: {
-    fontSize: 8,
+    fontSize: 11,
+    lineHeight: 14,
     fontWeight: "800",
   },
 
@@ -1027,7 +1036,8 @@ const styles = StyleSheet.create({
   },
 
   clinicLabel: {
-    fontSize: 8,
+    fontSize: 11,
+    lineHeight: 15,
     fontWeight: "700",
 
     color: "#6B7C73",
@@ -1036,7 +1046,8 @@ const styles = StyleSheet.create({
   clinicName: {
     marginTop: 2,
 
-    fontSize: 12,
+    fontSize: 15,
+    lineHeight: 19,
     fontWeight: "800",
 
     color: "#2E3A34",
@@ -1045,7 +1056,8 @@ const styles = StyleSheet.create({
   contactName: {
     marginTop: 2,
 
-    fontSize: 8,
+    fontSize: 12,
+    lineHeight: 17,
 
     color: "#6B7C73",
   },
@@ -1060,7 +1072,8 @@ const styles = StyleSheet.create({
   },
 
   dateText: {
-    fontSize: 8,
+    fontSize: 11,
+    lineHeight: 15,
 
     color: "#6B7C73",
   },
@@ -1091,7 +1104,7 @@ const styles = StyleSheet.create({
   },
 
   declineText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
 
     color: "#E57373",
@@ -1113,7 +1126,7 @@ const styles = StyleSheet.create({
   },
 
   approveText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: "800",
 
     color: "#FFFFFF",
@@ -1139,7 +1152,7 @@ const styles = StyleSheet.create({
   },
 
   revokeText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "800",
 
     color: "#E57373",
@@ -1194,8 +1207,8 @@ const styles = StyleSheet.create({
 
     maxWidth: 280,
 
-    fontSize: 10,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 19,
 
     textAlign: "center",
 
@@ -1220,8 +1233,8 @@ const styles = StyleSheet.create({
   securityText: {
     flex: 1,
 
-    fontSize: 9,
-    lineHeight: 15,
+    fontSize: 12,
+    lineHeight: 18,
 
     color: "#6B7C73",
   },

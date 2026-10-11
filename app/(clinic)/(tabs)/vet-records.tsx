@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 21, fontWeight: "900", color: "#2E3A34" },
   headerSpacer: { width: 44, height: 44 },
-  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 45 },
+  content: { width: "100%", maxWidth: 1180, alignSelf: "center", paddingHorizontal: 20, paddingTop: 20, paddingBottom: 110 },
   subtitle: { fontSize: 14, color: "#6B7C73" },
   searchContainer: {
     minHeight: 50,
