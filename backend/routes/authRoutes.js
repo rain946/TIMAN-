@@ -2,10 +2,16 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const { JWT_SECRET } = require("../config/auth");
 const db = require("../config/db");
+const {
+  loginRateLimiter,
+  registrationRateLimiter,
+} = require("../middleware/authRateLimit");
 const {
   CONTACT_NUMBER_VALIDATION_MESSAGE,
   GMAIL_VALIDATION_MESSAGE,
+  hasRequiredTextValues,
   isValidGmailAddress,
   isValidPhilippineMobileNumber,
   normalizeEmail,
@@ -18,7 +24,7 @@ const router = express.Router();
 
 
 
-router.post("/register", async (req, res) => {
+router.post("/register", registrationRateLimiter, async (req, res) => {
   try {
     const {
       fullName,
@@ -32,12 +38,14 @@ router.post("/register", async (req, res) => {
 
     
     if (
-      !fullName ||
-      !email ||
-      !password ||
-      !contactNumber ||
-      !address ||
-      !role
+      !hasRequiredTextValues(
+        fullName,
+        email,
+        password,
+        contactNumber,
+        address,
+        role
+      )
     ) {
       return res.status(400).json({
         success: false,
@@ -70,7 +78,10 @@ router.post("/register", async (req, res) => {
     }
 
     
-    if (role === "clinic" && !clinicName) {
+    if (
+      role === "clinic" &&
+      !hasRequiredTextValues(clinicName)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Clinic name is required.",
@@ -158,11 +169,11 @@ router.post("/register", async (req, res) => {
 
 
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginRateLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (!hasRequiredTextValues(email, password)) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required.",
@@ -213,7 +224,7 @@ router.post("/login", async (req, res) => {
         userId: user.user_id,
         role: user.role,
       },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       {
         expiresIn: "7d",
       }

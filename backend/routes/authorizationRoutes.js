@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/auth");
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -468,7 +469,7 @@ router.get(
                 clinicUserId,
                 petId: pet.pet_id,
               },
-              process.env.JWT_SECRET || "timan_development_secret",
+              JWT_SECRET,
               { expiresIn: "30m" }
             )
           : null;

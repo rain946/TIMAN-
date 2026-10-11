@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
+require("dotenv").config({ quiet: true });
+require("./config/auth");
 const db = require("./config/db");
 
 const authRoutes =
@@ -48,8 +50,59 @@ const app = express();
 
 const PORT =
   process.env.PORT || 3000;
+const isProduction =
+  process.env.NODE_ENV === "production" ||
+  Boolean(process.env.RAILWAY_ENVIRONMENT);
 
-app.use(cors());
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
+
+const configuredCorsOrigins = new Set(
+  (process.env.CORS_ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean)
+);
+
+const isDevelopmentOrigin = (origin) => {
+  if (isProduction) return false;
+
+  try {
+    const { hostname } = new URL(origin);
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "10.0.2.2" ||
+      hostname.startsWith("10.") ||
+      hostname.startsWith("192.168.") ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+    );
+  } catch {
+    return false;
+  }
+};
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Native React Native clients normally do not send an Origin header.
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.replace(/\/$/, "");
+      if (
+        configuredCorsOrigins.has(normalizedOrigin) ||
+        isDevelopmentOrigin(normalizedOrigin)
+      ) {
+        return callback(null, true);
+      }
+
+      const error = new Error("CORS origin is not allowed.");
+      error.code = "CORS_ORIGIN_DENIED";
+      return callback(error);
+    },
+  })
+);
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -167,40 +220,70 @@ app.get("/", (req, res) => {
 // DATABASE TEST
 // =====================================================
 
-app.get(
-  "/api/test-db",
-  async (req, res) => {
-    try {
-      const [rows] =
-        await db.query(`
-          SELECT
-            DATABASE() AS database_name,
-            NOW() AS server_time
-        `);
+if (!isProduction) {
+  app.get(
+    "/api/test-db",
+    async (req, res) => {
+      try {
+        await db.query("SELECT 1");
 
-      res.json({
-        success: true,
-        message:
-          "TIMAN MySQL connection successful.",
-        data:
-          rows[0],
-      });
-    } catch (error) {
-      console.error(
-        "DATABASE ERROR:",
-        error
-      );
+        res.json({
+          success: true,
+          message:
+            "TIMAN MySQL connection successful.",
+        });
+      } catch (error) {
+        console.error(
+          "DATABASE ERROR:",
+          error
+        );
 
-      res.status(500).json({
-        success: false,
-        message:
-          "Database connection failed.",
-        error:
-          error.message,
-      });
+        res.status(500).json({
+          success: false,
+          message:
+            "Database connection failed.",
+        });
+      }
     }
+  );
+}
+
+app.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+
+  if (error.code === "CORS_ORIGIN_DENIED") {
+    return res.status(403).json({
+      success: false,
+      message: "This web origin is not allowed to access the TIMAN API.",
+    });
   }
-);
+
+  if (error.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({
+      success: false,
+      message: "The selected image must be 5 MB or smaller.",
+    });
+  }
+
+  if (/Only valid JPG, PNG, and WEBP images/.test(error.message || "")) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  console.error("UNHANDLED API ERROR:", {
+    method: req.method,
+    path: req.originalUrl,
+    errorType: error.name,
+    message: error.message,
+  });
+
+  return res.status(500).json({
+    success: false,
+    message: "An unexpected server error occurred.",
+  });
+});
 
 // =====================================================
 // START SERVER

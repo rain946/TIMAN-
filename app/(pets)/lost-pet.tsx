@@ -111,7 +111,6 @@ export default function LostPetScreen() {
 
         console.log("LOST PET - PET STATUS:", petResponse.status);
 
-        console.log("LOST PET - PET RESPONSE:", petData);
 
         if (!petResponse.ok) {
           throw new Error(petData.message || "Unable to load pet.");
@@ -132,7 +131,6 @@ export default function LostPetScreen() {
 
           console.log("LOST REPORT STATUS:", reportResponse.status);
 
-          console.log("LOST REPORT RESPONSE:", reportData);
 
           if (reportResponse.ok) {
             setLostReport(reportData.report || reportData.lostReport || null);
@@ -304,7 +302,6 @@ export default function LostPetScreen() {
 
       console.log("RECOVER PET STATUS:", response.status);
 
-      console.log("RECOVER PET RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(

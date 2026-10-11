@@ -16,11 +16,12 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import { API_URL } from "../../config/api";
 import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
+import { apiRequest } from "../../services/apiClient";
 import {
   CONTACT_NUMBER_VALIDATION_MESSAGE,
   GMAIL_VALIDATION_MESSAGE,
+  hasRequiredTextValues,
   isValidGmailAddress,
   isValidPhilippineMobileNumber,
   normalizeEmail,
@@ -62,14 +63,14 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     const normalizedEmail = normalizeEmail(email);
 
-    if (
-      !fullName.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !confirmPassword.trim() ||
-      !contactNumber.trim() ||
-      !address.trim()
-    ) {
+    if (!hasRequiredTextValues(
+      fullName,
+      email,
+      password,
+      confirmPassword,
+      contactNumber,
+      address,
+    )) {
       Alert.alert(
         "Incomplete Information",
         "Please fill in all required fields.",
@@ -117,7 +118,7 @@ export default function RegisterScreen() {
     try {
       setLoading(true);
 
-      const response = await fetch(`${API_URL}/auth/register`, {
+      const response = await apiRequest<{ message?: string }>("/auth/register", {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -137,10 +138,7 @@ export default function RegisterScreen() {
         }),
       });
 
-      const data = await response.json();
-
-      console.log("REGISTER STATUS:", response.status);
-      console.log("REGISTER RESPONSE:", data);
+      const data = response.data;
 
       if (!response.ok) {
         Alert.alert(
@@ -163,7 +161,8 @@ export default function RegisterScreen() {
         ],
       );
     } catch (error) {
-      console.log("REGISTER ERROR:", error);
+      console.log("REGISTER REQUEST ERROR:",
+        error instanceof Error ? error.message : "Unknown request error");
 
       Alert.alert("Connection Error", "Unable to connect to the TIMAN server.");
     } finally {

@@ -68,23 +68,6 @@ function isValidTimanNotification(
 function handleNotificationNavigation(
   data: Record<string, any> | undefined
 ) {
-  console.log(
-    "======================================"
-  );
-
-  console.log(
-    "TIMAN NOTIFICATION TAP DATA:",
-    JSON.stringify(data, null, 2)
-  );
-
-  console.log(
-    "======================================"
-  );
-
-
-
-
-
   if (!isValidTimanNotification(data)) {
     console.log(
       "TIMAN: Ignoring invalid or non-TIMAN notification."
@@ -525,15 +508,6 @@ export default function RootLayout() {
           ) {
             console.log(
               "TIMAN: Initial notification response ignored."
-            );
-
-            console.log(
-              "TIMAN INVALID DATA:",
-              JSON.stringify(
-                data,
-                null,
-                2
-              )
             );
 
             return;

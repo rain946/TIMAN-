@@ -58,11 +58,7 @@ export default function QRScannerScreen() {
     setChecking(true);
 
     try {
-      console.log("SCANNED QR:", data);
-
       const qrCode = extractQrCode(data);
-
-      console.log("EXTRACTED QR TOKEN:", qrCode);
 
       if (!qrCode) {
         throw new Error("Invalid QR code.");

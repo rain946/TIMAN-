@@ -314,7 +314,6 @@ export default function NotificationsScreen({
       id: notification.notification_id,
       type: notification.type,
       petId: notification.pet_id,
-      petName: notification.pet_name,
     });
 
     switch (notification.type) {

@@ -65,6 +65,8 @@ router.get("/api/public/pets/:qrCode", async (req, res) => {
   try {
     const { qrCode } = req.params;
 
+    // Privacy compatibility: the public QR workflow currently exposes owner contact.
+    // TODO: make this conditional on explicit owner consent/privacy settings.
     const [rows] = await db.query(
       `
       SELECT
@@ -135,6 +137,8 @@ router.get("/public/pet/:qrCode", async (req, res) => {
   try {
     const { qrCode } = req.params;
 
+    // Privacy compatibility: the public QR workflow currently exposes owner contact.
+    // TODO: make this conditional on explicit owner consent/privacy settings.
     const [rows] = await db.query(
       `
         SELECT
@@ -1505,7 +1509,6 @@ router.post(
         "PUBLIC QR SCAN:",
         {
           petId: pet.pet_id,
-          petName: pet.pet_name,
           scanId:
             scanResult.insertId,
           lostReportId,

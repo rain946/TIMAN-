@@ -6,6 +6,11 @@ const fs = require("fs");
 
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
+const {
+  getValidatedImageExtension,
+  imageFileFilter,
+  validateUploadedImage,
+} = require("../middleware/imageUpload");
 
 const router = express.Router();
 
@@ -36,8 +41,7 @@ const storage = multer.diskStorage({
   },
 
   filename: (req, file, cb) => {
-    const extension =
-      path.extname(file.originalname) || ".jpg";
+    const extension = getValidatedImageExtension(file);
 
     const filename =
       `${Date.now()}-${crypto.randomUUID()}${extension}`;
@@ -47,26 +51,6 @@ const storage = multer.diskStorage({
 });
 
 
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/webp",
-  ];
-
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(
-      new Error(
-        "Only JPG, PNG, and WEBP images are allowed."
-      )
-    );
-  }
-};
-
-
 const upload = multer({
   storage,
 
@@ -74,7 +58,7 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024,
   },
 
-  fileFilter,
+  fileFilter: imageFileFilter,
 });
 
 
@@ -82,6 +66,7 @@ router.post(
   "/",
   authMiddleware,
   upload.single("photo"),
+  validateUploadedImage,
   async (req, res) => {
     try {
       if (req.user.role !== "owner") {
@@ -394,6 +379,7 @@ router.put(
   "/:id/photo",
   authMiddleware,
   upload.single("photo"),
+  validateUploadedImage,
   async (req, res) => {
     try {
       if (req.user.role !== "owner") {

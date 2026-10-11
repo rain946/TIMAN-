@@ -91,7 +91,6 @@ export default function ClinicAuthorizationScreen() {
 
       console.log("OWNER AUTHORIZATION STATUS:", response.status);
 
-      console.log("OWNER AUTHORIZATION RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
@@ -179,7 +178,6 @@ export default function ClinicAuthorizationScreen() {
 
       console.log("AUTHORIZATION ACTION STATUS:", response.status);
 
-      console.log("AUTHORIZATION ACTION RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(

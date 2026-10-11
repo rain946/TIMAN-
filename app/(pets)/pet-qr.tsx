@@ -150,8 +150,6 @@ export default function PetQRScreen() {
 
       console.log("PET QR STATUS:", response.status);
 
-      console.log("PET QR RESPONSE:", data);
-
       if (!response.ok) {
         Alert.alert(
           "Unable to Load QR",

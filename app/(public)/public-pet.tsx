@@ -1,27 +1,125 @@
 import { AppAlert as Alert } from "@/components/dialogs/AppDialog";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { getImageUrl } from "../../config/api";
+import { apiRequest } from "../../services/apiClient";
+
+type PublicPetApiRecord = {
+  breed?: string | null;
+  color?: string | null;
+  identifying_marks?: string | null;
+  owner_contact?: string | null;
+  owner_name?: string | null;
+  pet_name?: string | null;
+  pet_status?: string | null;
+  photo_url?: string | null;
+  sex?: string | null;
+  species?: string | null;
+};
+
+type PublicPet = {
+  breed: string;
+  color: string;
+  contactNumber: string;
+  identifyingMarks: string;
+  name: string;
+  ownerName: string;
+  photoUrl: string | null;
+  sex: string;
+  species: string;
+  status: string;
+};
 
 export default function PublicPetScreen() {
-  const pet = {
-    name: "Buddy",
-    species: "Dog",
-    breed: "Golden Retriever",
-    sex: "Male",
-    color: "Golden",
-    identifyingMarks: "Small white mark on the chest.",
-    status: "Missing",
-    ownerName: "Rainier",
-    contactNumber: "09123456789",
-  };
+  const params = useLocalSearchParams<{
+    code?: string | string[];
+    qr?: string | string[];
+    qrCode?: string | string[];
+  }>();
+  const qrCode = useMemo(() => {
+    const rawValue = params.qrCode ?? params.qr ?? params.code;
+    return Array.isArray(rawValue) ? rawValue[0] : rawValue;
+  }, [params.code, params.qr, params.qrCode]);
+  const [pet, setPet] = useState<PublicPet | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [reporting, setReporting] = useState(false);
 
-  const handleContactOwner = () => {
-    Linking.openURL(`tel:${pet.contactNumber}`);
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setErrorMessage("");
+    setPet(null);
+
+    const loadPet = async () => {
+      if (!qrCode) {
+        if (active) {
+          setErrorMessage("This pet QR code is invalid.");
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await apiRequest<{
+          message?: string;
+          pet?: PublicPetApiRecord;
+        }>(`/public/pets/${encodeURIComponent(qrCode)}`);
+
+        if (!response.ok || !response.data.pet) {
+          throw new Error(response.data.message || "Unable to load pet information.");
+        }
+
+        const record = response.data.pet;
+        if (active) {
+          setPet({
+            breed: record.breed || "Not specified",
+            color: record.color || "Not specified",
+            contactNumber: record.owner_contact || "",
+            identifyingMarks: record.identifying_marks || "No identifying marks recorded.",
+            name: record.pet_name || "Pet",
+            ownerName: record.owner_name || "Pet owner",
+            photoUrl: getImageUrl(record.photo_url),
+            sex: record.sex || "Not specified",
+            species: record.species || "Not specified",
+            status: record.pet_status || "Safe",
+          });
+        }
+      } catch (error) {
+        if (active) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "Unable to load pet information.",
+          );
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    void loadPet();
+    return () => {
+      active = false;
+    };
+  }, [qrCode]);
+
+  const handleContactOwner = async () => {
+    if (!pet?.contactNumber) {
+      Alert.alert("Contact Unavailable", "The owner has no contact number available.");
+      return;
+    }
+    try {
+      await Linking.openURL(`tel:${pet.contactNumber}`);
+    } catch {
+      Alert.alert("Unable to Call", "This device could not open the phone dialer.");
+    }
   };
 
   const handleReportFound = () => {
+    if (!pet || !qrCode || reporting) return;
+
     Alert.alert(
       "Report Pet Found",
       `Let ${pet.ownerName} know that you found ${pet.name}?`,
@@ -32,16 +130,53 @@ export default function PublicPetScreen() {
         },
         {
           text: "Report Found",
-          onPress: () => {
-            Alert.alert(
-              "Report Sent",
-              `${pet.ownerName} has been notified that ${pet.name} was found.`,
-            );
+          onPress: async () => {
+            try {
+              setReporting(true);
+              const response = await apiRequest<{ message?: string }>(
+                `/public/pets/${encodeURIComponent(qrCode)}/scan`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({}),
+                },
+              );
+
+              if (!response.ok) {
+                throw new Error(response.data.message || "Unable to send the found report.");
+              }
+
+              Alert.alert(
+                "Report Sent",
+                `${pet.ownerName} has been notified that ${pet.name} was found.`,
+              );
+            } catch (error) {
+              Alert.alert(
+                "Unable to Report",
+                error instanceof Error ? error.message : "Unable to send the found report.",
+              );
+            } finally {
+              setReporting(false);
+            }
           },
         },
       ],
     );
   };
+
+  if (loading || !pet) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.stateContainer}>
+          {loading ? (
+            <ActivityIndicator color="#2E7D6B" />
+          ) : (
+            <Text style={styles.stateText}>{errorMessage}</Text>
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -83,7 +218,11 @@ export default function PublicPetScreen() {
 
         <View style={styles.imageCard}>
           <Image
-            source={require("../../assets/images/pets.png")}
+            source={
+              pet.photoUrl
+                ? { uri: pet.photoUrl }
+                : require("../../assets/images/pets.png")
+            }
             style={styles.petImage}
             resizeMode="cover"
           />
@@ -110,11 +249,11 @@ export default function PublicPetScreen() {
             </View>
 
             <View style={styles.alertContent}>
-              <Text style={styles.alertTitle}>Help Buddy Get Home</Text>
+              <Text style={styles.alertTitle}>Help {pet.name} Get Home</Text>
 
               <Text style={styles.alertText}>
-                Buddy&apos;s owner has marked this pet as missing. If you found
-                Buddy, please contact the owner or send a found report below.
+                {pet.name}&apos;s owner has marked this pet as missing. If you found
+                {` ${pet.name}`}, please contact the owner or send a found report below.
               </Text>
             </View>
           </View>
@@ -196,6 +335,7 @@ export default function PublicPetScreen() {
                 pressed && styles.pressed,
               ]}
               onPress={handleReportFound}
+              disabled={reporting}
             >
               <Ionicons name="location-outline" size={21} color="#2E7D6B" />
 
@@ -254,6 +394,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF5E9",
+  },
+
+  stateContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 22,
+  },
+
+  stateText: {
+    color: "#6B7C73",
+    fontSize: 13,
+    textAlign: "center",
   },
 
   header: {

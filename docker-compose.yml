@@ -46,7 +46,9 @@ services:
       DB_USER: root
       DB_PASSWORD: root
       DB_NAME: timan_db
-      JWT_SECRET: timan_development_secret
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV:-development}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
       TZ: Asia/Manila
       NEARBY_LOST_PET_RADIUS_KM: ${NEARBY_LOST_PET_RADIUS_KM:-10}
       NEARBY_LOST_PET_ALERT_COOLDOWN_HOURS: ${NEARBY_LOST_PET_ALERT_COOLDOWN_HOURS:-6}

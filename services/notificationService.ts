@@ -19,18 +19,6 @@ type PushRegistrationResult = {
   message: string;
 };
 
-function maskPushToken(token: string) {
-  if (token.length <= 16) {
-    return "***";
-  }
-
-  return `${token.slice(0, 10)}...${token.slice(-6)}`;
-}
-
-
-
-
-
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -189,11 +177,6 @@ async function performPushRegistration(
     const expoPushToken =
       pushTokenResult.data;
 
-    console.log(
-      "TIMAN EXPO PUSH TOKEN:",
-      maskPushToken(expoPushToken)
-    );
-
     if (!expoPushToken) {
       return {
         success: false,
@@ -242,11 +225,6 @@ async function performPushRegistration(
     console.log(
       "PUSH TOKEN REGISTER STATUS:",
       response.status
-    );
-
-    console.log(
-      "PUSH TOKEN REGISTER RESPONSE:",
-      data
     );
 
     if (!response.ok) {

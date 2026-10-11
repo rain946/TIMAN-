@@ -127,7 +127,6 @@ export default function ClinicVetRecordsScreen() {
 
         console.log("CLINIC VET RECORDS STATUS:", response.status);
 
-        console.log("CLINIC VET RECORDS RESPONSE:", data);
 
         if (!response.ok) {
           Alert.alert(
@@ -212,7 +211,6 @@ export default function ClinicVetRecordsScreen() {
 
       console.log("COMPLETE SCHEDULE STATUS:", response.status);
 
-      console.log("COMPLETE SCHEDULE RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(

@@ -11,11 +11,6 @@ function isExpoPushToken(token) {
   );
 }
 
-function maskPushToken(token) {
-  if (typeof token !== "string" || token.length <= 16) return "***";
-  return `${token.slice(0, 10)}...${token.slice(-6)}`;
-}
-
 async function deactivatePushToken({ pushTokenId, token, reason }) {
   if (!pushTokenId && !token) return;
 
@@ -40,7 +35,6 @@ async function deactivatePushToken({ pushTokenId, token, reason }) {
 
   console.log("TIMAN PUSH TOKEN DEACTIVATED:", {
     pushTokenId: pushTokenId || null,
-    token: maskPushToken(token),
     reason,
     affectedRows: result.affectedRows,
   });
@@ -154,7 +148,6 @@ async function sendExpoPushNotification({
       console.warn("TIMAN INVALID EXPO PUSH TOKEN:", {
         userId,
         pushTokenId,
-        token: maskPushToken(to),
       });
       return { success: false, message: "Invalid Expo push token." };
     }
@@ -162,7 +155,6 @@ async function sendExpoPushNotification({
     console.log("TIMAN EXPO PUSH TARGET:", {
       userId,
       pushTokenId,
-      token: maskPushToken(to),
       type: data.type || null,
     });
 
@@ -252,7 +244,6 @@ async function sendExpoPushNotification({
 module.exports = {
   checkAndHandleExpoPushReceipt,
   isExpoPushToken,
-  maskPushToken,
   sendExpoPushNotification,
   waitForExpoPushReceipt,
 };

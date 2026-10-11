@@ -4,7 +4,6 @@ const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
 const {
   isExpoPushToken,
-  maskPushToken,
 } = require("../services/pushService");
 
 const router = express.Router();
@@ -82,7 +81,6 @@ router.post("/register", authMiddleware, async (req, res) => {
     console.log("TIMAN PUSH TOKEN REGISTERED:", {
       userId,
       platform,
-      token: maskPushToken(token),
     });
 
     return res.status(200).json({
@@ -98,7 +96,6 @@ router.post("/register", authMiddleware, async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Unable to register push token.",
-      error: error.message,
     });
   }
 });
@@ -141,7 +138,6 @@ router.get("/my-tokens", authMiddleware, async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Unable to retrieve push tokens.",
-      error: error.message,
     });
   }
 });
@@ -199,7 +195,6 @@ router.post("/unregister", authMiddleware, async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Unable to unregister push token.",
-      error: error.message,
     });
   }
 });

@@ -24,9 +24,16 @@ function isValidPhilippineMobileNumber(value) {
   );
 }
 
+function hasRequiredTextValues(...values) {
+  return values.every(
+    (value) => typeof value === "string" && value.trim().length > 0
+  );
+}
+
 module.exports = {
   CONTACT_NUMBER_VALIDATION_MESSAGE,
   GMAIL_VALIDATION_MESSAGE,
+  hasRequiredTextValues,
   isValidGmailAddress,
   isValidPhilippineMobileNumber,
   normalizeEmail,

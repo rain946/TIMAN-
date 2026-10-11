@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/auth");
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -15,7 +16,7 @@ const authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "timan_development_secret"
+      JWT_SECRET
     );
 
     req.user = decoded;

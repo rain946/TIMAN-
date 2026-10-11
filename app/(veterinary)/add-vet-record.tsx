@@ -250,7 +250,6 @@ export default function AddVetRecordScreen() {
 
       console.log("SAVE VET RECORD STATUS:", response.status);
 
-      console.log("SAVE VET RECORD RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(

@@ -157,11 +157,6 @@ export default function SchedulesScreen() {
           response.status
         );
 
-        console.log(
-          "OWNER SCHEDULE RESPONSE:",
-          data
-        );
-
         if (!response.ok) {
           Alert.alert(
             "Unable to Load",

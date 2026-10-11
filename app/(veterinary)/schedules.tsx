@@ -171,7 +171,6 @@ export default function SchedulesScreen() {
 
         console.log("OWNER SCHEDULE STATUS:", response.status);
 
-        console.log("OWNER SCHEDULE RESPONSE:", data);
 
         if (!response.ok) {
           const message = data.message || "Unable to load pet schedules.";

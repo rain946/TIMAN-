@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/auth");
 const db = require("../config/db");
 const authMiddleware = require(
   "../middleware/authMiddleware"
@@ -20,7 +21,7 @@ const hasValidClinicScan = (req, petId) => {
   try {
     const payload = jwt.verify(
       scanToken,
-      process.env.JWT_SECRET || "timan_development_secret"
+      JWT_SECRET
     );
 
     return (
@@ -513,11 +514,11 @@ router.post(
 
             if (pushResult.success) {
               console.log(
-                `TIMAN: Vet record push accepted for ${pet.pet_name}.`
+                `TIMAN: Vet record push accepted for pet ID ${pet.pet_id}.`
               );
             } else {
               console.log(
-                `TIMAN: Vet record push failed for ${pet.pet_name}:`,
+                `TIMAN: Vet record push failed for pet ID ${pet.pet_id}:`,
                 pushResult.message ||
                   pushResult.error
               );

@@ -7,6 +7,12 @@ const path = require("path");
 
 const db = require("../config/db");
 const authMiddleware = require("../middleware/authMiddleware");
+const { passwordRateLimiter } = require("../middleware/authRateLimit");
+const {
+  getValidatedImageExtension,
+  imageFileFilter,
+  validateUploadedImage,
+} = require("../middleware/imageUpload");
 const {
   CONTACT_NUMBER_VALIDATION_MESSAGE,
   isValidPhilippineMobileNumber,
@@ -24,7 +30,7 @@ const storage = multer.diskStorage({
     callback(null, uploadDirectory);
   },
   filename: (req, file, callback) => {
-    const extension = path.extname(file.originalname).toLowerCase() || ".jpg";
+    const extension = getValidatedImageExtension(file);
     callback(null, `${Date.now()}-${crypto.randomUUID()}${extension}`);
   },
 });
@@ -32,15 +38,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, callback) => {
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    callback(
-      allowedTypes.includes(file.mimetype)
-        ? null
-        : new Error("Only JPG, PNG, and WEBP images are allowed."),
-      allowedTypes.includes(file.mimetype)
-    );
-  },
+  fileFilter: imageFileFilter,
 });
 
 const deleteUploadedPhoto = (photoUrl) => {
@@ -289,6 +287,7 @@ router.put(
   "/photo",
   authMiddleware,
   upload.single("photo"),
+  validateUploadedImage,
   async (req, res) => {
     try {
       if (!req.file) {
@@ -346,6 +345,7 @@ router.put(
 router.put(
   "/change-password",
   authMiddleware,
+  passwordRateLimiter,
   async (req, res) => {
     try {
       const userId = req.user.userId;

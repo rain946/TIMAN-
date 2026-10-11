@@ -89,8 +89,6 @@ export default function PetsScreen() {
 
       console.log("GET PETS STATUS:", response.status);
 
-      console.log("GET PETS RESPONSE:", data);
-
       if (!response.ok) {
         Alert.alert(
           "Unable to Load Pets",

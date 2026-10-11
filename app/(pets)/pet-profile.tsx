@@ -179,7 +179,6 @@ export default function PetProfileScreen() {
       const data = await response.json();
 
       console.log("GET PET STATUS:", response.status);
-      console.log("GET PET RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
@@ -402,7 +401,6 @@ export default function PetProfileScreen() {
 
       console.log("UPDATE PHOTO STATUS:", response.status);
 
-      console.log("UPDATE PHOTO RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
@@ -539,7 +537,6 @@ export default function PetProfileScreen() {
 
       console.log("REPORT MISSING STATUS:", response.status);
 
-      console.log("REPORT MISSING RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
@@ -637,7 +634,6 @@ export default function PetProfileScreen() {
 
       console.log("RECOVER PET STATUS:", response.status);
 
-      console.log("RECOVER PET RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(

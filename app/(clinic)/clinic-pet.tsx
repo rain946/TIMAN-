@@ -111,7 +111,6 @@ export default function ClinicPetScreen() {
 
       console.log("CLINIC PET STATUS:", response.status);
 
-      console.log("CLINIC PET RESPONSE:", data);
 
       if (!response.ok) {
         Alert.alert(
@@ -189,7 +188,6 @@ export default function ClinicPetScreen() {
 
       console.log("REQUEST ACCESS STATUS:", response.status);
 
-      console.log("REQUEST ACCESS RESPONSE:", data);
 
       if (response.status === 409 && data.status) {
         setStatus(normalizeStatus(data.status));

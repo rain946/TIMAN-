@@ -129,7 +129,6 @@ export default function VetRecordsScreen() {
 
         console.log("OWNER VET RECORDS STATUS:", response.status);
 
-        console.log("OWNER VET RECORDS RESPONSE:", data);
 
         if (!response.ok) {
           Alert.alert(

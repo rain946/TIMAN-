@@ -22,3 +22,9 @@ export function sanitizePhilippineMobileNumber(value: string) {
 export function isValidPhilippineMobileNumber(value: string) {
   return PHILIPPINE_MOBILE_PATTERN.test(value);
 }
+
+export function hasRequiredTextValues(...values: unknown[]) {
+  return values.every(
+    (value) => typeof value === "string" && value.trim().length > 0,
+  );
+}

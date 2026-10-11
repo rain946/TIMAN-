@@ -398,7 +398,7 @@ async function processHealthReminders() {
         }
 
         console.log(
-          `TIMAN: Checking ${schedule.pet_name} - ${schedule.service_type} - ${reminder.type}`,
+          `TIMAN: Checking reminder ${reminder.type} for record ${schedule.record_id}.`,
         );
 
         const alreadySent = await reminderAlreadySent(
@@ -463,10 +463,10 @@ async function processHealthReminders() {
 
             lastTicketId = result.ticket?.id || null;
 
-            console.log(`TIMAN: Push accepted for ${schedule.pet_name}.`);
+            console.log(`TIMAN: Push accepted for record ${schedule.record_id}.`);
           } else {
             console.log(
-              `TIMAN: Push failed for ${schedule.pet_name}:`,
+              `TIMAN: Push failed for record ${schedule.record_id}:`,
               result.message || result.error,
             );
           }
@@ -486,7 +486,7 @@ async function processHealthReminders() {
           });
 
           console.log(
-            `TIMAN: Inbox notification saved for ${schedule.pet_name}.`,
+            `TIMAN: Inbox notification saved for record ${schedule.record_id}.`,
           );
 
           await saveReminderLog({
@@ -502,7 +502,7 @@ async function processHealthReminders() {
           });
 
           console.log(
-            `TIMAN: ${reminder.type} logged for ${schedule.pet_name}.`,
+            `TIMAN: ${reminder.type} logged for record ${schedule.record_id}.`,
           );
         }
       } catch (scheduleError) {

@@ -24,8 +24,10 @@ import { useKeyboardAwareScroll } from "../../hooks/useKeyboardAwareScroll";
 
 import { registerDeviceForPushNotifications } from "../../services/notificationService";
 import { checkNearbyAlertEnrollmentForSession } from "../../services/nearbyAlertEnrollment";
+import { apiRequest } from "../../services/apiClient";
 import {
   GMAIL_VALIDATION_MESSAGE,
+  hasRequiredTextValues,
   isValidGmailAddress,
   normalizeEmail,
 } from "../../utils/validation";
@@ -37,12 +39,8 @@ type AuthenticatedUser = {
 };
 
 function startPostLoginSetup(token: string, user: AuthenticatedUser) {
-  console.log("TIMAN: Starting background push registration...");
-
   void registerDeviceForPushNotifications()
     .then((pushResult) => {
-      console.log("TIMAN PUSH REGISTRATION RESULT:", pushResult);
-
       if (!pushResult.success) {
         console.log(
           "TIMAN: Push registration was not completed.",
@@ -80,7 +78,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     const normalizedEmail = normalizeEmail(email);
 
-    if (!normalizedEmail || !password.trim()) {
+    if (!hasRequiredTextValues(normalizedEmail, password)) {
       Alert.alert(
         "Incomplete Information",
         "Please enter your email and password.",
@@ -96,18 +94,14 @@ export default function LoginScreen() {
 
     const loginUrl = `${API_URL}/auth/login`;
 
-    console.log("========== TIMAN LOGIN ==========");
-
-    console.log("API_URL:", API_URL);
-
-    console.log("LOGIN URL:", loginUrl);
-
-    console.log("EMAIL:", normalizedEmail);
-
     try {
       setLoading(true);
 
-      const response = await fetch(loginUrl, {
+      const response = await apiRequest<{
+        message?: string;
+        token?: string;
+        user?: AuthenticatedUser;
+      }>("/auth/login", {
         method: "POST",
 
         headers: {
@@ -123,11 +117,7 @@ export default function LoginScreen() {
         }),
       });
 
-      console.log("RESPONSE STATUS:", response.status);
-
-      const data = await response.json();
-
-      console.log("SERVER RESPONSE:", data);
+      const data = response.data;
 
       if (!response.ok) {
         Alert.alert(
@@ -153,8 +143,6 @@ export default function LoginScreen() {
         ["user", JSON.stringify(data.user)],
       ]);
 
-      console.log("LOGIN SUCCESS:", data.user);
-
       if (data.user.role === "owner") {
         router.replace("/dashboard");
 
@@ -173,9 +161,8 @@ export default function LoginScreen() {
 
       Alert.alert("Account Error", "Invalid account role.");
     } catch (error) {
-      console.log("TIMAN LOGIN ERROR:", error);
-
-      console.log("LOGIN URL WAS:", loginUrl);
+      console.log("TIMAN LOGIN REQUEST ERROR:",
+        error instanceof Error ? error.message : "Unknown request error");
 
       Alert.alert("Connection Error", `Cannot connect to:\n${loginUrl}`);
     } finally {
@@ -333,7 +320,7 @@ export default function LoginScreen() {
               onPress={() =>
                 Alert.alert(
                   "Forgot Password",
-                  "Password reset will be connected next.",
+                  "Password reset is not available yet.",
                 )
               }
             >

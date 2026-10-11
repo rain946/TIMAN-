@@ -270,8 +270,6 @@ export default function AddPetScreen() {
             ? petImage.fileName
             : `pet-${Date.now()}.${extension}`;
 
-        console.log("PHOTO URI:", petImage.uri);
-        console.log("PHOTO NAME:", fileName);
         console.log("PHOTO TYPE:", mimeType);
 
         formData.append("photo", {
@@ -297,8 +295,6 @@ export default function AddPetScreen() {
       const responseText = await response.text();
 
       console.log("ADD PET STATUS:", response.status);
-
-      console.log("ADD PET RAW RESPONSE:", responseText);
 
       let data: any = {};
 

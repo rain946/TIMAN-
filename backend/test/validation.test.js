@@ -2,10 +2,17 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
+  hasRequiredTextValues,
   isValidGmailAddress,
   isValidPhilippineMobileNumber,
   normalizeEmail,
 } = require("../utils/validation");
+
+test("required text validation rejects blank and non-string values", () => {
+  assert.equal(hasRequiredTextValues("owner", " password "), true);
+  assert.equal(hasRequiredTextValues("owner", "   "), false);
+  assert.equal(hasRequiredTextValues("owner", null), false);
+});
 
 test("Gmail validation accepts and normalizes valid Gmail addresses", () => {
   assert.equal(isValidGmailAddress("owner@gmail.com"), true);
