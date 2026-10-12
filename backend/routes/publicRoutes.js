@@ -873,6 +873,30 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                 let isReloadAfterScan = false;
                 let submitting = false;
 
+                function setLocationButton(
+                  label,
+                  disabled
+                ) {
+                  const button =
+                    document.getElementById(
+                      "timan-location-button"
+                    );
+
+                  if (!button) {
+                    return;
+                  }
+
+                  button.innerText = label;
+                  button.disabled = disabled;
+                }
+
+                function resetLocationButton() {
+                  setLocationButton(
+                    "Share My Location",
+                    false
+                  );
+                }
+
                 try {
                   isReloadAfterScan =
                     sessionStorage.getItem(reloadKey) === "1";
@@ -905,6 +929,17 @@ router.get("/public/pet/:qrCode", async (req, res) => {
 
                   submitting = true;
 
+                  const locationShared =
+                    latitude !== null &&
+                    longitude !== null;
+
+                  setLocationButton(
+                    locationShared
+                      ? "Sending Location..."
+                      : "Sending Report...",
+                    true
+                  );
+
                   try {
                     const response = await fetch(
                       "/api/public/pets/" +
@@ -935,6 +970,12 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                       );
 
                       submitting = false;
+                      resetLocationButton();
+
+                      alert(
+                        result.message ||
+                          "Unable to send the found report. Please try again."
+                      );
                       return;
                     }
 
@@ -952,10 +993,15 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                     window.location.reload();
                   } catch (error) {
                     submitting = false;
+                    resetLocationButton();
 
                     console.error(
                       "TIMAN QR scan failed:",
                       error
+                    );
+
+                    alert(
+                      "Unable to send the found report. Check your connection and try again."
                     );
                   }
                 }
@@ -970,52 +1016,107 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                       "Location is not supported by this browser."
                     );
 
-                    continueWithoutLocation();
+                    resetLocationButton();
                     return;
                   }
 
-                  navigator.geolocation.getCurrentPosition(
-                    function (position) {
-                      submitScan(
-                        position.coords.latitude,
-                        position.coords.longitude
-                      );
-                    },
+                  if (window.isSecureContext === false) {
+                    alert(
+                      "Location sharing requires a secure HTTPS connection."
+                    );
 
-                    function (error) {
-                      console.log(
-                        "TIMAN location error:",
-                        error.code,
-                        error.message
-                      );
+                    resetLocationButton();
+                    return;
+                  }
 
-                      if (error.code === 1) {
-                        alert(
-                          "Location access was denied. Please allow Location for this website, then scan the QR again."
-                        );
-                      } else if (error.code === 2) {
-                        alert(
-                          "Your current location could not be determined. Please make sure your phone Location is turned on."
-                        );
-                      } else if (error.code === 3) {
-                        alert(
-                          "Location request timed out. Please try again."
-                        );
-                      } else {
-                        alert(
-                          "Unable to get your current location."
-                        );
+                  let locationRequestFinished = false;
+
+                  const finishLocationRequest =
+                    function (callback) {
+                      if (locationRequestFinished) {
+                        return;
                       }
 
-                      continueWithoutLocation();
-                    },
+                      locationRequestFinished = true;
+                      window.clearTimeout(locationWatchdog);
+                      callback();
+                    };
 
-                    {
-                      enableHighAccuracy: true,
-                      timeout: 20000,
-                      maximumAge: 0,
-                    }
-                  );
+                  const handleLocationError =
+                    function (error) {
+                      finishLocationRequest(
+                        function () {
+                          console.log(
+                            "TIMAN location error:",
+                            error.code,
+                            error.message
+                          );
+
+                          if (error.code === 1) {
+                            alert(
+                              "Location access was denied. Allow Location for this website, then try again."
+                            );
+                          } else if (error.code === 2) {
+                            alert(
+                              "Your current location could not be determined. Make sure your phone Location is turned on, then try again."
+                            );
+                          } else if (error.code === 3) {
+                            alert(
+                              "Location took too long. Move near a window or turn on Location, then try again."
+                            );
+                          } else {
+                            alert(
+                              "Unable to get your current location. Please try again."
+                            );
+                          }
+
+                          resetLocationButton();
+                        }
+                      );
+                    };
+
+                  const locationWatchdog =
+                    window.setTimeout(
+                      function () {
+                        handleLocationError({
+                          code: 3,
+                          message:
+                            "Location request timed out.",
+                        });
+                      },
+                      15000
+                    );
+
+                  try {
+                    navigator.geolocation.getCurrentPosition(
+                      function (position) {
+                        finishLocationRequest(
+                          function () {
+                            submitScan(
+                              position.coords.latitude,
+                              position.coords.longitude
+                            );
+                          }
+                        );
+                      },
+
+                      handleLocationError,
+
+                      {
+                        enableHighAccuracy: false,
+                        timeout: 12000,
+                        maximumAge: 60000,
+                      }
+                    );
+                  } catch (error) {
+                    handleLocationError({
+                      code: 0,
+                      message:
+                        error instanceof Error
+                          ? error.message
+                          : "Location request failed.",
+                    });
+                  }
                 }
 
                 
