@@ -1,4 +1,6 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 const test = require("node:test");
 
 const {
@@ -50,4 +52,29 @@ test("public image URL does not duplicate the uploads/pets prefix", () => {
   );
   assert.equal((result.match(/\/uploads\/pets\//g) || []).length, 1);
   assert.equal(result.includes("/uploads/pets//uploads/pets/"), false);
+});
+
+test("public location modal guards timeouts, skips, and late callbacks", () => {
+  const routeSource = fs.readFileSync(
+    path.join(__dirname, "../routes/publicRoutes.js"),
+    "utf8"
+  );
+
+  assert.match(routeSource, /let locationRequestFinished = true;/);
+  assert.match(routeSource, /let locationFallbackTimer = null;/);
+  assert.match(
+    routeSource,
+    /cancelLocationRequest\(\);\s+overlay\.remove\(\);\s+continueWithoutLocation\(\);/
+  );
+  assert.match(
+    routeSource,
+    /if \(locationRequestFinished\) \{\s+return;\s+\}/
+  );
+  assert.match(routeSource, /new AbortController\(\)/);
+  assert.match(routeSource, /enableHighAccuracy: true/);
+  assert.match(routeSource, /maximumAge: 0/);
+  assert.match(
+    routeSource,
+    /Location request timed out\. You can try again or continue without location\./
+  );
 });

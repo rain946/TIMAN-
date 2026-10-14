@@ -872,6 +872,8 @@ router.get("/public/pet/:qrCode", async (req, res) => {
 
                 let isReloadAfterScan = false;
                 let submitting = false;
+                let locationRequestFinished = true;
+                let locationFallbackTimer = null;
 
                 function setLocationButton(
                   label,
@@ -895,6 +897,29 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                     "Share My Location",
                     false
                   );
+                }
+
+                function clearLocationFallbackTimer() {
+                  if (locationFallbackTimer !== null) {
+                    window.clearTimeout(
+                      locationFallbackTimer
+                    );
+                    locationFallbackTimer = null;
+                  }
+                }
+
+                function cancelLocationRequest() {
+                  locationRequestFinished = true;
+                  clearLocationFallbackTimer();
+                }
+
+                function restoreSubmitControls() {
+                  submitting = false;
+                  resetLocationButton();
+
+                  if (!document.body.contains(overlay)) {
+                    document.body.appendChild(overlay);
+                  }
                 }
 
                 try {
@@ -940,7 +965,20 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                     true
                   );
 
+                  let requestController = null;
+                  let requestTimeout = null;
+
                   try {
+                    requestController =
+                      new AbortController();
+                    requestTimeout =
+                      window.setTimeout(
+                        function () {
+                          requestController.abort();
+                        },
+                        15000
+                      );
+
                     const response = await fetch(
                       "/api/public/pets/" +
                         encodeURIComponent(qrCode) +
@@ -957,6 +995,9 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                           latitude,
                           longitude,
                         }),
+
+                        signal:
+                          requestController.signal,
                       }
                     );
 
@@ -969,8 +1010,7 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                         result
                       );
 
-                      submitting = false;
-                      resetLocationButton();
+                      restoreSubmitControls();
 
                       alert(
                         result.message ||
@@ -992,8 +1032,7 @@ router.get("/public/pet/:qrCode", async (req, res) => {
 
                     window.location.reload();
                   } catch (error) {
-                    submitting = false;
-                    resetLocationButton();
+                    restoreSubmitControls();
 
                     console.error(
                       "TIMAN QR scan failed:",
@@ -1001,8 +1040,14 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                     );
 
                     alert(
-                      "Unable to send the found report. Check your connection and try again."
+                      error && error.name === "AbortError"
+                        ? "The request timed out. Please try again."
+                        : "Unable to send the found report. Check your connection and try again."
                     );
+                  } finally {
+                    if (requestTimeout !== null) {
+                      window.clearTimeout(requestTimeout);
+                    }
                   }
                 }
 
@@ -1011,11 +1056,15 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                 }
 
                 function requestFinderLocation() {
+                  locationRequestFinished = false;
+                  clearLocationFallbackTimer();
+
                   if (!("geolocation" in navigator)) {
                     alert(
                       "Location is not supported by this browser."
                     );
 
+                    cancelLocationRequest();
                     resetLocationButton();
                     return;
                   }
@@ -1025,64 +1074,58 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                       "Location sharing requires a secure HTTPS connection."
                     );
 
+                    cancelLocationRequest();
                     resetLocationButton();
                     return;
                   }
 
-                  let locationRequestFinished = false;
-
-                  const finishLocationRequest =
-                    function (callback) {
+                  const handleLocationError =
+                    function (error) {
                       if (locationRequestFinished) {
                         return;
                       }
 
-                      locationRequestFinished = true;
-                      window.clearTimeout(locationWatchdog);
-                      callback();
-                    };
+                      cancelLocationRequest();
 
-                  const handleLocationError =
-                    function (error) {
-                      finishLocationRequest(
-                        function () {
-                          console.log(
-                            "TIMAN location error:",
-                            error.code,
-                            error.message
-                          );
-
-                          if (error.code === 1) {
-                            alert(
-                              "Location access was denied. Allow Location for this website, then try again."
-                            );
-                          } else if (error.code === 2) {
-                            alert(
-                              "Your current location could not be determined. Make sure your phone Location is turned on, then try again."
-                            );
-                          } else if (error.code === 3) {
-                            alert(
-                              "Location took too long. Move near a window or turn on Location, then try again."
-                            );
-                          } else {
-                            alert(
-                              "Unable to get your current location. Please try again."
-                            );
-                          }
-
-                          resetLocationButton();
-                        }
+                      console.log(
+                        "TIMAN location error:",
+                        error.code,
+                        error.message
                       );
+
+                      if (error.code === 1) {
+                        alert(
+                          "Location access was denied. Allow Location for this website, then try again."
+                        );
+                      } else if (error.code === 2) {
+                        alert(
+                          "Your current location could not be determined. Make sure your phone Location is turned on, then try again."
+                        );
+                      } else if (error.code === 3) {
+                        alert(
+                          "Location request timed out. You can try again or continue without location."
+                        );
+                      } else {
+                        alert(
+                          "Unable to get your current location. Please try again."
+                        );
+                      }
+
+                      resetLocationButton();
                     };
 
-                  const locationWatchdog =
+                  locationFallbackTimer =
                     window.setTimeout(
                       function () {
-                        handleLocationError({
-                          code: 3,
-                          message:
-                            "Location request timed out.",
-                        });
+                        if (locationRequestFinished) {
+                          return;
+                        }
+
+                        cancelLocationRequest();
+                        resetLocationButton();
+                        alert(
+                          "Location request timed out. You can try again or continue without location."
+                        );
                       },
                       15000
                     );
@@ -1090,22 +1133,23 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                   try {
                     navigator.geolocation.getCurrentPosition(
                       function (position) {
-                        finishLocationRequest(
-                          function () {
-                            submitScan(
-                              position.coords.latitude,
-                              position.coords.longitude
-                            );
-                          }
+                        if (locationRequestFinished) {
+                          return;
+                        }
+
+                        cancelLocationRequest();
+                        submitScan(
+                          position.coords.latitude,
+                          position.coords.longitude
                         );
                       },
 
                       handleLocationError,
 
                       {
-                        enableHighAccuracy: false,
+                        enableHighAccuracy: true,
                         timeout: 12000,
-                        maximumAge: 60000,
+                        maximumAge: 0,
                       }
                     );
                   } catch (error) {
@@ -1239,6 +1283,7 @@ router.get("/public/pet/:qrCode", async (req, res) => {
                   .addEventListener(
                     "click",
                     function () {
+                      cancelLocationRequest();
                       overlay.remove();
 
                       continueWithoutLocation();
