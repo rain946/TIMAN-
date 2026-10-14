@@ -1280,6 +1280,90 @@ router.get("/public/pet/:qrCode", async (req, res) => {
 
 
 
+async function dispatchPublicScanNotifications({
+  pet,
+  lostReportId,
+  scanId,
+  locationShared,
+  latitude,
+  longitude,
+  ownerTokenRows,
+  clinicRows,
+  clinicTokenRows,
+}) {
+  const ownerTitle =
+    `${pet.pet_name}'s QR was scanned while marked as Missing`;
+  const ownerBody = locationShared
+    ? `Someone scanned ${pet.pet_name}'s QR code while ${pet.pet_name} is marked as Missing and shared a location. Check Missing Pet Details.`
+    : `Someone scanned ${pet.pet_name}'s QR code while ${pet.pet_name} is marked as Missing. No location was shared.`;
+  const clinicTitle = `${pet.pet_name}'s QR was scanned`;
+  const clinicBody = locationShared
+    ? `${pet.pet_name}'s permanent QR was scanned by a finder and a location was shared.`
+    : `${pet.pet_name}'s permanent QR was scanned by a finder. No location was shared.`;
+
+  const notificationPromises = [
+    ...ownerTokenRows.map((tokenRow) =>
+      sendExpoPushNotification({
+        to: tokenRow.expo_push_token,
+        title: ownerTitle,
+        body: ownerBody,
+        data: {
+          type: "pet_qr_scan",
+          petId: String(pet.pet_id),
+          lostReportId: String(lostReportId),
+          scanId: String(scanId),
+          locationShared,
+        },
+      })
+    ),
+    ...clinicTokenRows.map((tokenRow) =>
+      sendExpoPushNotification({
+        to: tokenRow.expo_push_token,
+        title: clinicTitle,
+        body: clinicBody,
+        data: {
+          type: "pet_qr_scan",
+          petId: String(pet.pet_id),
+          lostReportId: String(lostReportId),
+          scanId: String(scanId),
+          locationShared,
+        },
+      })
+    ),
+  ];
+
+  const notificationResultsPromise = Promise.allSettled(notificationPromises);
+  let nearbyAlert = { status: "skipped", reason: "no_location" };
+
+  if (locationShared && pet.pet_status === "Missing") {
+    try {
+      nearbyAlert = await broadcastNearbyLostPet({
+        lostReportId,
+        latitude,
+        longitude,
+      });
+    } catch (broadcastError) {
+      console.error("FINDER NEARBY LOST PET ALERT ERROR:", broadcastError);
+      nearbyAlert = { status: "failed", reason: "broadcast_error" };
+    }
+  }
+
+  const notificationResults = await notificationResultsPromise;
+
+  console.log("PUBLIC QR SCAN NOTIFICATIONS:", {
+    petId: pet.pet_id,
+    scanId,
+    lostReportId,
+    activeMissingReport: true,
+    locationShared,
+    ownerPushTokens: ownerTokenRows.length,
+    approvedClinics: clinicRows.length,
+    clinicPushTokens: clinicTokenRows.length,
+    notifications: notificationResults.length,
+    nearbyAlert: nearbyAlert.status,
+  });
+}
+
 router.post(
   "/api/public/pets/:qrCode/scan",
   publicScanRateLimiter,
@@ -1534,129 +1618,10 @@ router.post(
       connection.release();
       connection = null;
 
+      const nearbyAlertQueued =
+        locationShared && pet.pet_status === "Missing";
 
-      const notificationPromises = [];
-
-
-      const ownerTitle =
-        `${pet.pet_name}'s QR was scanned while marked as Missing`;
-
-      const ownerBody =
-        locationShared
-          ? `Someone scanned ${pet.pet_name}'s QR code while ${pet.pet_name} is marked as Missing and shared a location. Check Missing Pet Details.`
-          : `Someone scanned ${pet.pet_name}'s QR code while ${pet.pet_name} is marked as Missing. No location was shared.`;
-
-      for (const tokenRow of ownerTokenRows) {
-        notificationPromises.push(
-          sendExpoPushNotification({
-            to: tokenRow.expo_push_token,
-
-            title: ownerTitle,
-
-            body: ownerBody,
-
-            data: {
-              type: "pet_qr_scan",
-              petId: String(
-                pet.pet_id
-              ),
-              lostReportId: String(
-                lostReportId
-              ),
-              scanId: String(
-                scanResult.insertId
-              ),
-              locationShared,
-            },
-          })
-        );
-      }
-
-      
-      
-      
-
-      const clinicTitle =
-        `${pet.pet_name}'s QR was scanned`;
-
-      const clinicBody =
-        locationShared
-          ? `${pet.pet_name}'s permanent QR was scanned by a finder and a location was shared.`
-          : `${pet.pet_name}'s permanent QR was scanned by a finder. No location was shared.`;
-
-      for (
-        const tokenRow of clinicTokenRows
-      ) {
-        notificationPromises.push(
-          sendExpoPushNotification({
-            to: tokenRow.expo_push_token,
-
-            title: clinicTitle,
-
-            body: clinicBody,
-
-            data: {
-              type: "pet_qr_scan",
-              petId: String(
-                pet.pet_id
-              ),
-              lostReportId: String(
-                lostReportId
-              ),
-              scanId: String(
-                scanResult.insertId
-              ),
-              locationShared,
-            },
-          })
-        );
-      }
-
-      
-      const notificationResults =
-        await Promise.allSettled(
-          notificationPromises
-        );
-
-      let nearbyAlert = { status: "skipped", reason: "no_location" };
-      if (locationShared && pet.pet_status === "Missing") {
-        try {
-          nearbyAlert = await broadcastNearbyLostPet({
-            lostReportId,
-            latitude: validLatitude,
-            longitude: validLongitude,
-          });
-        } catch (broadcastError) {
-          console.error("FINDER NEARBY LOST PET ALERT ERROR:", broadcastError);
-          nearbyAlert = { status: "failed", reason: "broadcast_error" };
-        }
-      }
-
-      console.log(
-        "PUBLIC QR SCAN:",
-        {
-          petId: pet.pet_id,
-          scanId:
-            scanResult.insertId,
-          lostReportId,
-          activeMissingReport: true,
-          locationShared,
-          ownerPushTokens:
-            ownerTokenRows.length,
-          approvedClinics:
-            clinicRows.length,
-          clinicPushTokens:
-            clinicTokenRows.length,
-          notifications:
-            notificationResults.length,
-        }
-      );
-
-      
-      
-      
-
-      return res.status(201).json({
+      res.status(201).json({
         success: true,
 
         message:
@@ -1697,10 +1662,31 @@ router.post(
             clinicTokenRows.length,
         },
         nearbyAlert: {
-          status: nearbyAlert.status,
-          reason: nearbyAlert.reason,
+          status: nearbyAlertQueued ? "queued" : "skipped",
+          reason: nearbyAlertQueued
+            ? "background_dispatch"
+            : "no_location",
         },
       });
+
+      void dispatchPublicScanNotifications({
+        pet,
+        lostReportId,
+        scanId: scanResult.insertId,
+        locationShared,
+        latitude: validLatitude,
+        longitude: validLongitude,
+        ownerTokenRows,
+        clinicRows,
+        clinicTokenRows,
+      }).catch((notificationError) => {
+        console.error(
+          "PUBLIC QR SCAN NOTIFICATION DISPATCH ERROR:",
+          notificationError
+        );
+      });
+
+      return;
     } catch (error) {
       if (connection) {
         try {
